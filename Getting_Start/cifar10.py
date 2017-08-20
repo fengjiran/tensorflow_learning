@@ -252,3 +252,52 @@ def loss(logits, labels):
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
 # test
+
+# https://zhuanlan.zhihu.com/p/27017189
+
+
+def pre_process_image(image, training):
+    """Take a single image as input to pre-process.
+
+    A boolean whether to build the training or testing graph.
+    """
+    if training:
+        # For training, add the following to the tensorflow graph
+        # Randomly crop the input image
+        image = tf.random_crop(image, size=[24, 24, 3])
+
+        # Randomly flip the image horizontally
+        image = tf.image.random_flip_left_right(image)
+
+        # Randomly adjust hue,contrast and saturation
+        image = tf.image.random_hue(image, max_delta=0.05)
+
+        image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
+
+        image = tf.image.random_brightness(image, max_delta=0.2)
+
+        image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
+
+        # Limit the image pixels between [0, 1] in case of overflow
+        image = tf.minimum(image, 1.0)
+        image = tf.maximum(image, 0.0)
+
+    else:
+        # Crop the input image around the center so it is the same
+        # size as images that are randomly cropped during training
+        image = tf.image.resize_image_with_crop_or_pad(image,
+                                                       target_height=24,
+                                                       target_width=24)
+
+    return image
+
+
+def pre_process(images, training):
+    """Use tensorflow to loop over all the input images.
+
+    Call the function above which takes a single image as
+    input.
+    """
+    images = tf.map_fn(lambda image: pre_process_image(image, training), images)
+
+    return images
