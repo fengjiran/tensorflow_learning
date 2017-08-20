@@ -1,0 +1,8 @@
+// 将设置放入此文件中以覆盖默认值和用户设置。
+{
+    // "python.pythonPath": "D:\\Python35_64\\python.exe",
+    "python.linting.pylintArgs": ["--max-line-length=120",
+        "--disable=E712,E1101,E1129,C0121,C0301,F405,E711,C0103,E0102,W0612,C0111,W0621"],
+    "git.enabled": true
+    
+}
