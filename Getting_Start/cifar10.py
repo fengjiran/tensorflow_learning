@@ -251,7 +251,6 @@ def loss(logits, labels):
     # decay terms (L2 loss).
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
-# test
 
 # https://zhuanlan.zhihu.com/p/27017189
 
