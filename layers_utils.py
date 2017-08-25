@@ -153,8 +153,8 @@ class DenseLayer(Layer):
                  act=tf.identity,
                  W_init=tf.truncated_normal_initializer(stddev=0.1),
                  b_init=tf.constant_initializer(value=0.0),
-                 W_init_args=None,
-                 b_init_args=None,
+                 W_init_args={},
+                 b_init_args={},
                  name='dense_layer'):
         Layer.__init__(self, name=name)
         self.inputs = layer.outputs
@@ -198,5 +198,6 @@ if __name__ == '__main__':
     # basic = Layer()
     # basic.print_params()
     x = tf.placeholder(tf.float32, shape=[None, 784], name='x')
-    inpt = InputLayer(inputs=x, name='input')
-    inpt.print_params()
+    x = InputLayer(inputs=x, name='input')
+    x = DenseLayer(layer=x)
+    x.print_params(False)
