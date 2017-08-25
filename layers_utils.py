@@ -23,6 +23,45 @@ def set_name_reuse(enable=True):
     set_keep['name_reuse'] = enable
 
 
+def clear_layers_name():
+    """Clear all layer names in set_keep['_layers_name_list'].
+
+    Enable layer name reuse.
+    """
+    set_keep['_layers_name_list'] = []
+
+
+def flatten_reshape(variable, name=''):
+    """Reshapes high-dimension input to a vector.
+
+    [batch_size, mask_row, mask_col, n_mask] ---> [batch_size, mask_row * mask_col * n_mask]
+
+    Parameters
+    ----------
+    variable : a tensorflow variable
+    name : a string or None
+        An optional name to attach to this layer.
+
+    """
+    dim = 1
+    for d in variable.get_shape()[1:].as_list():
+        dim *= d
+
+    return tf.reshape(variable, shape=[-1, dim], name=name)
+
+
+def initialize_global_variables(sess=None):
+    """Excute ``sess.run(tf.global_variables_initializer())``.
+
+    Parameters
+    ----------
+    sess : a Session
+
+    """
+    assert sess is not None
+    sess.run(tf.global_variables_initializer())
+
+
 class Layer(object):
     """Construct the basic layer.
 
@@ -192,6 +231,59 @@ class DenseLayer(Layer):
             self.all_params.extend([W, b])
         else:
             self.all_params.extend([W])
+
+
+class DropoutLayer(Layer):
+    """Construct dropout layer.
+
+    The :class:`DropoutLayer` class is a noise layer which randomly set some
+    values to zero by a given keeping probability.
+
+    Parameters
+    ----------
+    layer : a :class:`Layer` instance
+        The `Layer` class feeding into this layer.
+    keep : float
+        The keeping probability, the lower more values will be set to zero.
+    is_fix : boolean
+        Default False, if True, the keeping probability is fixed and cannot be
+        changed via feed_dict.
+    is_train : boolean
+        If False, skip this layer, default is True.
+    seed : int or None
+        An integer or None to create random seed.
+    name : a string or None
+        An optional name to attach to this layer.
+
+    Notes
+    -----
+    - A frequent question regarding :class:`DropoutLayer` is that why it donot have
+    `is_train` like :class:`BatchNormLayer`. In many simple cases, user may find it
+    is better to use one inference instead of two inferences for training and testing
+    seperately, :class:`DropoutLayer` allows you to control the dropout rate via
+    `feed_dict`. However, you can fix the keeping probability by setting `is_fix` to True.
+
+    """
+
+    def __init__(self,
+                 layer=None,
+                 keep=0.5,
+                 is_fixed=False,
+                 is_train=True,
+                 seed=None,
+                 name='dropout_layer'):
+        Layer.__init__(self, name=name)
+        if is_train is False:
+            print("  [TL] skip DropoutLayer")
+            self.outputs = layer.outputs
+            self.all_layers = list(layer.all_layers)
+            self.all_params = list(layer.all_params)
+            self.all_drop = dict(layer.all_drop)
+        else:
+            self.inputs = layer.outputs
+            print("  [TL] DropoutLayer %s: keep:%f is_fix:%s" % (self.name, keep, is_fix))
+
+            pass
 
 
 if __name__ == '__main__':
