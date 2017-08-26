@@ -297,6 +297,94 @@ class DropoutLayer(Layer):
             self.all_layers.extend([self.outputs])
 
 
+class Conv2dLayer(Layer):
+    """Construct conv2d layer.
+
+    Parameters
+    ----------
+    layer : a :class:`Layer` instance
+        The `Layer` class feeding into this layer.
+    act : activation function
+        The function that is applied to the layer activations.
+    shape : list of shape
+        shape of the filters, [filter_height, filter_width, in_channels, out_channels].
+    strides : a list of ints.
+        The stride of the sliding window for each dimension of input.
+        It Must be in the same order as the dimension specified with format.
+    padding : a string from: "SAME", "VALID".
+        The type of padding algorithm to use.
+    W_init : weights initializer
+        The initializer for initializing the weight matrix.
+    b_init : biases initializer or None
+        The initializer for initializing the bias vector. If None, skip biases.
+    W_init_args : dictionary
+        The arguments for the weights tf.get_variable().
+    b_init_args : dictionary
+        The arguments for the biases tf.get_variable().
+    use_cudnn_on_gpu : bool, default is None.
+    data_format : string "NHWC" or "NCHW", default is "NHWC"
+    name : a string or None
+        An optional name to attach to this layer.
+
+    Notes
+    -----
+    - shape = [h, w, the number of output channel of previous layer, the number of output channels]
+    - the number of output channel of a layer is its last dimension.
+
+    """
+
+    def __init__(self,
+                 layer=None,
+                 act=tf.identity,
+                 shape=[5, 5, 1, 100],
+                 strides=[1, 1, 1, 1],
+                 padding='SAME',
+                 W_init=tf.truncated_normal_initializer(stddev=0.02),
+                 b_init=tf.constant_initializer(value=0),
+                 W_init_args={},
+                 b_init_args={},
+                 use_cudnn_on_gpu=None,
+                 data_format=None,
+                 name='cnn_layer'):
+        Layer.__init__(self, name=name)
+        self.inputs = layer.outputs
+        print("  [TL] Conv2dLayer %s: shape:%s strides:%s pad:%s act:%s" %
+              (self.name, str(shape), str(strides), padding, act.__name__))
+
+        with tf.variable_scope(name) as vs:
+            W = tf.get_variable(name='W_conv2d',
+                                shape=shape,
+                                initializer=W_init,
+                                **W_init_args)
+            if b_init:
+                b = tf.get_variable(name='b_conv2d',
+                                    shape=[shape[-1]],
+                                    initializer=b_init,
+                                    **b_init_args)
+                self.outputs = act(tf.nn.conv2d(input=self.inputs,
+                                                filter=W,
+                                                strides=strides,
+                                                padding=padding,
+                                                use_cudnn_on_gpu=use_cudnn_on_gpu,
+                                                data_format=data_format) + b)
+            else:
+                self.outputs = act(tf.nn.conv2d(input=self.inputs,
+                                                filter=W,
+                                                strides=strides,
+                                                padding=padding,
+                                                use_cudnn_on_gpu=use_cudnn_on_gpu,
+                                                data_format=data_format))
+
+        self.all_layers = list(layer.all_layers)
+        self.all_params = list(layer.all_params)
+        self.all_drop = dict(layer.all_drop)
+        self.all_layers.extend([self.outputs])
+        if b_init:
+            self.all_params.extend([W, b])
+        else:
+            self.all_params.extend([W])
+
+
 if __name__ == '__main__':
     # basic = Layer()
     # basic.print_params()
