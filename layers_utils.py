@@ -268,7 +268,7 @@ class DropoutLayer(Layer):
     def __init__(self,
                  layer=None,
                  keep=0.5,
-                 is_fixed=False,
+                 is_fix=False,
                  is_train=True,
                  seed=None,
                  name='dropout_layer'):
@@ -283,7 +283,18 @@ class DropoutLayer(Layer):
             self.inputs = layer.outputs
             print("  [TL] DropoutLayer %s: keep:%f is_fix:%s" % (self.name, keep, is_fix))
 
-            pass
+            if is_fix:
+                self.outputs = tf.nn.dropout(self.inputs, keep, seed=seed, name=name)
+            else:
+                set_keep[name] = tf.placeholder(tf.float32)
+                self.outputs = tf.nn.dropout(self.inputs, set_keep[name], seed=seed, name=name)
+
+            self.all_layers = list(layer.all_layers)
+            self.all_params = list(layer.all_params)
+            self.all_drop = dict(layer.all_drop)
+            if is_fix:
+                self.all_drop.update({set_keep[name]: keep})
+            self.all_layers.extend([self.outputs])
 
 
 if __name__ == '__main__':
