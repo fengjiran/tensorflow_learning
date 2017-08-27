@@ -7,6 +7,13 @@ import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 
+# from . import layers_utils
+
+# from layers_utils import InputLayer
+# from layers_utils import Conv2dLayer
+# from layers_utils import DenseLayer
+# from layers_utils import flatten_reshape
+
 if platform.system() == 'Windows':
     data_path = 'E:\\deeplearning_experiments\\datasets\\mnist'
 elif platform.system() == 'Linux':
@@ -133,6 +140,8 @@ x_image = tf.reshape(x, [-1, img_size, img_size, num_channels])
 
 y_true = tf.placeholder(tf.float32, [None, 10], name='y_true')
 y_true_cls = tf.argmax(y_true, axis=1)
+
+# network = InputLayer(inputs=x, name='input')
 
 
 layer_conv1, weights_conv1 = new_conv_layer(inpt=x_image,
