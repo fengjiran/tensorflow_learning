@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 
-from ..utils.layers_utils import InputLayer
+# from ..utils.layers_utils import InputLayer
 # from . import layers_utils
 
-# from layers_utils import InputLayer
-# from layers_utils import Conv2dLayer
-# from layers_utils import DenseLayer
-# from layers_utils import flatten_reshape
+from layers_utils import InputLayer
+from layers_utils import Conv2dLayer
+from layers_utils import DenseLayer
+from layers_utils import FlattenLayer
 
 if platform.system() == 'Windows':
     data_path = 'E:\\deeplearning_experiments\\datasets\\mnist'
@@ -143,38 +143,59 @@ x_image = tf.reshape(x, [-1, img_size, img_size, num_channels])
 y_true = tf.placeholder(tf.float32, [None, 10], name='y_true')
 y_true_cls = tf.argmax(y_true, axis=1)
 
-# network = InputLayer(inputs=x, name='input')
+network = InputLayer(inputs=x_image, name='input')
+network = Conv2dLayer(layer=network,
+                      act=tf.nn.relu,
+                      shape=[filter_size1, filter_size1, num_channels, num_filters1],
+                      name='cnn_layer1')
 
+network = Conv2dLayer(layer=network,
+                      act=tf.nn.relu,
+                      shape=[filter_size2, filter_size2, num_filters1, num_filters2],
+                      name='cnn_layer2')
+network = FlattenLayer(layer=network)
+network = DenseLayer(layer=network,
+                     n_units=fc_size,
+                     act=tf.nn.relu,
+                     name='dense_layer1')
+network = DenseLayer(layer=network,
+                     n_units=num_classes,
+                     name='dense_layer2')
 
-layer_conv1, weights_conv1 = new_conv_layer(inpt=x_image,
-                                            num_input_channels=num_channels,
-                                            filter_size=filter_size1,
-                                            num_filters=num_filters1,
-                                            use_pooling=True)
-
-layer_conv2, weights_conv2 = new_conv_layer(inpt=layer_conv1,
-                                            num_input_channels=num_filters1,
-                                            filter_size=filter_size2,
-                                            num_filters=num_filters2,
-                                            use_pooling=True)
-
-layer_flat, num_features = flatten_layer(layer_conv2)
-
-layer_fc1 = new_fc_layer(inpt=layer_flat,
-                         num_inputs=num_features,
-                         num_outputs=fc_size,
-                         use_relu=True)
-
-layer_fc2 = new_fc_layer(inpt=layer_fc1,
-                         num_inputs=fc_size,
-                         num_outputs=num_classes,
-                         use_relu=False)
-
-y_pred = tf.nn.softmax(layer_fc2)
+y_pred = tf.nn.softmax(network.outputs)
 y_pred_cls = tf.argmax(y_pred, axis=1)
-
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=layer_fc2,
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred,
                                                               labels=y_true))
+
+# layer_conv1, weights_conv1 = new_conv_layer(inpt=x_image,
+#                                             num_input_channels=num_channels,
+#                                             filter_size=filter_size1,
+#                                             num_filters=num_filters1,
+#                                             use_pooling=True)
+
+# layer_conv2, weights_conv2 = new_conv_layer(inpt=layer_conv1,
+#                                             num_input_channels=num_filters1,
+#                                             filter_size=filter_size2,
+#                                             num_filters=num_filters2,
+#                                             use_pooling=True)
+
+# layer_flat, num_features = flatten_layer(layer_conv2)
+
+# layer_fc1 = new_fc_layer(inpt=layer_flat,
+#                          num_inputs=num_features,
+#                          num_outputs=fc_size,
+#                          use_relu=True)
+
+# layer_fc2 = new_fc_layer(inpt=layer_fc1,
+#                          num_inputs=fc_size,
+#                          num_outputs=num_classes,
+#                          use_relu=False)
+
+# y_pred = tf.nn.softmax(layer_fc2)
+# y_pred_cls = tf.argmax(y_pred, axis=1)
+
+# cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=layer_fc2,
+#                                                               labels=y_true))
 
 optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)
 
