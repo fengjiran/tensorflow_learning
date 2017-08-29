@@ -77,65 +77,89 @@ def plot_images(images, cls_true, cls_pred=None, img_shape=(28, 28)):
     plt.show()
 
 
-def new_weights(shape):
-    weights = tf.Variable(tf.truncated_normal(shape, stddev=0.05))
-    return weights
+def plot_weights(weights, input_channel=0):
+
+    with tf.Session() as sess:
+        w = sess.run(weights)
+
+    w_min = np.min(w)
+    w_max = np.max(w)
+
+    num_filters = w.shape[3]
+
+    num_grids = np.ceil(np.sqrt(num_filters))
+
+    fig, axes = plt.subplots(num_grids, num_grids)
+
+    for i, ax in enumerate(axes.flat):
+        if i < num_filters:
+            img = w[:, :, input_channel, i]
+            ax.imshow(img, vmin=w_min, vmax=w_max,
+                      interpolation='nearest', cmap='seismic')
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    plt.show()
+
+# def new_weights(shape):
+#     weights = tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+#     return weights
 
 
-def new_biases(length):
-    biases = tf.Variable(tf.constant(0.05, shape=[length]))
-    return biases
+# def new_biases(length):
+#     biases = tf.Variable(tf.constant(0.05, shape=[length]))
+#     return biases
 
 
-def new_conv_layer(inpt,
-                   num_input_channels,
-                   filter_size,
-                   num_filters,
-                   use_pooling=True):
-    shape = [filter_size, filter_size, num_input_channels, num_filters]
-    weights = new_weights(shape)
-    biases = new_biases(num_filters)
+# def new_conv_layer(inpt,
+#                    num_input_channels,
+#                    filter_size,
+#                    num_filters,
+#                    use_pooling=True):
+#     shape = [filter_size, filter_size, num_input_channels, num_filters]
+#     weights = new_weights(shape)
+#     biases = new_biases(num_filters)
 
-    layer = tf.nn.conv2d(input=inpt,
-                         filter=weights,
-                         strides=[1, 1, 1, 1],
-                         padding='SAME')
+#     layer = tf.nn.conv2d(input=inpt,
+#                          filter=weights,
+#                          strides=[1, 1, 1, 1],
+#                          padding='SAME')
 
-    layer += biases
+#     layer += biases
 
-    if use_pooling:
-        layer = tf.nn.max_pool(value=layer,
-                               ksize=[1, 2, 2, 1],
-                               strides=[1, 2, 2, 1],
-                               padding='SAME')
+#     if use_pooling:
+#         layer = tf.nn.max_pool(value=layer,
+#                                ksize=[1, 2, 2, 1],
+#                                strides=[1, 2, 2, 1],
+#                                padding='SAME')
 
-    layer = tf.nn.relu(layer)
+#     layer = tf.nn.relu(layer)
 
-    return layer, weights
-
-
-def flatten_layer(layer):
-    layer_shape = layer.get_shape()
-    num_features = layer_shape[1:4].num_elements()
-
-    layer_flat = tf.reshape(layer, [-1, num_features])
-
-    return layer_flat, num_features
+#     return layer, weights
 
 
-def new_fc_layer(inpt,
-                 num_inputs,
-                 num_outputs,
-                 use_relu=True):
-    weights = new_weights(shape=[num_inputs, num_outputs])
-    biases = new_biases(length=num_outputs)
+# def flatten_layer(layer):
+#     layer_shape = layer.get_shape()
+#     num_features = layer_shape[1:4].num_elements()
 
-    layer = tf.matmul(inpt, weights) + biases
+#     layer_flat = tf.reshape(layer, [-1, num_features])
 
-    if use_relu:
-        layer = tf.nn.relu(layer)
+#     return layer_flat, num_features
 
-    return layer
+
+# def new_fc_layer(inpt,
+#                  num_inputs,
+#                  num_outputs,
+#                  use_relu=True):
+#     weights = new_weights(shape=[num_inputs, num_outputs])
+#     biases = new_biases(length=num_outputs)
+
+#     layer = tf.matmul(inpt, weights) + biases
+
+#     if use_relu:
+#         layer = tf.nn.relu(layer)
+
+#     return layer
 
 
 x = tf.placeholder(tf.float32, [None, img_size_flat], name='x')
