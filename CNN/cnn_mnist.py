@@ -17,9 +17,9 @@ from layers_utils import DenseLayer
 from layers_utils import FlattenLayer
 
 if platform.system() == 'Windows':
-    data_path = 'E:\\deeplearning_experiments\\datasets\\mnist'
+    data_path = 'E:\\deeplearning_experiments\\datasets\\fashion_mnist'
 elif platform.system() == 'Linux':
-    data_path = '/home/richard/datasets/mnist'
+    data_path = '/home/richard/datasets/fashion_mnist'
 
 data = input_data.read_data_sets(data_path, one_hot=True, validation_size=0)
 data.test.cls = np.array([label.argmax() for label in data.test.labels])
