@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 
-# from ..utils.layers_utils import InputLayer
-# from . import layers_utils
 
 from layers_utils import InputLayer
 from layers_utils import Conv2dLayer
