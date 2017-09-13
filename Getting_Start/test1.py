@@ -15,8 +15,8 @@ y_data = np.array([[377.4376, 393.5123, 361.3656],
 x_data /= 255.0
 y_data /= 511.0
 
-W2 = tf.Variable(tf.random_uniform([3, 3], -0.01, 0.01))
 W1 = tf.Variable(tf.random_uniform([3, 3], -0.01, 0.01))
+W2 = tf.Variable(tf.random_uniform([3, 3], -0.01, 0.01))
 b = tf.Variable(tf.zeros([1, 3]))
 
 y = tf.matmul(x_data**2, W2) + tf.matmul(x_data, W1) + b
