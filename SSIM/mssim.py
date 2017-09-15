@@ -191,8 +191,8 @@ if __name__ == '__main__':
 
     w2 = _tf_fspecial_gaussian(11, 1.5)
 
-    # with tf.Session() as sess:
-    #     init = tf.global_variables_initializer()
-    #     print(sess.run(w2))
+    with tf.Session() as sess:
+        init = tf.global_variables_initializer()
+        print(sess.run(w2))
 
-    # print(w2.get_shape())
+    print(w2.get_shape())
