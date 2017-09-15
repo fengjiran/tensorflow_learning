@@ -42,6 +42,66 @@ def _FSpecialGauss(size, sigma):
     return g / g.sum()
 
 
+def _tf_fspecial_gaussian(size, sigma):
+    """Construct function to mimic the 'fspecial' gaussian MATLAB function."""
+    radius = size // 2
+    offset = 0.0
+    start, stop = -radius, radius + 1
+
+    if size % 2 == 0:
+        offset = 0.5
+        stop -= 1
+
+    x, y = np.mgrid[offset + start:stop, offset + start:stop]
+    x = np.expand_dims(x, axis=-1)
+    x = np.expand_dims(x, axis=-1)
+
+    y = np.expand_dims(y, axis=-1)
+    y = np.expand_dims(y, axis=-1)
+
+    # assert len(x) == size
+    g = tf.exp(-((x**2 + y**2) / (2.0 * sigma**2)))
+    return g / tf.reduce_sum(g)
+
+
+def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, multichannel=False):
+    if multichannel:
+        nch = img1.get_shape()[-1]
+        value = np.zeros(nch)
+        for ch in range(nch):
+            ch_result = tf_ssim(img1[:, :, :, ch], img2[:, :, :, ch])
+
+    window = _tf_fspecial_gaussian(size, sigma)  # window shape [size, size]
+    K1 = 0.01
+    K2 = 0.03
+    L = 255  # depth of image (255 in case the image has a differnt scale)
+    C1 = (K1 * L)**2
+    C2 = (K2 * L)**2
+
+    mu1 = tf.nn.conv2d(img1, window, strides=[1, 1, 1, 1], padding='VALID')
+    mu2 = tf.nn.conv2d(img2, window, strides=[1, 1, 1, 1], padding='VALID')
+
+    mu1_sq = mu1 * mu1
+    mu2_sq = mu2 * mu2
+    mu1_mu2 = mu1 * mu2
+
+    sigma1_sq = tf.nn.conv2d(img1 * img1, window, strides=[1, 1, 1, 1], padding='VALID') - mu1_sq
+    sigma2_sq = tf.nn.conv2d(img2 * img2, window, strides=[1, 1, 1, 1], padding='VALID') - mu2_sq
+    sigma12 = tf.nn.conv2d(img1 * img2, window, strides=[1, 1, 1, 1], padding='VALID') - mu1_mu2
+
+    if cs_map:
+        value = (((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) *
+                                                              (sigma1_sq + sigma2_sq + C2)),
+                 (2.0 * sigma12 + C2) / (sigma1_sq + sigma2_sq + C2))
+    else:
+        value = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) *
+                                                             (sigma1_sq + sigma2_sq + C2))
+
+    if mean_metric:
+        value = tf.reduce_mean(value)
+    return value
+
+
 def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
                        filter_sigma=1.5, k1=0.01, k2=0.03):
     """Return the Structural Similarity Map between `img1` and `img2`.
@@ -121,3 +181,18 @@ def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
     cs = np.mean(v1 / v2)
 
     return ssim, cs
+
+
+if __name__ == '__main__':
+    w1 = _FSpecialGauss(size=11, sigma=1.5)
+    # print(w)
+    # print(w.sum())
+    print(w1.shape)
+
+    w2 = _tf_fspecial_gaussian(11, 1.5)
+
+    # with tf.Session() as sess:
+    #     init = tf.global_variables_initializer()
+    #     print(sess.run(w2))
+
+    # print(w2.get_shape())
