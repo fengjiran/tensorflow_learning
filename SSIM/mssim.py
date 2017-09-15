@@ -23,6 +23,7 @@ from __future__ import division
 import numpy as np
 from scipy import signal
 from scipy.ndimage.filters import convolve
+from skimage import io
 import tensorflow as tf
 
 
@@ -59,6 +60,9 @@ def _tf_fspecial_gaussian(size, sigma):
     y = np.expand_dims(y, axis=-1)
     y = np.expand_dims(y, axis=-1)
 
+    x = tf.constant(x, dtype=tf.float32)
+    y = tf.constant(y, dtype=tf.float32)
+
     # assert len(x) == size
     g = tf.exp(-((x**2 + y**2) / (2.0 * sigma**2)))
     return g / tf.reduce_sum(g)
@@ -67,11 +71,22 @@ def _tf_fspecial_gaussian(size, sigma):
 def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, multichannel=False):
     if multichannel:
         nch = img1.get_shape()[-1]
-        value = np.zeros(nch)
+        value = []
+        # value = tf.zeros(shape=[nch, ])
         for ch in range(nch):
-            ch_result = tf_ssim(img1[:, :, :, ch], img2[:, :, :, ch])
+            img1_ch = img1[:, :, :, ch]
+            img2_ch = img2[:, :, :, ch]
+
+            img1_ch = tf.expand_dims(img1_ch, axis=-1)
+            img2_ch = tf.expand_dims(img2_ch, axis=-1)
+
+            ch_result = tf_ssim(img1_ch, img2_ch, multichannel=False)
+            value.append(ch_result)
+
+        return tf.reduce_mean(value)
 
     window = _tf_fspecial_gaussian(size, sigma)  # window shape [size, size]
+    # window = tf.cast(window, tf.float32)
     K1 = 0.01
     K2 = 0.03
     L = 255  # depth of image (255 in case the image has a differnt scale)
@@ -184,15 +199,23 @@ def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
 
 
 if __name__ == '__main__':
-    w1 = _FSpecialGauss(size=11, sigma=1.5)
+    # w1 = _FSpecialGauss(size=11, sigma=1.5)
     # print(w)
     # print(w.sum())
-    print(w1.shape)
+    # print(w1.shape)
 
-    w2 = _tf_fspecial_gaussian(11, 1.5)
+    # w2 = _tf_fspecial_gaussian(11, 1.5)
+    img1 = io.imread('C:\\Users\\Richard\\Desktop\\jie.jpg').astype(np.float32)
+    img2 = io.imread('C:\\Users\\Richard\\Desktop\\jie.jpg').astype(np.float32)
+
+    img1 = np.expand_dims(img1, axis=0)
+    img2 = np.expand_dims(img2, axis=0)
+
+    x = tf.placeholder(tf.float32, img1.shape)
+    y = tf.placeholder(tf.float32, img2.shape)
+
+    result = tf_ssim(x, y, multichannel=True)
 
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
-        print(sess.run(w2))
-
-    print(w2.get_shape())
+        print(sess.run(result, feed_dict={x: img1, y: img2}))
