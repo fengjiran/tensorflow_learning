@@ -22,7 +22,7 @@ python msssim.py --original_image=original.png --compared_image=distorted.png
 from __future__ import division
 import numpy as np
 from scipy import signal
-from scipy.ndimage.filters import convolve
+# from scipy.ndimage.filters import convolve
 from skimage import io
 import tensorflow as tf
 
@@ -77,19 +77,39 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
     """
     if multichannel:
         nch = img1.get_shape()[-1]
-        value = []
-        # value = tf.zeros(shape=[nch, ])
-        for ch in range(nch):
-            img1_ch = img1[:, :, :, ch]
-            img2_ch = img2[:, :, :, ch]
 
-            img1_ch = tf.expand_dims(img1_ch, axis=-1)
-            img2_ch = tf.expand_dims(img2_ch, axis=-1)
+        if cs_map:
+            ssim = []
+            cs = []
+            for ch in range(nch):
+                img1_ch = img1[:, :, :, ch]
+                img2_ch = img2[:, :, :, ch]
 
-            ch_result = tf_ssim(img1_ch, img2_ch, multichannel=False)
-            value.append(ch_result)
+                img1_ch = tf.expand_dims(img1_ch, axis=-1)
+                img2_ch = tf.expand_dims(img2_ch, axis=-1)
 
-        return tf.reduce_mean(value)
+                ssim_map, cs_map = tf_ssim(img1_ch, img2_ch, cs_map=cs_map, mean_metric=False, multichannel=False)
+                ssim.append(ssim_map)
+                cs.append(cs_map)
+
+            n = len(ssim)
+            ssim_map = tf.add_n(ssim) / n
+            cs_map = tf.add_n(cs) / n
+
+            return ssim_map, cs_map
+        else:
+            value = []
+            for ch in range(nch):
+                img1_ch = img1[:, :, :, ch]
+                img2_ch = img2[:, :, :, ch]
+
+                img1_ch = tf.expand_dims(img1_ch, axis=-1)
+                img2_ch = tf.expand_dims(img2_ch, axis=-1)
+
+                ch_result = tf_ssim(img1_ch, img2_ch, cs_map=cs_map, multichannel=False)
+                value.append(ch_result)
+
+            return tf.reduce_mean(value)
 
     window = _tf_fspecial_gaussian(size, sigma)  # window shape [size, size, 1, 1]
     # window = tf.cast(window, tf.float32)
@@ -114,17 +134,22 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
         value = (((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) *
                                                               (sigma1_sq + sigma2_sq + C2)),
                  (2.0 * sigma12 + C2) / (sigma1_sq + sigma2_sq + C2))
+
+        if mean_metric:
+            return (tf.reduce_mean((1.0 - value[0]) / 2), tf.reduce_mean((1.0 - value[1]) / 2))
+        else:
+            return ((1.0 - value[0]) / 2, (1.0 - value[1]) / 2)
     else:
         value = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) *
                                                              (sigma1_sq + sigma2_sq + C2))
 
-    if mean_metric:
-        return tf.reduce_mean((1.0 - value) / 2)
-    else:
-        return (1.0 - value) / 2
+        if mean_metric:
+            return tf.reduce_mean((1.0 - value) / 2)
+        else:
+            return (1.0 - value) / 2
 
 
-def tf_ms_ssim(img1, img2, mean_metric=True, level=5):
+def tf_ms_ssim(img1, img2, mean_metric=True, level=5, multichannel=False):
     """Return the MS-SSIM score between `img1` and `img2`.
 
     This function implements Multi-Scale Structural Similarity (MS-SSIM) Image
@@ -139,7 +164,24 @@ def tf_ms_ssim(img1, img2, mean_metric=True, level=5):
     mssim = []
     mcs = []
     for l in range(level):
-        ssim_map, cs_map = tf_ssim(img1, img2, cs_map=True, mean_metric=False)
+        ssim_map, cs_map = tf_ssim(img1, img2, cs_map=True, mean_metric=False, multichannel=multichannel)
+        mssim.append(tf.reduce_mean(ssim_map))
+        mcs.append(tf.reduce_mean(cs_map))
+
+        filtered_im1 = tf.nn.avg_pool(img1, [1, 2, 2, 1], [1, 2, 2, 1], padding='SAME')
+        filtered_im2 = tf.nn.avg_pool(img2, [1, 2, 2, 1], [1, 2, 2, 1], padding='SAME')
+
+        img1 = filtered_im1
+        img2 = filtered_im2
+
+    mssim = tf.stack(mssim, axis=0)
+    mcs = tf.stack(mcs, axis=0)
+
+    value = tf.reduce_prod(mcs[0:level - 1]**weights[0:level - 1]) * (mssim[level - 1]**weights[level - 1])
+
+    if mean_metric:
+        value = tf.reduce_mean(value)
+    return value
 
 
 def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
