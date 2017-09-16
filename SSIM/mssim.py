@@ -69,6 +69,12 @@ def _tf_fspecial_gaussian(size, sigma):
 
 
 def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, multichannel=False):
+    """Return the Structural Similarity Map between `img1` and `img2`.
+
+    This function attempts to match the functionality of ssim_index_new.m by
+    Zhou Wang: http://www.cns.nyu.edu/~lcv/ssim/msssim.zip
+
+    """
     if multichannel:
         nch = img1.get_shape()[-1]
         value = []
@@ -85,7 +91,7 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
 
         return tf.reduce_mean(value)
 
-    window = _tf_fspecial_gaussian(size, sigma)  # window shape [size, size]
+    window = _tf_fspecial_gaussian(size, sigma)  # window shape [size, size, 1, 1]
     # window = tf.cast(window, tf.float32)
     K1 = 0.01
     K2 = 0.03
@@ -113,8 +119,27 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
                                                              (sigma1_sq + sigma2_sq + C2))
 
     if mean_metric:
-        value = tf.reduce_mean((1.0 - value) / 2)
-    return value
+        return tf.reduce_mean((1.0 - value) / 2)
+    else:
+        return (1.0 - value) / 2
+
+
+def tf_ms_ssim(img1, img2, mean_metric=True, level=5):
+    """Return the MS-SSIM score between `img1` and `img2`.
+
+    This function implements Multi-Scale Structural Similarity (MS-SSIM) Image
+    Quality Assessment according to Zhou Wang's paper, "Multi-scale structural
+    similarity for image quality assessment" (2003).
+    Link: https://ece.uwaterloo.ca/~z70wang/publications/msssim.pdf
+    Author's MATLAB implementation:
+    http://www.cns.nyu.edu/~lcv/ssim/msssim.zip
+
+    """
+    weights = tf.constant([0.0448, 0.2856, 0.3001, 0.2363, 0.1333], dtype=tf.float32)
+    mssim = []
+    mcs = []
+    for l in range(level):
+        ssim_map, cs_map = tf_ssim(img1, img2, cs_map=True, mean_metric=False)
 
 
 def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
