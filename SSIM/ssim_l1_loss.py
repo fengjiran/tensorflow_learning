@@ -75,10 +75,12 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5):
     Zhou Wang: http://www.cns.nyu.edu/~lcv/ssim/msssim.zip
 
     """
-    tensor_shape = img1.get_shape().as_list()
-    assert len(tensor_shape) == 4  # 4-d
+    tensor_shape1 = img1.get_shape().as_list()
+    tensor_shape2 = img2.get_shape().as_list()
+    assert tensor_shape1 == tensor_shape2
+    assert len(tensor_shape1) == 4  # 4-d
 
-    nch = tensor_shape[-1]
+    nch = tensor_shape1[-1]
 
     if nch > 1:
         if cs_map:
@@ -189,12 +191,15 @@ def tf_ms_ssim(img1, img2, mean_metric=True, level=5):
 
 def tf_l1_loss(img1, img2, size=11, sigma=1.5):
     """Compute l1 loss with gaussian window."""
+    tensor_shape1 = img1.get_shape().as_list()
+    tensor_shape2 = img2.get_shape().as_list()
+    assert tensor_shape1 == tensor_shape2
+    assert len(tensor_shape1) == 4
+
     diff = tf.abs(img1 - img2)
     window = _tf_fspecial_gaussian(size, sigma)
-    tensor_shape = img1.get_shape().as_list()
-    assert len(tensor_shape) == 4
 
-    nch = tensor_shape[-1]
+    nch = tensor_shape1[-1]
 
     if nch > 1:  # multi channel
         results = []
@@ -309,8 +314,8 @@ if __name__ == '__main__':
     x = tf.placeholder(tf.float32, img1.shape)
     y = tf.placeholder(tf.float32, img2.shape)
 
-    result = tf_ms_ssim(x, y)
-    # result = tf_l1_loss(x, y)
+    # result = tf_ms_ssim(x, y)
+    result = tf_l1_loss(x, y)
 
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
