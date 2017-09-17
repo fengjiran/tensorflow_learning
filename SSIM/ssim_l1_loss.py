@@ -68,16 +68,19 @@ def _tf_fspecial_gaussian(size, sigma):
     return g / tf.reduce_sum(g)
 
 
-def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, multichannel=False):
+def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5):
     """Return the Structural Similarity Map between `img1` and `img2`.
 
     This function attempts to match the functionality of ssim_index_new.m by
     Zhou Wang: http://www.cns.nyu.edu/~lcv/ssim/msssim.zip
 
     """
-    if multichannel:
-        nch = img1.get_shape()[-1]
+    tensor_shape = img1.get_shape().as_list()
+    assert len(tensor_shape) == 4  # 4-d
 
+    nch = tensor_shape[-1]
+
+    if nch > 1:
         if cs_map:
             ssim = []
             cs = []
@@ -88,8 +91,7 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
                 img1_ch = tf.expand_dims(img1_ch, axis=-1)
                 img2_ch = tf.expand_dims(img2_ch, axis=-1)
 
-                ssim_map, cross_scale_map = tf_ssim(img1_ch, img2_ch, cs_map=cs_map,
-                                                    mean_metric=False, multichannel=False)
+                ssim_map, cross_scale_map = tf_ssim(img1_ch, img2_ch, cs_map=cs_map, mean_metric=False)
                 ssim.append(ssim_map)
                 cs.append(cross_scale_map)
 
@@ -107,7 +109,7 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
                 img1_ch = tf.expand_dims(img1_ch, axis=-1)
                 img2_ch = tf.expand_dims(img2_ch, axis=-1)
 
-                ch_result = tf_ssim(img1_ch, img2_ch, cs_map=cs_map, multichannel=False)
+                ch_result = tf_ssim(img1_ch, img2_ch, cs_map=cs_map)
                 value.append(ch_result)
 
             return tf.reduce_mean(value)
@@ -150,7 +152,7 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5, mult
             return (1.0 - value) / 2
 
 
-def tf_ms_ssim(img1, img2, mean_metric=True, level=5, multichannel=False):
+def tf_ms_ssim(img1, img2, mean_metric=True, level=5):
     """Return the MS-SSIM score between `img1` and `img2`.
 
     This function implements Multi-Scale Structural Similarity (MS-SSIM) Image
@@ -165,7 +167,7 @@ def tf_ms_ssim(img1, img2, mean_metric=True, level=5, multichannel=False):
     mssim = []
     mcs = []
     for l in range(level):
-        ssim_map, cs_map = tf_ssim(img1, img2, cs_map=True, mean_metric=False, multichannel=multichannel)
+        ssim_map, cs_map = tf_ssim(img1, img2, cs_map=True, mean_metric=False)
         mssim.append(tf.reduce_mean(ssim_map))
         mcs.append(tf.reduce_mean(cs_map))
 
@@ -307,8 +309,8 @@ if __name__ == '__main__':
     x = tf.placeholder(tf.float32, img1.shape)
     y = tf.placeholder(tf.float32, img2.shape)
 
-    # result = tf_ms_ssim(x, y, multichannel=True)
-    result = tf_l1_loss(x, y)
+    result = tf_ms_ssim(x, y)
+    # result = tf_l1_loss(x, y)
 
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
