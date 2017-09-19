@@ -217,7 +217,7 @@ def tf_l1_loss(img1, img2, size=11, sigma=1.5):
     return l1_loss
 
 
-def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-3):
+def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-5):
     scale = tf.Variable(tf.ones([inputs.get_shape()[-1]]))
     beta = tf.Variable(tf.zeros([inputs.get_shape()[-1]]))
     pop_mean = tf.Variable(tf.zeros([inputs.get_shape()[-1]]), trainable=False)
@@ -238,8 +238,8 @@ def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-3):
                                              variance_epsilon=epsilon)
     else:
         return tf.nn.batch_normalization(x=inputs,
-                                         mean=batch_mean,
-                                         variance=batch_var,
+                                         mean=pop_mean,
+                                         variance=pop_var,
                                          offset=beta,
                                          scale=scale,
                                          variance_epsilon=epsilon)
