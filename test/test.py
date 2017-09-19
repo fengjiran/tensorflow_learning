@@ -4,13 +4,15 @@ from tensorflow.python.client import device_lib
 g = tf.get_default_graph()
 
 x = tf.Variable(1.0, name='x')
-# x_plus_1 = tf.assign_add(x, 1)
+x_plus_1 = tf.assign_add(x, 1)
 # y = x
 # y = tf.identity(x)
 # y = x_plus_1
 
-with tf.control_dependencies([tf.assign_add(x, 1)]):
-    y = x
+with tf.control_dependencies([x_plus_1]):
+    # z = tf.identity(x)
+    # y = x
+    y = tf.identity(x)
 # y = tf.identity(x)
 # y = x_plus_1
 # y = tf.identity(x)
@@ -24,7 +26,8 @@ with tf.Session() as sess:
     for i in range(5):
         # print(sess.run(x), sess.run(y), sess.run(x_plus_1))
         # print(sess.run(x_plus_1), sess.run(x), sess.run(y))
-        print(sess.run(tf.assign_add(x, 1)), sess.run(y))
+        # print(sess.run(z))
+        print(sess.run(y))
 
 
 # g1 = tf.get_default_graph()
