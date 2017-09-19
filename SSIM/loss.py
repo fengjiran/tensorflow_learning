@@ -217,6 +217,34 @@ def tf_l1_loss(img1, img2, size=11, sigma=1.5):
     return l1_loss
 
 
+def batch_norm(inputs, is_training, decay=0.999, epsilon=1e-3):
+    scale = tf.Variable(tf.ones([inputs.get_shape()[-1]]))
+    beta = tf.Variable(tf.zeros([inputs.get_shape()[-1]]))
+    pop_mean = tf.Variable(tf.zeros([inputs.get_shape()[-1]]), trainable=False)
+    pop_var = tf.Variable(tf.ones([inputs.get_shape()[-1]]), trainable=False)
+
+    if is_training:
+        axes = list(range(len(inputs.get_shape()) - 1))
+        batch_mean, batch_var = tf.nn.moments(inputs, axes)
+        train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
+        train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
+
+        with tf.control_dependencies([train_mean, train_var]):
+            return tf.nn.batch_normalization(x=inputs,
+                                             mean=batch_mean,
+                                             variance=batch_var,
+                                             offset=beta,
+                                             scale=scale,
+                                             variance_epsilon=epsilon)
+    else:
+        return tf.nn.batch_normalization(x=inputs,
+                                         mean=batch_mean,
+                                         variance=batch_var,
+                                         offset=beta,
+                                         scale=scale,
+                                         variance_epsilon=epsilon)
+
+
 def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11,
                        filter_sigma=1.5, k1=0.01, k2=0.03):
     """Return the Structural Similarity Map between `img1` and `img2`.
