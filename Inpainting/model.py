@@ -107,26 +107,44 @@ def batch_norm_layer(inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
                                   initializer=tf.constant_initializer(1.),
                                   trainable=False)
 
-        if is_training:
+        def mean_var_update():
             axes = list(range(len(inputs.get_shape()) - 1))
             batch_mean, batch_var = tf.nn.moments(inputs, axes)
             train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
             train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
 
             with tf.control_dependencies([train_mean, train_var]):
-                return tf.nn.batch_normalization(x=inputs,
-                                                 mean=batch_mean,
-                                                 variance=batch_var,
-                                                 offset=beta,
-                                                 scale=scale,
-                                                 variance_epsilon=epsilon)
-        else:
-            return tf.nn.batch_normalization(x=inputs,
-                                             mean=pop_mean,
-                                             variance=pop_var,
-                                             offset=beta,
-                                             scale=scale,
-                                             variance_epsilon=epsilon)
+                return tf.identity(batch_mean), tf.identity(batch_var)
+
+        mean, variance = tf.cond(is_training, mean_var_update, lambda: (pop_mean, pop_var))
+
+        return tf.nn.batch_normalization(x=inputs,
+                                         mean=mean,
+                                         variance=variance,
+                                         offset=beta,
+                                         scale=scale,
+                                         variance_epsilon=epsilon)
+
+        # if is_training:
+        #     axes = list(range(len(inputs.get_shape()) - 1))
+        #     batch_mean, batch_var = tf.nn.moments(inputs, axes)
+        #     train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
+        #     train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
+
+        #     with tf.control_dependencies([train_mean, train_var]):
+        #         return tf.nn.batch_normalization(x=inputs,
+        #                                          mean=batch_mean,
+        #                                          variance=batch_var,
+        #                                          offset=beta,
+        #                                          scale=scale,
+        #                                          variance_epsilon=epsilon)
+        # else:
+        #     return tf.nn.batch_normalization(x=inputs,
+        #                                      mean=pop_mean,
+        #                                      variance=pop_var,
+        #                                      offset=beta,
+        #                                      scale=scale,
+        #                                      variance_epsilon=epsilon)
 
 
 def reconstruction(images, is_training):
