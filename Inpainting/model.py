@@ -127,3 +127,37 @@ def batch_norm_layer(inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
                                              offset=beta,
                                              scale=scale,
                                              variance_epsilon=epsilon)
+
+
+def reconstruction(images, is_training):
+    batch_size = images.get_shape().as_list()[0]
+
+    with tf.variable_scope('generator'):
+        conv1 = conv_layer(images, [4, 4, 3, 64], stride=2, name='conv1')
+        bn1 = batch_norm_layer(conv1, is_training, name='bn1')
+        bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
+
+        conv2 = conv_layer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
+        bn2 = batch_norm_layer(conv2, is_training, name='bn2')
+        bn2 = tf.contrib.keras.layers.LeakyReLU()(bn2)
+
+        conv3 = conv_layer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
+        bn3 = batch_norm_layer(conv3, is_training, name='bn3')
+        bn3 = tf.contrib.keras.layers.LeakyReLU()(bn3)
+
+        conv4 = conv_layer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
+        bn4 = batch_norm_layer(conv4, is_training, name='bn4')
+        bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
+
+        conv5 = conv_layer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
+        bn5 = batch_norm_layer(conv5, is_training, name='bn5')
+        bn5 = tf.contrib.keras.layers.LeakyReLU()(bn5)
+
+    return bn5
+
+
+if __name__ == '__main__':
+    x = tf.placeholder(tf.float32, [100, 128, 128, 3], name='x')
+    train_flag = tf.placeholder(tf.bool)
+    y = reconstruction(x, train_flag)
+    print(y.get_shape().as_list())
