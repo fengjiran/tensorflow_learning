@@ -151,6 +151,7 @@ def reconstruction(images, is_training):
     batch_size = images.get_shape().as_list()[0]
 
     with tf.variable_scope('generator'):
+        # encoder
         conv1 = conv_layer(images, [4, 4, 3, 64], stride=2, name='conv1')
         bn1 = batch_norm_layer(conv1, is_training, name='bn1')
         bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
@@ -171,11 +172,40 @@ def reconstruction(images, is_training):
         bn5 = batch_norm_layer(conv5, is_training, name='bn5')
         bn5 = tf.contrib.keras.layers.LeakyReLU()(bn5)
 
-    return bn5
+        conv6 = conv_layer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
+        bn6 = batch_norm_layer(conv6, is_training, name='bn6')
+        bn6 = tf.contrib.keras.layers.LeakyReLU()(bn6)
+
+        # decoder
+        deconv4 = deconv_layer(bn6, [4, 4, 512, 4000], conv5.get_shape().as_list(),
+                               padding='VALID', stride=2, name='deconv4')
+        debn4 = batch_norm_layer(deconv4, is_training, name='debn4')
+        debn4 = tf.nn.relu(debn4)
+
+        deconv3 = deconv_layer(debn4, [4, 4, 256, 512], conv4.get_shape().as_list(),
+                               stride=2, name='deconv3')
+        debn3 = batch_norm_layer(deconv3, is_training, name='debn3')
+        debn3 = tf.nn.relu(debn3)
+
+        deconv2 = deconv_layer(debn3, [4, 4, 128, 256], conv3.get_shape().as_list(),
+                               stride=2, name='deconv2')
+        debn2 = batch_norm_layer(deconv2, is_training, name='debn2')
+        debn2 = tf.nn.relu(debn2)
+
+        deconv1 = deconv_layer(debn2, [4, 4, 64, 128], conv2.get_shape().as_list(),
+                               stride=2, name='deconv1')
+        debn1 = batch_norm_layer(deconv1, is_training, name='debn1')
+        debn1 = tf.nn.relu(debn1)
+
+        recon = deconv_layer(debn1, [4, 4, 3, 64], [batch_size, 64, 64, 3],
+                             stride=2, name='recon')
+
+    return recon
 
 
 if __name__ == '__main__':
-    x = tf.placeholder(tf.float32, [100, 128, 128, 3], name='x')
+    batch_size = 128
+    x = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='x')
     train_flag = tf.placeholder(tf.bool)
     y = reconstruction(x, train_flag)
     print(y.get_shape().as_list())
