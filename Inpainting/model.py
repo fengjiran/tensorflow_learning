@@ -38,7 +38,7 @@ def deconv_layer(inputs, filter_shape, output_shape, activation=tf.identity, pad
     return activation(tf.nn.bias_add(deconv, b))
 
 
-def fc_layer(inputs, output_size, activation=tf.identity, name=None):
+def fc_layer(inputs, output_size, name, activation=tf.identity):
     shape = inputs.get_shape().as_list()
     dim = np.prod(shape[1:])
     x = tf.reshape(inputs, [-1, dim])   # flatten
@@ -53,3 +53,77 @@ def fc_layer(inputs, output_size, activation=tf.identity, name=None):
                             initializer=tf.constant_initializer(0.))
 
     return activation(tf.nn.bias_add(tf.matmul(x, w), b))
+
+
+def channel_wise_fc_layer(inputs, name, activation=tf.identity):  # bottom:(7,7,512)
+    _, width, height, n_feat_map = inputs.get_shape().as_list()
+    inputs_reshape = tf.reshape(inputs, [-1, width * height, n_feat_map])
+    inputs_transpose = tf.transpose(inputs_reshape, [2, 0, 1])
+
+    with tf.variable_scope(name):
+        w = tf.get_variable(name='w',
+                            shape=[n_feat_map, width * height, width * height],
+                            initializer=tf.truncated_normal_initializer(0., 0.005))
+
+        output = tf.matmul(inputs_transpose, w)
+
+        output = tf.transpose(output, [1, 2, 0])
+        output = tf.reshape(output, [-1, height, width, n_feat_map])
+
+        # add 1*1 conv
+        w_conv = tf.get_variable(name='w_conv',
+                                 shape=[1, 1, n_feat_map, n_feat_map],
+                                 initializer=tf.contrib.layers.xavier_initializer())
+
+        b_conv = tf.get_variable(name='b_conv',
+                                 shape=[n_feat_map],
+                                 initializer=tf.constant_initializer(0.))
+
+        output = tf.nn.conv2d(input=output,
+                              filter=w_conv,
+                              strides=[1, 1, 1, 1],
+                              padding='SAME')
+
+    return activation(tf.nn.bias_add(output, b_conv))
+
+
+def batch_norm_layer(inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
+    with tf.variable_scope(name):
+        scale = tf.get_variable(name='scale',
+                                shape=[inputs.get_shape()[-1]],
+                                initializer=tf.constant_initializer(1.))
+
+        beta = tf.get_variable(name='beta',
+                               shape=[inputs.get_shape()[-1]],
+                               initializer=tf.constant_initializer(0.))
+
+        pop_mean = tf.get_variable(name='pop_mean',
+                                   shape=[inputs.get_shape()[-1]],
+                                   initializer=tf.constant_initializer(0.),
+                                   trainable=False)
+
+        pop_var = tf.get_variable(name='pop_var',
+                                  shape=[inputs.get_shape()[-1]],
+                                  initializer=tf.constant_initializer(1.),
+                                  trainable=False)
+
+        if is_training:
+            axes = list(range(len(inputs.get_shape()) - 1))
+            batch_mean, batch_var = tf.nn.moments(inputs, axes)
+            train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
+            train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
+
+            with tf.control_dependencies([train_mean, train_var]):
+                return tf.nn.batch_normalization(x=inputs,
+                                                 mean=batch_mean,
+                                                 variance=batch_var,
+                                                 offset=beta,
+                                                 scale=scale,
+                                                 variance_epsilon=epsilon)
+        else:
+            return tf.nn.batch_normalization(x=inputs,
+                                             mean=pop_mean,
+                                             variance=pop_var,
+                                             offset=beta,
+                                             scale=scale,
+                                             variance_epsilon=epsilon)
