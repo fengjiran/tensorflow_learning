@@ -200,7 +200,32 @@ def reconstruction(images, is_training):
         recon = deconv_layer(debn1, [4, 4, 3, 64], [batch_size, 64, 64, 3],
                              stride=2, name='recon')
 
+        recon = tf.nn.tanh(recon)
+
     return recon
+
+
+def discriminator(images, is_training, reuse=None):
+    with tf.variable_scope('discriminator', reuse=reuse):
+        conv1 = conv_layer(images, [4, 4, 3, 64], stride=2, name='conv1')
+        bn1 = batch_norm_layer(conv1, is_training, name='bn1')
+        bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
+
+        conv2 = conv_layer(bn1, [4, 4, 64, 128], stride=2, name='conv2')
+        bn2 = batch_norm_layer(conv2, is_training, name='bn2')
+        bn2 = tf.contrib.keras.layers.LeakyReLU()(bn2)
+
+        conv3 = conv_layer(bn2, [4, 4, 128, 256], stride=2, name='conv3')
+        bn3 = batch_norm_layer(conv3, is_training, name='bn3')
+        bn3 = tf.contrib.keras.layers.LeakyReLU()(bn3)
+
+        conv4 = conv_layer(bn3, [4, 4, 256, 512], stride=2, name='conv4')
+        bn4 = batch_norm_layer(conv4, is_training, name='bn4')
+        bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
+
+        output = fc_layer(bn4, output_size=1, name='output', activation=tf.nn.sigmoid)
+
+    return output[:, 0]
 
 
 if __name__ == '__main__':
@@ -209,3 +234,6 @@ if __name__ == '__main__':
     train_flag = tf.placeholder(tf.bool)
     y = reconstruction(x, train_flag)
     print(y.get_shape().as_list())
+
+    z = discriminator(y, train_flag)
+    print(z.get_shape().as_list())
