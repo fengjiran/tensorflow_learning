@@ -83,7 +83,7 @@ def _variable_with_decay(name, shape, stddev, wd):
       name: name of the variable
       shape: list of ints
       stddev: standard deviation of a truncated Gaussian
-      wd: add L2Loss weight decay multiplied by this float. If None, weight
+      wd: add L2 Loss weight decay multiplied by this float. If None, weight
           decay is not added for this Variable.
 
     Returns
