@@ -223,7 +223,7 @@ def discriminator(images, is_training, reuse=None):
         bn4 = batch_norm_layer(conv4, is_training, name='bn4')
         bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
 
-        output = fc_layer(bn4, output_size=1, name='output', activation=tf.nn.sigmoid)
+        output = fc_layer(bn4, output_size=1, name='output')
 
     return output[:, 0]
 
