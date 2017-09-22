@@ -26,6 +26,7 @@ momentum = 0.9
 batch_size = 128
 lambda_recon = 0.9
 lambda_adv = 0.1
+alpha = 0.84
 
 overlap_size = 7
 hiding_size = 64
@@ -83,3 +84,34 @@ adv_all = tf.concat([adv_pos, adv_neg], axis=0)
 # Applying bigger loss for overlapping region
 mask_recon = tf.pad(tensor=tf.ones([hiding_size - 2 * overlap_size, hiding_size - 2 * overlap_size]),
                     paddings=[[overlap_size, overlap_size], [overlap_size, overlap_size]])
+
+mask_recon = tf.reshape(mask_recon, [hiding_size, hiding_size, 1])
+mask_recon = tf.concat([mask_recon] * 3, 2)
+mask_overlap = 1 - mask_recon
+
+
+loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon)
+
+loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap)
+
+loss_recon = loss_recon_center / 10. + loss_recon_overlap
+
+
+loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
+                                                                    labels=labels_D))
+loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_neg,
+                                                                    labels=labels_G))
+loss_G = loss_adv_G * lambda_adv + loss_recon * lambda_recon
+loss_D = loss_adv_D * lambda_adv
+
+# Trainable variables in generator and discriminator
+var_G = filter(lambda x: x.name.startswith('generator'), tf.trainable_variables())
+var_D = filter(lambda x: x.name.startswith('discriminator'), tf.trainable_variables())
+
+w_G = filter(lambda x: x.name.endswith('w:0'), var_G)
+w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
+
+loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_G)))
+loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_D)))
