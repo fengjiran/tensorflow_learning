@@ -115,3 +115,5 @@ w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
 
 loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_G)))
 loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_D)))
+
+loss_G_ = loss_G + weight_decay_rate * tf.add_n(tf.get_collection('weight_decay'))
