@@ -16,6 +16,7 @@ def conv_layer(inputs, filter_shape, activation=tf.identity, padding='SAME', str
                             initializer=tf.constant_initializer(0.))
 
         conv = tf.nn.conv2d(inputs, w, [1, stride, stride, 1], padding=padding)
+        tf.add_to_collection('weight_decay', tf.nn.l2_loss(w))
 
     return activation(tf.nn.bias_add(conv, b))
 
@@ -35,6 +36,8 @@ def deconv_layer(inputs, filter_shape, output_shape, activation=tf.identity, pad
                                         output_shape=output_shape,
                                         strides=[1, stride, stride, 1],
                                         padding=padding)
+        tf.add_to_collection('weight_decay', tf.nn.l2_loss(w))
+
     return activation(tf.nn.bias_add(deconv, b))
 
 
@@ -51,6 +54,7 @@ def fc_layer(inputs, output_size, name, activation=tf.identity):
         b = tf.get_variable(name='b',
                             shape=[output_size],
                             initializer=tf.constant_initializer(0.))
+        tf.add_to_collection('weight_decay', tf.nn.l2_loss(w))
 
     return activation(tf.nn.bias_add(tf.matmul(x, w), b))
 
@@ -83,6 +87,9 @@ def channel_wise_fc_layer(inputs, name, activation=tf.identity):  # bottom:(7,7,
                               filter=w_conv,
                               strides=[1, 1, 1, 1],
                               padding='SAME')
+
+        tf.add_to_collection('weight_decay', tf.nn.l2_loss(w))
+        tf.add_to_collection('weight_decay', tf.nn.l2_loss(w_conv))
 
     return activation(tf.nn.bias_add(output, b_conv))
 
