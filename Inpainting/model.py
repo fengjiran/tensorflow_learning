@@ -5,6 +5,85 @@ import pickle
 import tensorflow as tf
 
 
+class Conv2dLayer(object):
+    """Construct conv2d layer."""
+
+    def __init__(self,
+                 inputs,
+                 filter_shape,
+                 activation=tf.identity,
+                 padding='SAME',
+                 stride=1,
+                 name=None):
+        self.inputs = inputs
+        with tf.variable_scope(name):
+            self.w = tf.get_variable(name='w',
+                                     shape=filter_shape,
+                                     initializer=tf.contrib.layers.xavier_initializer())
+
+            self.b = tf.get_variable(name='b',
+                                     shape=filter_shape[-1],
+                                     initializer=tf.constant_initializer(0.))
+
+            linear_output = tf.nn.conv2d(self.inputs, self.w, [1, stride, stride, 1], padding=padding)
+
+            self.output = activation(tf.nn.bias_add(linear_output, self.b))
+
+
+class DeconvLayer(object):
+    """Construct deconv2d layer."""
+
+    def __init__(self,
+                 inputs,
+                 filter_shape,
+                 output_shape,
+                 activation=tf.identity,
+                 padding='SAME',
+                 stride=1,
+                 name=None):
+        self.inputs = inputs
+        with tf.variable_scope(name):
+            self.w = tf.get_variable(name='w',
+                                     shape=filter_shape,
+                                     initializer=tf.contrib.layers.xavier_initializer())
+
+            self.b = tf.get_variable(name='b',
+                                     shape=filter_shape[-2],
+                                     initializer=tf.constant_initializer(0.))
+
+            deconv = tf.nn.conv2d_transpose(value=self.inputs,
+                                            filter=self.w,
+                                            output_shape=output_shape,
+                                            strides=[1, stride, stride, 1],
+                                            padding=padding)
+
+            self.output = activation(tf.nn.bias_add(deconv, self.b))
+
+
+class FCLayer(object):
+    """Construct fc layer."""
+
+    def __init__(self,
+                 inputs,
+                 output_size,
+                 activation=tf.identity,
+                 name=None):
+        self.inputs = inputs
+        shape = inputs.get_shape().as_list()
+        input_size = np.prod(shape[1:])
+        x = tf.reshape(self.inputs, [-1, input_size])
+
+        with tf.variable_scope(name):
+            self.w = tf.get_variable(name='w',
+                                     shape=[input_size, output_size],
+                                     initializer=tf.contrib.layers.xavier_initializer())
+            self.b = tf.get_variable(name='b',
+                                     shape=[output_size],
+                                     initializer=tf.constant_initializer(0.))
+
+            self.output = activation(tf.nn.bias_add(tf.matmul(x, self.w), self.b))
+
+
 def conv_layer(inputs, filter_shape, activation=tf.identity, padding='SAME', stride=1, name=None):
     with tf.variable_scope(name):
         w = tf.get_variable(name='w',
@@ -159,47 +238,66 @@ def reconstruction(images, is_training):
 
     with tf.variable_scope('generator'):
         # encoder
-        conv1 = conv_layer(images, [4, 4, 3, 64], stride=2, name='conv1')
-        bn1 = batch_norm_layer(conv1, is_training, name='bn1')
+        conv1 = Conv2dLayer(images, [4, 4, 3, 64], stride=2, name='conv1')
+        # conv1 = conv_layer(images, [4, 4, 3, 64], stride=2, name='conv1')
+        bn1 = batch_norm_layer(conv1.output, is_training, name='bn1')
         bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv1.w))
 
-        conv2 = conv_layer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
-        bn2 = batch_norm_layer(conv2, is_training, name='bn2')
+        conv2 = Conv2dLayer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
+        # conv2 = conv_layer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
+        bn2 = batch_norm_layer(conv2.output, is_training, name='bn2')
         bn2 = tf.contrib.keras.layers.LeakyReLU()(bn2)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv2.w))
 
-        conv3 = conv_layer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
-        bn3 = batch_norm_layer(conv3, is_training, name='bn3')
+        conv3 = Conv2dLayer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
+        # conv3 = conv_layer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
+        bn3 = batch_norm_layer(conv3.output, is_training, name='bn3')
         bn3 = tf.contrib.keras.layers.LeakyReLU()(bn3)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv3.w))
 
-        conv4 = conv_layer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
-        bn4 = batch_norm_layer(conv4, is_training, name='bn4')
+        conv4 = Conv2dLayer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
+        # conv4 = conv_layer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
+        bn4 = batch_norm_layer(conv4.output, is_training, name='bn4')
         bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv4.w))
 
-        conv5 = conv_layer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
-        bn5 = batch_norm_layer(conv5, is_training, name='bn5')
+        conv5 = Conv2dLayer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
+        # conv5 = conv_layer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
+        bn5 = batch_norm_layer(conv5.output, is_training, name='bn5')
         bn5 = tf.contrib.keras.layers.LeakyReLU()(bn5)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv5.w))
 
-        conv6 = conv_layer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
-        bn6 = batch_norm_layer(conv6, is_training, name='bn6')
+        conv6 = Conv2dLayer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
+        # conv6 = conv_layer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
+        bn6 = batch_norm_layer(conv6.output, is_training, name='bn6')
         bn6 = tf.contrib.keras.layers.LeakyReLU()(bn6)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w))
 
         # decoder
-        deconv4 = deconv_layer(bn6, [4, 4, 512, 4000], conv5.get_shape().as_list(),
-                               padding='VALID', stride=2, name='deconv4')
-        debn4 = batch_norm_layer(deconv4, is_training, name='debn4')
+        deconv4 = DeconvLayer(inputs=bn6,
+                              filter_shape=[4, 4, 512, 4000],
+                              output_shape=conv5.output.get_shape().as_list(),
+                              padding='VALID',
+                              stride=2,
+                              name='deconv4')
+        # deconv4 = deconv_layer(bn6, [4, 4, 512, 4000], conv5.output.get_shape().as_list(),
+        #                        padding='VALID', stride=2, name='deconv4')
+        debn4 = batch_norm_layer(deconv4.output, is_training, name='debn4')
         debn4 = tf.nn.relu(debn4)
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv4.w))
 
-        deconv3 = deconv_layer(debn4, [4, 4, 256, 512], conv4.get_shape().as_list(),
+        deconv3 = deconv_layer(debn4, [4, 4, 256, 512], conv4.output.get_shape().as_list(),
                                stride=2, name='deconv3')
         debn3 = batch_norm_layer(deconv3, is_training, name='debn3')
         debn3 = tf.nn.relu(debn3)
 
-        deconv2 = deconv_layer(debn3, [4, 4, 128, 256], conv3.get_shape().as_list(),
+        deconv2 = deconv_layer(debn3, [4, 4, 128, 256], conv3.output.get_shape().as_list(),
                                stride=2, name='deconv2')
         debn2 = batch_norm_layer(deconv2, is_training, name='debn2')
         debn2 = tf.nn.relu(debn2)
 
-        deconv1 = deconv_layer(debn2, [4, 4, 64, 128], conv2.get_shape().as_list(),
+        deconv1 = deconv_layer(debn2, [4, 4, 64, 128], conv2.output.get_shape().as_list(),
                                stride=2, name='deconv1')
         debn1 = batch_norm_layer(deconv1, is_training, name='debn1')
         debn1 = tf.nn.relu(debn1)
@@ -244,3 +342,5 @@ if __name__ == '__main__':
 
     z = discriminator(y, train_flag)
     print(z.get_shape().as_list())
+
+    print(tf.get_collection('weight_decay_gen'))
