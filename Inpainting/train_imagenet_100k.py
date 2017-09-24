@@ -90,11 +90,11 @@ mask_recon = tf.concat([mask_recon] * 3, 2)
 mask_overlap = 1 - mask_recon
 
 
-loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon)
+loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=7, level=3) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=7)
 
-loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap)
+loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=7, level=3) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=7)
 
 loss_recon = loss_recon_center / 10. + loss_recon_overlap
 
@@ -113,8 +113,8 @@ var_D = filter(lambda x: x.name.startswith('discriminator'), tf.trainable_variab
 w_G = filter(lambda x: x.name.endswith('w:0'), var_G)
 w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
 
-loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_G)))
-loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(map(tf.nn.l2_loss, w_D)))
+loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_G))))
+loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_D))))
 
 loss_G_ = loss_G + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 loss_D_ = loss_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
@@ -125,7 +125,7 @@ y = np.random.rand(batch_size, 64, 64, 3)
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
-    print(sess.run([loss_G, loss_G, loss_D, loss_D_],
+    print(sess.run([loss_G, loss_G_, loss_D, loss_D_],
                    feed_dict={is_training: True,
                               learning_rate: 0.001,
                               images: x,
