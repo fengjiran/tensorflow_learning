@@ -243,42 +243,48 @@ def reconstruction(images, is_training):
         bn1 = batch_norm_layer(conv1.output, is_training, name='bn1')
         bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv1.w))
+        print(bn1.get_shape().as_list())
 
         conv2 = Conv2dLayer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
         # conv2 = conv_layer(bn1, [4, 4, 64, 64], stride=2, name='conv2')
         bn2 = batch_norm_layer(conv2.output, is_training, name='bn2')
         bn2 = tf.contrib.keras.layers.LeakyReLU()(bn2)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv2.w))
+        print(bn2.get_shape().as_list())
 
         conv3 = Conv2dLayer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
         # conv3 = conv_layer(bn2, [4, 4, 64, 128], stride=2, name='conv3')
         bn3 = batch_norm_layer(conv3.output, is_training, name='bn3')
         bn3 = tf.contrib.keras.layers.LeakyReLU()(bn3)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv3.w))
+        print(bn3.get_shape().as_list())
 
         conv4 = Conv2dLayer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
         # conv4 = conv_layer(bn3, [4, 4, 128, 256], stride=2, name='conv4')
         bn4 = batch_norm_layer(conv4.output, is_training, name='bn4')
         bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv4.w))
+        print(bn4.get_shape().as_list())
 
         conv5 = Conv2dLayer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
         # conv5 = conv_layer(bn4, [4, 4, 256, 512], stride=2, name='conv5')
         bn5 = batch_norm_layer(conv5.output, is_training, name='bn5')
         bn5 = tf.contrib.keras.layers.LeakyReLU()(bn5)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv5.w))
+        print(bn5.get_shape().as_list())
 
         conv6 = Conv2dLayer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
         # conv6 = conv_layer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
         bn6 = batch_norm_layer(conv6.output, is_training, name='bn6')
         bn6 = tf.contrib.keras.layers.LeakyReLU()(bn6)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w))
+        print(bn6.get_shape().as_list())
 
         # decoder
         deconv4 = DeconvLayer(inputs=bn6,
                               filter_shape=[4, 4, 512, 4000],
                               output_shape=conv5.output.get_shape().as_list(),
-                              padding='VALID',
+                              padding='SAME',
                               stride=2,
                               name='deconv4')
         # deconv4 = deconv_layer(bn6, [4, 4, 512, 4000], conv5.output.get_shape().as_list(),
@@ -286,11 +292,12 @@ def reconstruction(images, is_training):
         debn4 = batch_norm_layer(deconv4.output, is_training, name='debn4')
         debn4 = tf.nn.relu(debn4)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv4.w))
+        print(debn4.get_shape().as_list())
 
         deconv3 = DeconvLayer(inputs=debn4,
                               filter_shape=[4, 4, 256, 512],
                               output_shape=conv4.output.get_shape().as_list(),
-                              padding='VALID',
+                              padding='SAME',
                               stride=2,
                               name='deconv3')
         # deconv3 = deconv_layer(debn4, [4, 4, 256, 512], conv4.output.get_shape().as_list(),
@@ -298,11 +305,12 @@ def reconstruction(images, is_training):
         debn3 = batch_norm_layer(deconv3.output, is_training, name='debn3')
         debn3 = tf.nn.relu(debn3)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv3.w))
+        print(debn3.get_shape().as_list())
 
         deconv2 = DeconvLayer(inputs=debn3,
                               filter_shape=[4, 4, 128, 256],
                               output_shape=conv3.output.get_shape().as_list(),
-                              padding='VALID',
+                              padding='SAME',
                               stride=2,
                               name='deconv2')
         # deconv2 = deconv_layer(debn3, [4, 4, 128, 256], conv3.output.get_shape().as_list(),
@@ -310,11 +318,12 @@ def reconstruction(images, is_training):
         debn2 = batch_norm_layer(deconv2.output, is_training, name='debn2')
         debn2 = tf.nn.relu(debn2)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv2.w))
+        print(debn2.get_shape().as_list())
 
         deconv1 = DeconvLayer(inputs=debn2,
                               filter_shape=[4, 4, 64, 128],
                               output_shape=conv2.output.get_shape().as_list(),
-                              padding='VALID',
+                              padding='SAME',
                               stride=2,
                               name='deconv1')
         # deconv1 = deconv_layer(debn2, [4, 4, 64, 128], conv2.output.get_shape().as_list(),
@@ -322,6 +331,7 @@ def reconstruction(images, is_training):
         debn1 = batch_norm_layer(deconv1.output, is_training, name='debn1')
         debn1 = tf.nn.relu(debn1)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv1.w))
+        print(debn1.get_shape().as_list())
 
         recon = DeconvLayer(inputs=debn1,
                             filter_shape=[4, 4, 3, 64],
@@ -343,24 +353,28 @@ def discriminator(images, is_training, reuse=None):
         bn1 = batch_norm_layer(conv1.output, is_training, name='bn1')
         bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1)
         tf.add_to_collection('weight_decay_dis', tf.nn.l2_loss(conv1.w))
+        print(bn1.get_shape().as_list())
 
         conv2 = Conv2dLayer(bn1, [4, 4, 64, 128], stride=2, name='conv2')
         # conv2 = conv_layer(bn1, [4, 4, 64, 128], stride=2, name='conv2')
         bn2 = batch_norm_layer(conv2.output, is_training, name='bn2')
         bn2 = tf.contrib.keras.layers.LeakyReLU()(bn2)
         tf.add_to_collection('weight_decay_dis', tf.nn.l2_loss(conv2.w))
+        print(bn2.get_shape().as_list())
 
         conv3 = Conv2dLayer(bn2, [4, 4, 128, 256], stride=2, name='conv3')
         # conv3 = conv_layer(bn2, [4, 4, 128, 256], stride=2, name='conv3')
         bn3 = batch_norm_layer(conv3.output, is_training, name='bn3')
         bn3 = tf.contrib.keras.layers.LeakyReLU()(bn3)
         tf.add_to_collection('weight_decay_dis', tf.nn.l2_loss(conv3.w))
+        print(bn3.get_shape().as_list())
 
         conv4 = Conv2dLayer(bn3, [4, 4, 256, 512], stride=2, name='conv4')
         # conv4 = conv_layer(bn3, [4, 4, 256, 512], stride=2, name='conv4')
         bn4 = batch_norm_layer(conv4.output, is_training, name='bn4')
         bn4 = tf.contrib.keras.layers.LeakyReLU()(bn4)
         tf.add_to_collection('weight_decay_dis', tf.nn.l2_loss(conv4.w))
+        print(bn4.get_shape().as_list())
 
         fc = FCLayer(bn4, output_size=1, name='output')
         tf.add_to_collection('weight_decay_dis', tf.nn.l2_loss(fc.w))
@@ -377,7 +391,16 @@ if __name__ == '__main__':
     y = reconstruction(x, train_flag)
     print(y.get_shape().as_list())
 
-    z = discriminator(y, train_flag)
-    print(z.get_shape().as_list())
+    init = tf.global_variables_initializer()
 
-    print(tf.get_collection('weight_decay_gen'))
+    a = np.random.rand(batch_size, 128, 128, 3)
+    with tf.Session() as sess:
+        sess.run(init)
+        print(sess.run([tf.reduce_mean(y)],
+                       feed_dict={train_flag: True,
+                                  x: a}))
+
+    # z = discriminator(y, train_flag)
+    # print(z.get_shape().as_list())
+
+    # print(tf.get_collection('weight_decay_gen'))
