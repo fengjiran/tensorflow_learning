@@ -173,6 +173,31 @@ def channel_wise_fc_layer(inputs, name, activation=tf.identity):  # bottom:(7,7,
     return activation(tf.nn.bias_add(output, b_conv))
 
 
+class BatchNormLayer(object):
+    """Construct batch norm layer."""
+
+    def __init__(self, inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
+        self.inputs = inputs
+        with tf.variable_scope(name):
+            self.scale = tf.get_variable(name='scale',
+                                         shape=[inputs.get_shape()[-1]],
+                                         initializer=tf.constant_initializer(1.))
+
+            self.beta = tf.get_variable(name='beta',
+                                        shape=[inputs.get_shape()[-1]],
+                                        initializer=tf.constant_initializer(0.))
+
+            self.pop_mean = tf.get_variable(name='pop_mean',
+                                            shape=[inputs.get_shape()[-1]],
+                                            initializer=tf.constant_initializer(0.),
+                                            trainable=False)
+
+            self.pop_var = tf.get_variable(name='pop_var',
+                                           shape=[inputs.get_shape()[-1]],
+                                           initializer=tf.constant_initializer(1.),
+                                           trainable=False)
+
+
 def batch_norm_layer(inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
     with tf.variable_scope(name):
         scale = tf.get_variable(name='scale',
@@ -210,27 +235,6 @@ def batch_norm_layer(inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
                                          offset=beta,
                                          scale=scale,
                                          variance_epsilon=epsilon)
-
-        # if is_training:
-        #     axes = list(range(len(inputs.get_shape()) - 1))
-        #     batch_mean, batch_var = tf.nn.moments(inputs, axes)
-        #     train_mean = tf.assign(pop_mean, pop_mean * decay + batch_mean * (1 - decay))
-        #     train_var = tf.assign(pop_var, pop_var * decay + batch_var * (1 - decay))
-
-        #     with tf.control_dependencies([train_mean, train_var]):
-        #         return tf.nn.batch_normalization(x=inputs,
-        #                                          mean=batch_mean,
-        #                                          variance=batch_var,
-        #                                          offset=beta,
-        #                                          scale=scale,
-        #                                          variance_epsilon=epsilon)
-        # else:
-        #     return tf.nn.batch_normalization(x=inputs,
-        #                                      mean=pop_mean,
-        #                                      variance=pop_var,
-        #                                      offset=beta,
-        #                                      scale=scale,
-        #                                      variance_epsilon=epsilon)
 
 
 def reconstruction(images, is_training):
