@@ -113,11 +113,14 @@ var_D = filter(lambda x: x.name.startswith('discriminator'), tf.trainable_variab
 w_G = filter(lambda x: x.name.endswith('w:0'), var_G)
 w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
 
-loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_G))))
-loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_D))))
+# loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_G))))
+# loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_D))))
 
-loss_G_ = loss_G + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
-loss_D_ = loss_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
+loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
+
+opt_g = tf.train.AdamOptimizer(learning_rate)
+opt_d = tf.train.AdamOptimizer(learning_rate)
 
 x = np.random.rand(batch_size, 128, 128, 3)
 y = np.random.rand(batch_size, 64, 64, 3)
@@ -125,7 +128,7 @@ y = np.random.rand(batch_size, 64, 64, 3)
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
-    print(sess.run([loss_G, loss_G_, loss_D, loss_D_],
+    print(sess.run(loss_G,
                    feed_dict={is_training: True,
                               learning_rate: 0.001,
                               images: x,
