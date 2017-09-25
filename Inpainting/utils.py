@@ -9,6 +9,16 @@ from PIL import Image
 import numpy as np
 
 
+def array_to_image(array):
+    r = Image.fromarray(array[0]).convert('L')
+    g = Image.fromarray(array[1]).convert('L')
+    b = Image.fromarray(array[2]).convert('L')
+
+    image = Image.merge('RGB', (r, g, b))
+
+    return image
+
+
 def load_image(path, pre_height=146, pre_width=146, height=128, width=128):
     try:
         # print path
