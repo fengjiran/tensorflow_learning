@@ -12,6 +12,7 @@ import tensorflow as tf
 
 from utils import load_image
 from utils import crop_random
+from utils import array_to_image
 
 from model import reconstruction
 from model import discriminator
@@ -122,14 +123,76 @@ loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_d
 opt_g = tf.train.AdamOptimizer(learning_rate)
 opt_d = tf.train.AdamOptimizer(learning_rate)
 
-x = np.random.rand(batch_size, 128, 128, 3)
-y = np.random.rand(batch_size, 64, 64, 3)
+grads_vars_g = opt_g.compute_gradients(loss_G, var_G)
+grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
+train_op_g = opt_g.apply_gradients(grads_vars_g)
 
+grads_vars_d = opt_d.compute_gradients(loss_D, var_D)
+grads_vars_d = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_d]
+train_op_d = opt_d.apply_gradients(grads_vars_d)
+
+saver = tf.train.Saver()
 init = tf.global_variables_initializer()
+
 with tf.Session() as sess:
     sess.run(init)
-    print(sess.run(loss_G,
-                   feed_dict={is_training: True,
-                              learning_rate: 0.001,
-                              images: x,
-                              ground_truth: y}))
+
+    iters = 0
+    loss_D_val = 0.
+    loss_G_val = 0.
+
+    for epoch in range(n_epochs):
+        print('Epoch: {}'.format(epoch + 1))
+        trainset.index = range(len(trainset))
+        trainset = trainset.ix[np.random.permutation(len(trainset))]
+
+        for start, end in zip(range(0, len(trainset), batch_size),
+                              range(batch_size, len(trainset), batch_size)):
+            index = int(start / batch_size)
+            image_paths = trainset[start:end]['image_path'].values
+            images_ori = map(load_image, image_paths)
+            is_none = np.sum([x is None for x in images_ori])
+            if is_none > 0:
+                continue
+
+            images_crops = map(crop_random, images_ori)
+            images, crops, _, _ = zip(*images_crops)
+
+            images = np.array(images)  # images with holes
+            crops = np.array(crops)  # the holes cropped from orignal images, ground ttruth images
+
+            if (iters != 0) and (iters % 100 == 0):
+                test_image_paths = testset[:batch_size]['image_path'].values
+                test_image_ori = map(load_image, test_image_paths)
+
+                test_images_crop = [crop_random(image_ori, x=32, y=32) for image_ori in test_image_ori]
+                test_images, test_crops, xs, ys = zip(*test_images_crop)
+
+                test_images = np.array(test_images)
+                test_crops = np.array(test_crops)
+
+                recons_vals = sess.run(recons, feed_dict={
+                    images: test_images,
+                    ground_truth: test_crops,
+                    is_training: False
+                })
+
+                recons_vals = [recons_vals[i] for i in range(recons_vals.shape[0])]
+
+                if iters % 500 == 0:
+                    ii = 0
+                    for recon, img, x, y in zip(recons_vals, test_images, xs, ys):
+                        recon_hid = ()
+
+
+# x = np.random.rand(batch_size, 128, 128, 3)
+# y = np.random.rand(batch_size, 64, 64, 3)
+
+# init = tf.global_variables_initializer()
+# with tf.Session() as sess:
+#     sess.run(init)
+#     print(sess.run(loss_G,
+#                    feed_dict={is_training: True,
+#                               learning_rate: 0.001,
+#                               images: x,
+#                               ground_truth: y}))
