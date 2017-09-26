@@ -156,10 +156,10 @@ with tf.Session() as sess:
                 continue
 
             images_crops = map(crop_random, images_ori)
-            images, crops, _, _ = zip(*images_crops)
+            train_images, train_crops, _, _ = zip(*images_crops)
 
-            images = np.array(images)  # images with holes
-            crops = np.array(crops)  # the holes cropped from orignal images, ground ttruth images
+            train_images = np.array(train_images)  # images with holes,the inputs of context encoder
+            train_crops = np.array(train_crops)  # the holes cropped from orignal images, ground ttruth images
 
             if (iters != 0) and (iters % 100 == 0):
                 test_image_paths = testset[:batch_size]['image_path'].values
@@ -182,7 +182,30 @@ with tf.Session() as sess:
                 if iters % 500 == 0:
                     ii = 0
                     for recon, img, x, y in zip(recons_vals, test_images, xs, ys):
-                        recon_hid = ()
+                        recon_hid = (255. * (recon + 1) / 2.).astype('uint8')
+                        test_with_crop = (255. * (img + 1) / 2.).astype('uint8')
+                        test_with_crop[y:y + 64, x:x + 64, :] = recon_hid
+
+                        test_with_crop = np.transpose(test_with_crop, [2, 0, 1])
+
+                        image = array_to_image(test_with_crop)
+                        image.save(os.path.join(result_path, 'img_' + str(ii) + '_ori.jpg'))
+
+                        ii += 1
+                        if ii > 50:
+                            break
+
+            # train generator
+            sess.run(train_op_g, feed_dict={
+                images: train_images,
+                ground_truth: train_crops,
+                is_training: True,
+                learning_rate: learning_rate_val
+            })
+
+            # train discriminator
+            if iters % 10 == 0:
+                sess.run(train_op_d, feed_dict={})
 
 
 # x = np.random.rand(batch_size, 128, 128, 3)
