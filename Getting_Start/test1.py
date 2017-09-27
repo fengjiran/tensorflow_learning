@@ -1,5 +1,8 @@
+import os
 import tensorflow as tf
 import numpy as np
+
+model_path = 'E:\\TensorFlow_Learning\\Getting_Start\\my_model'
 
 x_data = np.array([[161, 159, 155],
                    [189, 166, 156],
@@ -38,11 +41,11 @@ init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
     # sa = tf.train.import_meta_graph('E:\\TensorFlow_Learning\\Getting_Start\\my_model\\model.meta')
-    saver.restore(sess, 'E:\\TensorFlow_Learning\\Getting_Start\\my_model\\model')
+    saver.restore(sess, os.path.join(model_path, 'model'))
 
     for step in range(6000):
         sess.run(train_op)
         if step % 20 == 0:
             print(sess.run(loss))
 
-    saver.save(sess, 'E:\\TensorFlow_Learning\\Getting_Start\\my_model\\model')
+    saver.save(sess, os.path.join(model_path, 'model'))
