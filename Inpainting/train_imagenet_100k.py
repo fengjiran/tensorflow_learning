@@ -20,7 +20,11 @@ from model import discriminator
 from loss import tf_ms_ssim
 from loss import tf_l1_loss
 
+isFirstTimeTrain = True
+
 n_epochs = 10000
+init_lr = 0.001
+lr_decay_steps = 1000
 learning_rate_val = 0.0003
 weight_decay_rate = 0.00001
 momentum = 0.9
@@ -36,14 +40,16 @@ if platform.system() == 'Windows':
     trainset_path = 'X:\\DeepLearning\\imagenet_trainset.pickle'
     testset_path = 'X:\\DeepLearning\\imagenet_testset.pickle'
     dataset_path = 'X:\\DeepLearning\\ImageNet_100K'
-    result_path = 'E:\\Scholar_Project\\Inpainting\\Context_Encoders\\imagenet'
-    model_path = 'E:\\Scholar_Project\\Inpainting\\Context_Encoders\\models\\imagenet'
+    result_path = 'E:\\TensorFlow_Learning\\Inpainting\\imagenet'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\models'
+    params = 'E:\\TensorFlow_Learning\\Inpainting\\params'
 elif platform.system() == 'Linux':
     trainset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_trainset.pickle'
     testset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_testset.pickle'
     dataset_path = '/home/richard/datasets/ImageNet_100K'
-    result_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet'
-    model_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/models/imagenet'
+    result_path = '/home/richard/TensorFlow_Learning/Inpainting/imagenet'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/models'
+    params_path = '/home/richard/TensorFlow_Learning/Inpainting/params'
 
 
 if not os.path.exists(trainset_path) or not os.path.exists(testset_path):
@@ -68,8 +74,8 @@ testset = testset.ix[np.random.permutation(len(testset))]
 
 # placeholder
 is_training = tf.placeholder(tf.bool)
-learning_rate = tf.placeholder(tf.float32)
-
+# learning_rate = tf.placeholder(tf.float32)
+global_step = tf.placeholder(tf.int64)
 images = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='images')
 ground_truth = tf.placeholder(tf.float32, [batch_size, hiding_size, hiding_size, 3], name='ground_truth')
 
@@ -91,11 +97,11 @@ mask_recon = tf.concat([mask_recon] * 3, 2)
 mask_overlap = 1 - mask_recon
 
 
-loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=7, level=3) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=7)
+loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=3, level=5) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=3)
 
-loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=7, level=3) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=7)
+loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=3, level=5) +\
+    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=3)
 
 loss_recon = loss_recon_center / 10. + loss_recon_overlap
 
@@ -108,20 +114,27 @@ loss_G = loss_adv_G * lambda_adv + loss_recon * lambda_recon
 loss_D = loss_adv_D * lambda_adv
 
 # Trainable variables in generator and discriminator
-var_G = filter(lambda x: x.name.startswith('generator'), tf.trainable_variables())
-var_D = filter(lambda x: x.name.startswith('discriminator'), tf.trainable_variables())
+# var_G = filter(lambda x: x.name.startswith('generator'), tf.trainable_variables())
+# var_D = filter(lambda x: x.name.startswith('discriminator'), tf.trainable_variables())
 
-w_G = filter(lambda x: x.name.endswith('w:0'), var_G)
-w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
+# w_G = filter(lambda x: x.name.endswith('w:0'), var_G)
+# w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
 
+var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+var_D = tf.get_collection('dis_params_conv') + tf.get_collection('dis_params_bn')
 # loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_G))))
 # loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_D))))
 
 loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
 
-opt_g = tf.train.AdamOptimizer(learning_rate)
-opt_d = tf.train.AdamOptimizer(learning_rate)
+lr = tf.train.exponential_decay(learning_rate=init_lr,
+                                global_step=global_step,
+                                decay_steps=lr_decay_steps,
+                                decay_rate=0.96)
+
+opt_g = tf.train.AdamOptimizer(lr)
+opt_d = tf.train.AdamOptimizer(lr / 10.)
 
 grads_vars_g = opt_g.compute_gradients(loss_G, var_G)
 grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
@@ -137,9 +150,14 @@ init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
 
-    iters = 0
-    loss_D_val = 0.
-    loss_G_val = 0.
+    if not isFirstTimeTrain:
+        pass
+    else:
+        iters = 0
+        with open(os.path.join(params_path, 'iters'), 'wb') as f:
+            pickle.dump(iters, f)
+    # loss_D_val = 0.
+    # loss_G_val = 0.
 
     for epoch in range(n_epochs):
         print('Epoch: {}'.format(epoch + 1))
@@ -148,6 +166,7 @@ with tf.Session() as sess:
 
         for start, end in zip(range(0, len(trainset), batch_size),
                               range(batch_size, len(trainset), batch_size)):
+
             index = int(start / batch_size)
             image_paths = trainset[start:end]['image_path'].values
             images_ori = map(load_image, image_paths)
@@ -161,7 +180,8 @@ with tf.Session() as sess:
             train_images = np.array(train_images)  # images with holes,the inputs of context encoder
             train_crops = np.array(train_crops)  # the holes cropped from orignal images, ground ttruth images
 
-            if (iters != 0) and (iters % 100 == 0):
+            # if (iters != 0) and (iters % 100 == 0):
+            if iters % 100 == 0:
                 test_image_paths = testset[:batch_size]['image_path'].values
                 test_image_ori = map(load_image, test_image_paths)
 
@@ -196,16 +216,28 @@ with tf.Session() as sess:
                             break
 
             # train generator
-            sess.run(train_op_g, feed_dict={
-                images: train_images,
-                ground_truth: train_crops,
-                is_training: True,
-                learning_rate: learning_rate_val
-            })
+            _, loss_temp_g = sess.run([train_op_g, loss_G],
+                                      feed_dict={
+                                          images: train_images,
+                                          ground_truth: train_crops,
+                                          is_training: True,
+                                          global_step: iters})
+
+            print('Iter: {0}, loss_g: {1}'.format(iters, loss_temp_g))
 
             # train discriminator
             if iters % 10 == 0:
-                sess.run(train_op_d, feed_dict={})
+                _, loss_temp_d = sess.run([train_op_d, loss_D],
+                                          feed_dict={
+                                              images: train_images,
+                                              ground_truth: train_crops,
+                                              is_training: True,
+                                              global_step: iters})
+                print('Iter: {0}, loss_d: {1}'.format(iters, loss_temp_d))
+
+            iters += 1
+            with open(os.path.join(params_path, 'iters'), 'wb') as f:
+                pickle.dump(iters, f)
 
 
 # x = np.random.rand(batch_size, 128, 128, 3)
