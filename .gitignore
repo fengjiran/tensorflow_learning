@@ -11,5 +11,7 @@
 .vscode/
 
 Inpainting/imagenet/
+Inpainting/models/
+Inpainting/params/
 
 *.pickle
