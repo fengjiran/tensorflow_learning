@@ -155,30 +155,34 @@ def main(_):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for i in range(20000):
+        for i in range(2000):
             batch = mnist.train.next_batch(50)
             if i % 100 == 0:
-                train_accuracy = accuracy.eval(
-                    feed_dict={
-                        x: batch[0],
-                        y_: batch[1],
-                        keep_prob: 1.0})
+                train_accuracy = sess.run(accuracy, feed_dict={
+                    x: batch[0],
+                    y_: batch[1],
+                    keep_prob: 1.0})
+                # train_accuracy = accuracy.eval(
+                #     feed_dict={
+                #         x: batch[0],
+                #         y_: batch[1],
+                #         keep_prob: 1.0})
 
                 print('step %d, training accuracy %g' % (i, train_accuracy))
 
             train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
-        print('test accuracy %g' % accuracy.eval(
-            feed_dict={
-                x: mnist.test.images,
-                y_: mnist.test.labels,
-                keep_prob: 1.0}))
+        print('test accuracy %g' % sess.run(accuracy, feed_dict={
+            x: mnist.test.images,
+            y_: mnist.test.labels,
+            keep_prob: 1.0}))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str,
-                        default='E:\\deeplearning_experiments\\datasets\\mnist',
+                        default='/home/richard/datasets/mnist',
+                        # default='E:\\deeplearning_experiments\\datasets\\mnist',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
