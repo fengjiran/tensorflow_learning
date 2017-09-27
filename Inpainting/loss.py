@@ -93,7 +93,8 @@ def tf_ssim(img1, img2, cs_map=False, mean_metric=True, size=11, sigma=1.5):
                 img1_ch = tf.expand_dims(img1_ch, axis=-1)
                 img2_ch = tf.expand_dims(img2_ch, axis=-1)
 
-                ssim_map, cross_scale_map = tf_ssim(img1_ch, img2_ch, cs_map=cs_map, mean_metric=False)
+                ssim_map, cross_scale_map = tf_ssim(img1_ch, img2_ch, cs_map=cs_map,
+                                                    mean_metric=False, size=size, sigma=sigma)
                 ssim.append(ssim_map)
                 cs.append(cross_scale_map)
 
@@ -342,8 +343,8 @@ if __name__ == '__main__':
     x = tf.placeholder(tf.float32, img1.shape)
     y = tf.placeholder(tf.float32, img2.shape)
 
-    # result = tf_ms_ssim(x, y)
-    result = tf_l1_loss(x, y)
+    result = tf_ms_ssim(x, y, size=3)
+    # result = tf_l1_loss(x, y)
 
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
