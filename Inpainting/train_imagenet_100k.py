@@ -87,6 +87,9 @@ adv_pos = discriminator(images=ground_truth, is_training=is_training)
 adv_neg = discriminator(images=recons, is_training=is_training, reuse=True)
 adv_all = tf.concat([adv_pos, adv_neg], axis=0)
 
+loss_adv_G = 0 - tf.reduce_mean(adv_neg)
+loss_adv_D = tf.reduce_mean(adv_pos) - tf.reduce_mean(adv_neg)
+
 # Applying bigger loss for overlapping region
 mask_recon = tf.pad(tensor=tf.ones([hiding_size - 2 * overlap_size, hiding_size - 2 * overlap_size]),
                     paddings=[[overlap_size, overlap_size], [overlap_size, overlap_size]])
