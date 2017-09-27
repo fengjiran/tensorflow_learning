@@ -83,7 +83,6 @@ labels_D = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
 labels_G = tf.ones([batch_size])
 
 recons = reconstruction(images=images, is_training=is_training)
-
 adv_pos = discriminator(images=ground_truth, is_training=is_training)
 adv_neg = discriminator(images=recons, is_training=is_training, reuse=True)
 adv_all = tf.concat([adv_pos, adv_neg], axis=0)
@@ -103,7 +102,7 @@ loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_
 loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=3, level=5) +\
     (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=3)
 
-loss_recon = loss_recon_center / 10. + loss_recon_overlap
+loss_recon = loss_recon_center + loss_recon_overlap * 10.
 
 
 loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
@@ -151,13 +150,16 @@ with tf.Session() as sess:
     sess.run(init)
 
     if not isFirstTimeTrain:
-        pass
+        saver.restore(sess, os.path.join(model_path, 'context_encoder_imagenet_model'))
+
+        with open(os.path.join(params_path, 'iters')) as f:
+            iters = pickle.load(f)
     else:
         iters = 0
         with open(os.path.join(params_path, 'iters'), 'wb') as f:
             pickle.dump(iters, f)
-    # loss_D_val = 0.
-    # loss_G_val = 0.
+
+        saver.save(sess, os.path.join(model_path, 'context_encoder_imagenet_model'))
 
     for epoch in range(n_epochs):
         print('Epoch: {}'.format(epoch + 1))
@@ -215,6 +217,16 @@ with tf.Session() as sess:
                         if ii > 50:
                             break
 
+            # train discriminator
+            if iters % 5 == 0:
+                _, loss_temp_d = sess.run([train_op_d, loss_D],
+                                          feed_dict={
+                                              images: train_images,
+                                              ground_truth: train_crops,
+                                              is_training: True,
+                                              global_step: iters})
+                print('Iter: {0}, loss_d: {1}'.format(iters, loss_temp_d))
+
             # train generator
             _, loss_temp_g = sess.run([train_op_g, loss_G],
                                       feed_dict={
@@ -225,19 +237,12 @@ with tf.Session() as sess:
 
             print('Iter: {0}, loss_g: {1}'.format(iters, loss_temp_g))
 
-            # train discriminator
-            if iters % 10 == 0:
-                _, loss_temp_d = sess.run([train_op_d, loss_D],
-                                          feed_dict={
-                                              images: train_images,
-                                              ground_truth: train_crops,
-                                              is_training: True,
-                                              global_step: iters})
-                print('Iter: {0}, loss_d: {1}'.format(iters, loss_temp_d))
-
             iters += 1
             with open(os.path.join(params_path, 'iters'), 'wb') as f:
                 pickle.dump(iters, f)
+
+        # save the model
+        saver.save(sess, os.path.join(model_path, 'context_encoder_imagenet_model'))
 
 
 # x = np.random.rand(batch_size, 128, 128, 3)
