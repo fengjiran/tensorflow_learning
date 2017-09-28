@@ -23,7 +23,7 @@ from loss import tf_l1_loss
 isFirstTimeTrain = True
 
 n_epochs = 10000
-init_lr = 0.001
+init_lr = 0.0001
 lr_decay_steps = 1000
 learning_rate_val = 0.0003
 weight_decay_rate = 0.00001
@@ -32,6 +32,7 @@ batch_size = 128
 lambda_recon = 0.9
 lambda_adv = 0.1
 alpha = 0.84
+lambda_gp = 10  # Gradient penalty lambda hyperparameter
 
 overlap_size = 7
 hiding_size = 64
@@ -87,8 +88,16 @@ adv_pos = discriminator(images=ground_truth, is_training=is_training)
 adv_neg = discriminator(images=recons, is_training=is_training, reuse=True)
 adv_all = tf.concat([adv_pos, adv_neg], axis=0)
 
-loss_adv_G = 0 - tf.reduce_mean(adv_neg)
-loss_adv_D = tf.reduce_mean(adv_pos) - tf.reduce_mean(adv_neg)
+# Gradient penalty
+theta = tf.random_uniform(shape=[batch_size, 1, 1, 1], minval=0., maxval=1.)
+diff = recons - ground_truth
+interpolates = ground_truth + theta * diff
+gradients = tf.gradients(discriminator(interpolates, is_training, True), [interpolates])[0]
+slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), axis=1))
+gradient_penalty = tf.reduce_mean((slopes - 1.)**2)
+
+loss_adv_G = -tf.reduce_mean(adv_neg)
+loss_adv_D = tf.reduce_mean(adv_neg) - tf.reduce_mean(adv_pos) + lambda_gp * gradient_penalty
 
 # Applying bigger loss for overlapping region
 mask_recon = tf.pad(tensor=tf.ones([hiding_size - 2 * overlap_size, hiding_size - 2 * overlap_size]),
@@ -108,10 +117,10 @@ loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * ma
 loss_recon = loss_recon_center + loss_recon_overlap * 10.
 
 
-loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
-                                                                    labels=labels_D))
-loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_neg,
-                                                                    labels=labels_G))
+# loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
+#                                                                     labels=labels_D))
+# loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_neg,
+#                                                                     labels=labels_G))
 loss_G = loss_adv_G * lambda_adv + loss_recon * lambda_recon
 loss_D = loss_adv_D * lambda_adv
 
@@ -135,8 +144,11 @@ lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 decay_steps=lr_decay_steps,
                                 decay_rate=0.96)
 
-opt_g = tf.train.AdamOptimizer(lr)
-opt_d = tf.train.AdamOptimizer(lr / 10.)
+# opt_g = tf.train.AdamOptimizer(lr)
+# opt_d = tf.train.AdamOptimizer(lr / 10.)
+
+opt_g = tf.train.RMSPropOptimizer(lr)
+opt_d = tf.train.RMSPropOptimizer(lr)
 
 grads_vars_g = opt_g.compute_gradients(loss_G, var_G)
 grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
@@ -145,6 +157,15 @@ train_op_g = opt_g.apply_gradients(grads_vars_g)
 grads_vars_d = opt_d.compute_gradients(loss_D, var_D)
 grads_vars_d = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_d]
 train_op_d = opt_d.apply_gradients(grads_vars_d)
+
+# clip_var_d_update = [w.assign(tf.clip_by_value(w, -0.01, 0.01)) for w in var_D]
+with tf.control_dependencies([train_op_d]):
+    print('Clip the value of var_D.')
+    clip_var_d_update = [tf.assign(w, tf.clip_by_value(w, -0.01, 0.01)) for w in var_D]
+
+# with tf.control_dependencies([train_op_d]):
+#     print('test')
+#     tf.identity(clip_var_d_update)
 
 saver = tf.train.Saver()
 init = tf.global_variables_initializer()
@@ -229,6 +250,7 @@ with tf.Session() as sess:
                                               is_training: True,
                                               global_step: iters})
                 print('Iter: {0}, loss_d: {1}'.format(iters, loss_temp_d))
+                sess.run(clip_var_d_update)
 
             # train generator
             _, loss_temp_g = sess.run([train_op_g, loss_G],
