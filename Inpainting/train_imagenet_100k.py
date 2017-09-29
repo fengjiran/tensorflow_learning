@@ -32,7 +32,7 @@ batch_size = 128
 lambda_recon = 0.9
 lambda_adv = 0.1
 alpha = 0.84
-lambda_gp = 10  # Gradient penalty lambda hyperparameter
+lambda_gp = 0.1  # Gradient penalty lambda hyperparameter
 
 overlap_size = 7
 hiding_size = 64
@@ -108,14 +108,16 @@ mask_recon = tf.concat([mask_recon] * 3, 2)
 mask_overlap = 1 - mask_recon
 
 
-loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=3, level=5) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=3)
+# loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=3, level=5) +\
+#     (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=3)
 
-loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=3, level=5) +\
-    (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=3)
+# loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=3, level=5) +\
+#     (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=3)
 
-loss_recon = loss_recon_center + loss_recon_overlap * 10.
+# loss_recon = loss_recon_center + loss_recon_overlap * 10.
 
+loss_recon = alpha * tf_ms_ssim(recons, ground_truth, size=3, level=5) +\
+    (1 - alpha) * tf_l1_loss(recons, ground_truth, size=3)
 
 # loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
 #                                                                     labels=labels_D))
@@ -132,7 +134,7 @@ loss_D = loss_adv_D * lambda_adv
 # w_D = filter(lambda x: x.name.endswith('w:0'), var_D)
 
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-var_D = tf.get_collection('dis_params_conv') + tf.get_collection('dis_params_bn')
+var_D = tf.get_collection('dis_params_conv')  # + tf.get_collection('dis_params_bn')
 # loss_G = loss_G + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_G))))
 # loss_D = loss_D + weight_decay_rate * tf.reduce_mean(tf.stack(list(map(tf.nn.l2_loss, w_D))))
 
@@ -144,24 +146,24 @@ lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 decay_steps=lr_decay_steps,
                                 decay_rate=0.96)
 
-# opt_g = tf.train.AdamOptimizer(lr)
-# opt_d = tf.train.AdamOptimizer(lr / 10.)
+opt_g = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+opt_d = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 
-opt_g = tf.train.RMSPropOptimizer(lr)
-opt_d = tf.train.RMSPropOptimizer(lr)
+# opt_g = tf.train.RMSPropOptimizer(lr)
+# opt_d = tf.train.RMSPropOptimizer(lr)
 
 grads_vars_g = opt_g.compute_gradients(loss_G, var_G)
-grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
+# grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
 train_op_g = opt_g.apply_gradients(grads_vars_g)
 
 grads_vars_d = opt_d.compute_gradients(loss_D, var_D)
-grads_vars_d = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_d]
+# grads_vars_d = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_d]
 train_op_d = opt_d.apply_gradients(grads_vars_d)
 
 # clip_var_d_update = [w.assign(tf.clip_by_value(w, -0.01, 0.01)) for w in var_D]
-with tf.control_dependencies([train_op_d]):
-    print('Clip the value of var_D.')
-    clip_var_d_update = [tf.assign(w, tf.clip_by_value(w, -0.01, 0.01)) for w in var_D]
+# with tf.control_dependencies([train_op_d]):
+#     print('Clip the value of var_D...')
+#     clip_var_d_update = [tf.assign(w, tf.clip_by_value(w, -0.01, 0.01)) for w in var_D]
 
 # with tf.control_dependencies([train_op_d]):
 #     print('test')
@@ -250,7 +252,7 @@ with tf.Session() as sess:
                                               is_training: True,
                                               global_step: iters})
                 print('Iter: {0}, loss_d: {1}'.format(iters, loss_temp_d))
-                sess.run(clip_var_d_update)
+                # sess.run(clip_var_d_update)
 
             # train generator
             _, loss_temp_g = sess.run([train_op_g, loss_G],
