@@ -17,13 +17,14 @@ from utils import array_to_image
 from model import reconstruction
 from model import discriminator
 
+from loss import tf_ssim
 from loss import tf_ms_ssim
 from loss import tf_l1_loss
 
 isFirstTimeTrain = True
 
 n_epochs = 10000
-init_lr = 0.0001
+init_lr = 1e-5
 lr_decay_steps = 1000
 learning_rate_val = 0.0003
 weight_decay_rate = 0.00001
@@ -116,8 +117,8 @@ mask_overlap = 1 - mask_recon
 
 # loss_recon = loss_recon_center + loss_recon_overlap * 10.
 
-loss_recon = alpha * tf_ms_ssim(recons, ground_truth, size=3, level=5) +\
-    (1 - alpha) * tf_l1_loss(recons, ground_truth, size=3)
+loss_recon = alpha * tf_ssim(recons, ground_truth, size=11) +\
+    (1 - alpha) * tf_l1_loss(recons, ground_truth, size=11)
 
 # loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
 #                                                                     labels=labels_D))
