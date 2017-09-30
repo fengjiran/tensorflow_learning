@@ -409,7 +409,7 @@ def discriminator(images, is_training, reuse=None):
         conv1 = Conv2dLayer(images, [4, 4, 3, 64], stride=2, name='conv1')
         # bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
         # bn1 = tf.contrib.keras.layers.LeakyReLU()(bn1_layer.output)
-        bn1=tf.contrib.keras.layers.LeakyReLU()(conv1.output)
+        bn1 = tf.contrib.keras.layers.LeakyReLU()(conv1.output)
 
         tf.add_to_collection('dis_params_conv', conv1.w)
         tf.add_to_collection('dis_params_conv', conv1.b)
