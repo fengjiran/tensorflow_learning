@@ -169,7 +169,7 @@ train_op_d = opt_d.apply_gradients(grads_vars_d)
 # with tf.control_dependencies([train_op_d]):
 #     print('test')
 #     tf.identity(clip_var_d_update)
-
+# test
 saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 
