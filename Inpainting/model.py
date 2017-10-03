@@ -84,6 +84,21 @@ class FCLayer(object):
             self.output = activation(tf.nn.bias_add(tf.matmul(x, self.w), self.b))
 
 
+class ChannelWiseLayer(object):
+    """Construct channel wise layer."""
+
+    def __init__(self, inputs, name, activation=tf.identity):
+        self.inputs = inputs
+        _, width, height, n_feat_map = inputs.get_shape().as_list()
+        inputs_reshape = tf.reshape(inputs, [-1, width * height, n_feat_map])
+        inputs_transpose = tf.transpose(inputs_reshape, [2, 0, 1])
+
+        with tf.variable_scope(name):
+            self.w = tf.get_variable(name='w',
+                                     shape=[n_feat_map, width * height, width * height],
+                                     initializer=tf.truncated_normal_initializer(0., 0.005))
+
+
 def conv_layer(inputs, filter_shape, activation=tf.identity, padding='SAME', stride=1, name=None):
     with tf.variable_scope(name):
         w = tf.get_variable(name='w',
