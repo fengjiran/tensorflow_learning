@@ -33,7 +33,7 @@ batch_size = 128
 lambda_recon = 0.9
 lambda_adv = 0.1
 alpha = 0.84
-lambda_gp = 0.1  # Gradient penalty lambda hyperparameter
+lambda_gp = 1.  # Gradient penalty lambda hyperparameter
 
 overlap_size = 7
 hiding_size = 64
@@ -97,7 +97,7 @@ gradients = tf.gradients(discriminator(interpolates, is_training, True), [interp
 slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), axis=1))
 gradient_penalty = tf.reduce_mean((slopes - 1.)**2)
 
-loss_adv_G = -tf.reduce_mean(adv_neg)
+loss_adv_G = 0 - tf.reduce_mean(adv_neg)
 loss_adv_D = tf.reduce_mean(adv_neg) - tf.reduce_mean(adv_pos) + lambda_gp * gradient_penalty
 
 # Applying bigger loss for overlapping region
@@ -117,9 +117,10 @@ mask_overlap = 1 - mask_recon
 
 # loss_recon = loss_recon_center + loss_recon_overlap * 10.
 
-loss_recon = alpha * tf_ssim(recons, ground_truth, size=11) +\
-    (1 - alpha) * tf_l1_loss(recons, ground_truth, size=11)
+# loss_recon = alpha * tf_ssim(recons, ground_truth, size=11) +\
+#     (1 - alpha) * tf_l1_loss(recons, ground_truth, size=11)
 
+loss_recon = tf_ssim(recons, ground_truth, size=11)
 # loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
 #                                                                     labels=labels_D))
 # loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_neg,
