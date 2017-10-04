@@ -94,9 +94,27 @@ class ChannelWiseLayer(object):
         inputs_transpose = tf.transpose(inputs_reshape, [2, 0, 1])
 
         with tf.variable_scope(name):
-            self.w = tf.get_variable(name='w',
-                                     shape=[n_feat_map, width * height, width * height],
-                                     initializer=tf.truncated_normal_initializer(0., 0.005))
+            self.w_fc = tf.get_variable(name='w',
+                                        shape=[n_feat_map, width * height, width * height],
+                                        initializer=tf.truncated_normal_initializer(0., 0.005))
+            output = tf.matmul(inputs_transpose, self.w_fc)
+            output = tf.transpose(output, [1, 2, 0])
+            output = tf.reshape(output, [-1, height, width, n_feat_map])
+
+            self.w_conv = tf.get_variable(name='w_conv',
+                                          shape=[1, 1, n_feat_map, n_feat_map],
+                                          initializer=tf.contrib.layers.xavier_initializer())
+
+            self.b_conv = tf.get_variable(name='b_conv',
+                                          shape=[n_feat_map],
+                                          initializer=tf.constant_initializer(0.))
+
+            conv_output = tf.nn.conv2d(input=output,
+                                       filter=self.w_conv,
+                                       strides=[1, 1, 1, 1],
+                                       padding='SAME')
+
+            self.output = activation(tf.nn.bias_add(conv_output, self.b_conv))
 
 
 def conv_layer(inputs, filter_shape, activation=tf.identity, padding='SAME', stride=1, name=None):
@@ -330,35 +348,38 @@ def reconstruction(images, is_training):
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv5.w))
         print(bn5.get_shape().as_list())
 
-        conv6 = Conv2dLayer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
+        conv6 = ChannelWiseLayer(bn5, name='cwfc')
+        # conv6 = Conv2dLayer(bn5, [4, 4, 512, 4000], stride=2, name='conv6')
         bn6_layer = BatchNormLayer(conv6.output, is_training, name='bn6')
         bn6 = tf.contrib.keras.layers.LeakyReLU()(bn6_layer.output)
 
-        tf.add_to_collection('gen_params_conv', conv6.w)
-        tf.add_to_collection('gen_params_conv', conv6.b)
+        tf.add_to_collection('gen_params_conv', conv6.w_fc)
+        tf.add_to_collection('gen_params_conv', conv6.w_conv)
+        tf.add_to_collection('gen_params_conv', conv6.b_conv)
         tf.add_to_collection('gen_params_bn', bn6_layer.scale)
         tf.add_to_collection('gen_params_bn', bn6_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w))
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w_conv))
+        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w_fc))
         print(bn6.get_shape().as_list())
 
         # decoder
-        deconv4 = DeconvLayer(inputs=bn6,
-                              filter_shape=[4, 4, 512, 4000],
-                              output_shape=conv5.output.get_shape().as_list(),
-                              padding='SAME',
-                              stride=2,
-                              name='deconv4')
-        debn4_layer = BatchNormLayer(deconv4.output, is_training, name='debn4')
-        debn4 = tf.nn.relu(debn4_layer.output)
+        # deconv4 = DeconvLayer(inputs=bn6,
+        #                       filter_shape=[4, 4, 512, 4000],
+        #                       output_shape=conv5.output.get_shape().as_list(),
+        #                       padding='SAME',
+        #                       stride=2,
+        #                       name='deconv4')
+        # debn4_layer = BatchNormLayer(deconv4.output, is_training, name='debn4')
+        # debn4 = tf.nn.relu(debn4_layer.output)
 
-        tf.add_to_collection('gen_params_conv', deconv4.w)
-        tf.add_to_collection('gen_params_conv', deconv4.b)
-        tf.add_to_collection('gen_params_bn', debn4_layer.scale)
-        tf.add_to_collection('gen_params_bn', debn4_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv4.w))
-        print(debn4.get_shape().as_list())
+        # tf.add_to_collection('gen_params_conv', deconv4.w)
+        # tf.add_to_collection('gen_params_conv', deconv4.b)
+        # tf.add_to_collection('gen_params_bn', debn4_layer.scale)
+        # tf.add_to_collection('gen_params_bn', debn4_layer.beta)
+        # tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv4.w))
+        # print(debn4.get_shape().as_list())
 
-        deconv3 = DeconvLayer(inputs=debn4,
+        deconv3 = DeconvLayer(inputs=bn6,
                               filter_shape=[4, 4, 256, 512],
                               output_shape=conv4.output.get_shape().as_list(),
                               padding='SAME',
