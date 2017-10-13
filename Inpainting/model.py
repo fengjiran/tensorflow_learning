@@ -302,7 +302,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn1_layer.scale)
         tf.add_to_collection('gen_params_bn', bn1_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv1.w))
-        print(bn1.get_shape().as_list())
+        print('conv1 shape:{}'.format(bn1.get_shape().as_list()))
 
         conv2 = Conv2dLayer(bn1, [3, 3, 64, 64], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
@@ -313,7 +313,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn2_layer.scale)
         tf.add_to_collection('gen_params_bn', bn2_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv2.w))
-        print(bn2.get_shape().as_list())
+        print('conv2 shape:{}'.format(bn2.get_shape().as_list()))
 
         conv3 = Conv2dLayer(bn2, [3, 3, 64, 128], stride=2, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
@@ -324,7 +324,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn3_layer.scale)
         tf.add_to_collection('gen_params_bn', bn3_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv3.w))
-        print(bn3.get_shape().as_list())
+        print('conv3 shape:{}'.format(bn3.get_shape().as_list()))
 
         conv4 = Conv2dLayer(bn3, [3, 3, 128, 256], stride=2, name='conv4')
         bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
@@ -335,7 +335,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn4_layer.scale)
         tf.add_to_collection('gen_params_bn', bn4_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv4.w))
-        print(bn4.get_shape().as_list())
+        print('conv4 shape:{}'.format(bn4.get_shape().as_list()))
 
         conv5 = Conv2dLayer(bn4, [3, 3, 256, 512], stride=2, name='conv5')
         bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
@@ -346,7 +346,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn5_layer.scale)
         tf.add_to_collection('gen_params_bn', bn5_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv5.w))
-        print(bn5.get_shape().as_list())
+        print('conv5 shape:{}'.format(bn5.get_shape().as_list()))
 
         # conv6 = ChannelWiseLayer(bn5, name='cwfc')
         conv6 = Conv2dLayer(bn5, [3, 3, 512, 4000], stride=2, name='conv6')
@@ -358,6 +358,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', bn6_layer.scale)
         tf.add_to_collection('gen_params_bn', bn6_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w))
+        print('conv6 shape:{}'.format(bn6.get_shape().as_list()))
 
         # tf.add_to_collection('gen_params_conv', conv6.w_fc)
         # tf.add_to_collection('gen_params_conv', conv6.w_conv)
@@ -366,7 +367,6 @@ def reconstruction(images, is_training):
         # tf.add_to_collection('gen_params_bn', bn6_layer.beta)
         # tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w_conv))
         # tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w_fc))
-        print(bn6.get_shape().as_list())
 
         # decoder
         deconv4 = DeconvLayer(inputs=bn6,
@@ -383,7 +383,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', debn4_layer.scale)
         tf.add_to_collection('gen_params_bn', debn4_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv4.w))
-        print(debn4.get_shape().as_list())
+        print('deconv4 shape:{}'.format(debn4.get_shape().as_list()))
 
         deconv3 = DeconvLayer(inputs=debn4,
                               filter_shape=[3, 3, 256, 512],
@@ -399,7 +399,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', debn3_layer.scale)
         tf.add_to_collection('gen_params_bn', debn3_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv3.w))
-        print(debn3.get_shape().as_list())
+        print('deconv3 shape:{}'.format(debn3.get_shape().as_list()))
 
         deconv2 = DeconvLayer(inputs=debn3,
                               filter_shape=[3, 3, 128, 256],
@@ -415,7 +415,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', debn2_layer.scale)
         tf.add_to_collection('gen_params_bn', debn2_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv2.w))
-        print(debn2.get_shape().as_list())
+        print('deconv2 shape:{}'.format(debn2.get_shape().as_list()))
 
         deconv1 = DeconvLayer(inputs=debn2,
                               filter_shape=[3, 3, 64, 128],
@@ -431,7 +431,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_bn', debn1_layer.scale)
         tf.add_to_collection('gen_params_bn', debn1_layer.beta)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(deconv1.w))
-        print(debn1.get_shape().as_list())
+        print('deconv1 shape:{}'.format(debn1.get_shape().as_list()))
 
         recon = DeconvLayer(inputs=debn1,
                             filter_shape=[3, 3, 3, 64],
@@ -442,6 +442,7 @@ def reconstruction(images, is_training):
         tf.add_to_collection('gen_params_conv', recon.w)
         tf.add_to_collection('gen_params_conv', recon.b)
         tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(recon.w))
+        print('recon shape:{}'.format(recon.output.get_shape().as_list()))
 
     return tf.nn.tanh(recon.output)
 
@@ -570,14 +571,16 @@ def discriminator_with_bn(images, is_training, reuse=None):
 
 if __name__ == '__main__':
     batch_size = 128
-    x = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='x')
+    # x = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='x')
+    x = tf.placeholder(tf.float32, [batch_size, 227, 227, 3], name='x')
     train_flag = tf.placeholder(tf.bool)
     y = reconstruction(x, train_flag)
     print(y.get_shape().as_list())
 
     init = tf.global_variables_initializer()
 
-    a = np.random.rand(batch_size, 128, 128, 3)
+    # a = np.random.rand(batch_size, 128, 128, 3)
+    a = np.random.rand(batch_size, 227, 227, 3)
     with tf.Session() as sess:
         sess.run(init)
         print(sess.run([tf.reduce_mean(y)],
