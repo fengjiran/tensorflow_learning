@@ -24,14 +24,14 @@ from loss import tf_l1_loss
 isFirstTimeTrain = True
 
 n_epochs = 10000
-init_lr = 1e-5
+init_lr = 3e-4
 lr_decay_steps = 1000
 learning_rate_val = 0.0003
 weight_decay_rate = 0.00001
 momentum = 0.9
 batch_size = 128
-lambda_recon = 0.9
-lambda_adv = 0.1
+lambda_recon = 0.7
+lambda_adv = 1 - lambda_recon
 alpha = 0.84
 
 overlap_size = 7
