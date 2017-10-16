@@ -183,7 +183,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str,
                         # default='/home/richard/datasets/mnist',
-                        default='E:\\deeplearning_experiments\\datasets\\mnist',
+                        default='E:\\deeplearning_experiments\\datasets\\fashion_mnist',
                         # default='E:\\fashion_mnist',
                         help='Directory for storing input data')
     FLAGS, unparsed = parser.parse_known_args()
