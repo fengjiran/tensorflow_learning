@@ -86,15 +86,15 @@ labels_D = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
 labels_G = tf.ones([batch_size])
 
 recons = reconstruction(images=images, is_training=is_training)
-adv_pos = discriminator_with_bn(images=ground_truth, is_training=is_training)
-adv_neg = discriminator_with_bn(images=recons, is_training=is_training, reuse=True)
+adv_pos = discriminator_without_bn(images=ground_truth)
+adv_neg = discriminator_without_bn(images=recons, reuse=True)
 adv_all = tf.concat([adv_pos, adv_neg], axis=0)
 
 # Gradient penalty
 theta = tf.random_uniform(shape=[batch_size, 1, 1, 1], minval=0., maxval=1.)
 diff = recons - ground_truth
 interpolates = ground_truth + theta * diff
-gradients = tf.gradients(discriminator_with_bn(interpolates, is_training, True), [interpolates])[0]
+gradients = tf.gradients(discriminator_without_bn(interpolates, True), [interpolates])[0]
 slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), axis=1))
 gradient_penalty = tf.reduce_mean((slopes - 1.)**2)
 
