@@ -10,8 +10,9 @@
 .sync/
 .vscode/
 
-Inpainting/imagenet/
-Inpainting/models/
-Inpainting/params/
+Inpainting/my_work/imagenet_100k_ssim/
+Inpainting/my_work/paris_ssim/
+Inpainting/context_encoder/imagenet_100k_ssim/
+Inpainting/context_encoder/paris_ssim/
 
 *.pickle
