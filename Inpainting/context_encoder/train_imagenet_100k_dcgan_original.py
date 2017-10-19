@@ -98,18 +98,6 @@ loss_recon_center = tf.reduce_mean(tf.sqrt(1e-5 + tf.reduce_mean(loss_recon_ori 
 loss_recon_overlap = tf.reduce_mean(tf.sqrt(1e-5 + tf.reduce_mean(loss_recon_ori * mask_overlap, [1, 2, 3])))
 loss_recon = loss_recon_center + loss_recon_overlap
 
-# loss_recon_center = alpha * tf_ms_ssim(recons * mask_recon, ground_truth * mask_recon, size=3, level=5) +\
-#     (1 - alpha) * tf_l1_loss(recons * mask_recon, ground_truth * mask_recon, size=3)
-
-# loss_recon_overlap = alpha * tf_ms_ssim(recons * mask_overlap, ground_truth * mask_overlap, size=3, level=5) +\
-#     (1 - alpha) * tf_l1_loss(recons * mask_overlap, ground_truth * mask_overlap, size=3)
-
-# loss_recon = loss_recon_center + loss_recon_overlap * 10.
-
-# loss_recon = alpha * tf_ssim(recons, ground_truth, size=11) +\
-#     (1 - alpha) * tf_l1_loss(recons, ground_truth, size=11)
-
-# loss_recon = tf_ssim(recons, ground_truth, size=11)
 loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all,
                                                                     labels=labels_D))
 loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_neg,

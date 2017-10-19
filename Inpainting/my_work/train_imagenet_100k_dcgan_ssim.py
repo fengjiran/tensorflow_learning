@@ -21,7 +21,7 @@ from loss import tf_ssim
 # from loss import tf_ms_ssim
 # from loss import tf_l1_loss
 
-isFirstTimeTrain = True
+isFirstTimeTrain = False
 
 n_epochs = 10000
 init_lr = 3e-4
@@ -41,16 +41,16 @@ if platform.system() == 'Windows':
     trainset_path = 'F:\\Datasets\\imagenet_trainset.pickle'
     testset_path = 'F:\\Datasets\\imagenet_testset.pickle'
     dataset_path = 'F:\\Datasets\\ImageNet_100K'
-    result_path = 'E:\\TensorFlow_Learning\\Inpainting\\imagenet'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\models'
-    params_path = 'E:\\TensorFlow_Learning\\Inpainting\\params'
+    result_path = 'E:\\TensorFlow_Learning\\Inpainting\\my_work\\imagenet_100k_ssim\\images'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\my_work\\imagenet_100k_ssim\\models'
+    params_path = 'E:\\TensorFlow_Learning\\Inpainting\\my_work\\imagenet_100k_ssim\\params'
 elif platform.system() == 'Linux':
     trainset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_trainset.pickle'
     testset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_testset.pickle'
     dataset_path = '/home/richard/datasets/ImageNet_100K'
-    result_path = '/home/richard/TensorFlow_Learning/Inpainting/imagenet'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/models'
-    params_path = '/home/richard/TensorFlow_Learning/Inpainting/params'
+    result_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/images'
+    model_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/models'
+    params_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/params'
 
 
 if not os.path.exists(trainset_path) or not os.path.exists(testset_path):
@@ -170,7 +170,7 @@ with tf.Session() as sess:
     if not isFirstTimeTrain:
         saver.restore(sess, os.path.join(model_path, 'context_encoder_imagenet_model'))
 
-        with open(os.path.join(params_path, 'iters')) as f:
+        with open(os.path.join(params_path, 'iters'), 'rb') as f:
             iters = pickle.load(f)
     else:
         iters = 0
