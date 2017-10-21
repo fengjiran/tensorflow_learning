@@ -139,7 +139,7 @@ lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 decay_rate=0.96)
 
 opt_g = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
-opt_d = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+opt_d = tf.train.AdamOptimizer(lr * 0.1, beta1=0.5, beta2=0.9)
 
 # opt_g = tf.train.RMSPropOptimizer(lr)
 # opt_d = tf.train.RMSPropOptimizer(lr)
