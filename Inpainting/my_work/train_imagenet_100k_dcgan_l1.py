@@ -43,9 +43,9 @@ elif platform.system() == 'Linux':
     trainset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_trainset.pickle'
     testset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_testset.pickle'
     dataset_path = '/home/richard/datasets/ImageNet_100K'
-    result_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_l1/images'
-    model_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_l1/models'
-    params_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_l1/params'
+    result_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_l1/images'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_l1/models'
+    params_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_l1/params'
 
 
 if not os.path.exists(trainset_path) or not os.path.exists(testset_path):
