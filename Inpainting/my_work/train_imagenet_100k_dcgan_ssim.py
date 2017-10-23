@@ -30,7 +30,7 @@ learning_rate_val = 0.0003
 weight_decay_rate = 0.00001
 momentum = 0.9
 batch_size = 128
-lambda_recon = 0.8
+lambda_recon = 0.9
 lambda_adv = 1 - lambda_recon
 alpha = 0.84
 
@@ -48,9 +48,9 @@ elif platform.system() == 'Linux':
     trainset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_trainset.pickle'
     testset_path = '/home/richard/Deep_Learning_Projects/Inpainting/Context_Encoders/imagenet_testset.pickle'
     dataset_path = '/home/richard/datasets/ImageNet_100K'
-    result_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/images'
-    model_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/models'
-    params_path = '/home/richard/TensorFlow_Learning/my_work/imagenet_100k_ssim/params'
+    result_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_ssim/images'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_ssim/models'
+    params_path = '/home/richard/TensorFlow_Learning/Inpainting/my_work/imagenet_100k_ssim/params'
 
 
 if not os.path.exists(trainset_path) or not os.path.exists(testset_path):
