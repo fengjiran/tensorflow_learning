@@ -17,9 +17,9 @@ from utils import array_to_image
 from model import reconstruction
 from model import discriminator_with_bn
 
-isFirstTimeTrain = True
+isFirstTimeTrain = False
 
-n_epochs = 10000
+n_epochs = 500
 init_lr = 3e-4
 lr_decay_steps = 1000
 learning_rate_val = 0.0003
