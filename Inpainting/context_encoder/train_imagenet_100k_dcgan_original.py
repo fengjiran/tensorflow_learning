@@ -33,9 +33,9 @@ overlap_size = 7
 hiding_size = 64
 
 if platform.system() == 'Windows':
-    trainset_path = 'X:\\DeepLearning\\imagenet_trainset.pickle'
-    testset_path = 'X:\\DeepLearning\\imagenet_testset.pickle'
-    dataset_path = 'X:\\DeepLearning\\ImageNet_100K'
+    trainset_path = 'F:\\Datasets\\imagenet_trainset.pickle'
+    testset_path = 'F:\\Datasets\\imagenet_testset.pickle'
+    dataset_path = 'F:\\Datasets\\ImageNet_100K'
     result_path = 'E:\\TensorFlow_Learning\\Inpainting\\context_encoder\\imagenet_100k\\images'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\context_encoder\\imagenet_100k\\models'
     params_path = 'E:\\TensorFlow_Learning\\Inpainting\\context_encoder\\imagenet_100k\\params'
