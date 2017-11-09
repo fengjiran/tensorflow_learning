@@ -59,6 +59,34 @@ class DeconvLayer(object):
             self.output = activation(tf.nn.bias_add(deconv, self.b))
 
 
+class DilatedConv2dLayer(object):
+    """Construct dilated conv2d layer."""
+
+    def __init__(self,
+                 inputs,
+                 filter_shape,
+                 rate,
+                 activation=tf.identity,
+                 padding='SAME',
+                 name=None):
+        self.inputs = inputs
+        with tf.variable_scope(name):
+            self.w = tf.get_variable(name='w',
+                                     shape=filter_shape,
+                                     initializer=tf.keras.initializers.glorot_normal())
+
+            self.b = tf.get_variable(name='b',
+                                     shape=filter_shape[-1],
+                                     initializer=tf.constant_initializer(0.))
+
+            linear_output = tf.nn.atrous_conv2d(value=self.inputs,
+                                                filters=self.w,
+                                                rate=rate,
+                                                padding=padding)
+
+            self.output = activation(tf.nn.bias_add(linear_output, self.b))
+
+
 class FCLayer(object):
     """Construct FC layer."""
 
@@ -124,3 +152,7 @@ class BatchNormLayer(object):
                                                     offset=self.beta,
                                                     scale=self.scale,
                                                     variance_epsilon=epsilon)
+
+
+def completion_network():
+    """Construct completion network."""
