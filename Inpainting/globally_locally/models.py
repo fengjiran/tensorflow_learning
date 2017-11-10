@@ -2,156 +2,11 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-
-
-class Conv2dLayer(object):
-    """Construct conv2d layer."""
-
-    def __init__(self,
-                 inputs,
-                 filter_shape,
-                 activation=tf.identity,
-                 padding='SAME',
-                 stride=1,
-                 name=None):
-        self.inputs = inputs
-        with tf.variable_scope(name):
-            self.w = tf.get_variable(name='w',
-                                     shape=filter_shape,
-                                     initializer=tf.keras.initializers.glorot_normal())
-
-            self.b = tf.get_variable(name='b',
-                                     shape=filter_shape[-1],
-                                     initializer=tf.constant_initializer(0.))
-
-            linear_output = tf.nn.conv2d(self.inputs, self.w, [1, stride, stride, 1], padding=padding)
-
-            self.output = activation(tf.nn.bias_add(linear_output, self.b))
-
-
-class DeconvLayer(object):
-    """Construct deconv2d layer."""
-
-    def __init__(self,
-                 inputs,
-                 filter_shape,
-                 output_shape,
-                 activation=tf.identity,
-                 padding='SAME',
-                 stride=1,
-                 name=None):
-        self.inputs = inputs
-        with tf.variable_scope(name):
-            self.w = tf.get_variable(name='w',
-                                     shape=filter_shape,
-                                     initializer=tf.keras.initializers.glorot_normal())
-
-            self.b = tf.get_variable(name='b',
-                                     shape=filter_shape[-2],
-                                     initializer=tf.constant_initializer(0.))
-
-            deconv = tf.nn.conv2d_transpose(value=self.inputs,
-                                            filter=self.w,
-                                            output_shape=output_shape,
-                                            strides=[1, stride, stride, 1],
-                                            padding=padding)
-
-            self.output = activation(tf.nn.bias_add(deconv, self.b))
-
-
-class DilatedConv2dLayer(object):
-    """Construct dilated conv2d layer."""
-
-    def __init__(self,
-                 inputs,
-                 filter_shape,
-                 rate,
-                 activation=tf.identity,
-                 padding='SAME',
-                 name=None):
-        self.inputs = inputs
-        with tf.variable_scope(name):
-            self.w = tf.get_variable(name='w',
-                                     shape=filter_shape,
-                                     initializer=tf.keras.initializers.glorot_normal())
-
-            self.b = tf.get_variable(name='b',
-                                     shape=filter_shape[-1],
-                                     initializer=tf.constant_initializer(0.))
-
-            linear_output = tf.nn.atrous_conv2d(value=self.inputs,
-                                                filters=self.w,
-                                                rate=rate,
-                                                padding=padding)
-
-            self.output = activation(tf.nn.bias_add(linear_output, self.b))
-
-
-class FCLayer(object):
-    """Construct FC layer."""
-
-    def __init__(self,
-                 inputs,
-                 output_size,
-                 activation=tf.identity,
-                 name=None):
-        self.inputs = inputs
-        shape = inputs.get_shape().as_list()
-        input_size = np.prod(shape[1:])
-        x = tf.reshape(self.inputs, [-1, input_size])
-
-        with tf.variable_scope(name):
-            self.w = tf.get_variable(name='w',
-                                     shape=[input_size, output_size],
-                                     initializer=tf.keras.initializers.glorot_normal())
-            self.b = tf.get_variable(name='b',
-                                     shape=[output_size],
-                                     initializer=tf.constant_initializer(0.))
-
-            self.output = activation(tf.nn.bias_add(tf.matmul(x, self.w), self.b))
-
-
-class BatchNormLayer(object):
-    """Construct batch norm layer."""
-
-    def __init__(self, inputs, is_training, decay=0.999, epsilon=1e-5, name=None):
-        self.inputs = inputs
-        with tf.variable_scope(name):
-            self.scale = tf.get_variable(name='scale',
-                                         shape=[inputs.get_shape()[-1]],
-                                         initializer=tf.constant_initializer(1.))
-
-            self.beta = tf.get_variable(name='beta',
-                                        shape=[inputs.get_shape()[-1]],
-                                        initializer=tf.constant_initializer(0.))
-
-            self.pop_mean = tf.get_variable(name='pop_mean',
-                                            shape=[inputs.get_shape()[-1]],
-                                            initializer=tf.constant_initializer(0.),
-                                            trainable=False)
-
-            self.pop_var = tf.get_variable(name='pop_var',
-                                           shape=[inputs.get_shape()[-1]],
-                                           initializer=tf.constant_initializer(1.),
-                                           trainable=False)
-
-            def mean_var_update():
-                axes = list(range(len(inputs.get_shape()) - 1))
-                batch_mean, batch_var = tf.nn.moments(inputs, axes)
-                train_mean = tf.assign(self.pop_mean, self.pop_mean * decay + batch_mean * (1 - decay))
-                train_var = tf.assign(self.pop_var, self.pop_var * decay + batch_var * (1 - decay))
-
-                with tf.control_dependencies([train_mean, train_var]):
-                    return tf.identity(batch_mean), tf.identity(batch_var)
-
-            mean, variance = tf.cond(is_training, mean_var_update, lambda: (self.pop_mean, self.pop_var))
-
-            self.output = tf.nn.batch_normalization(x=inputs,
-                                                    mean=mean,
-                                                    variance=variance,
-                                                    offset=self.beta,
-                                                    scale=self.scale,
-                                                    variance_epsilon=epsilon)
+from utils import Conv2dLayer
+from utils import DeconvLayer
+from utils import DilatedConv2dLayer
+from utils import BatchNormLayer
+from utils import FCLayer
 
 
 def completion_network(images, is_training):
@@ -170,25 +25,11 @@ def completion_network(images, is_training):
         conv_layers.append(conv1)
         bn_layers.append(bn1_layer)
 
-        tf.add_to_collection('gen_params_conv', conv1.w)
-        tf.add_to_collection('gen_params_conv', conv1.b)
-        tf.add_to_collection('gen_params_bn', bn1_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn1_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv1.w))
-        print('conv1 shape:{}'.format(bn1.get_shape().as_list()))
-
         conv2 = Conv2dLayer(bn1, [3, 3, 64, 128], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
         bn2 = tf.nn.relu(bn2_layer.output)  # N, 128, 128, 128
         conv_layers.append(conv2)
         bn_layers.append(bn2_layer)
-
-        tf.add_to_collection('gen_params_conv', conv2.w)
-        tf.add_to_collection('gen_params_conv', conv2.b)
-        tf.add_to_collection('gen_params_bn', bn2_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn2_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv2.w))
-        print('conv2 shape:{}'.format(bn2.get_shape().as_list()))
 
         conv3 = Conv2dLayer(bn2, [3, 3, 128, 128], stride=1, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
@@ -196,25 +37,11 @@ def completion_network(images, is_training):
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
-        tf.add_to_collection('gen_params_conv', conv3.w)
-        tf.add_to_collection('gen_params_conv', conv3.b)
-        tf.add_to_collection('gen_params_bn', bn3_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn3_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv3.w))
-        print('conv3 shape:{}'.format(bn3.get_shape().as_list()))
-
         conv4 = Conv2dLayer(bn3, [3, 3, 128, 256], stride=2, name='conv4')
         bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
         bn4 = tf.nn.relu(bn4_layer.output)  # N, 64, 64, 256
         conv_layers.append(conv4)
         bn_layers.append(bn4_layer)
-
-        tf.add_to_collection('gen_params_conv', conv4.w)
-        tf.add_to_collection('gen_params_conv', conv4.b)
-        tf.add_to_collection('gen_params_bn', bn4_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn4_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv4.w))
-        print('conv4 shape:{}'.format(bn4.get_shape().as_list()))
 
         conv5 = Conv2dLayer(bn4, [3, 3, 256, 256], stride=1, name='conv5')
         bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
@@ -222,61 +49,29 @@ def completion_network(images, is_training):
         conv_layers.append(conv5)
         bn_layers.append(bn5_layer)
 
-        tf.add_to_collection('gen_params_conv', conv5.w)
-        tf.add_to_collection('gen_params_conv', conv5.b)
-        tf.add_to_collection('gen_params_bn', bn5_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn5_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv5.w))
-        print('conv5 shape:{}'.format(bn5.get_shape().as_list()))
-
         conv6 = Conv2dLayer(bn5, [3, 3, 256, 256], stride=1, name='conv6')
         bn6_layer = BatchNormLayer(conv5.output, is_training, name='bn6')
         bn6 = tf.nn.relu(bn6_layer.output)  # N, 64, 64, 256
         conv_layers.append(conv6)
         bn_layers.append(bn6_layer)
 
-        tf.add_to_collection('gen_params_conv', conv6.w)
-        tf.add_to_collection('gen_params_conv', conv6.b)
-        tf.add_to_collection('gen_params_bn', bn6_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn6_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv6.w))
-        print('conv6 shape:{}'.format(bn6.get_shape().as_list()))
-
         dilated_conv7 = DilatedConv2dLayer(bn6, [3, 3, 256, 256], rate=2, name='dilated_conv7')
         bn7_layer = BatchNormLayer(dilated_conv7.output, is_training, name='bn7')
         bn7 = tf.nn.relu(bn7_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv7)
         bn_layers.append(bn7_layer)
-        tf.add_to_collection('gen_params_conv', dilated_conv7.w)
-        tf.add_to_collection('gen_params_conv', dilated_conv7.b)
-        tf.add_to_collection('gen_params_bn', bn7_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn7_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(dilated_conv7.w))
-        print('dilated_conv7 shape:{}'.format(bn7.get_shape().as_list()))
 
         dilated_conv8 = DilatedConv2dLayer(bn7, [3, 3, 256, 256], rate=4, name='dilated_conv8')
         bn8_layer = BatchNormLayer(dilated_conv8.output, is_training, name='bn8')
         bn8 = tf.nn.relu(bn8_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv8)
         bn_layers.append(bn8_layer)
-        tf.add_to_collection('gen_params_conv', dilated_conv8.w)
-        tf.add_to_collection('gen_params_conv', dilated_conv8.b)
-        tf.add_to_collection('gen_params_bn', bn8_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn8_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(dilated_conv8.w))
-        print('dilated_conv8 shape:{}'.format(bn8.get_shape().as_list()))
 
         dilated_conv9 = DilatedConv2dLayer(bn8, [3, 3, 256, 256], rate=8, name='dilated_conv9')
         bn9_layer = BatchNormLayer(dilated_conv9.output, is_training, name='bn9')
         bn9 = tf.nn.relu(bn9_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv9)
         bn_layers.append(bn9_layer)
-        tf.add_to_collection('gen_params_conv', dilated_conv9.w)
-        tf.add_to_collection('gen_params_conv', dilated_conv9.b)
-        tf.add_to_collection('gen_params_bn', bn9_layer.scale)
-        tf.add_to_collection('gen_params_bn', bn9_layer.beta)
-        tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(dilated_conv9.w))
-        print('dilated_conv9 shape:{}'.format(bn9.get_shape().as_list()))
 
         dilated_conv10 = DilatedConv2dLayer(bn9, [3, 3, 256, 256], rate=16, name='dilated_conv10')
         bn10_layer = BatchNormLayer(dilated_conv10.output, is_training, name='bn10')
@@ -331,4 +126,140 @@ def completion_network(images, is_training):
         conv17 = Conv2dLayer(bn16, [3, 3, 32, 3], stride=1, name='conv17')
         conv_layers.append(conv17)
 
+        for conv_layer in conv_layers:
+            tf.add_to_collection('gen_params_conv', conv_layer.w)
+            tf.add_to_collection('gen_params_conv', conv_layer.b)
+            tf.add_to_collection('weight_decay_gen', tf.nn.l2_loss(conv_layer.w))
+            print('conv_{} shape:{}'.format(conv_layers.index(conv_layer) + 1, conv_layer.output_shape))
+
+        for bn_layer in bn_layers:
+            tf.add_to_collection('gen_params_bn', bn_layer.scale)
+            tf.add_to_collection('gen_params_bn', bn_layer.beta)
+
     return tf.nn.tanh(conv17.output)  # N, 256, 256, 3
+
+
+def global_discriminator(images, is_training, reuse=None):
+    """Construct global discriminator network."""
+    # batch_size = images.get_shape().as_list()[0]
+    conv_layers = []
+    bn_layers = []
+    with tf.variable_scope('global_discriminator', reuse=reuse):
+        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
+        bn1 = tf.nn.relu(bn1_layer.output)
+        conv_layers.append(conv1)
+        bn_layers.append(bn1_layer)
+
+        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
+        bn2 = tf.nn.relu(bn2_layer.output)
+        conv_layers.append(conv2)
+        bn_layers.append(bn2_layer)
+
+        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
+        bn3 = tf.nn.relu(bn3_layer.output)
+        conv_layers.append(conv3)
+        bn_layers.append(bn3_layer)
+
+        conv4 = Conv2dLayer(bn3, [5, 5, 256, 512], stride=2, name='conv4')
+        bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
+        bn4 = tf.nn.relu(bn4_layer.output)
+        conv_layers.append(conv4)
+        bn_layers.append(bn4_layer)
+
+        conv5 = Conv2dLayer(bn4, [5, 5, 512, 512], stride=2, name='conv5')
+        bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
+        bn5 = tf.nn.relu(bn5_layer.output)
+        conv_layers.append(conv5)
+        bn_layers.append(bn5_layer)
+
+        conv6 = Conv2dLayer(bn5, [5, 5, 512, 512], stride=2, name='conv6')
+        bn6_layer = BatchNormLayer(conv6.output, is_training, name='bn6')
+        bn6 = tf.nn.relu(bn6_layer.output)
+        conv_layers.append(conv6)
+        bn_layers.append(bn6_layer)
+
+        fc7 = FCLayer(bn6, 1024, activation=tf.nn.relu, name='fc7')
+        conv_layers.append(fc7)
+
+        for conv_layer in conv_layers:
+            tf.add_to_collection('global_dis_params_conv', conv_layer.w)
+            tf.add_to_collection('global_dis_params_conv', conv_layer.b)
+            tf.add_to_collection('weight_decay_global_dis', tf.nn.l2_loss(conv_layer.w))
+            print('conv_{} shape:{}'.format(conv_layers.index(conv_layer) + 1, conv_layer.output_shape))
+
+        for bn_layer in bn_layers:
+            tf.add_to_collection('global_dis_params_bn', bn_layer.scale)
+            tf.add_to_collection('global_dis_params_bn', bn_layer.beta)
+
+    return fc7.output
+
+
+def local_discriminator(images, is_training, reuse=None):
+    """Construct local discriminator network."""
+    conv_layers = []
+    bn_layers = []
+    with tf.variable_scope('local_discriminator', reuse=reuse):
+        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
+        bn1 = tf.nn.relu(bn1_layer.output)
+        conv_layers.append(conv1)
+        bn_layers.append(bn1_layer)
+
+        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
+        bn2 = tf.nn.relu(bn2_layer.output)
+        conv_layers.append(conv2)
+        bn_layers.append(bn2_layer)
+
+        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
+        bn3 = tf.nn.relu(bn3_layer.output)
+        conv_layers.append(conv3)
+        bn_layers.append(bn3_layer)
+
+        conv4 = Conv2dLayer(bn3, [5, 5, 256, 512], stride=2, name='conv4')
+        bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
+        bn4 = tf.nn.relu(bn4_layer.output)
+        conv_layers.append(conv4)
+        bn_layers.append(bn4_layer)
+
+        conv5 = Conv2dLayer(bn4, [5, 5, 512, 512], stride=2, name='conv5')
+        bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
+        bn5 = tf.nn.relu(bn5_layer.output)
+        conv_layers.append(conv5)
+        bn_layers.append(bn5_layer)
+
+        fc6 = FCLayer(bn5, 1024, activation=tf.nn.relu, name='fc6')
+        conv_layers.append(fc6)
+
+        for conv_layer in conv_layers:
+            tf.add_to_collection('local_dis_params_conv', conv_layer.w)
+            tf.add_to_collection('local_dis_params_conv', conv_layer.b)
+            tf.add_to_collection('weight_decay_local_dis', tf.nn.l2_loss(conv_layer.w))
+            print('conv_{} shape:{}'.format(conv_layers.index(conv_layer) + 1, conv_layer.output_shape))
+
+        for bn_layer in bn_layers:
+            tf.add_to_collection('local_dis_params_bn', bn_layer.scale)
+            tf.add_to_collection('local_dis_params_bn', bn_layer.beta)
+
+    return fc6.output
+
+
+if __name__ == '__main__':
+    batch_size = 128
+    x = tf.placeholder(tf.float32, [batch_size, 256, 256, 3], name='x')
+    train_flag = tf.placeholder(tf.bool)
+
+    # y = completion_network(x, train_flag)
+    y = global_discriminator(x, train_flag)
+    init = tf.global_variables_initializer()
+
+    a = np.random.rand(batch_size, 256, 256, 3)
+    with tf.Session() as sess:
+        sess.run(init)
+        print(sess.run([tf.reduce_mean(y)],
+                       feed_dict={train_flag: True,
+                                  x: a}))
