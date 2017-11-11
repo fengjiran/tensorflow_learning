@@ -1,8 +1,10 @@
+from __future__ import division
 import numpy as np
 import tensorflow as tf
 import skimage.io
 import skimage.transform
 from PIL import Image
+import matplotlib.pyplot as plt
 
 
 class Conv2dLayer(object):
@@ -167,3 +169,80 @@ def array_to_image(array):
     image = Image.merge('RGB', (r, g, b))
 
     return image
+
+
+def load_image(path, height=256, width=256):
+    try:
+        img = skimage.io.imread(path).astype(float)
+    except TypeError:
+        return None
+
+    if img is None:
+        return None
+
+    if len(img.shape) < 2:
+        return None
+
+    if len(img.shape) == 4:
+        return None
+
+    if len(img.shape) == 2:
+        img = np.tile(img[:, :, None], 3)
+
+    if img.shape[2] == 4:
+        img = img[:, :, 3]
+
+    if img.shape[2] > 4:
+        return None
+
+    img /= 255.
+
+    short_edge = min(img.shape[:2])
+    # long_edge = max(img.shape[:2])
+
+    new_short_edge = np.random.randint(256, 384)
+    ratio = new_short_edge / short_edge
+    rescaled_img = skimage.transform.rescale(img, ratio)
+    # new_long_edge = max(rescaled_img.shape[:2])
+
+    random_y = np.random.randint(0, rescaled_img.shape[0] - height)
+    random_x = np.random.randint(0, rescaled_img.shape[1] - width)
+
+    patch = rescaled_img[random_y:random_y + height, random_x:random_x + width, :]
+
+    return patch * 2 - 1  # 256*256 range:[-1,1]
+
+
+def crop_image_with_hole(image):
+    image_height, image_width = image.shape[:2]
+    hole_height = np.random.randint(96, 128)
+    hole_width = np.random.randint(96, 128)
+
+    y = np.random.randint(0, image_height - hole_height)
+    x = np.random.randint(0, image_width - hole_width)
+
+    hole = image[y:y + hole_height, x:x + hole_width, :]
+
+    image[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
+    image[y:y + hole_height, x:x + hole_width, 1] = 2 * 104. / 255. - 1.
+    image[y:y + hole_height, x:x + hole_width, 2] = 2 * 123. / 255. - 1.
+
+    return image, hole, hole_height, hole_width, y, x
+
+
+if __name__ == '__main__':
+    path = 'C:\\Users\\Richard\\Desktop\\ILSVRC2012_test_00000003.JPEG'
+    test = load_image(path)
+    # print(test.shape)
+    # test = (255. * (test + 1) / 2.).astype('uint8')
+    image, hole, hole_height, hole_width, y, x = crop_image_with_hole(test)
+    test = (255. * (test + 1) / 2.).astype('uint8')
+    hole = (255. * (hole + 1) / 2.).astype('uint8')
+
+    plt.subplot(121)
+    plt.imshow(test)
+
+    plt.subplot(122)
+    plt.imshow(hole)
+
+    plt.show()
