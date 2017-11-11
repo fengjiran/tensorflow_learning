@@ -93,7 +93,8 @@ def completion_network(images, is_training):
 
         deconv13 = DeconvLayer(inputs=bn12,
                                filter_shape=[4, 4, 128, 256],
-                               output_shape=[batch_size, 128, 128, 128],
+                               output_shape=[batch_size, conv2.output_shape[1],
+                                             conv2.output_shape[2], 128],
                                stride=2,
                                name='deconv13')
         bn13_layer = BatchNormLayer(deconv13.output, is_training, name='bn13')
@@ -109,7 +110,8 @@ def completion_network(images, is_training):
 
         deconv15 = DeconvLayer(inputs=bn14,
                                filter_shape=[4, 4, 64, 128],
-                               output_shape=[batch_size, 256, 256, 64],
+                               output_shape=[batch_size, conv1.output_shape[1],
+                                             conv1.output_shape[2], 64],
                                stride=2,
                                name='deconv15')
         bn15_layer = BatchNormLayer(deconv15.output, is_training, name='bn15')
@@ -248,18 +250,40 @@ def local_discriminator(images, is_training, reuse=None):
     return fc6.output
 
 
+def combine_discriminator(global_inputs, local_inputs, is_training, reuse=None):
+    """Combine the global and local discriminators."""
+    global_dis = global_discriminator(global_inputs, is_training, reuse)
+    local_dis = local_discriminator(local_inputs, is_training, reuse)
+
+    x = tf.concat([global_dis, local_dis], axis=1)
+    fc = FCLayer(x, 1, name='output')
+
+    tf.add_to_collection('combine_dis_params', fc.w)
+    tf.add_to_collection('combine_dis_params', fc.b)
+
+    return fc.output[:, 0]
+
+
 if __name__ == '__main__':
     batch_size = 128
-    x = tf.placeholder(tf.float32, [batch_size, 256, 256, 3], name='x')
+    x = tf.placeholder(tf.float32, [batch_size, 128, 255, 3], name='x')
+    global_inputs = tf.placeholder(tf.float32, [batch_size, 256, 256, 3], name='global_inputs')
+    local_inputs = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='local_inputs')
     train_flag = tf.placeholder(tf.bool)
 
     # y = completion_network(x, train_flag)
-    y = global_discriminator(x, train_flag)
+    # y = global_discriminator(x, train_flag)
+    # y = local_discriminator(x, train_flag)
+    y = combine_discriminator(global_inputs, local_inputs, train_flag)
     init = tf.global_variables_initializer()
 
-    a = np.random.rand(batch_size, 256, 256, 3)
+    a = np.random.rand(batch_size, 128, 255, 3)
+    b = np.random.rand(batch_size, 256, 256, 3)  # for global dis
+    c = np.random.rand(batch_size, 128, 128, 3)  # for local dis
+
     with tf.Session() as sess:
         sess.run(init)
         print(sess.run([tf.reduce_mean(y)],
                        feed_dict={train_flag: True,
-                                  x: a}))
+                                  global_inputs: b,
+                                  local_inputs: c}))
