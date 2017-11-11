@@ -1,5 +1,8 @@
 import numpy as np
 import tensorflow as tf
+import skimage.io
+import skimage.transform
+from PIL import Image
 
 
 class Conv2dLayer(object):
@@ -154,3 +157,13 @@ class BatchNormLayer(object):
                                                     offset=self.beta,
                                                     scale=self.scale,
                                                     variance_epsilon=epsilon)
+
+
+def array_to_image(array):
+    r = Image.fromarray(array[0]).convert('L')
+    g = Image.fromarray(array[1]).convert('L')
+    b = Image.fromarray(array[2]).convert('L')
+
+    image = Image.merge('RGB', (r, g, b))
+
+    return image
