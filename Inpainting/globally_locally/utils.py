@@ -1,10 +1,22 @@
 from __future__ import division
+import os
+import platform
 import numpy as np
 import tensorflow as tf
 import skimage.io
 import skimage.transform
 from PIL import Image
 import matplotlib.pyplot as plt
+
+if platform.system() == 'Windows':
+    train_path = 'F:\\Datasets\\ILSVRC2015\\ILSVRC2015_CLS_LOC\\Data\\CLS-LOC\\train'
+    val_path = 'F:\\Datasets\\ILSVRC2015\\ILSVRC2015_CLS_LOC\\Data\\CLS-LOC\\val'
+    test_path = 'F:\\Datasets\\ILSVRC2015\\ILSVRC2015_CLS_LOC\\Data\\CLS-LOC\\test'
+    val_annotation_path = 'F:\\Datasets\\ILSVRC2015\\ILSVRC2015_CLS_LOC\\Annotations\\CLS-LOC\\val'
+elif platform.system() == 'Linux':
+    train_path = '/mnt/DataBase/DeepLearning/ILSVRC2015/ILSVRC2015_CLS-LOC/ILSVRC2015_CLS-LOC/ILSVRC2015/Data/CLS-LOC/train'
+    val_path = '/mnt/DataBase/DeepLearning/ILSVRC2015/ILSVRC2015_CLS-LOC/ILSVRC2015_CLS-LOC/ILSVRC2015/Data/CLS-LOC/val'
+    val_annotation_path = '/mnt/DataBase/DeepLearning/ILSVRC2015/ILSVRC2015_CLS-LOC/ILSVRC2015_CLS-LOC/ILSVRC2015/Annotations/CLS-LOC/val'
 
 
 class Conv2dLayer(object):
@@ -221,7 +233,10 @@ def crop_image_with_hole(image):
     y = np.random.randint(0, image_height - hole_height)
     x = np.random.randint(0, image_width - hole_width)
 
+    image = image.copy()
+
     hole = image[y:y + hole_height, x:x + hole_width, :]
+    hole = hole.copy()
 
     image[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
     image[y:y + hole_height, x:x + hole_width, 1] = 2 * 104. / 255. - 1.
@@ -234,15 +249,21 @@ if __name__ == '__main__':
     path = 'C:\\Users\\Richard\\Desktop\\ILSVRC2012_test_00000003.JPEG'
     test = load_image(path)
     # print(test.shape)
-    # test = (255. * (test + 1) / 2.).astype('uint8')
     image, hole, hole_height, hole_width, y, x = crop_image_with_hole(test)
     test = (255. * (test + 1) / 2.).astype('uint8')
+    image = (255. * (image + 1) / 2.).astype('uint8')
     hole = (255. * (hole + 1) / 2.).astype('uint8')
 
-    plt.subplot(121)
+    print(image.shape)
+    print(hole.shape)
+
+    plt.subplot(131)
     plt.imshow(test)
 
-    plt.subplot(122)
+    plt.subplot(132)
+    plt.imshow(image)
+
+    plt.subplot(133)
     plt.imshow(hole)
 
     plt.show()
