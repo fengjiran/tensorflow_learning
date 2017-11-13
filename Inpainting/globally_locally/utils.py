@@ -233,23 +233,29 @@ def crop_image_with_hole(image):
     y = np.random.randint(0, image_height - hole_height)
     x = np.random.randint(0, image_width - hole_width)
 
-    image = image.copy()
+    image_with_hole = image.copy()
 
     hole = image[y:y + hole_height, x:x + hole_width, :]
-    hole = hole.copy()
+    # hole = hole.copy()
 
-    image[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
-    image[y:y + hole_height, x:x + hole_width, 1] = 2 * 104. / 255. - 1.
-    image[y:y + hole_height, x:x + hole_width, 2] = 2 * 123. / 255. - 1.
+    image_with_hole[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
+    image_with_hole[y:y + hole_height, x:x + hole_width, 1] = 2 * 104. / 255. - 1.
+    image_with_hole[y:y + hole_height, x:x + hole_width, 2] = 2 * 123. / 255. - 1.
 
-    return image, hole, hole_height, hole_width, y, x
+    mask = np.lib.pad(np.ones([hole_height, hole_width]),
+                      pad_width=((image_height - hole_height - y, y), (x, image_width - hole_width - x)),
+                      mode='constant')
+    mask = np.reshape(mask, [image_height, image_width, 1])
+    mask = np.concatenate([mask] * 3, 2)
+
+    return image_with_hole, hole, mask  # hole_height, hole_width, y, x
 
 
 if __name__ == '__main__':
     path = 'C:\\Users\\Richard\\Desktop\\ILSVRC2012_test_00000003.JPEG'
     test = load_image(path)
     # print(test.shape)
-    image, hole, hole_height, hole_width, y, x = crop_image_with_hole(test)
+    image, hole, mask = crop_image_with_hole(test)
     test = (255. * (test + 1) / 2.).astype('uint8')
     image = (255. * (image + 1) / 2.).astype('uint8')
     hole = (255. * (hole + 1) / 2.).astype('uint8')
