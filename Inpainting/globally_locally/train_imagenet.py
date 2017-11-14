@@ -39,6 +39,7 @@ global_step = tf.placeholder(tf.int64)
 
 images = tf.placeholder(tf.float32, [batch_size, input_height, input_width, 3], name='images')
 images_with_hole = tf.placeholder(tf.float32, [batch_size, input_height, input_width, 3], name='images_with_holes')
+# holes = tf.placeholder(tf.float32, [batch_size, None, None, 3], name='holes')
 
 masks = tf.placeholder(tf.float32, [batch_size, input_height, input_width, 3], name='masks')
 ground_truth = tf.placeholder(tf.float32, [batch_size, gt_height, gt_width, 3], name='ground_truth')
@@ -53,10 +54,19 @@ ground_truth = tf.placeholder(tf.float32, [batch_size, gt_height, gt_width, 3], 
 #               paddings=[[input_height - hole_height - y_init, y_init], [x_init, input_width - hole_width - x_init]])
 # mask = tf.reshape(mask, [input_height, input_width, 1])
 # mask = tf.concat([mask] * 3, 2)
+labels_G = tf.ones([batch_size])
+labels_D = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
 
 completed_images = completion_network(images_with_hole, is_training)
 
+# global discriminator inputs
+global_dis_inputs_fake = completed_images * masks + images_with_hole * (1 - masks)
+
+# local discriminator inputs
+
+
 loss_mse = tf.reduce_mean(tf.square(masks * (images - completed_images)))
+
 
 train_path = pd.read_pickle(compress_path)
 train_path.index = range(len(train_path))
@@ -65,4 +75,4 @@ train_path = train_path.ix[np.random.permutation(len(train_path))]
 for t1 in range(iters_total):
     # load a minibatch of images x from training data
     # generate masks Mc with random holes for each image x in the minibatch
-    x = 0
+    pass
