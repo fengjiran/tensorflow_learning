@@ -235,7 +235,7 @@ def crop_image_with_hole(image):
 
     image_with_hole = image.copy()
 
-    hole = image[y:y + hole_height, x:x + hole_width, :]
+    # hole = image[y:y + hole_height, x:x + hole_width, :]
     # hole = hole.copy()
 
     image_with_hole[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
@@ -248,7 +248,7 @@ def crop_image_with_hole(image):
     mask = np.reshape(mask, [image_height, image_width, 1])
     mask = np.concatenate([mask] * 3, 2)
 
-    return image_with_hole, hole, mask  # hole_height, hole_width, y, x
+    return image, image_with_hole, mask  # hole_height, hole_width, y, x
 
 
 if __name__ == '__main__':
