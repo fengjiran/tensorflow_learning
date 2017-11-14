@@ -226,6 +226,7 @@ def load_image(path, height=256, width=256):
 
 
 def crop_image_with_hole(image):
+    """Generate a single image with hole."""
     image_height, image_width = image.shape[:2]
     hole_height = np.random.randint(96, 128)
     hole_width = np.random.randint(96, 128)
@@ -243,33 +244,73 @@ def crop_image_with_hole(image):
     image_with_hole[y:y + hole_height, x:x + hole_width, 2] = 2 * 123. / 255. - 1.
 
     mask = np.lib.pad(np.ones([hole_height, hole_width]),
-                      pad_width=((image_height - hole_height - y, y), (x, image_width - hole_width - x)),
+                      pad_width=((y, image_height - hole_height - y), (x, image_width - hole_width - x)),
                       mode='constant')
     mask = np.reshape(mask, [image_height, image_width, 1])
     mask = np.concatenate([mask] * 3, 2)
 
-    return image, image_with_hole, mask  # hole_height, hole_width, y, x
+    return image_with_hole, mask  # hole_height, hole_width, y, x
 
 
 if __name__ == '__main__':
     path = 'C:\\Users\\Richard\\Desktop\\ILSVRC2012_test_00000003.JPEG'
     test = load_image(path)
-    # print(test.shape)
-    image, hole, mask = crop_image_with_hole(test)
-    test = (255. * (test + 1) / 2.).astype('uint8')
-    image = (255. * (image + 1) / 2.).astype('uint8')
-    hole = (255. * (hole + 1) / 2.).astype('uint8')
 
-    print(image.shape)
-    print(hole.shape)
+    # image_height, image_width = test.shape[:2]
+    # test1 = test.copy()
+    # image = tf.placeholder(tf.float32, [image_height, image_width, 3])
+    # hole_height = tf.placeholder(tf.int32)
+    # hole_width = tf.placeholder(tf.int32)
+
+    # y = tf.placeholder(tf.int32)
+    # x = tf.placeholder(tf.int32)
+
+    # # image_height, image_width = image.get_shape().as_list()[:2]
+
+    # mask = tf.pad(tf.ones([hole_height, hole_width]),
+    #               paddings=[[y, image_height - hole_height - y], [x, image_width - hole_width - x]])
+
+    # image = image[y:y + hole_height, x:x + hole_width, 0].assign(2 * 117. / 255. - 1.)
+    # image = image[y:y + hole_height, x:x + hole_width, 1].assign(2 * 104. / 255. - 1.)
+    # image = image[y:y + hole_height, x:x + hole_width, 2].assign(2 * 123. / 255. - 1.)
+
+    # with tf.Session() as sess:
+    #     a, b = sess.run([image, mask],
+    #                     feed_dict={image: test1,
+    #                                hole_height: np.random.randint(96, 128),
+    #                                hole_width: np.random.randint(96, 128),
+    #                                y: np.random.randint(0, image_height - hole_height),
+    #                                x: np.random.randint(0, image_width - hole_width)})
+
+    #     test = (255. * (test + 1) / 2.).astype('uint8')
+    #     a = (255. * (a + 1) / 2.).astype('uint8')
+    #     b = (255. * (b + 1) / 2.).astype('uint8')
+    #     plt.subplot(131)
+    #     plt.imshow(test)
+
+    #     plt.subplot(132)
+    #     plt.imshow(a)
+
+    #     plt.subplot(133)
+    #     plt.imshow(b)
+
+    #     plt.show()
+
+    image_with_hole, mask = crop_image_with_hole(test)
+    test = (255. * (test + 1) / 2.).astype('uint8')
+    image_with_hole = (255. * (image_with_hole + 1) / 2.).astype('uint8')
+    mask = (255. * (mask + 1) / 2.).astype('uint8')
+
+    print(image_with_hole.shape)
+    print(mask.shape)
 
     plt.subplot(131)
     plt.imshow(test)
 
     plt.subplot(132)
-    plt.imshow(image)
+    plt.imshow(image_with_hole)
 
     plt.subplot(133)
-    plt.imshow(hole)
+    plt.imshow(mask)
 
     plt.show()
