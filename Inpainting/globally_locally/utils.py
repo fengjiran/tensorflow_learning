@@ -257,42 +257,39 @@ if __name__ == '__main__':
     test = load_image(path)
 
     # image_height, image_width = test.shape[:2]
+    # hole_height = np.random.randint(96, 128)
+    # hole_width = np.random.randint(96, 128)
+    # y = np.random.randint(0, image_height - hole_height)
+    # x = np.random.randint(0, image_width - hole_width)
+
     # test1 = test.copy()
-    # image = tf.placeholder(tf.float32, [image_height, image_width, 3])
-    # hole_height = tf.placeholder(tf.int32)
-    # hole_width = tf.placeholder(tf.int32)
 
-    # y = tf.placeholder(tf.int32)
-    # x = tf.placeholder(tf.int32)
+    # test1[y:y + hole_height, x:x + hole_width, 0] = 2 * 117. / 255. - 1.
+    # test1[y:y + hole_height, x:x + hole_width, 1] = 2 * 104. / 255. - 1.
+    # test1[y:y + hole_height, x:x + hole_width, 2] = 2 * 123. / 255. - 1.
 
-    # # image_height, image_width = image.get_shape().as_list()[:2]
-
+    # # top,down,left,right
     # mask = tf.pad(tf.ones([hole_height, hole_width]),
     #               paddings=[[y, image_height - hole_height - y], [x, image_width - hole_width - x]])
 
-    # image = image[y:y + hole_height, x:x + hole_width, 0].assign(2 * 117. / 255. - 1.)
-    # image = image[y:y + hole_height, x:x + hole_width, 1].assign(2 * 104. / 255. - 1.)
-    # image = image[y:y + hole_height, x:x + hole_width, 2].assign(2 * 123. / 255. - 1.)
+    # mask = tf.reshape(mask, [image_height, image_width, 1])
+    # mask = tf.concat([mask] * 3, 2)
+    # print(mask.get_shape().as_list())
 
     # with tf.Session() as sess:
-    #     a, b = sess.run([image, mask],
-    #                     feed_dict={image: test1,
-    #                                hole_height: np.random.randint(96, 128),
-    #                                hole_width: np.random.randint(96, 128),
-    #                                y: np.random.randint(0, image_height - hole_height),
-    #                                x: np.random.randint(0, image_width - hole_width)})
+    #     a = sess.run(mask)
 
     #     test = (255. * (test + 1) / 2.).astype('uint8')
-    #     a = (255. * (a + 1) / 2.).astype('uint8')
-    #     b = (255. * (b + 1) / 2.).astype('uint8')
+    #     test1 = (255. * (test1 + 1) / 2.).astype('uint8')
+    #     # a = (255. * (a + 1) / 2.).astype('uint8')
     #     plt.subplot(131)
     #     plt.imshow(test)
 
     #     plt.subplot(132)
-    #     plt.imshow(a)
+    #     plt.imshow(test1)
 
     #     plt.subplot(133)
-    #     plt.imshow(b)
+    #     plt.imshow(a)
 
     #     plt.show()
 
