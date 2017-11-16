@@ -49,6 +49,10 @@ ground_truth = tf.placeholder(tf.float32, [batch_size, gt_height, gt_width, 3], 
 # y_init = tf.placeholder(tf.int32)
 # x_init = tf.placeholder(tf.int32)
 
+local_mask_location = tf.placeholder(tf.int32, [batch_size, 2])
+# x_loc = tf.placeholder(tf.int32, [batch_size])
+# y_loc = tf.placeholder(tf.int32, [batch_size])
+
 # # mask for every image
 # mask = tf.pad(tensor=tf.ones([hole_height, hole_width]),
 #               paddings=[[input_height - hole_height - y_init, y_init], [x_init, input_width - hole_width - x_init]])
@@ -61,8 +65,10 @@ completed_images = completion_network(images_with_hole, is_training)
 
 # global discriminator inputs
 global_dis_inputs_fake = completed_images * masks + images_with_hole * (1 - masks)
+# the global_dis_inputs_real = images
 
 # local discriminator inputs
+# local_dis_inputs_fake = global_dis_inputs_fake[:, y_loc:y_loc + 128, x_loc:x_loc + 128, :]
 
 
 loss_mse = tf.reduce_mean(tf.square(masks * (images - completed_images)))
