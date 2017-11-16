@@ -273,12 +273,6 @@ def read_batch(paths):
     x_locs = np.array(x_locs)
     y_locs = np.array(y_locs)
 
-    # print(images_ori.shape)
-    # print(images_with_hole.shape)
-    # print(masks.shape)
-    # print(x_locs.shape)
-    # print(y_locs.shape)
-
     return images_ori, images_with_hole, masks, x_locs, y_locs
 
 
@@ -316,21 +310,42 @@ if __name__ == '__main__':
 
     # plt.show()
 
+    images = tf.placeholder(tf.float32, [5, 256, 256, 3])
+    x_locs = tf.placeholder(tf.int32, [5], name='x')
+    y_locs = tf.placeholder(tf.int32, [5], name='y')
+
+    crops = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0], args[1], args[2], 128, 128),
+                      elems=(images, y_locs, x_locs),
+                      dtype=tf.float32)
+
     train_path = pd.read_pickle(compress_path)
     train_path.index = range(len(train_path))
     train_path = train_path.ix[np.random.permutation(len(train_path))]
     # train_path = train_path.ix[range(len(train_path))]
 
-    image_paths = train_path[0:100]['image_path'].values
-    a, b = read_batch(image_paths)
+    image_paths = train_path[0:5]['image_path'].values
+    a, b, masks, x_locs_, y_locs_ = read_batch(image_paths)
 
-    c = (255. * (a[0] + 1) / 2.).astype('uint8')
-    d = (255. * (b[0] + 1) / 2.).astype('uint8')
+    with tf.Session() as sess:
+        results = sess.run(crops, feed_dict={images: a,
+                                             x_locs: x_locs_,
+                                             y_locs: y_locs_})
 
-    plt.subplot(121)
-    plt.imshow(c)
+        plt.subplot(121)
+        plt.imshow((255. * (a[0] + 1) / 2.).astype('uint8'))
 
-    plt.subplot(122)
-    plt.imshow(d)
+        plt.subplot(122)
+        plt.imshow((255. * (results[0] + 1) / 2.).astype('uint8'))
 
-    plt.show()
+        plt.show()
+
+    # c = (255. * (a[0] + 1) / 2.).astype('uint8')
+    # d = (255. * (b[0] + 1) / 2.).astype('uint8')
+
+    # plt.subplot(121)
+    # plt.imshow(c)
+
+    # plt.subplot(122)
+    # plt.imshow(d)
+
+    # plt.show()
