@@ -263,6 +263,7 @@ def combine_discriminator(global_inputs, local_inputs, is_training, reuse=None):
         fc = FCLayer(x, 1, name='output')
         tf.add_to_collection('combine_dis_params', fc.w)
         tf.add_to_collection('combine_dis_params', fc.b)
+        tf.add_to_collection('weight_decay_combine_dis', tf.nn.l2_loss(fc.w))
 
     return fc.output[:, 0]
 
