@@ -14,5 +14,6 @@ Inpainting/my_work/imagenet_100k_ssim/
 Inpainting/my_work/paris_ssim/
 Inpainting/context_encoder/imagenet_100k/
 Inpainting/context_encoder/paris/
+Inpainting/globally_locally/models
 
 *.pickle
