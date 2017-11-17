@@ -107,13 +107,13 @@ with tf.Session() as sess:
     plt.subplot(243)
     plt.imshow((255. * masks_c_[0]).astype('uint8'))
     plt.subplot(244)
-    plt.imshow((255. * (completed_images[0] + 1) / 2.).astype('uint8'))
+    plt.imshow((255. * (a[0] + 1) / 2.).astype('uint8'))
     plt.subplot(245)
-    plt.imshow((255. * (global_dis_inputs_fake[0] + 1) / 2.).astype('uint8'))
+    plt.imshow((255. * (b[0] + 1) / 2.).astype('uint8'))
     plt.subplot(246)
-    plt.imshow((255. * (local_dis_inputs_fake[0] + 1) / 2.).astype('uint8'))
+    plt.imshow((255. * (c[0] + 1) / 2.).astype('uint8'))
     plt.subplot(247)
-    plt.imshow((255. * (local_dis_inputs_real[0] + 1) / 2.).astype('uint8'))
+    plt.imshow((255. * (d[0] + 1) / 2.).astype('uint8'))
 
     plt.show()
 
