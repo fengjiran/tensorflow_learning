@@ -230,12 +230,11 @@ def load_image(path, height=256, width=256):
     return patch * 2 - 1  # 256*256 range:[-1,1]
 
 
-def crop_image_with_hole(image):
+def crop_image_with_hole(image, low=96, high=128, length=128):
     """Generate a single image with hole."""
     image_height, image_width = image.shape[:2]
 
-    hole_height = np.random.randint(96, 128)
-    hole_width = np.random.randint(96, 128)
+    hole_height, hole_width = np.random.randint(low, high, size=(2))
 
     y = np.random.randint(0, image_height - hole_height)
     x = np.random.randint(0, image_width - hole_width)
@@ -256,8 +255,10 @@ def crop_image_with_hole(image):
     mask_c = np.concatenate([mask_c] * 3, 2)
 
     # generate the location of 128*128 patch for local discriminator
-    x_loc = x - int((128 - hole_width) / 2) if x > int((128 - hole_width) / 2) else x
-    y_loc = y - int((128 - hole_height) / 2) if y > int((128 - hole_height) / 2) else y
+    x_loc = np.random.randint(low=max(0, x + hole_width - length),
+                              high=min(x, image_width - length) + 1)
+    y_loc = np.random.randint(low=max(0, y + hole_height - length),
+                              high=min(y, image_height - length) + 1)
 
     return image_with_hole, mask_c, x_loc, y_loc  # hole_height, hole_width, y, x
 
