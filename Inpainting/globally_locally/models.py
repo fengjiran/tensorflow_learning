@@ -128,6 +128,7 @@ def completion_network(images, is_training):
         conv17 = Conv2dLayer(bn16, [3, 3, 32, 3], stride=1, name='conv17')
         conv_layers.append(conv17)
 
+        print('Print the completion network constructure:')
         for conv_layer in conv_layers:
             tf.add_to_collection('gen_params_conv', conv_layer.w)
             tf.add_to_collection('gen_params_conv', conv_layer.b)
@@ -186,6 +187,7 @@ def global_discriminator(images, is_training, reuse=None):
         fc7 = FCLayer(bn6, 1024, activation=tf.nn.relu, name='fc7')
         conv_layers.append(fc7)
 
+        print('Print the global discriminator network constructure:')
         for conv_layer in conv_layers:
             tf.add_to_collection('global_dis_params_conv', conv_layer.w)
             tf.add_to_collection('global_dis_params_conv', conv_layer.b)
@@ -237,6 +239,7 @@ def local_discriminator(images, is_training, reuse=None):
         fc6 = FCLayer(bn5, 1024, activation=tf.nn.relu, name='fc6')
         conv_layers.append(fc6)
 
+        print('Print the local discriminator network constructure:')
         for conv_layer in conv_layers:
             tf.add_to_collection('local_dis_params_conv', conv_layer.w)
             tf.add_to_collection('local_dis_params_conv', conv_layer.b)
@@ -252,14 +255,14 @@ def local_discriminator(images, is_training, reuse=None):
 
 def combine_discriminator(global_inputs, local_inputs, is_training, reuse=None):
     """Combine the global and local discriminators."""
-    global_dis = global_discriminator(global_inputs, is_training, reuse)
-    local_dis = local_discriminator(local_inputs, is_training, reuse)
+    global_dis = global_discriminator(global_inputs, is_training, reuse=reuse)
+    local_dis = local_discriminator(local_inputs, is_training, reuse=reuse)
 
     x = tf.concat([global_dis, local_dis], axis=1)
-    fc = FCLayer(x, 1, name='output')
-
-    tf.add_to_collection('combine_dis_params', fc.w)
-    tf.add_to_collection('combine_dis_params', fc.b)
+    with tf.variable_scope('combine_discriminator', reuse=reuse):
+        fc = FCLayer(x, 1, name='output')
+        tf.add_to_collection('combine_dis_params', fc.w)
+        tf.add_to_collection('combine_dis_params', fc.b)
 
     return fc.output[:, 0]
 
