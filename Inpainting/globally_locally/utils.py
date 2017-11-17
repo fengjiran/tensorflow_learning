@@ -276,10 +276,6 @@ def read_batch(paths):
     return images_ori, images_with_hole, masks, x_locs, y_locs
 
 
-def create_local_dis_mask(batch_size, x_loc, y_loc):
-    pass
-
-
 if __name__ == '__main__':
     # path = 'C:\\Users\\Richard\\Desktop\\ILSVRC2012_test_00000003.JPEG'
     # test = load_image(path)
@@ -310,14 +306,6 @@ if __name__ == '__main__':
 
     # plt.show()
 
-    images = tf.placeholder(tf.float32, [5, 256, 256, 3])
-    x_locs = tf.placeholder(tf.int32, [5], name='x')
-    y_locs = tf.placeholder(tf.int32, [5], name='y')
-
-    crops = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0], args[1], args[2], 128, 128),
-                      elems=(images, y_locs, x_locs),
-                      dtype=tf.float32)
-
     train_path = pd.read_pickle(compress_path)
     train_path.index = range(len(train_path))
     train_path = train_path.ix[np.random.permutation(len(train_path))]
@@ -325,6 +313,17 @@ if __name__ == '__main__':
 
     image_paths = train_path[0:5]['image_path'].values
     a, b, masks, x_locs_, y_locs_ = read_batch(image_paths)
+
+    print(x_locs_ + 128)
+    print(y_locs_ + 128)
+
+    images = tf.placeholder(tf.float32, [5, 256, 256, 3])
+    x_locs = tf.placeholder(tf.int32, [5], name='x')
+    y_locs = tf.placeholder(tf.int32, [5], name='y')
+
+    crops = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0], args[1], args[2], 128, 128),
+                      elems=(images, y_locs, x_locs),
+                      dtype=tf.float32)
 
     with tf.Session() as sess:
         results = sess.run(crops, feed_dict={images: a,
