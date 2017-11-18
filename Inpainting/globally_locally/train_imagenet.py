@@ -39,7 +39,7 @@ iters_total = 120000 * 6  # total iters
 
 lambda_adv = 0.0004
 weight_decay_rate = 0.0001
-init_lr = 0.005
+init_lr = 0.002
 
 # placeholder
 is_training = tf.placeholder(tf.bool)
@@ -134,10 +134,6 @@ train_path = train_path.ix[np.random.permutation(len(train_path))]
 
 num_batch = int(len(train_path) / batch_size)
 
-# image_paths = train_path[0:batch_size]['image_path'].values
-
-# images_, images_with_hole_, masks_c_, x_locs_, y_locs_ = read_batch(image_paths)
-
 saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 
@@ -151,13 +147,18 @@ with tf.Session() as sess:
     else:
         iters = 0
         with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
-            pickle.dump(iters, f)
+            pickle.dump(iters, f, protocol=2)
         saver.save(sess, os.path.join(model_path, 'global_local_consistent'))
 
     while iters < iters_total:
         indx = iters % num_batch
         image_paths = train_path[indx * batch_size:(indx + 1) * batch_size]['image_path'].values
         images_, images_with_hole_, masks_c_, x_locs_, y_locs_ = read_batch(image_paths)
+
+        # a = sess.run(global_dis_inputs_fake, feed_dict={images: images_,
+        #                                                 images_with_hole: images_with_hole_,
+        #                                                 masks_c: masks_c_,
+        #                                                 is_training: False})
 
         if iters < iters_c:
             _, loss_g1 = sess.run([train_op_g1, loss_G1],
@@ -191,10 +192,12 @@ with tf.Session() as sess:
                 print('Iter: {0}, loss_g2: {1}'.format(iters, loss_g2))
                 iters += 1
 
-        with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
-            pickle.dump(iters, f)
+        # with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+        #     pickle.dump(iters, f, protocol=2)
 
         if iters % 100 == 0:
+            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'global_local_consistent'))
 
 
