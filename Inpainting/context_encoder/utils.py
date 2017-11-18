@@ -46,7 +46,7 @@ def load_image(path, pre_height=146, pre_width=146, height=128, width=128):
         img = np.tile(img[:, :, None], 3)
 
     if img.shape[2] == 4:
-        img = img[:, :, 3]
+        img = img[:, :, 0:3]
 
     if img.shape[2] > 4:
         return None

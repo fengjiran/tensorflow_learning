@@ -200,16 +200,16 @@ def load_image(path, height=256, width=256):
     if len(img.shape) < 2:
         return None
 
-    if len(img.shape) == 4:
-        return None
-
     if len(img.shape) == 2:
         img = np.tile(img[:, :, None], 3)
 
-    if img.shape[2] == 4:
-        img = img[:, :, 3]
+    if len(img.shape) == 3:
+        if img.shape[2] == 4:
+            img = img[:, :, 0:3]
+        elif img.shape[2] > 4:
+            return None
 
-    if img.shape[2] > 4:
+    if len(img.shape) == 4:
         return None
 
     img /= 255.
@@ -226,6 +226,7 @@ def load_image(path, height=256, width=256):
     random_x = np.random.randint(0, rescaled_img.shape[1] - width + 1)
 
     patch = rescaled_img[random_y:random_y + height, random_x:random_x + width, :]
+    # print(patch.shape)
 
     return patch * 2 - 1  # 256*256 range:[-1,1]
 
@@ -306,6 +307,7 @@ if __name__ == '__main__':
     # plt.imshow(crop)
 
     # plt.show()
+    #
 
     train_path = pd.read_pickle(compress_path)
     train_path.index = range(len(train_path))
