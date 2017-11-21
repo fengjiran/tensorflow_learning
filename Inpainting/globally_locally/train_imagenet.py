@@ -26,6 +26,7 @@ elif platform.system() == 'Linux':
 input_height = 256
 input_width = 256
 
+
 # input image size for local discriminator
 gt_height = 128
 gt_width = 128
@@ -33,13 +34,14 @@ gt_width = 128
 isFirstTimeTrain = False
 batch_size = 16
 
+
 iters_c = 120000  # iters for completion network
 iters_d = 2300 * 6  # iters for discriminator
 iters_total = 120000 * 6  # total iters
 
 lambda_adv = 0.0004
 weight_decay_rate = 0.0001
-init_lr = 0.002
+init_lr = 0.0002
 
 # placeholder
 is_training = tf.placeholder(tf.bool)
