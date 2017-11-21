@@ -5,6 +5,7 @@
 *.pyc
 *.py~
 *.save
+*.png
 
 # VSCODE settings
 .sync/
