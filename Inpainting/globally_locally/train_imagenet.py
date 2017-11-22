@@ -39,7 +39,7 @@ iters_c = 120000  # iters for completion network
 iters_d = 2300 * 6  # iters for discriminator
 iters_total = 120000 * 6  # total iters
 
-lambda_adv = 0.0004
+lambda_adv = 0.0004 * 2
 weight_decay_rate = 0.0001
 init_lr = 0.0002
 
