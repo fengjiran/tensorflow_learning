@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from PIL import ImageFile
+# from PIL import ImageFile
 
 from utils import read_batch
 from utils import array_to_image
@@ -23,7 +23,7 @@ elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/imagenet_train_path_linux.pickle'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models'
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+# ImageFile.LOAD_TRUNCATED_IMAGES = True
 # input image size for comletion network and global discrimintor
 input_height = 256
 input_width = 256

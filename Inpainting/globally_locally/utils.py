@@ -9,6 +9,7 @@ import tensorflow as tf
 import skimage.io
 import skimage.transform
 from PIL import Image
+from PIL import ImageFile
 import matplotlib.pyplot as plt
 
 if platform.system() == 'Windows':
@@ -265,6 +266,7 @@ def crop_image_with_hole(image, low=96, high=128, gt_height=128, gt_width=128):
 
 
 def read_batch(paths):
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
     images_ori = list(map(load_image, paths))
     images_crops = map(crop_image_with_hole, images_ori)
     images_with_hole, masks, x_locs, y_locs = zip(*images_crops)
