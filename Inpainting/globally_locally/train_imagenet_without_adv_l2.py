@@ -93,7 +93,7 @@ with tf.Session() as sess:
                                         global_step: iters,
                                         is_training: True})
 
-        print('Iter: {0}, loss_g1: {1}'.format(iters, loss_g))
+        print('Iter: {0}, loss_g: {1}'.format(iters, loss_g))
         iters += 1
 
         if iters % 100 == 0:
