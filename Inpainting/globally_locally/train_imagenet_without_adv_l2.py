@@ -23,7 +23,7 @@ elif platform.system() == 'Linux':
 input_height = 256
 input_width = 256
 
-isFirstTimeTrain = True
+isFirstTimeTrain = False
 batch_size = 32
 
 iters_c = 120000  # iters for completion network
