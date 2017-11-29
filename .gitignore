@@ -17,6 +17,7 @@ Inpainting/context_encoder/imagenet_100k/
 Inpainting/context_encoder/paris/
 Inpainting/globally_locally/models
 Inpainting/globally_locally/models_without_adv_l2
+Inpainting/globally_locally/models_without_adv_l1
 Inpainting/globally_locally/test_images
 
 *.pickle
