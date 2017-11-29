@@ -93,7 +93,7 @@ with tf.Session() as sess:
                                         global_step: iters,
                                         is_training: True})
 
-        print('Iter: {0}, loss_g: {1}'.format(iters, loss_g))
+        print('Epoch: {}, Iter: {}, loss_g: {}'.format(int(iters / num_batch) + 1, iters, loss_g))
         iters += 1
 
         if iters % 100 == 0:
