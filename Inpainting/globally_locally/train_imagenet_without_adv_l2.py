@@ -7,7 +7,7 @@ import platform
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from utils import read_batch
 from models import completion_network
@@ -60,7 +60,7 @@ train_op_g = opt.apply_gradients(grads_vars_g)
 # load the train sample paths
 train_path = pd.read_pickle(compress_path)
 np.random.seed(42)
-train_path.index = range(len(train_path))
+train_path.index = range(len(train_path))  # 1807854
 train_path = train_path.ix[np.random.permutation(len(train_path))]
 
 num_batch = int(len(train_path) / batch_size)

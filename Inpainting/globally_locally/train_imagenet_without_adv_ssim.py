@@ -7,7 +7,7 @@ import platform
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from utils import read_batch
 from models import completion_network
@@ -45,7 +45,8 @@ completed_images = completion_network(images_with_hole, is_training)
 
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
 
-loss_recon = tf.reduce_mean(tf.abs(masks_c * (images - completed_images)))
+# loss_recon = tf.reduce_mean(tf.abs(masks_c * (images - completed_images)))
+loss_recon = tf_ssim(masks_c * images, masks_c * completed_images, size=11, sigma=9)
 loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
 lr = tf.train.exponential_decay(learning_rate=init_lr,
@@ -61,7 +62,7 @@ train_op_g = opt.apply_gradients(grads_vars_g)
 # load the train sample paths
 train_path = pd.read_pickle(compress_path)
 np.random.seed(42)
-train_path.index = range(len(train_path))
+train_path.index = range(len(train_path))  # 1807854
 train_path = train_path.ix[np.random.permutation(len(train_path))]
 
 num_batch = int(len(train_path) / batch_size)

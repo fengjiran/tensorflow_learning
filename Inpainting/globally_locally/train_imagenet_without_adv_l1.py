@@ -7,7 +7,7 @@ import platform
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from utils import read_batch
 from models import completion_network
@@ -23,7 +23,7 @@ elif platform.system() == 'Linux':
 input_height = 256
 input_width = 256
 
-isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 32
 
 iters_c = 120000  # iters for completion network
@@ -45,7 +45,9 @@ completed_images = completion_network(images_with_hole, is_training)
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
 
 loss_recon = tf.reduce_mean(tf.abs(masks_c * (images - completed_images)))
-loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+# loss_recon = tf.reduce_mean(tf.norm(masks_c * (images - completed_images), ord=1))
+# loss_recon = tf.reduce_mean(tf.square(masks_c * (images - completed_images)))
+# loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
@@ -53,14 +55,15 @@ lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 decay_rate=0.992)
 
 opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
-grads_vars_g = opt.compute_gradients(loss_G, var_G)
-# grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
+grads_vars_g = opt.compute_gradients(loss_recon, var_G)
+# grads_vars_g = [(tf.clip_by_norm(gv[0], 5.), gv[1]) for gv in grads_vars_g]
+# grads_vars_g = [gv if gv[0] is None else (tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
 train_op_g = opt.apply_gradients(grads_vars_g)
 
 # load the train sample paths
 train_path = pd.read_pickle(compress_path)
 np.random.seed(42)
-train_path.index = range(len(train_path))
+train_path.index = range(len(train_path))  # 1807854
 train_path = train_path.ix[np.random.permutation(len(train_path))]
 
 num_batch = int(len(train_path) / batch_size)
@@ -86,7 +89,7 @@ with tf.Session() as sess:
         indx = iters % num_batch
         image_paths = train_path[indx * batch_size:(indx + 1) * batch_size]['image_path'].values
         images_, images_with_hole_, masks_c_, x_locs_, y_locs_ = read_batch(image_paths)
-        _, loss_g = sess.run([train_op_g, loss_G],
+        _, loss_g = sess.run([train_op_g, grads_vars_g[0][1]],
                              feed_dict={images: images_,
                                         images_with_hole: images_with_hole_,
                                         masks_c: masks_c_,
