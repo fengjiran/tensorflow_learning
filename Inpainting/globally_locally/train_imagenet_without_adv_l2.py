@@ -57,6 +57,10 @@ grads_vars_g = opt.compute_gradients(loss_G, var_G)
 # grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
 train_op_g = opt.apply_gradients(grads_vars_g)
 
+view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
+                             for gv in grads_vars_g])
+view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
+
 # load the train sample paths
 train_path = pd.read_pickle(compress_path)
 np.random.seed(42)
@@ -86,14 +90,19 @@ with tf.Session() as sess:
         indx = iters % num_batch
         image_paths = train_path[indx * batch_size:(indx + 1) * batch_size]['image_path'].values
         images_, images_with_hole_, masks_c_, x_locs_, y_locs_ = read_batch(image_paths)
-        _, loss_g = sess.run([train_op_g, loss_G],
-                             feed_dict={images: images_,
-                                        images_with_hole: images_with_hole_,
-                                        masks_c: masks_c_,
-                                        global_step: iters,
-                                        is_training: True})
+        _, loss_g, weights_mean, grads_mean = sess.run([train_op_g, loss_G, view_weights, view_grads],
+                                                       feed_dict={images: images_,
+                                                                  images_with_hole: images_with_hole_,
+                                                                  masks_c: masks_c_,
+                                                                  global_step: iters,
+                                                                  is_training: True})
 
-        print('Epoch: {}, Iter: {}, loss_g: {}'.format(int(iters / num_batch) + 1, iters, loss_g))
+        print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+            int(iters / num_batch) + 1,
+            iters,
+            loss_g,
+            weights_mean,
+            grads_mean))
         iters += 1
 
         if iters % 100 == 0:
