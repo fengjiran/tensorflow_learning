@@ -23,14 +23,14 @@ elif platform.system() == 'Linux':
 input_height = 256
 input_width = 256
 
-isFirstTimeTrain = True
+isFirstTimeTrain = False
 batch_size = 32
 
 iters_c = 120000  # iters for completion network
 
 lr_decay_steps = 1000
 weight_decay_rate = 0.0001
-init_lr = 0.0002
+init_lr = 5e-5
 
 # placeholder
 is_training = tf.placeholder(tf.bool)
@@ -45,20 +45,29 @@ completed_images = completion_network(images_with_hole, is_training)
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
 
 loss_recon = tf.reduce_mean(tf.abs(masks_c * (images - completed_images)))
-# loss_recon = tf.reduce_mean(tf.norm(masks_c * (images - completed_images), ord=1))
-# loss_recon = tf.reduce_mean(tf.square(masks_c * (images - completed_images)))
-# loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+
+# loss_G = tf.reduce_mean(tf.abs(masks_c * (images - completed_images)))
 
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
                                 decay_steps=lr_decay_steps,
                                 decay_rate=0.992)
 
-opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
-grads_vars_g = opt.compute_gradients(loss_recon, var_G)
-# grads_vars_g = [(tf.clip_by_norm(gv[0], 5.), gv[1]) for gv in grads_vars_g]
-# grads_vars_g = [gv if gv[0] is None else (tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
+opt = tf.train.AdamOptimizer(lr, beta1=0.9, beta2=0.999)
+# train_op_g = opt.minimize(loss_G)
+grads_vars_g = opt.compute_gradients(loss_G, var_G)
+# grads_vars_g = [(gv[0] if gv[0] is not None else tf.zeros_like(gv[1]), gv[1])
+#                 for gv in grads_vars_g]
+
+grads_vars_g = [(tf.clip_by_value(gv[0], -0.001, 0.001) if gv[0] is not None else gv[0], gv[1])
+                for gv in grads_vars_g]
+# grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
 train_op_g = opt.apply_gradients(grads_vars_g)
+
+view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
+                             for gv in grads_vars_g])
+view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 
 # load the train sample paths
 train_path = pd.read_pickle(compress_path)
@@ -89,14 +98,26 @@ with tf.Session() as sess:
         indx = iters % num_batch
         image_paths = train_path[indx * batch_size:(indx + 1) * batch_size]['image_path'].values
         images_, images_with_hole_, masks_c_, x_locs_, y_locs_ = read_batch(image_paths)
-        _, loss_g = sess.run([train_op_g, grads_vars_g[0][1]],
-                             feed_dict={images: images_,
-                                        images_with_hole: images_with_hole_,
-                                        masks_c: masks_c_,
-                                        global_step: iters,
-                                        is_training: True})
+        # _, loss_g = sess.run([train_op_g, loss_G],
+        #                      feed_dict={images: images_,
+        #                                 images_with_hole: images_with_hole_,
+        #                                 masks_c: masks_c_,
+        #                                 global_step: iters,
+        #                                 is_training: True})
+        # print('Epoch: {}, Iter: {}, loss_g: {}'.format(int(iters / num_batch) + 1, iters, loss_g))
+        _, loss_g, weights_mean, grads_mean = sess.run([train_op_g, loss_G, view_weights, view_grads],
+                                                       feed_dict={images: images_,
+                                                                  images_with_hole: images_with_hole_,
+                                                                  masks_c: masks_c_,
+                                                                  global_step: iters,
+                                                                  is_training: True})
 
-        print('Epoch: {}, Iter: {}, loss_g: {}'.format(int(iters / num_batch) + 1, iters, loss_g))
+        print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+            int(iters / num_batch) + 1,
+            iters,
+            loss_g,
+            weights_mean,
+            grads_mean))
         iters += 1
 
         if iters % 100 == 0:
