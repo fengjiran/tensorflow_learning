@@ -26,7 +26,7 @@ input_width = 256
 isFirstTimeTrain = False
 batch_size = 32
 
-iters_c = 120000  # iters for completion network
+iters_c = 240000  # iters for completion network
 
 lr_decay_steps = 1000
 weight_decay_rate = 0.0001
