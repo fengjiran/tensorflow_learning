@@ -32,11 +32,11 @@ if not os.path.exists(compress_path):
     trainset = pd.DataFrame({'image_path': paths})
     trainset.to_pickle(compress_path)
 
-if not os.path.exists(test_path):
-    paths = []
-    for filepath, _, _ in os.walk(path5):
-        paths.extend(glob(os.path.join(filepath, '*.JPEG')))
+# if not os.path.exists(test_path):
+#     paths = []
+#     for filepath, _, _ in os.walk(path5):
+#         paths.extend(glob(os.path.join(filepath, '*.JPEG')))
 
-    paths = np.hstack(paths)
-    testset = pd.DataFrame({'test_path': paths})
-    testset.to_pickle(test_path)
+#     paths = np.hstack(paths)
+#     testset = pd.DataFrame({'test_path': paths})
+#     testset.to_pickle(test_path)
