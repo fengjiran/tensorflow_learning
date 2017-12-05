@@ -20,8 +20,8 @@ elif platform.system() == 'Linux':
 
 batch_size = 1
 
-origin_image = skimage.io.imread(os.path.join(test_path, '2_origin.png')).astype(float)
-image_with_hole = skimage.io.imread(os.path.join(test_path, '2_with_holes.png')).astype(float)
+origin_image = skimage.io.imread(os.path.join(test_path, '1_origin.png')).astype(float)
+image_with_hole = skimage.io.imread(os.path.join(test_path, '1_with_holes.png')).astype(float)
 
 height = origin_image.shape[0]
 width = origin_image.shape[1]
