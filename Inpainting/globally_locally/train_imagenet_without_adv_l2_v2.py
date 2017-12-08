@@ -1,7 +1,9 @@
 from __future__ import division
 from __future__ import print_function
 
+import os
 import platform
+import pickle
 import numpy as np
 import pandas as pd
 # import matplotlib.pyplot as plt
@@ -16,10 +18,12 @@ from utils import BatchNormLayer
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\imagenet_train_path_win.pickle'
-    # model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l1'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2_v2'
 elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/imagenet_train_path_linux.pickle'
-    # model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l1'
+    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2_v2'
 
 isFirstTimeTrain = True
 batch_size = 32
@@ -213,11 +217,9 @@ def input_parse(img_path):
 
 
 is_training = tf.placeholder(tf.bool)
-# global_step = tf.placeholder(tf.int64)
+global_step = tf.placeholder(tf.int64)
 filenames = tf.placeholder(tf.string, shape=[None])
 
-# filenames = tf.constant(train_path)
-# filenames = tf.constant(['E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\test_images\\1_origin.png'])
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
 dataset = dataset.batch(batch_size)
@@ -230,11 +232,11 @@ var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn'
 loss_recon = tf.reduce_mean(tf.square(masks * (images - completed_images)))
 loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
-# lr = tf.train.exponential_decay(learning_rate=init_lr,
-#                                 global_step=global_step,
-#                                 decay_steps=lr_decay_steps,
-#                                 decay_rate=0.992)
-opt = tf.train.AdamOptimizer(init_lr, beta1=0.5, beta2=0.9)
+lr = tf.train.exponential_decay(learning_rate=init_lr,
+                                global_step=global_step,
+                                decay_steps=lr_decay_steps,
+                                decay_rate=0.992)
+opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 grads_vars_g = opt.compute_gradients(loss_G, var_G)
 # grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
 train_op_g = opt.apply_gradients(grads_vars_g)
@@ -243,21 +245,65 @@ view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
                              for gv in grads_vars_g])
 view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
+if isFirstTimeTrain:
+    old_var_G = []
+    graph1 = tf.Graph()
+    with graph1.as_default():
+        with tf.Session(graph=graph1) as sess1:
+            saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l2.meta'))
+            saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l2'))
+            old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+            old_var_G = sess1.run(old_var_G)
 
+saver = tf.train.Saver()
+with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
     # np.random.seed(42)
     train_path.index = range(len(train_path))
     train_path = train_path.ix[np.random.permutation(len(train_path))]
     train_path = train_path[:]['image_path'].values.tolist()
+    num_batch = int(len(train_path) / batch_size)
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
 
-    while True:
-        _, loss_g = sess.run([train_op_g, loss_G],
-                             feed_dict={is_training: True})
-        print(loss_g)
+    if isFirstTimeTrain:
+        sess.run(tf.global_variables_initializer())
+        updates = []
+        for i, item in enumerate(old_var_G):
+            updates.append(tf.assign(var_G[i], item))
+        sess.run(updates)
+
+        with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
+            iters = pickle.load(f)
+
+        with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+            pickle.dump(iters, f, protocol=2)
+        saver.save(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))
+    else:
+        saver.restore(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))
+        with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+            iters = pickle.load(f)
+
+    while iters < iters_c:
+        _, loss_g, weights_mean, grads_mean =\
+            sess.run([train_op_g, loss_G, view_weights, view_grads],
+                     feed_dict={is_training: True,
+                                global_step: iters})
+
+        print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+            int(iters / num_batch) + 1,
+            iters,
+            loss_g,
+            weights_mean,
+            grads_mean))
+
+        iters += 1
+
+        if iters % 100 == 0:
+            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                pickle.dump(iters, f, protocol=2)
+            saver.save(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))
+
     # a = sess.run(iterator.get_next())
     # print(a[2].shape)
     # print(a[3], a[4])
