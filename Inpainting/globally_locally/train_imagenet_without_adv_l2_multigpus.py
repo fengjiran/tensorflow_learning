@@ -9,11 +9,6 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 import tensorflow as tf
 
-# from utils import Conv2dLayer
-# from utils import DeconvLayer
-# from utils import DilatedConv2dLayer
-# from utils import BatchNormLayer
-
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\imagenet_train_path_win.pickle'
     g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2'
@@ -29,6 +24,7 @@ iters_c = 240000  # iters for completion network
 lr_decay_steps = 1000
 weight_decay_rate = 0.0001
 init_lr = 0.001
+num_gpus = 2
 
 
 def _variable_on_cpu(name, shape, initializer, trainable=True):
@@ -311,7 +307,7 @@ def completion_network(images, is_training, batch_size):
     return tf.nn.tanh(conv17.output)  # N, 256, 256, 3
 
 
-def tower_loss(scope, images, images_with_hole, masks, batch_size, is_training):
+def tower_loss(scope, images, images_with_hole, masks, split_batch_size, is_training):
     """Calculate the total loss on a single tower.
 
     Returns
@@ -320,7 +316,13 @@ def tower_loss(scope, images, images_with_hole, masks, batch_size, is_training):
 
     """
     # Build inference Graph.
-    completed_images = completion_network(images_with_hole, is_training)
+    with tf.name_scope(scope):
+        completed_images = completion_network(images_with_hole, is_training, split_batch_size)
+        loss_recon = tf.reduce_mean(tf.square(masks * (images - completed_images)))
+
+        loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+
+    return loss_G
 
 
 def average_gradients(tower_grads):
@@ -365,9 +367,21 @@ def average_gradients(tower_grads):
 
 def train():
     with tf.Graph().as_default(), tf.device('/cpu:0'):
-        global_step = tf.get_variable(
-            'global_step', [],
-            initializer=tf.constant_initializer(0), trainable=False)
+        # global_step = tf.get_variable(
+        #     'global_step', [],
+        #     initializer=tf.constant_initializer(0), trainable=False)
+        global_step = tf.placeholder(tf.int64)
+
+        lr = tf.train.exponential_decay(learning_rate=init_lr,
+                                        global_step=global_step,
+                                        decay_steps=lr_decay_steps,
+                                        decay_rate=0.992)
+        opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 
         # Calculate the gradients for each model tower.
         tower_grads = []
+        with tf.variable_scope(tf.get_variable_scope()):
+            for i in range(num_gpus):
+                with tf.device('/gpu:{}'.format(i)):
+                    with tf.name_scope('tower_{}'.format(i)) as scope:
+                        pass
