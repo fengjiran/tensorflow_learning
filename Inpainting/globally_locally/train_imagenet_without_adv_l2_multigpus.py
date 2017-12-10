@@ -463,7 +463,7 @@ def train():
                         loss = tower_loss(scope=scope,
                                           images=images_splits[i],
                                           images_with_hole=images_with_hole_splits[i],
-                                          masks=masks[i],
+                                          masks=masks_splits[i],
                                           split_batch_size=int(batch_size / num_gpus),
                                           is_training=is_training)
 
