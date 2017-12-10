@@ -27,6 +27,56 @@ init_lr = 0.001
 num_gpus = 2
 
 
+def input_parse(img_path):
+    with tf.device('/cpu:0'):
+        low = 96
+        high = 128
+        image_height = 256
+        image_width = 256
+        gt_height = 128
+        gt_width = 128
+
+        img_file = tf.read_file(img_path)
+        img_decoded = tf.image.decode_image(img_file, channels=3)
+        img = tf.cast(img_decoded, tf.float32)
+        img /= 255.
+        img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
+        img = 2 * img - 1
+
+        hole_height, hole_width = np.random.randint(low, high, size=(2))
+        y = tf.random_uniform([], 0, image_height - hole_height, tf.int32)
+        x = tf.random_uniform([], 0, image_width - hole_width, tf.int32)
+
+        mask = tf.pad(tensor=tf.ones((hole_height, hole_width)),
+                      paddings=[[y, image_height - hole_height - y], [x, image_width - hole_width - x]])
+        mask = tf.reshape(mask, [image_height, image_width, 1])
+        mask = tf.concat([mask] * 3, 2)
+
+        mask_1 = tf.reshape(tensor=mask[:, :, 0] * (2 * 117. / 255. - 1.),
+                            shape=[image_height, image_width, 1])
+        mask_2 = tf.reshape(tensor=mask[:, :, 1] * (2 * 104. / 255. - 1.),
+                            shape=[image_height, image_width, 1])
+        mask_3 = tf.reshape(tensor=mask[:, :, 2] * (2 * 123. / 255. - 1.),
+                            shape=[image_height, image_width, 1])
+        mask_tmp = tf.concat([mask_1, mask_2, mask_3], 2)
+
+        image_with_hole = tf.identity(img)
+        image_with_hole = image_with_hole * (1 - mask) + mask_tmp
+
+        # generate the location of 128*128 patch for local discriminator
+        x_loc = tf.random_uniform(shape=[],
+                                  minval=tf.reduce_max([0, x + hole_width - gt_width]),
+                                  maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
+                                  dtype=tf.int32)
+
+        y_loc = tf.random_uniform(shape=[],
+                                  minval=tf.reduce_max([0, y + hole_height - gt_height]),
+                                  maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
+                                  dtype=tf.int32)
+
+    return img, image_with_hole, mask, x_loc, y_loc
+
+
 def _variable_on_cpu(name, shape, initializer, trainable=True):
     """Help to create a Variable stored on CPU memory.
 
@@ -371,6 +421,26 @@ def train():
         #     'global_step', [],
         #     initializer=tf.constant_initializer(0), trainable=False)
         global_step = tf.placeholder(tf.int64)
+        filenames = tf.placeholder(tf.string, shape=[None])
+        is_training = tf.placeholder(tf.bool)
+
+        dataset = tf.data.Dataset.from_tensor_slices(filenames)
+        dataset = dataset.map(input_parse)
+        dataset = dataset.batch(batch_size)
+        dataset = dataset.repeat()
+        iterator = dataset.make_initializable_iterator()
+        images, images_with_hole, masks, _, _ = iterator.get_next()
+
+        # Split the batch for towers.
+        images_splits = tf.split(value=images, num_or_size_splits=num_gpus, axis=0)
+        images_with_hole_splits = tf.split(value=images_with_hole, num_or_size_splits=num_gpus, axis=0)
+        masks_splits = tf.split(value=masks, num_or_size_splits=num_gpus, axis=0)
+
+        # train_path = pd.read_pickle(compress_path)
+        # train_path.index = range(len(train_path))
+        # train_path = train_path.ix[np.random.permutation(len(train_path))]
+        # train_path = train_path[:]['image_path'].values.tolist()
+        # num_batch = int(len(train_path) / batch_size)
 
         lr = tf.train.exponential_decay(learning_rate=init_lr,
                                         global_step=global_step,
@@ -378,10 +448,27 @@ def train():
                                         decay_rate=0.992)
         opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 
+        # Get images and labels for ImageNet and split the batch across GPUs.
+        assert batch_size % num_gpus == 0, ('Batch size must be divisible by number of GPUs')
+
         # Calculate the gradients for each model tower.
         tower_grads = []
         with tf.variable_scope(tf.get_variable_scope()):
             for i in range(num_gpus):
                 with tf.device('/gpu:{}'.format(i)):
                     with tf.name_scope('tower_{}'.format(i)) as scope:
-                        pass
+                        # Calculate the loss for one tower of the CIFAR model. This function
+                        # constructs the entire model but shares the variables across
+                        # all towers.
+                        loss = tower_loss(scope=scope,
+                                          images=images_splits[i],
+                                          images_with_hole=images_with_hole_splits[i],
+                                          masks=masks[i],
+                                          split_batch_size=int(batch_size / num_gpus),
+                                          is_training=is_training)
+
+                        # Reuse variables for the next tower.
+                        tf.get_variable_scope().reuse_variables()
+
+                        # Calculate the gradients for the batch of data on this tower.
+                        grads_and_vars = opt.compute_gradients(loss)
