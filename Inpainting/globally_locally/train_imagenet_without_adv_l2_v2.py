@@ -25,7 +25,7 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2_v2'
 
-isFirstTimeTrain = True
+isFirstTimeTrain = False
 batch_size = 32
 iters_c = 240000  # iters for completion network
 lr_decay_steps = 1000
@@ -217,7 +217,12 @@ def input_parse(img_path):
 
 
 is_training = tf.placeholder(tf.bool)
-global_step = tf.placeholder(tf.int64)
+global_step = tf.get_variable('global_step',
+                              [],
+                              tf.int32,
+                              initializer=tf.constant_initializer(0),
+                              trainable=False)
+# global_step = tf.placeholder(tf.int64)
 filenames = tf.placeholder(tf.string, shape=[None])
 
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
@@ -232,30 +237,55 @@ var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn'
 loss_recon = tf.reduce_mean(tf.square(masks * (images - completed_images)))
 loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
+summaries = tf.get_collection(tf.GraphKeys.SUMMARIES)
+# Add a summary to track the loss.
+summaries.append(tf.summary.scalar('generator_loss', loss_G))
+
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
                                 decay_steps=lr_decay_steps,
                                 decay_rate=0.992)
+# Add a summary to track the learning rate.
+summaries.append(tf.summary.scalar('learning_rate', lr))
+
 opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 grads_vars_g = opt.compute_gradients(loss_G, var_G)
 # grads_vars_g = [(tf.clip_by_value(gv[0], -10., 10.), gv[1]) for gv in grads_vars_g]
-train_op_g = opt.apply_gradients(grads_vars_g)
+
+# Add histograms for gradients.
+for grad, var in grads_vars_g:
+    if grad is not None:
+        summaries.append(tf.summary.histogram(var.op.name + '/gradients', grad))
+
+train_op_g = opt.apply_gradients(grads_vars_g, global_step)
+
+# Add histograms for trainable variables.
+for var in tf.trainable_variables():
+    summaries.append(tf.summary.histogram(var.op.name, var))
+
+# Track the moving averages of all trainable variables.
+variable_averages = tf.train.ExponentialMovingAverage(decay=0.999, num_updates=global_step)
+variable_averages_op = variable_averages.apply(tf.trainable_variables())
+
+train_op = tf.group(train_op_g, variable_averages_op)
 
 view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
                              for gv in grads_vars_g])
 view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 
-if isFirstTimeTrain:
-    old_var_G = []
-    graph1 = tf.Graph()
-    with graph1.as_default():
-        with tf.Session(graph=graph1) as sess1:
-            saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l2.meta'))
-            saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l2'))
-            old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-            old_var_G = sess1.run(old_var_G)
-
-saver = tf.train.Saver()
+# if isFirstTimeTrain:
+#     old_var_G = []
+#     graph1 = tf.Graph()
+#     with graph1.as_default():
+#         with tf.Session(graph=graph1) as sess1:
+#             saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l2.meta'))
+#             saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l2'))
+#             old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+#             old_var_G = sess1.run(old_var_G)
+variables_to_restore = variable_averages.variables_to_restore()
+saver = tf.train.Saver(variables_to_restore)
+summary_op = tf.summary.merge(summaries)
+summary_writer = tf.summary.FileWriter(model_path)
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
     # np.random.seed(42)
@@ -265,17 +295,18 @@ with tf.Session() as sess:
     num_batch = int(len(train_path) / batch_size)
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
+    sess.run(tf.global_variables_initializer())
 
     if isFirstTimeTrain:
-        sess.run(tf.global_variables_initializer())
-        updates = []
-        for i, item in enumerate(old_var_G):
-            updates.append(tf.assign(var_G[i], item))
-        sess.run(updates)
+        # updates = []
+        # for i, item in enumerate(old_var_G):
+        #     updates.append(tf.assign(var_G[i], item))
+        # sess.run(updates)
 
-        with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
-            iters = pickle.load(f)
+        # with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
+        #     iters = pickle.load(f)
 
+        iters = 0
         with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
             pickle.dump(iters, f, protocol=2)
         saver.save(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))
@@ -285,14 +316,13 @@ with tf.Session() as sess:
             iters = pickle.load(f)
 
     while iters < iters_c:
-        _, loss_g, weights_mean, grads_mean =\
-            sess.run([train_op_g, loss_G, view_weights, view_grads],
-                     feed_dict={is_training: True,
-                                global_step: iters})
+        _, loss_g, weights_mean, grads_mean, gs =\
+            sess.run([train_op, loss_G, view_weights, view_grads, global_step],
+                     feed_dict={is_training: True})
 
         print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
             int(iters / num_batch) + 1,
-            iters,
+            gs,  # iters,
             loss_g,
             weights_mean,
             grads_mean))
@@ -300,6 +330,8 @@ with tf.Session() as sess:
         iters += 1
 
         if iters % 100 == 0:
+            summary_str = sess.run(summary_op, feed_dict={is_training: True})
+            summary_writer.add_summary(summary_str, iters)
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))

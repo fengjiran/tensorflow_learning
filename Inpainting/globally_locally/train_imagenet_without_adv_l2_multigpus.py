@@ -369,7 +369,6 @@ def tower_loss(scope, images, images_with_hole, masks, split_batch_size, is_trai
     with tf.name_scope(scope):
         completed_images = completion_network(images_with_hole, is_training, split_batch_size)
         loss_recon = tf.reduce_mean(tf.square(masks * (images - completed_images)))
-
         loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     return loss_G
@@ -417,10 +416,11 @@ def average_gradients(tower_grads):
 
 def train():
     with tf.Graph().as_default(), tf.device('/cpu:0'):
-        # global_step = tf.get_variable(
-        #     'global_step', [],
-        #     initializer=tf.constant_initializer(0), trainable=False)
-        global_step = tf.placeholder(tf.int64)
+        global_step = tf.get_variable('global_step',
+                                      [],
+                                      tf.int32,
+                                      initializer=tf.constant_initializer(0),
+                                      trainable=False)
         filenames = tf.placeholder(tf.string, shape=[None])
         is_training = tf.placeholder(tf.bool)
 
@@ -457,7 +457,7 @@ def train():
             for i in range(num_gpus):
                 with tf.device('/gpu:{}'.format(i)):
                     with tf.name_scope('tower_{}'.format(i)) as scope:
-                        # Calculate the loss for one tower of the CIFAR model. This function
+                        # Calculate the loss for one tower of the model. This function
                         # constructs the entire model but shares the variables across
                         # all towers.
                         loss = tower_loss(scope=scope,
@@ -472,3 +472,28 @@ def train():
 
                         # Calculate the gradients for the batch of data on this tower.
                         grads_and_vars = opt.compute_gradients(loss)
+
+                        # Keep track of the gradients across all towers.
+                        tower_grads.append(grads_and_vars)
+
+        # We must calculate the mean of each gradient. Note that this is the
+        # synchronization point across all towers.
+        grads = average_gradients(tower_grads)
+
+        # Apply the gradients to adjust the shared variables.
+        apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
+
+        # Create a saver
+        saver = tf.train.Saver(tf.global_variables())
+
+        init = tf.global_variables_initializer()
+
+        # Start running operations on the Graph. allow_soft_placement must be set to
+        # True to build towers on GPU, as some of the ops do not have GPU
+        # implementations.
+        sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        sess.run(init)
+
+        iters = 0
+        while iters < iters_c:
+            sess.run([apply_gradient_op, loss])
