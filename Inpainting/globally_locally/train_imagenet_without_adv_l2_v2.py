@@ -20,10 +20,12 @@ if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\imagenet_train_path_win.pickle'
     g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2_v2'
+    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\models_without_adv_l2_v2\\events'
 elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/imagenet_train_path_linux.pickle'
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2_v2'
+    events_path = '/home/richard/TensorFlow_Learning/Inpainting/globally_locally/models_without_adv_l2_v2/events'
 
 isFirstTimeTrain = False
 batch_size = 32
@@ -285,7 +287,7 @@ view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 variables_to_restore = variable_averages.variables_to_restore()
 saver = tf.train.Saver(variables_to_restore)
 summary_op = tf.summary.merge(summaries)
-summary_writer = tf.summary.FileWriter(model_path)
+summary_writer = tf.summary.FileWriter(events_path)
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
     # np.random.seed(42)
