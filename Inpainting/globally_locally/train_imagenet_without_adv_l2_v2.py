@@ -178,7 +178,11 @@ def input_parse(img_path):
         gt_width = 128
 
         img_file = tf.read_file(img_path)
-        img_decoded = tf.image.decode_image(img_file, channels=3)
+        try:
+            img_decoded = tf.image.decode_image(img_file, channels=3)
+        except TypeError:
+            return None, None, None, None, None
+
         img = tf.cast(img_decoded, tf.float32)
         img /= 255.
         img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
@@ -290,11 +294,13 @@ summary_op = tf.summary.merge(summaries)
 summary_writer = tf.summary.FileWriter(events_path)
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
-    # np.random.seed(42)
+    np.random.seed(42)
     train_path.index = range(len(train_path))
     train_path = train_path.ix[np.random.permutation(len(train_path))]
     train_path = train_path[:]['image_path'].values.tolist()
     num_batch = int(len(train_path) / batch_size)
+
+    # print(train_path[728258:728290])
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
     sess.run(tf.global_variables_initializer())
@@ -318,25 +324,31 @@ with tf.Session() as sess:
             iters = pickle.load(f)
 
     while iters < iters_c:
-        _, loss_g, weights_mean, grads_mean, gs =\
-            sess.run([train_op, loss_G, view_weights, view_grads, global_step],
+        _, loss_g, gs =\
+            sess.run([train_op, loss_G, global_step],
                      feed_dict={is_training: True})
 
-        print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+        print('Epoch: {}, Iter: {}, loss_g: {}'.format(
             int(iters / num_batch) + 1,
             gs,  # iters,
-            loss_g,
-            weights_mean,
-            grads_mean))
+            loss_g))
 
         iters += 1
 
         if iters % 100 == 0:
-            summary_str = sess.run(summary_op, feed_dict={is_training: True})
-            summary_writer.add_summary(summary_str, iters)
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'models_without_adv_l2_v2'))
+
+            summary_str, weights_mean, grads_mean = sess.run([summary_op, view_weights, view_grads],
+                                                             feed_dict={is_training: True})
+            summary_writer.add_summary(summary_str, iters)
+            print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+                int(iters / num_batch) + 1,
+                gs,  # iters,
+                loss_g,
+                weights_mean,
+                grads_mean))
 
     # a = sess.run(iterator.get_next())
     # print(a[2].shape)
