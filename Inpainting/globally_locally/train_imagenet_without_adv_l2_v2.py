@@ -178,10 +178,7 @@ def input_parse(img_path):
         gt_width = 128
 
         img_file = tf.read_file(img_path)
-        try:
-            img_decoded = tf.image.decode_image(img_file, channels=3)
-        except TypeError:
-            return None, None, None, None, None
+        img_decoded = tf.image.decode_image(img_file, channels=3)
 
         img = tf.cast(img_decoded, tf.float32)
         img /= 255.
@@ -294,7 +291,7 @@ summary_op = tf.summary.merge(summaries)
 summary_writer = tf.summary.FileWriter(events_path)
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
-    np.random.seed(42)
+    # np.random.seed(42)
     train_path.index = range(len(train_path))
     train_path = train_path.ix[np.random.permutation(len(train_path))]
     train_path = train_path[:]['image_path'].values.tolist()
