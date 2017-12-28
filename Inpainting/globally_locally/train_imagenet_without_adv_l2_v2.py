@@ -297,8 +297,6 @@ with tf.Session() as sess:
     train_path = train_path[:]['image_path'].values.tolist()
     num_batch = int(len(train_path) / batch_size)
 
-    # print(train_path[728258:728290])
-
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
     sess.run(tf.global_variables_initializer())
 
