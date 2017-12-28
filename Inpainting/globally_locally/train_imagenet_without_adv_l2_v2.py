@@ -14,7 +14,6 @@ from utils import DeconvLayer
 from utils import DilatedConv2dLayer
 from utils import BatchNormLayer
 
-# from models import completion_network
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\globally_locally\\imagenet_train_path_win.pickle'
