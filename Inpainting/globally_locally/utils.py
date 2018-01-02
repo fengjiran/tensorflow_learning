@@ -309,7 +309,6 @@ if __name__ == '__main__':
     # plt.imshow(crop)
 
     # plt.show()
-    #
 
     train_path = pd.read_pickle(compress_path)
     train_path.index = range(len(train_path))
