@@ -8,15 +8,18 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from models import completion_network
+
 
 if platform.system() == 'Windows':
-    pass
+    compress_path = compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
 
 elif platform.system() == 'Linux':
-    pass
+    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
 
-elif platform.system() == 'Darwin':
-    pass
+
+isFirstTimeTrain = True
+batch_size = 64
 
 
 def input_parse(img_path):
@@ -63,3 +66,22 @@ def input_parse(img_path):
                                   dtype=tf.int32)
 
         return ori_image, image_with_hole, mask, x_loc, y_loc
+
+
+is_training = tf.placeholder(tf.bool)
+global_step = tf.get_variable('global_step',
+                              [],
+                              tf.int32,
+                              initializer=tf.constant_initializer(0),
+                              trainable=False)
+filenames = tf.placeholder(tf.string, shape=[None])
+
+dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = dataset.map(input_parse)
+dataset = dataset.batch(batch_size)
+dataset = dataset.repeat()
+iterator = dataset.make_initializable_iterator()
+
+images, images_with_hole, masks, _, _ = iterator.get_next()
+completed_images = completion_network(images_with_hole, is_training)
+var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
