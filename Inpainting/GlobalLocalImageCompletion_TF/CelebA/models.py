@@ -9,9 +9,9 @@ from utils import BatchNormLayer
 from utils import FCLayer
 
 
-def completion_network(images, is_training):
+def completion_network(images, is_training, batch_size):
     """Construct completion network."""
-    batch_size = images.get_shape().as_list()[0]
+    # batch_size = images.get_shape().as_list()[0]
     conv_layers = []
     bn_layers = []
 
