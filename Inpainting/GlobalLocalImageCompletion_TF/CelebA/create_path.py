@@ -20,3 +20,7 @@ if not os.path.exists(compress_path):
     paths = np.hstack(paths)
     trainset = pd.DataFrame({'image_path': paths})
     trainset.to_pickle(compress_path)
+
+train_path = pd.read_pickle(compress_path)
+print(len(train_path))
+# train_path.index = range(len(train_path))
