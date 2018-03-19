@@ -83,5 +83,13 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
 images, images_with_hole, masks, _, _ = iterator.get_next()
-completed_images = completion_network(images_with_hole, is_training)
+completed_images = completion_network(images_with_hole, is_training, batch_size)
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+
+with tf.Session() as sess:
+    train_path = pd.read_pickle(compress_path)
+    train_path.index = range(len(train_path))
+    train_path = train_path.ix[np.random.permutation(len(train_path))]
+    train_path = train_path[:]['image_path'].values.tolist()
+    num_batch = int(len(train_path) / batch_size)
+    print(num_batch)
