@@ -19,7 +19,10 @@ elif platform.system() == 'Linux':
 
 
 isFirstTimeTrain = True
-batch_size = 64
+batch_size = 32
+weight_decay_rate = 1e-4
+init_lr = 3e-4
+lr_decay_steps = 1000
 
 
 def input_parse(img_path):
@@ -84,7 +87,48 @@ iterator = dataset.make_initializable_iterator()
 
 images, images_with_hole, masks, _, _ = iterator.get_next()
 completed_images = completion_network(images_with_hole, is_training, batch_size)
+completed_images = (1 - masks) * images + masks * completed_images
+# loss_recon = tf.reduce_mean(tf.nn.l2_loss(completed_images - images))
+loss_recon = tf.reduce_mean(tf.square(completed_images - images))
+loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+
+summaries = tf.get_collection(tf.GraphKeys.SUMMARIES)
+
+# Add a summary to track the loss.
+summaries.append(tf.summary.scalar('generator_loss', loss_G))
+
+lr = tf.train.exponential_decay(learning_rate=init_lr,
+                                global_step=global_step,
+                                decay_steps=lr_decay_steps,
+                                decay_rate=0.992)
+
+# Add a summary to track the learning rate.
+summaries.append(tf.summary.scalar('learning_rate', lr))
+
+opt = tf.train.AdamOptimizer(lr, beta1=0.5)
+grads_vars_g = opt.compute_gradients(loss_G, var_G)
+
+# Add histograms for gradients.
+for grad, var in grads_vars_g:
+    if grad is not None:
+        summaries.append(tf.summary.histogram(var.op.name + '/gradients', grad))
+
+train_op_g = opt.apply_gradients(grads_vars_g, global_step)
+
+# Add histograms for trainable variables.
+for var in tf.trainable_variables():
+    summaries.append(tf.summary.histogram(var.op.name, var))
+
+# Track the moving averages of all trainable variables.
+variable_averages = tf.train.ExponentialMovingAverage(decay=0.999, num_updates=global_step)
+variable_averages_op = variable_averages.apply(tf.trainable_variables())
+
+train_op = tf.group(train_op_g, variable_averages_op)
+
+view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
+                             for gv in grads_vars_g])
+view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
@@ -92,4 +136,12 @@ with tf.Session() as sess:
     train_path = train_path.ix[np.random.permutation(len(train_path))]
     train_path = train_path[:]['image_path'].values.tolist()
     num_batch = int(len(train_path) / batch_size)
-    print(num_batch)
+
+    sess.run(iterator.initializer, feed_dict={filenames: train_path})
+    sess.run(tf.global_variables_initializer())
+
+    iters = 0
+    while iters < 5000:
+        _, loss_g, gs = sess.run([train_op, loss_G, global_step],
+                                 feed_dict={is_training: True})
+        print(loss_g)
