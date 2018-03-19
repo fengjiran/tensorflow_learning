@@ -22,5 +22,10 @@ if not os.path.exists(compress_path):
     trainset.to_pickle(compress_path)
 
 train_path = pd.read_pickle(compress_path)
+
+train_path.index = range(len(train_path))
+train_path = train_path.ix[np.random.permutation(len(train_path))]
+train_path = train_path[:]['image_path'].values.tolist()
+
 print(len(train_path))
 # train_path.index = range(len(train_path))
