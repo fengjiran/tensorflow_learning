@@ -87,7 +87,11 @@ filenames = tf.placeholder(tf.string, shape=[None])
 
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
-dataset = dataset.batch(batch_size)
+
+# a way to prevent the dataset from producing the final batch which has incomplete batch size
+# https://github.com/tensorflow/tensorflow/issues/13161
+dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+# dataset = dataset.batch(batch_size)
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
