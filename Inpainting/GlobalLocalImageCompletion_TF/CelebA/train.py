@@ -13,16 +13,22 @@ from models import completion_network
 
 if platform.system() == 'Windows':
     compress_path = compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
+    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l2\\events'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l2'
 
 elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
+    events_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l2/events'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l2'
 
 
 isFirstTimeTrain = True
+# isFirstTimeTrain = False
 batch_size = 32
 weight_decay_rate = 1e-4
 init_lr = 3e-4
 lr_decay_steps = 1000
+iters_c = 90000
 
 
 def input_parse(img_path):
@@ -130,6 +136,11 @@ view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
                              for gv in grads_vars_g])
 view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
 
+variables_to_restore = variable_averages.variables_to_restore()
+saver = tf.train.Saver(variables_to_restore)
+summary_op = tf.summary.merge(summaries)
+summary_writer = tf.summary.FileWriter(events_path)
+
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
     train_path.index = range(len(train_path))
@@ -140,8 +151,38 @@ with tf.Session() as sess:
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
     sess.run(tf.global_variables_initializer())
 
-    iters = 0
-    while iters < 5000:
-        _, loss_g, gs = sess.run([train_op, loss_G, global_step],
-                                 feed_dict={is_training: True})
-        print(loss_g)
+    if isFirstTimeTrain:
+        iters = 0
+        with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+            pickle.dump(iters, f, protocol=2)
+        saver.save(sess, os.path.join(model_path, 'models_without_adv_l2'))
+    else:
+        saver.restore(sess, os.path.join(model_path, 'models_without_adv_l2'))
+        with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+            iters = pickle.load(f)
+
+    while iters < iters_c:
+        _, loss_g, gs, lr_view = sess.run([train_op, loss_G, global_step, lr],
+                                          feed_dict={is_training: True})
+        print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
+            int(iters / num_batch) + 1,
+            gs,  # iters,
+            loss_g,
+            lr_view))
+
+        iters += 1
+
+        if iters % 100 == 0:
+            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                pickle.dump(iters, f, protocol=2)
+            saver.save(sess, os.path.join(model_path, 'models_without_adv_l2'))
+
+            summary_str, weights_mean, grads_mean = sess.run([summary_op, view_weights, view_grads],
+                                                             feed_dict={is_training: True})
+            summary_writer.add_summary(summary_str, iters)
+            print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+                int(iters / num_batch) + 1,
+                gs,  # iters,
+                loss_g,
+                weights_mean,
+                grads_mean))
