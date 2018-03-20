@@ -22,7 +22,8 @@ elif platform.system() == 'Linux':
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
 
 
-isFirstTimeTrain = False
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 32
 weight_decay_rate = 1e-4
 init_lr = 3e-4
@@ -166,12 +167,13 @@ with tf.Session() as sess:
             iters = pickle.load(f)
 
     while iters < iters_c:
-        _, loss_g, gs = sess.run([train_op, loss_G, global_step],
-                                 feed_dict={is_training: True})
-        print('Epoch: {}, Iter: {}, loss_g: {}'.format(
+        _, loss_g, gs, lr_view = sess.run([train_op, loss_G, global_step, lr],
+                                          feed_dict={is_training: True})
+        print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
             int(iters / num_batch) + 1,
             gs,  # iters,
-            loss_g))
+            loss_g,
+            lr_view))
 
         iters += 1
 
