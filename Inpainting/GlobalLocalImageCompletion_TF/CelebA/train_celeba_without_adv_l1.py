@@ -22,8 +22,8 @@ elif platform.system() == 'Linux':
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
 
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 32
 weight_decay_rate = 1e-4
 init_lr = 3e-4
