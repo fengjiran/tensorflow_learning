@@ -57,7 +57,7 @@ def erase_img(img):
         cv2.imshow('image', img_show)
         # cv2.imshow('mask', mask)
         k = cv2.waitKey(1) & 0xFF
-        if k == ord('\n'):  # enter
+        if k == ord('q'):  # enter
             break
 
     test_img = img / 127.5 - 1
