@@ -36,7 +36,7 @@ def erase_img(img):
             cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
 
     cv2.namedWindow('image')
-    cv2.namedWindow('mask')
+    # cv2.namedWindow('mask')
     cv2.setMouseCallback('image', erase_rect)
     cv2.setMouseCallback('mask', erase_rect)
     mask = np.zeros(img.shape)
@@ -44,9 +44,9 @@ def erase_img(img):
     while True:
         img_show = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         cv2.imshow('image', img_show)
-        cv2.imshow('mask', mask)
+        # cv2.imshow('mask', mask)
         k = cv2.waitKey(1) & 0xFF
-        if k == ord('q'):
+        if k == ord('\r'):  # enter
             break
 
     test_img = img / 127.5 - 1
@@ -55,25 +55,18 @@ def erase_img(img):
     test_img = test_img * (1 - test_mask) + test_mask
 
     cv2.destroyAllWindows()
-    # return test_img, test_mask
     return np.tile(test_img[np.newaxis, ...], [batch_size, 1, 1, 1]), np.tile(test_mask[np.newaxis, ...], [batch_size, 1, 1, 1])
 
 
 def test(sess):
     img = cv2.imread(img_path)
-    # cv2.imshow('img', img)
-    # cv2.waitKey()
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     height, width = img.shape[0], img.shape[1]
 
-    # orig_test = 2 * img / 255. - 1
     orig_test = img / 127.5 - 1
     orig_test = np.tile(orig_test[np.newaxis, ...], [batch_size, 1, 1, 1])
     orig_test = orig_test.astype(np.float32)
-
-    # cv2.imshow('orig', cv2.cvtColor((orig_test[0] + 1) / 2, cv2.COLOR_BGR2RGB))
-    # cv2.waitKey()
 
     test_img, test_mask = erase_img(img)
     test_img = test_img.astype(np.float32)
@@ -86,29 +79,26 @@ def test(sess):
     variables_to_restore = variable_averages.variables_to_restore()
 
     saver = tf.train.Saver(variables_to_restore)
-    # last_ckpt = tf.train.latest_checkpoint(checkpoint_path)
     saver.restore(sess, checkpoint_path)
-    # ckpt_name = str(last_ckpt)
-    # print('Loaded model file from' + ckpt_name)
+    # sess.run(tf.global_variables_initializer())
 
     res_image = sess.run(res_image, feed_dict={x: test_img,
                                                is_training: False})
+
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
-    res_image = np.asarray(res_image)
+    res_image = res_image.astype(np.float32)
     # print(res_image.min(), res_image.max())
-    print(res_image.shape)
+    # print(res_image.shape)
     orig = (orig_test[0] + 1) / 2
     test = (test_img[0] + 1) / 2
     recon = (res_image[0] + 1) / 2
 
-    orig = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
-    test = cv2.cvtColor(test, cv2.COLOR_BGR2RGB)
-    recon = cv2.cvtColor(recon, cv2.COLOR_BGR2RGB)
+    # orig = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
+    # test = cv2.cvtColor(test, cv2.COLOR_BGR2RGB)
+    # recon = cv2.cvtColor(recon, cv2.COLOR_BGR2RGB)
 
     res = np.hstack([orig, test, recon])
-    # print(res.shape)
-    # res = (res * 255.).astype(np.uint8)
-    # res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
+    res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
 
     cv2.imshow('result', res)
     cv2.waitKey()
