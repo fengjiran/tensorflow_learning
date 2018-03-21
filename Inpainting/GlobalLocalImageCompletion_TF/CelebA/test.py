@@ -94,17 +94,23 @@ def test(sess):
     res_image = sess.run(res_image, feed_dict={x: test_img,
                                                is_training: False})
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
-    # print(res_image.shape)
+    res_image = np.asarray(res_image)
+    # print(res_image.min(), res_image.max())
+    print(res_image.shape)
     orig = (orig_test[0] + 1) / 2
     test = (test_img[0] + 1) / 2
     recon = (res_image[0] + 1) / 2
+
+    orig = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
+    test = cv2.cvtColor(test, cv2.COLOR_BGR2RGB)
+    recon = cv2.cvtColor(recon, cv2.COLOR_BGR2RGB)
 
     res = np.hstack([orig, test, recon])
     # print(res.shape)
     # res = (res * 255.).astype(np.uint8)
     # res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
 
-    cv2.imshow('result', orig)
+    cv2.imshow('result', res)
     cv2.waitKey()
     print('Done.')
 
