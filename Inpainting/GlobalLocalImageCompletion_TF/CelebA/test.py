@@ -49,7 +49,7 @@ def erase_img(img):
         if k == ord('q'):
             break
 
-    test_img = 2 * img / 255. - 1
+    test_img = img / 127.5 - 1
     test_mask = mask / 255.
 
     test_img = test_img * (1 - test_mask) + test_mask
@@ -61,13 +61,19 @@ def erase_img(img):
 
 def test(sess):
     img = cv2.imread(img_path)
+    # cv2.imshow('img', img)
+    # cv2.waitKey()
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     height, width = img.shape[0], img.shape[1]
 
-    orig_test = 2 * img / 255. - 1
+    # orig_test = 2 * img / 255. - 1
+    orig_test = img / 127.5 - 1
     orig_test = np.tile(orig_test[np.newaxis, ...], [batch_size, 1, 1, 1])
     orig_test = orig_test.astype(np.float32)
+
+    # cv2.imshow('orig', cv2.cvtColor((orig_test[0] + 1) / 2, cv2.COLOR_BGR2RGB))
+    # cv2.waitKey()
 
     test_img, test_mask = erase_img(img)
     test_img = test_img.astype(np.float32)
@@ -76,8 +82,10 @@ def test(sess):
     is_training = tf.placeholder(tf.bool)
     x = tf.placeholder(tf.float32, [batch_size, height, width, 3])
     res_image = completion_network(x, is_training, batch_size)
+    variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    variables_to_restore = variable_averages.variables_to_restore()
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(variables_to_restore)
     # last_ckpt = tf.train.latest_checkpoint(checkpoint_path)
     saver.restore(sess, checkpoint_path)
     # ckpt_name = str(last_ckpt)
@@ -86,11 +94,17 @@ def test(sess):
     res_image = sess.run(res_image, feed_dict={x: test_img,
                                                is_training: False})
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
+    # print(res_image.shape)
+    orig = (orig_test[0] + 1) / 2
+    test = (test_img[0] + 1) / 2
+    recon = (res_image[0] + 1) / 2
 
-    res = np.hstack([orig_test, test_img, res_image])
-    res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
+    res = np.hstack([orig, test, recon])
+    # print(res.shape)
+    # res = (res * 255.).astype(np.uint8)
+    # res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
 
-    cv2.imshow('result', res)
+    cv2.imshow('result', orig)
     cv2.waitKey()
     print('Done.')
 
@@ -103,12 +117,13 @@ if __name__ == '__main__':
     # # print(x.shape, y.shape)
     # height, width = x.shape[1], x.shape[2]
 
-    is_training = tf.placeholder(tf.bool)
-    test_image = tf.placeholder(tf.float32, [batch_size, 218, 178, 3])
-    res_image = completion_network(test_image, is_training, 1)
-    saver = tf.train.Saver()
+    # is_training = tf.placeholder(tf.bool)
+    # test_image = tf.placeholder(tf.float32, [batch_size, 218, 178, 3])
+    # res_image = completion_network(test_image, is_training, 1)
+    # variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    # variables_to_restore = variable_averages.variables_to_restore()
+    # saver = tf.train.Saver(variables_to_restore)
 
     with tf.Session() as sess:
-        saver.restore(sess, checkpoint_path)
-        # print('Start Testing...')
-        # test(sess)
+        print('Start Testing...')
+        test(sess)
