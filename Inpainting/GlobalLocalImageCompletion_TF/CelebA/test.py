@@ -8,7 +8,7 @@ drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
 color = (255, 255, 255)
 size = 10
-checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l2\\models_without_adv_l2'
+checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\models_without_adv_l1'
 # img_path = '/Users/apple/Desktop/000013.png'
 img_path = 'C:\\Users\\Richard\\Desktop\\000013.png'
 batch_size = 1
@@ -87,15 +87,10 @@ def test(sess):
 
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
     res_image = res_image.astype(np.float32)
-    # print(res_image.min(), res_image.max())
-    # print(res_image.shape)
+
     orig = (orig_test[0] + 1) / 2
     test = (test_img[0] + 1) / 2
     recon = (res_image[0] + 1) / 2
-
-    # orig = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
-    # test = cv2.cvtColor(test, cv2.COLOR_BGR2RGB)
-    # recon = cv2.cvtColor(recon, cv2.COLOR_BGR2RGB)
 
     res = np.hstack([orig, test, recon])
     res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
