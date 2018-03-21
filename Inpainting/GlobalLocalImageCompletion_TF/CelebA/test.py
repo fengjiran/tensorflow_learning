@@ -1,6 +1,8 @@
+from __future__ import print_function
 import cv2
 import tensorflow as tf
 import numpy as np
+import platform
 
 from models import completion_network
 
@@ -8,10 +10,19 @@ drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
 color = (255, 255, 255)
 size = 10
-checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\models_without_adv_l1'
-# img_path = '/Users/apple/Desktop/000013.png'
-img_path = 'C:\\Users\\Richard\\Desktop\\000013.png'
 batch_size = 1
+
+if platform.system() == 'Windows':
+    checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\models_without_adv_l1'
+    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\000013.png'
+
+elif platform.system() == 'Linux':
+    checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1/models_without_adv_l1'
+    img_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/000013.png'
+
+elif platform.system() == 'Darwin':
+    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1/models_without_adv_l1'
+    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/000013.png'
 
 
 def erase_img(img):
