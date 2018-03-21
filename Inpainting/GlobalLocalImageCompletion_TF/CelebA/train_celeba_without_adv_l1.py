@@ -160,9 +160,9 @@ with tf.Session() as sess:
         iters = 0
         with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
             pickle.dump(iters, f, protocol=2)
-        saver.save(sess, os.path.join(model_path, 'models_without_adv_l2'))
+        saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
     else:
-        saver.restore(sess, os.path.join(model_path, 'models_without_adv_l2'))
+        saver.restore(sess, os.path.join(model_path, 'models_without_adv_l1'))
         with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
             iters = pickle.load(f)
 
@@ -180,7 +180,7 @@ with tf.Session() as sess:
         if iters % 100 == 0:
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(model_path, 'models_without_adv_l2'))
+            saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
 
             summary_str, weights_mean, grads_mean = sess.run([summary_op, view_weights, view_grads],
                                                              feed_dict={is_training: True})
