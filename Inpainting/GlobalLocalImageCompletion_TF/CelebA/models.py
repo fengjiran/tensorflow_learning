@@ -277,7 +277,7 @@ if __name__ == '__main__':
     local_inputs = tf.placeholder(tf.float32, [batch_size, 128, 128, 3], name='local_inputs')
     train_flag = tf.placeholder(tf.bool)
 
-    y = completion_network(x, train_flag)
+    y = completion_network(x, train_flag, batch_size)
     # y = global_discriminator(x, train_flag)
     # y = local_discriminator(x, train_flag)
     # y = combine_discriminator(global_inputs, local_inputs, train_flag)
