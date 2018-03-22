@@ -23,5 +23,6 @@ Inpainting/globally_locally/test_images
 Inpainting/globally_locally/models_without_adv_l2_v2
 Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l2
 Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1
+Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_with_global_adv_l1
 
 *.pickle
