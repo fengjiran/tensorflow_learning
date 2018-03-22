@@ -261,7 +261,7 @@ with tf.Session() as sess:
         if iters < iters_d:
             _, loss_d, gs, lr_view_d = sess.run([train_op_d, loss_D, global_step_d, lr_d],
                                                 feed_dict={is_training: True})
-            print('Epoch: {}, Iter: {}, loss_d: {}, lr: {}'.format(
+            print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_d,
@@ -270,7 +270,7 @@ with tf.Session() as sess:
             _, loss_g, gs, lr_view_g = sess.run([train_op_g, loss_G, global_step_g, lr_g],
                                                 feed_dict={is_training: True})
 
-            print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
+            print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_g,
