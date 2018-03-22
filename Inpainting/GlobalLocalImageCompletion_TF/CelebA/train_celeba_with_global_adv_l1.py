@@ -44,11 +44,12 @@ def input_parse(img_path):
         img_decoded = tf.image.decode_image(img_file, channels=3)
 
         img = tf.cast(img_decoded, tf.float32)
-        img /= 255.
+        # img /= 255.
         img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
 
         # input image range from -1 to 1
-        img = 2 * img - 1
+        # img = 2 * img - 1
+        img = img / 127.5 - 1
 
         ori_image = tf.identity(img)
 
@@ -134,3 +135,19 @@ def global_discriminator(images, is_training, reuse=None):
             tf.add_to_collection('global_dis_params_bn', bn_layer.beta)
 
     return fc7.output[:, 0]
+
+
+is_training = tf.placeholder(tf.bool)
+global_step = tf.get_variable('global_step',
+                              [],
+                              tf.int32,
+                              initializer=tf.constant_initializer(0),
+                              trainable=False)
+filenames = tf.placeholder(tf.string, shape=[None])
+
+dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = dataset.map(input_parse)
+dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+dataset = dataset.repeat()
+iterator = dataset.make_initializable_iterator()
+images, images_with_hole, masks, _, _ = iterator.get_next()
