@@ -24,6 +24,20 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_global_local_l1'
 
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
+batch_size = 32
+weight_decay_rate = 1e-4
+init_lr_g = 3e-4
+init_lr_d = 3e-4
+lr_decay_steps = 1000
+iters_total = 100000
+iters_d = 10000
+alpha = 1.0
+
+gt_height = 96
+gt_width = 96
+
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
@@ -70,3 +84,47 @@ def input_parse(img_path):
                                   dtype=tf.int32)
 
         return ori_image, image_with_hole, mask, x_loc, y_loc
+
+
+is_training = tf.placeholder(tf.bool)
+global_step_g = tf.get_variable('global_step_g',
+                                [],
+                                tf.int32,
+                                initializer=tf.constant_initializer(0),
+                                trainable=False)
+
+global_step_d = tf.get_variable('global_step_d',
+                                [],
+                                tf.int32,
+                                initializer=tf.constant_initializer(0),
+                                trainable=False)
+
+filenames = tf.placeholder(tf.string, shape=[None])
+dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = dataset.map(input_parse)
+dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+dataset = dataset.repeat()
+iterator = dataset.make_initializable_iterator()
+images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
+
+completed_images = completion_network(images_with_hole, is_training, batch_size)
+completed_images = (1 - masks) * images + masks * completed_images
+
+local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
+                                                                                args[1],
+                                                                                args[2],
+                                                                                gt_height,
+                                                                                gt_width),
+                                  elems=(completed_images, y_locs, x_locs),
+                                  dtype=tf.float32)
+local_dis_inputs_real = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
+                                                                                args[1],
+                                                                                args[2],
+                                                                                gt_height,
+                                                                                gt_width),
+                                  elems=(images, y_locs, x_locs),
+                                  dtype=tf.float32)
+
+print(images.get_shape())
+print(local_dis_inputs_fake.get_shape())
+print(local_dis_inputs_real.get_shape())
