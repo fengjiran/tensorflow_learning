@@ -18,7 +18,7 @@ if platform.system() == 'Windows':
     g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_with_global_adv_l1'
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/imagenet_train_path_linux.pickle'
+    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_with_global_adv_l1'
 
@@ -181,7 +181,7 @@ loss_adv_G = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_n
 loss_adv_D = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=adv_all, labels=labels_D))
 
 loss_G = loss_recon + alpha * loss_adv_G + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
-loss_D = alpha * loss_adv_D + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
+loss_D = alpha * loss_adv_D  # + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_dis'))
 
 lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                   global_step=global_step_g,
@@ -239,7 +239,7 @@ with tf.Session() as sess:
     num_batch = int(len(train_path) / batch_size)
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
-    sess.run(tf.global_variables_initializer())
+    # sess.run(tf.global_variables_initializer())
 
     if isFirstTimeTrain:
         sess.run(tf.global_variables_initializer())
