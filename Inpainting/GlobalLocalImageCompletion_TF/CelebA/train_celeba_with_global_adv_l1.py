@@ -22,8 +22,8 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_with_global_adv_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 32
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
@@ -210,11 +210,12 @@ view_d_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_d])
 
 # Track the moving averages of all trainable variables.
 variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
-g_variable_averages_op = variable_averages.apply(tf.trainable_variables('generator'))
-d_variable_averages_op = variable_averages.apply(tf.trainable_variables('global_discriminator'))
+variable_averages_op = variable_averages.apply(tf.trainable_variables())
+# g_variable_averages_op = variable_averages.apply(tf.trainable_variables('generator'))
+# d_variable_averages_op = variable_averages.apply(tf.trainable_variables('global_discriminator'))
 
-train_op_g = tf.group(train_g, g_variable_averages_op)
-train_op_d = tf.group(train_d, d_variable_averages_op)
+train_op_g = tf.group(train_g, variable_averages_op)
+train_op_d = tf.group(train_d, variable_averages_op)
 
 variables_to_restore = variable_averages.variables_to_restore()
 saver = tf.train.Saver(variables_to_restore)
@@ -239,10 +240,10 @@ with tf.Session() as sess:
     num_batch = int(len(train_path) / batch_size)
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
-    # sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer())
 
     if isFirstTimeTrain:
-        sess.run(tf.global_variables_initializer())
+        # sess.run(tf.global_variables_initializer())
         updates = []
         for i, item in enumerate(old_var_G):
             updates.append(tf.assign(var_G[i], item))
@@ -253,6 +254,7 @@ with tf.Session() as sess:
             pickle.dump(iters, f, protocol=2)
         saver.save(sess, os.path.join(model_path, 'models_with_global_adv_l1'))
     else:
+        # sess.run(tf.global_variables_initializer())
         saver.restore(sess, os.path.join(model_path, 'models_with_global_adv_l1'))
         with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
             iters = pickle.load(f)
