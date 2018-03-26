@@ -264,6 +264,4 @@ with tf.Session() as sess:
                                                                                    d_grads_mean))
 
 
-print(images.get_shape())
-print(local_dis_inputs_fake.get_shape())
-print(local_dis_inputs_real.get_shape())
+print('done.')
