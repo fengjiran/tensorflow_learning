@@ -158,37 +158,37 @@ def global_discriminator(images, is_training, reuse=None):
     with tf.variable_scope('global_discriminator', reuse=reuse):
         conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
         bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
-        bn1 = tf.nn.relu(bn1_layer.output)
+        bn1 = tf.nn.leaky_relu(bn1_layer.output)
         conv_layers.append(conv1)
         bn_layers.append(bn1_layer)
 
         conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
-        bn2 = tf.nn.relu(bn2_layer.output)
+        bn2 = tf.nn.leaky_relu(bn2_layer.output)
         conv_layers.append(conv2)
         bn_layers.append(bn2_layer)
 
         conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
-        bn3 = tf.nn.relu(bn3_layer.output)
+        bn3 = tf.nn.leaky_relu(bn3_layer.output)
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
         conv4 = Conv2dLayer(bn3, [5, 5, 256, 512], stride=2, name='conv4')
         bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
-        bn4 = tf.nn.relu(bn4_layer.output)
+        bn4 = tf.nn.leaky_relu(bn4_layer.output)
         conv_layers.append(conv4)
         bn_layers.append(bn4_layer)
 
         conv5 = Conv2dLayer(bn4, [5, 5, 512, 512], stride=2, name='conv5')
         bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
-        bn5 = tf.nn.relu(bn5_layer.output)
+        bn5 = tf.nn.leaky_relu(bn5_layer.output)
         conv_layers.append(conv5)
         bn_layers.append(bn5_layer)
 
         conv6 = Conv2dLayer(bn5, [5, 5, 512, 512], stride=2, name='conv6')
         bn6_layer = BatchNormLayer(conv6.output, is_training, name='bn6')
-        bn6 = tf.nn.relu(bn6_layer.output)
+        bn6 = tf.nn.leaky_relu(bn6_layer.output)
         conv_layers.append(conv6)
         bn_layers.append(bn6_layer)
 
@@ -211,4 +211,48 @@ def global_discriminator(images, is_training, reuse=None):
 
 def markovian_discriminator(images, is_training, reuse=None):
     """Construct markovian discriminator."""
-    pass
+    conv_layers = []
+    bn_layers = []
+    with tf.variable_scope('markovian_discriminator', reuse=reuse):
+        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
+        bn1 = tf.nn.leaky_relu(bn1_layer.output, alpha=0.2)
+        conv_layers.append(conv1)
+        bn_layers.append(bn1_layer)
+
+        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
+        bn2 = tf.nn.leaky_relu(bn2_layer.output, alpha=0.2)
+        conv_layers.append(conv2)
+        bn_layers.append(bn2_layer)
+
+        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
+        bn3 = tf.nn.leaky_relu(bn3_layer.output, alpha=0.2)
+        conv_layers.append(conv3)
+        bn_layers.append(bn3_layer)
+
+        conv4 = Conv2dLayer(bn3, [5, 5, 256, 1], stride=1, name='conv4')
+        conv_layers.append(conv4)
+
+        print('Print the local discriminator network constructure:')
+        for conv_layer in conv_layers:
+            tf.add_to_collection('local_dis_params_conv', conv_layer.w)
+            tf.add_to_collection('local_dis_params_conv', conv_layer.b)
+            tf.add_to_collection('weight_decay_local_dis', tf.nn.l2_loss(conv_layer.w))
+            print('conv_{} shape:{}'.format(conv_layers.index(conv_layer) + 1, conv_layer.output_shape))
+
+        for bn_layer in bn_layers:
+            tf.add_to_collection('local_dis_params_bn', bn_layer.scale)
+            tf.add_to_collection('local_dis_params_bn', bn_layer.beta)
+
+    return conv4.output
+
+
+if __name__ == '__main__':
+    batch_size = 100
+    imgs = tf.placeholder(tf.float32, [100, 128, 128, 3])
+    train_flag = tf.placeholder(tf.bool)
+
+    result = markovian_discriminator(imgs, train_flag)
+    print(result.get_shape())
