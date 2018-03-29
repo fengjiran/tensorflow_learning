@@ -130,7 +130,7 @@ labels_G = tf.ones([batch_size])
 labels_D = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
 
 adv_pos = combine_discriminator(images, local_dis_inputs_real, is_training)
-adv_neg = combine_discriminator(completed_images, local_dis_inputs_fake, is_training)
+adv_neg = combine_discriminator(completed_images, local_dis_inputs_fake, is_training, reuse=True)
 adv_all = tf.concat([adv_pos, adv_neg], axis=0)
 
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
