@@ -334,6 +334,7 @@ def train():
                                     tf.int32,
                                     initializer=tf.constant_initializer(0),
                                     trainable=False)
+
     filenames = tf.placeholder(tf.string, shape=[None])
     dataset = tf.data.Dataset.from_tensor_slices(filenames)
     dataset = dataset.map(input_parse)
@@ -414,6 +415,51 @@ def train():
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
+
+    grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
+    train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
+
+    grads_vars_d = opt_d.compute_gradients(loss_d, var_d)
+    train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
+
+    view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
+    view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
+
+    view_d_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_d])
+    view_d_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_d])
+
+    # Track the moving averages of all trainable variables.
+    variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    variable_averages_op = variable_averages.apply(tf.trainable_variables())
+
+    train_op_g = tf.group(train_g, variable_averages_op)
+    train_op_d = tf.group(train_d, variable_averages_op)
+
+    variables_to_restore = variable_averages.variables_to_restore()
+    saver = tf.train.Saver(variables_to_restore)
+
+    if isFirstTimeTrain:
+        old_var_G = []
+        graph1 = tf.Graph()
+        with graph1.as_default():
+            with tf.Session(graph=graph1) as sess1:
+                saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l1.meta'))
+                saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
+                old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+                old_var_G = sess1.run(old_var_G)
+
+    with tf.Session() as sess:
+        # load trainset
+        train_path = pd.read_pickle(compress_path)
+        train_path.index = range(len(train_path))
+        train_path = train_path.ix[np.random.permutation(len(train_path))]
+        train_path = train_path[:]['image_path'].values.tolist()
+        num_batch = int(len(train_path) / batch_size)
+
+        sess.run(iterator.initializer, feed_dict={filenames: train_path})
+        sess.run(tf.global_variables_initializer())
+
+        # if isFirstTimeTrain:
 
 
 if __name__ == '__main__':
