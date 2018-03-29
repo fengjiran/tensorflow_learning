@@ -33,8 +33,8 @@ lr_decay_steps = 1000
 iters_total = 100000
 iters_d = 10000
 alpha_rec = 0.995
-alpha_glo = 0.0025
-alpha_mp = 0.0025
+alpha_global = 0.0025
+alpha_local = 0.0025
 
 gt_height = 96
 gt_width = 96
@@ -278,7 +278,7 @@ def global_discriminator(images, is_training, reuse=None):
             tf.add_to_collection('global_dis_params_bn', bn_layer.scale)
             tf.add_to_collection('global_dis_params_bn', bn_layer.beta)
 
-    return fc7.output
+    return fc7.output[:, 0]
 
 
 def markovian_discriminator(images, is_training, reuse=None):
@@ -362,6 +362,58 @@ def train():
 
     # loss function
     loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+
+    global_dis_outputs_real = global_discriminator(images, is_training)
+    global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
+    global_dis_outputs_all = tf.concat([global_dis_outputs_real, global_dis_outputs_fake], axis=0)
+
+    local_dis_outputs_real = markovian_discriminator(local_dis_inputs_real, is_training)
+    local_dis_outputs_fake = markovian_discriminator(local_dis_inputs_fake, is_training, reuse=True)
+    local_dis_outputs_all = tf.concat([local_dis_outputs_real, local_dis_outputs_fake], axis=0)
+
+    labels_global_dis = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
+    labels_local_dis = tf.concat([tf.ones_like(local_dis_outputs_real),
+                                  tf.zeros_like(local_dis_outputs_fake)], axis=0)
+
+    loss_global_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=global_dis_outputs_all,
+        labels=labels_global_dis
+    ))
+
+    loss_local_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=local_dis_outputs_all,
+        labels=labels_local_dis))
+
+    loss_global_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=global_dis_outputs_fake,
+        labels=tf.ones([batch_size])
+    ))
+    loss_local_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=local_dis_outputs_fake,
+        labels=tf.ones([batch_size])
+    ))
+
+    loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * loss_local_g
+    loss_d = loss_global_dis + loss_local_dis
+
+    var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+    var_d = tf.get_collection('global_dis_params_conv') +\
+        tf.get_collection('global_dis_params_bn') +\
+        tf.get_collection('local_dis_params_conv') +\
+        tf.get_collection('local_dis_params_bn')
+
+    lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
+                                      global_step=global_step_g,
+                                      decay_steps=lr_decay_steps,
+                                      decay_rate=0.992)
+
+    lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
+                                      global_step=global_step_d,
+                                      decay_steps=lr_decay_steps,
+                                      decay_rate=0.992)
+
+    opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
+    opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
 
 
 if __name__ == '__main__':
