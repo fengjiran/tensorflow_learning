@@ -14,6 +14,31 @@ from utils import DilatedConv2dLayer
 from utils import BatchNormLayer
 from utils import FCLayer
 
+if platform.system() == 'Windows':
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_local_l1'
+elif platform.system() == 'Linux':
+    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
+    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
+batch_size = 32
+weight_decay_rate = 1e-4
+init_lr_g = 3e-4
+init_lr_d = 3e-4
+lr_decay_steps = 1000
+iters_total = 100000
+iters_d = 10000
+alpha_rec = 0.995
+alpha_glo = 0.0025
+alpha_mp = 0.0025
+
+gt_height = 96
+gt_width = 96
+
 
 def completion_network(images, is_training, batch_size):
     """Construct completion network."""
