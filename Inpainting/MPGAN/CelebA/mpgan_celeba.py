@@ -321,6 +321,10 @@ def markovian_discriminator(images, is_training, reuse=None):
     return conv4.output
 
 
+def train():
+    pass
+
+
 if __name__ == '__main__':
     batch_size = 100
     imgs = tf.placeholder(tf.float32, [100, 96, 96, 3])
