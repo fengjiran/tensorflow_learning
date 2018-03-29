@@ -207,3 +207,8 @@ def global_discriminator(images, is_training, reuse=None):
             tf.add_to_collection('global_dis_params_bn', bn_layer.beta)
 
     return fc7.output
+
+
+def markovian_discriminator(images, is_training, reuse=None):
+    """Construct markovian discriminator."""
+    pass
