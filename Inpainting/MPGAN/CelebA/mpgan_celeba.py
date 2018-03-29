@@ -36,8 +36,8 @@ alpha_rec = 0.995
 alpha_glo = 0.0025
 alpha_mp = 0.0025
 
-gt_height = 128
-gt_width = 128
+gt_height = 96
+gt_width = 96
 
 
 def input_parse(img_path):
@@ -46,8 +46,8 @@ def input_parse(img_path):
         high = 96
         image_height = 178
         image_width = 178
-        gt_height = 128
-        gt_width = 128
+        gt_height = 96
+        gt_width = 96
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -323,7 +323,7 @@ def markovian_discriminator(images, is_training, reuse=None):
 
 if __name__ == '__main__':
     batch_size = 100
-    imgs = tf.placeholder(tf.float32, [100, 128, 128, 3])
+    imgs = tf.placeholder(tf.float32, [100, 96, 96, 3])
     train_flag = tf.placeholder(tf.bool)
 
     result = markovian_discriminator(imgs, train_flag)
