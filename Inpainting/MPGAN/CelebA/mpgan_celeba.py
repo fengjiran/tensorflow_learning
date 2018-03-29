@@ -25,7 +25,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 32
+batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-4
@@ -264,7 +264,7 @@ def global_discriminator(images, is_training, reuse=None):
         conv_layers.append(conv6)
         bn_layers.append(bn6_layer)
 
-        fc7 = FCLayer(bn6, 1024, activation=tf.nn.relu, name='fc7')
+        fc7 = FCLayer(bn6, 1, name='fc7')
         conv_layers.append(fc7)
 
         print('Print the global discriminator network constructure:')
@@ -322,12 +322,51 @@ def markovian_discriminator(images, is_training, reuse=None):
 
 
 def train():
-    pass
+    is_training = tf.placeholder(tf.bool)
+    global_step_g = tf.get_variable('global_step_g',
+                                    [],
+                                    tf.int32,
+                                    initializer=tf.constant_initializer(0),
+                                    trainable=False)
+
+    global_step_d = tf.get_variable('global_step_d',
+                                    [],
+                                    tf.int32,
+                                    initializer=tf.constant_initializer(0),
+                                    trainable=False)
+    filenames = tf.placeholder(tf.string, shape=[None])
+    dataset = tf.data.Dataset.from_tensor_slices(filenames)
+    dataset = dataset.map(input_parse)
+    dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+    dataset = dataset.repeat()
+    iterator = dataset.make_initializable_iterator()
+    images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
+
+    completed_images = completion_network(images_with_hole, is_training, batch_size)
+    completed_images = (1 - masks) * images + masks * completed_images
+
+    local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
+                                                                                    args[1],
+                                                                                    args[2],
+                                                                                    gt_height,
+                                                                                    gt_width),
+                                      elems=(completed_images, y_locs, x_locs),
+                                      dtype=tf.float32)
+    local_dis_inputs_real = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
+                                                                                    args[1],
+                                                                                    args[2],
+                                                                                    gt_height,
+                                                                                    gt_width),
+                                      elems=(images, y_locs, x_locs),
+                                      dtype=tf.float32)
+
+    # loss function
+    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
 
 
 if __name__ == '__main__':
     batch_size = 100
-    imgs = tf.placeholder(tf.float32, [100, 96, 96, 3])
+    imgs = tf.placeholder(tf.float32, [batch_size, 96, 96, 3])
     train_flag = tf.placeholder(tf.bool)
 
     result = markovian_discriminator(imgs, train_flag)
