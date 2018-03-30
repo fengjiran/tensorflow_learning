@@ -383,7 +383,8 @@ def train():
 
     loss_local_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits=local_dis_outputs_all,
-        labels=labels_local_dis))
+        labels=labels_local_dis
+    ))
 
     loss_global_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits=global_dis_outputs_fake,
