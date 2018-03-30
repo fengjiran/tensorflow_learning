@@ -12,7 +12,7 @@ from utils import Conv2dLayer
 from utils import DeconvLayer
 from utils import DilatedConv2dLayer
 from utils import BatchNormLayer
-from utils import FCLayer
+# from utils import FCLayer
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
@@ -370,3 +370,74 @@ def train():
                 saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
                 old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
                 old_var_G = sess1.run(old_var_G)
+
+    with tf.Session() as sess:
+        # load trainset
+        train_path = pd.read_pickle(compress_path)
+        train_path.index = range(len(train_path))
+        train_path = train_path.ix[np.random.permutation(len(train_path))]
+        train_path = train_path[:]['image_path'].values.tolist()
+        num_batch = int(len(train_path) / batch_size)
+
+        sess.run(iterator.initializer, feed_dict={filenames: train_path})
+        sess.run(tf.global_variables_initializer())
+
+        if isFirstTimeTrain:
+            # sess.run(tf.global_variables_initializer())
+            updates = []
+            for i, item in enumerate(old_var_G):
+                updates.append(tf.assign(var_g[i], item))
+            sess.run(updates)
+
+            iters = 0
+            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                pickle.dump(iters, f, protocol=2)
+            saver.save(sess, os.path.join(model_path, 'models_local_l1'))
+        else:
+            # sess.run(tf.global_variables_initializer())
+            saver.restore(sess, os.path.join(model_path, 'models_local_l1'))
+            with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+                iters = pickle.load(f)
+
+        while iters < iters_total:
+            if iters < iters_d:
+                _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_local_dis, global_step_d, lr_d],
+                                                         feed_dict={is_training: True})
+                print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
+                    int(iters / num_batch) + 1,
+                    gs,  # iters,
+                    loss_view_d,
+                    lr_view_d))
+            else:
+                _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
+                                                         feed_dict={is_training: True})
+                print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
+                    int(iters / num_batch) + 1,
+                    gs,  # iters,
+                    loss_view_g,
+                    lr_view_g))
+
+            iters += 1
+            if iters % 100 == 0:
+                with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                    pickle.dump(iters, f, protocol=2)
+                saver.save(sess, os.path.join(model_path, 'models_local_l1'))
+
+                g_vars_mean, g_grads_mean, d_vars_mean, d_grads_mean = sess.run([view_g_weights,
+                                                                                 view_g_grads,
+                                                                                 view_d_weights,
+                                                                                 view_d_grads],
+                                                                                feed_dict={is_training: True})
+                # summary_writer.add_summary(summary_str, iters)
+                print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
+                    int(iters / num_batch) + 1,
+                    iters,
+                    g_vars_mean,
+                    g_grads_mean))
+                print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
+                                                                                       d_grads_mean))
+    print('done.')
+
+
+if __name__ == '__main__':
+    train()
