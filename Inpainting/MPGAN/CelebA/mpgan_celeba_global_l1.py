@@ -33,8 +33,7 @@ lr_decay_steps = 1000
 iters_total = 100000
 iters_d = 10000
 alpha_rec = 0.995
-alpha_global = 0.0025
-alpha_local = 0.0025
+alpha_global = 0.005
 
 gt_height = 96
 gt_width = 96
@@ -282,4 +281,106 @@ def global_discriminator(images, is_training, reuse=None):
 
 
 def train():
-    pass
+    is_training = tf.placeholder(tf.bool)
+    global_step_g = tf.get_variable('global_step_g',
+                                    [],
+                                    tf.int32,
+                                    initializer=tf.constant_initializer(0),
+                                    trainable=False)
+
+    global_step_d = tf.get_variable('global_step_d',
+                                    [],
+                                    tf.int32,
+                                    initializer=tf.constant_initializer(0),
+                                    trainable=False)
+
+    filenames = tf.placeholder(tf.string, shape=[None])
+    dataset = tf.data.Dataset.from_tensor_slices(filenames)
+    dataset = dataset.map(input_parse)
+    dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+    dataset = dataset.repeat()
+    iterator = dataset.make_initializable_iterator()
+    images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
+
+    completed_images = completion_network(images_with_hole, is_training, batch_size)
+    completed_images = (1 - masks) * images + masks * completed_images
+
+    # loss function
+    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+
+    global_dis_outputs_real = global_discriminator(images, is_training)
+    global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
+    global_dis_outputs_all = tf.concat([global_dis_outputs_real, global_dis_outputs_fake], axis=0)
+
+    labels_global_dis = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
+
+    loss_global_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=global_dis_outputs_all,
+        labels=labels_global_dis
+    ))
+
+    loss_global_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=global_dis_outputs_fake,
+        labels=tf.ones([batch_size])
+    ))
+
+    loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g
+
+    var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+    var_d = tf.get_collection('global_dis_params_conv') + tf.get_collection('global_dis_params_bn')
+
+    lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
+                                      global_step=global_step_g,
+                                      decay_steps=lr_decay_steps,
+                                      decay_rate=0.992)
+
+    lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
+                                      global_step=global_step_d,
+                                      decay_steps=lr_decay_steps,
+                                      decay_rate=0.992)
+
+    opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
+    opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
+
+    grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
+    train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
+
+    grads_vars_d = opt_d.compute_gradients(loss_global_dis, var_d)
+    train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
+
+    view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
+    view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
+
+    view_d_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_d])
+    view_d_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_d])
+
+    # Track the moving averages of all trainable variables.
+    variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    variable_averages_op = variable_averages.apply(tf.trainable_variables())
+
+    train_op_g = tf.group(train_g, variable_averages_op)
+    train_op_d = tf.group(train_d, variable_averages_op)
+
+    variables_to_restore = variable_averages.variables_to_restore()
+    saver = tf.train.Saver(variables_to_restore)
+
+    if isFirstTimeTrain:
+        old_var_G = []
+        graph1 = tf.Graph()
+        with graph1.as_default():
+            with tf.Session(graph=graph1) as sess1:
+                saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l1.meta'))
+                saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
+                old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+                old_var_G = sess1.run(old_var_G)
+
+    with tf.Session() as sess:
+        # load trainset
+        train_path = pd.read_pickle(compress_path)
+        train_path.index = range(len(train_path))
+        train_path = train_path.ix[np.random.permutation(len(train_path))]
+        train_path = train_path[:]['image_path'].values.tolist()
+        num_batch = int(len(train_path) / batch_size)
+
+        sess.run(iterator.initializer, feed_dict={filenames: train_path})
+        sess.run(tf.global_variables_initializer())
