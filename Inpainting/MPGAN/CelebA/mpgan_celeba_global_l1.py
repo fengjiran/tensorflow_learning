@@ -23,15 +23,15 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-4
 lr_decay_steps = 1000
-iters_total = 100000
-iters_d = 10000
+iters_total = 200000
+iters_d = 15000
 alpha_rec = 0.995
 alpha_global = 0.005
 
@@ -439,8 +439,9 @@ def train():
                     g_grads_mean))
                 print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
                                                                                        d_grads_mean))
-    print('done.')
+    # print('done.')
 
 
 if __name__ == '__main__':
     train()
+    print('done.')
