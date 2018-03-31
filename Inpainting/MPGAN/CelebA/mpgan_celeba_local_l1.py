@@ -30,8 +30,8 @@ weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-4
 lr_decay_steps = 1000
-iters_total = 100000
-iters_d = 10000
+iters_total = 200000
+iters_d = 15000
 alpha_rec = 0.995
 alpha_local = 0.005
 
@@ -318,7 +318,7 @@ def train():
 
     loss_local_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits=local_dis_outputs_fake,
-        labels=tf.ones([batch_size])
+        labels=tf.ones_like(local_dis_outputs_fake)
     ))
 
     loss_g = alpha_rec * loss_recon + alpha_local * loss_local_g
@@ -436,8 +436,9 @@ def train():
                     g_grads_mean))
                 print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
                                                                                        d_grads_mean))
-    print('done.')
+    # print('done.')
 
 
 if __name__ == '__main__':
     train()
+    print('done.')
