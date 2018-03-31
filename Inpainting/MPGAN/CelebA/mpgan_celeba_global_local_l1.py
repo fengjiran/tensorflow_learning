@@ -23,15 +23,15 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-4
 lr_decay_steps = 1000
-iters_total = 100000
-iters_d = 10000
+iters_total = 200000
+iters_d = 15000
 alpha_rec = 0.995
 alpha_global = 0.0025
 alpha_local = 0.0025
@@ -392,7 +392,7 @@ def train():
     ))
     loss_local_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits=local_dis_outputs_fake,
-        labels=tf.ones([batch_size])
+        labels=tf.ones_like(local_dis_outputs_fake)
     ))
 
     loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * loss_local_g
@@ -517,9 +517,11 @@ def train():
 
 
 if __name__ == '__main__':
-    batch_size = 100
-    imgs = tf.placeholder(tf.float32, [batch_size, 96, 96, 3])
-    train_flag = tf.placeholder(tf.bool)
+    train()
+    print('done.')
+    # batch_size = 100
+    # imgs = tf.placeholder(tf.float32, [batch_size, 96, 96, 3])
+    # train_flag = tf.placeholder(tf.bool)
 
-    result = markovian_discriminator(imgs, train_flag)
-    print(result.get_shape())
+    # result = markovian_discriminator(imgs, train_flag)
+    # print(result.get_shape())
