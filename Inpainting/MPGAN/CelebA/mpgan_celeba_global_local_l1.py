@@ -8,11 +8,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from utils import Conv2dLayer
-from utils import DeconvLayer
-from utils import DilatedConv2dLayer
-from utils import BatchNormLayer
-from utils import FCLayer
 
 from mpgan_models import completion_network
 from mpgan_models import global_discriminator
