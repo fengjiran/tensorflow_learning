@@ -1,8 +1,9 @@
 from __future__ import print_function
+
+import platform
 import cv2
 import tensorflow as tf
 import numpy as np
-import platform
 
 from models import completion_network
 
