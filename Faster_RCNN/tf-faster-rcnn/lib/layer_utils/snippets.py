@@ -10,6 +10,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from layer_utils.generate_anchors import generate_anchors
+# from generate_anchors import generate_anchors
 
 
 def generate_anchors_pre(height, width, feat_stride=16, anchor_scales=(8, 16, 32), anchor_ratios=(0.5, 1, 2)):
@@ -30,3 +31,11 @@ def generate_anchors_pre(height, width, feat_stride=16, anchor_scales=(8, 16, 32
     anchors_tf = tf.reshape(tf.add(anchor_constant, shifts), shape=(length, 4))
 
     return tf.cast(anchors_tf, dtype=tf.float32), length
+
+
+if __name__ == '__main__':
+    a, b = generate_anchors_pre(6, 5)
+    with tf.Session() as sess:
+        a, b = sess.run([a, b])
+        print(a)
+        print(b)
