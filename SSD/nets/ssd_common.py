@@ -51,3 +51,4 @@ def tf_ssd_bboxes_encode_layer(labels,
     vol_anchors = (xmax - xmin) * (ymax - ymin)
 
     # Initialize tensors...
+    shape = (yref.shape[0], yref.shape[1], href.size)
