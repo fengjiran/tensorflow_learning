@@ -11,8 +11,12 @@ if platform.system() == 'Windows':
     path = 'F:\\Datasets\\ImageNet_100K'
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\imagenet100k_train_path_win.pickle'
 elif platform.system() == 'Linux':
-    path = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/CelebA/Img/img_align_celeba_png.7z/img_align_celeba_png'
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
+    if platform.node() == 'icie-Precision-T7610':
+        path = '/home/icie/ImageNet_100K'
+        compress_path = '/home/icie/richard/MPGAN/ImageNet100k/imagenet100k_train_path_linux_7610.pickle'
+    elif platform.node() == 'icie-Precision-T7810':
+        path = '/home/richard/datasets/ImageNet_100K'
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/imagenet100k_train_path_linux_7810.pickle'
 
 if not os.path.exists(compress_path):
     for filepath, _, _ in os.walk(path):
