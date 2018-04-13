@@ -67,7 +67,7 @@ def input_parse(img_path):
 
         image_with_hole = img * (1 - mask) + mask
 
-        # generate the location of 96*96 patch for local discriminator
+        # generate the location of 300*300 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
                                   minval=tf.reduce_max([0, x + hole_width - gt_width]),
                                   maxval=tf.reduce_min([x, image_width - gt_width]) + 1,

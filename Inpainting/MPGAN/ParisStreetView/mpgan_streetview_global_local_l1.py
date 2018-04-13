@@ -22,8 +22,8 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
@@ -35,18 +35,18 @@ alpha_rec = 0.995
 alpha_global = 0.0025
 alpha_local = 0.0025
 
-gt_height = 96
-gt_width = 96
+gt_height = 300
+gt_width = 300
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 48
-        high = 96
-        image_height = 178
-        image_width = 178
-        gt_height = 96
-        gt_width = 96
+        low = 192
+        high = 256
+        image_height = 537
+        image_width = 537
+        gt_height = 300
+        gt_width = 300
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -73,7 +73,7 @@ def input_parse(img_path):
 
         image_with_hole = img * (1 - mask) + mask
 
-        # generate the location of 96*96 patch for local discriminator
+        # generate the location of 300*300 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
                                   minval=tf.reduce_max([0, x + hole_width - gt_width]),
                                   maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
