@@ -12,15 +12,18 @@ from mpgan_models import completion_network
 
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
-    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\events'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
-
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\parisstreetview_train_path_win.pickle'
+    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1\\events'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1'
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
-    events_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1/events'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
-
+    if platform.node() == 'icie-Precision-Tower-7810':
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7810.pickle'
+        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
+    elif platform.node() == 'icie-Precision-T7610':
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
+        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
@@ -33,22 +36,22 @@ iters_c = 90000
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 48
-        high = 96
-        image_height = 178
-        image_width = 178
-        gt_height = 96
-        gt_width = 96
+        low = 192
+        high = 256
+        image_height = 537
+        image_width = 537
+        gt_height = 300
+        gt_width = 300
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
 
         img = tf.cast(img_decoded, tf.float32)
-        img /= 255.
+        # img /= 255.
         img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
 
         # input image range from -1 to 1
-        img = 2 * img - 1
+        img = img / 127.5 - 1
 
         ori_image = tf.identity(img)
 
