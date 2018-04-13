@@ -27,7 +27,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 32
+batch_size = 16
 weight_decay_rate = 1e-4
 init_lr = 3e-4
 lr_decay_steps = 1000
@@ -115,7 +115,7 @@ summaries.append(tf.summary.scalar('generator_loss', loss_G))
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
                                 decay_steps=lr_decay_steps,
-                                decay_rate=0.992)
+                                decay_rate=0.99)
 
 # Add a summary to track the learning rate.
 summaries.append(tf.summary.scalar('learning_rate', lr))
