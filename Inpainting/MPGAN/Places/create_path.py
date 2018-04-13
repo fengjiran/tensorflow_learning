@@ -18,8 +18,10 @@ elif platform.system() == 'Linux':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/places_train_path_linux_7810.pickle'
 
 if not os.path.exists(compress_path):
+    paths = []
     for filepath, _, _ in os.walk(path):
-        paths = glob(os.path.join(filepath, '*.jpg'))
+        paths.extend(glob(os.path.join(filepath, '*.jpg')))
+        # paths = glob(os.path.join(filepath, '*.jpg'))
 
     paths = np.hstack(paths)
     trainset = pd.DataFrame({'image_path': paths})
@@ -32,4 +34,7 @@ train_path = train_path.ix[np.random.permutation(len(train_path))]
 train_path = train_path[:]['image_path'].values.tolist()
 
 print(len(train_path))
-# train_path.index = range(len(train_path))
+
+# for filepath, _, _ in os.walk(path):
+#     paths = glob(os.path.join(filepath, '*.jpg'))
+#     print(paths)
