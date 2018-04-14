@@ -21,13 +21,13 @@ elif platform.system() == 'Linux':
         events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
         model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
     elif platform.node() == 'icie-Precision-T7610':
-        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
-        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
-        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
+        compress_path = '/home/icie/richard/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
+        events_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1/events'
+        model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 16
+batch_size = 8
 weight_decay_rate = 1e-4
 init_lr = 3e-4
 lr_decay_steps = 1000
