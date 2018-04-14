@@ -177,12 +177,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.93)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.93)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
@@ -256,13 +256,14 @@ def train():
                 loss_view_d,
                 lr_view_d))
 
-            _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-                int(iters / num_batch) + 1,
-                gs,  # iters,
-                loss_view_g,
-                lr_view_g))
+            for i in range(5):
+                _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
+                                                         feed_dict={is_training: True})
+                print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
+                    int(iters / num_batch) + 1,
+                    gs,  # iters,
+                    loss_view_g,
+                    lr_view_g))
 
             # if iters < iters_d:
             #     _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],

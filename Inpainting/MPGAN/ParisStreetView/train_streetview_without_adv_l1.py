@@ -115,7 +115,7 @@ summaries.append(tf.summary.scalar('generator_loss', loss_G))
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
                                 decay_steps=lr_decay_steps,
-                                decay_rate=0.9)
+                                decay_rate=0.93)
 
 # Add a summary to track the learning rate.
 summaries.append(tf.summary.scalar('learning_rate', lr))
