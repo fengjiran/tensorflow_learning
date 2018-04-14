@@ -14,16 +14,16 @@ size = 10
 batch_size = 1
 
 if platform.system() == 'Windows':
-    checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_local_l1\\models_global_local_l1'
-    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\000013.png'
+    checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_global_local_l1\\models_global_local_l1'
+    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\001_im.png'
 
 elif platform.system() == 'Linux':
-    checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1/models_global_local_l1'
-    img_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/000013.png'
+    checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_global_local_l1/models_global_local_l1'
+    img_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/001_im.png'
 
 elif platform.system() == 'Darwin':
-    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1/models_global_local_l1'
-    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/000013.png'
+    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ParisStreetView/models_global_local_l1/models_global_local_l1'
+    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ParisStreetView/001_im.png'
 
 
 def erase_img(img):
