@@ -29,7 +29,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 16
+batch_size = 4
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-5
@@ -48,8 +48,8 @@ def input_parse(img_path):
     with tf.device('/cpu:0'):
         low = 192
         high = 256
-        image_height = 537
-        image_width = 537
+        image_height = 500
+        image_width = 500
         gt_height = 300
         gt_width = 300
 
