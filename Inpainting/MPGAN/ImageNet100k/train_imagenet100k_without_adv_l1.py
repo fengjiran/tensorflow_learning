@@ -27,7 +27,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 4
+batch_size = 16
 weight_decay_rate = 1e-4
 init_lr = 3e-4
 lr_decay_steps = 1000
@@ -36,12 +36,12 @@ iters_c = 90000
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 192
-        high = 256
-        image_height = 500
-        image_width = 500
-        gt_height = 300
-        gt_width = 300
+        low = 96
+        high = 128
+        image_height = 256
+        image_width = 256
+        gt_height = 150
+        gt_width = 150
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
