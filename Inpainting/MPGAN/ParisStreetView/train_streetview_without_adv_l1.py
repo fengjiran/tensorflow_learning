@@ -25,13 +25,13 @@ elif platform.system() == 'Linux':
         events_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 4
 weight_decay_rate = 1e-4
-init_lr = 3e-4
+init_lr = 5e-4
 lr_decay_steps = 1000
-iters_c = 90000
+iters_c = 10 * int(90000 / batch_size)
 
 
 def input_parse(img_path):
