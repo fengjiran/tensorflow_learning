@@ -226,7 +226,7 @@ def markovian_discriminator(images, is_training, reuse=None):
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
-        conv4 = Conv2dLayer(bn3, [5, 5, 256, 1], stride=1, name='conv4')
+        conv4 = Conv2dLayer(bn3, [5, 5, 256, 1], stride=2, name='conv4')
         conv_layers.append(conv4)
 
         print('Print the local discriminator network constructure:')
