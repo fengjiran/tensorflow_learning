@@ -40,8 +40,8 @@ def input_parse(img_path):
         high = 128
         image_height = 256
         image_width = 256
-        gt_height = 150
-        gt_width = 150
+        # gt_height = 150
+        # gt_width = 150
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -68,16 +68,16 @@ def input_parse(img_path):
         image_with_hole = img * (1 - mask) + mask
 
         # generate the location of 300*300 patch for local discriminator
-        x_loc = tf.random_uniform(shape=[],
-                                  minval=tf.reduce_max([0, x + hole_width - gt_width]),
-                                  maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
-                                  dtype=tf.int32)
-        y_loc = tf.random_uniform(shape=[],
-                                  minval=tf.reduce_max([0, y + hole_height - gt_height]),
-                                  maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
-                                  dtype=tf.int32)
+        # x_loc = tf.random_uniform(shape=[],
+        #                           minval=tf.reduce_max([0, x + hole_width - gt_width]),
+        #                           maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
+        #                           dtype=tf.int32)
+        # y_loc = tf.random_uniform(shape=[],
+        #                           minval=tf.reduce_max([0, y + hole_height - gt_height]),
+        #                           maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
+        #                           dtype=tf.int32)
 
-        return ori_image, image_with_hole, mask, x_loc, y_loc
+        return ori_image, image_with_hole, mask  # , x_loc, y_loc
 
 
 is_training = tf.placeholder(tf.bool)
@@ -98,7 +98,7 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
-images, images_with_hole, masks, _, _ = iterator.get_next()
+images, images_with_hole, masks = iterator.get_next()
 completed_images = completion_network(images_with_hole, is_training, batch_size)
 completed_images = (1 - masks) * images + masks * completed_images
 # loss_recon = tf.reduce_mean(tf.nn.l2_loss(completed_images - images))
