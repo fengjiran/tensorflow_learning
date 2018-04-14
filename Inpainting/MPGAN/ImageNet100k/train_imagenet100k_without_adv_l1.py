@@ -31,7 +31,7 @@ batch_size = 16
 weight_decay_rate = 1e-4
 init_lr = 3e-4
 lr_decay_steps = 1000
-iters_c = 90000
+iters_c = 10 * int(100000 / batch_size)  # 10 epochs
 
 
 def input_parse(img_path):
