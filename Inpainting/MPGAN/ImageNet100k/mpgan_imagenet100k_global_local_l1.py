@@ -14,18 +14,18 @@ from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\parisstreetview_train_path_win.pickle'
-    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_global_local_l1'
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\imagenet100k_train_path_win.pickle'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\models_without_adv_l1'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\models_global_local_l1'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
-        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7810.pickle'
-        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
-        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_global_local_l1'
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/imagenet100k_train_path_linux_7810.pickle'
+        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/models_without_adv_l1'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/models_global_local_l1'
     elif platform.node() == 'icie-Precision-T7610':
-        compress_path = '/home/icie/richard/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
-        g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
-        model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
+        compress_path = '/home/icie/richard/MPGAN/ImageNet100k/imagenet100k_train_path_linux_7610.pickle'
+        g_model_path = '/home/icie/richard/MPGAN/ImageNet100k/models_without_adv_l1'
+        model_path = '/home/icie/richard/MPGAN/ImageNet100k/models_global_local_l1'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
@@ -40,18 +40,18 @@ alpha_rec = 0.995
 alpha_global = 0.0025
 alpha_local = 0.0025
 
-gt_height = 300
-gt_width = 300
+gt_height = 150
+gt_width = 150
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 192
-        high = 256
-        image_height = 500
-        image_width = 500
-        gt_height = 300
-        gt_width = 300
+        low = 96
+        high = 128
+        image_height = 256
+        image_width = 256
+        gt_height = 150
+        gt_width = 150
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
