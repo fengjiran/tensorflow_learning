@@ -14,13 +14,18 @@ from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
-    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_local_l1'
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\parisstreetview_train_path_win.pickle'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_global_local_l1'
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
-    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+    if platform.node() == 'icie-Precision-Tower-7810':
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7810.pickle'
+        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_global_local_l1'
+    elif platform.node() == 'icie-Precision-T7610':
+        compress_path = '/home/icie/richard/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
+        g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
+        model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
