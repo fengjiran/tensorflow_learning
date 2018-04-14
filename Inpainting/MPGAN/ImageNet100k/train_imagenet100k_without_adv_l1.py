@@ -21,7 +21,7 @@ elif platform.system() == 'Linux':
         events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/models_without_adv_l1/events'
         model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/models_without_adv_l1'
     elif platform.node() == 'icie-Precision-T7610':
-        compress_path = '/home/icie/richard/MPGAN/ImageNet100k/parisstreetview_train_path_linux_7610.pickle'
+        compress_path = '/home/icie/richard/MPGAN/ImageNet100k/imagenet100k_train_path_linux_7610.pickle'
         events_path = '/home/icie/richard/MPGAN/ImageNet100k/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/ImageNet100k/models_without_adv_l1'
 
