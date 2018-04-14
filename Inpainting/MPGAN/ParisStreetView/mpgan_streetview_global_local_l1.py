@@ -40,8 +40,8 @@ alpha_rec = 0.995
 alpha_global = 0.0025
 alpha_local = 0.0025
 
-gt_height = 300
-gt_width = 300
+gt_height = 256
+gt_width = 256
 
 
 def input_parse(img_path):
@@ -50,8 +50,8 @@ def input_parse(img_path):
         high = 256
         image_height = 500
         image_width = 500
-        gt_height = 300
-        gt_width = 300
+        gt_height = 256
+        gt_width = 256
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
