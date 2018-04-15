@@ -14,31 +14,31 @@ from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\parisstreetview_train_path_win.pickle'
-    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_global_local_l1'
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\Places\\places_train_path_win.pickle'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\Places\\models_without_adv_l1'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\Places\\models_global_local_l1'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
-        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7810.pickle'
-        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
-        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_global_local_l1'
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/places_train_path_linux_7810.pickle'
+        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/models_without_adv_l1'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/models_global_local_l1'
     elif platform.node() == 'icie-Precision-T7610':
-        compress_path = '/home/icie/richard/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
-        g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
-        model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
+        compress_path = '/home/icie/richard/MPGAN/Places/places_train_path_linux_7610.pickle'
+        g_model_path = '/home/icie/richard/MPGAN/Places/models_without_adv_l1'
+        model_path = '/home/icie/richard/MPGAN/Places/models_global_local_l1'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 4
+batch_size = 8
 weight_decay_rate = 1e-4
-init_lr_g = 5e-4
+init_lr_g = 3e-4
 init_lr_d = 3e-5
 lr_decay_steps = 1000
-iters_total = 200000
+iters_total = 10 * int(8026628 / batch_size)
 iters_d = 15000
-alpha_rec = 0.99
-alpha_global = 0.005
-alpha_local = 0.005
+alpha_rec = 0.995
+alpha_global = 0.0025
+alpha_local = 0.0025
 
 gt_height = 256
 gt_width = 256
@@ -46,19 +46,19 @@ gt_width = 256
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 192
-        high = 256
-        image_height = 500
-        image_width = 500
-        gt_height = 256
-        gt_width = 256
+        low = 96
+        high = 128
+        image_height = 256
+        image_width = 256
+        gt_height = 128
+        gt_width = 128
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
 
         img = tf.cast(img_decoded, tf.float32)
         # img /= 255.
-        img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
+        # img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
 
         # input image range from -1 to 1
         # img = 2 * img - 1
@@ -178,12 +178,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.97)
+                                      decay_rate=0.999)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.97)
+                                      decay_rate=0.999)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
