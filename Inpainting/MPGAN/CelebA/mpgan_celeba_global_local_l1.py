@@ -106,7 +106,7 @@ def train():
     dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
     dataset = dataset.repeat()
     iterator = dataset.make_initializable_iterator()
-    iterator_d = dataset.make_initializable_iterator()
+    # iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
     completed_images = completion_network(images_with_hole, is_training, batch_size)
@@ -244,22 +244,34 @@ def train():
                 iters = pickle.load(f)
 
         while iters < iters_total:
-            _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
+            # _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
+            #                                          feed_dict={is_training: True})
+            # print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
+            #     int(iters / num_batch) + 1,
+            #     gs,  # iters,
+            #     loss_view_d,
+            #     lr_view_d))
+
+            # for k in range(5):
+            #     _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
+            #                                              feed_dict={is_training: True})
+            #     print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
+            #         int(iters / num_batch) + 1,
+            #         gs,  # iters,
+            #         loss_view_g,
+            #         lr_view_g))
+
+            _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
+                sess.run([train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_g],
+                         feed_dict={is_training: True})
+
+            print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_view_d,
-                lr_view_d))
-
-            for k in range(5):
-                _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-                                                         feed_dict={is_training: True})
-                print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-                    int(iters / num_batch) + 1,
-                    gs,  # iters,
-                    loss_view_g,
-                    lr_view_g))
+                loss_view_g,
+                lr_view_d,
+                lr_view_g))
 
             # if iters < iters_d:
             #     _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
