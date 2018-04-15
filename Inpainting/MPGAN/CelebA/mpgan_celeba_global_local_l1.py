@@ -106,6 +106,7 @@ def train():
     dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
     dataset = dataset.repeat()
     iterator = dataset.make_initializable_iterator()
+    iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
     completed_images = completion_network(images_with_hole, is_training, batch_size)
