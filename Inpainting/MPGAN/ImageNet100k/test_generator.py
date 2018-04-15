@@ -14,16 +14,16 @@ size = 10
 batch_size = 1
 
 if platform.system() == 'Windows':
-    checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1\\models_without_adv_l1'
-    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\001_im.png'
+    checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\models_without_adv_l1\\models_without_adv_l1'
+    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ImageNet100k\\n01440764_18.JPEG'
 
 elif platform.system() == 'Linux':
-    checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/models_without_adv_l1'
-    img_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/001_im.png'
+    checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/models_without_adv_l1/models_without_adv_l1'
+    img_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ImageNet100k/n01440764_18.JPEG'
 
 elif platform.system() == 'Darwin':
-    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/models_without_adv_l1'
-    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ParisStreetView/001_im.png'
+    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ImageNet100k/models_without_adv_l1/models_without_adv_l1'
+    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/ImageNet100k/n01440764_18.JPEG'
 
 
 def erase_img(img):
