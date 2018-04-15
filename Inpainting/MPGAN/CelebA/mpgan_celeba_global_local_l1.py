@@ -22,11 +22,11 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
-init_lr_g = 3e-4
+init_lr_g = 5e-4
 init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 200000
@@ -172,12 +172,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.97)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.97)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
