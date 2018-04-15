@@ -27,8 +27,8 @@ elif platform.system() == 'Linux':
         g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
         model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 4
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
@@ -111,6 +111,7 @@ def train():
     dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
     dataset = dataset.repeat()
     iterator = dataset.make_initializable_iterator()
+    iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
     completed_images = completion_network(images_with_hole, is_training, batch_size)
@@ -177,12 +178,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.93)
+                                      decay_rate=0.97)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.93)
+                                      decay_rate=0.97)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
