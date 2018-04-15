@@ -27,19 +27,19 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 4
+batch_size = 8
 weight_decay_rate = 1e-4
 init_lr = 5e-4
 lr_decay_steps = 1000
-iters_c = 10 * int(14900 / batch_size)
+iters_c = 10 * int(8026628 / batch_size)
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 192
-        high = 256
-        image_height = 500
-        image_width = 500
+        low = 96
+        high = 128
+        image_height = 256
+        image_width = 256
         # gt_height = 300
         # gt_width = 300
 
@@ -48,7 +48,7 @@ def input_parse(img_path):
 
         img = tf.cast(img_decoded, tf.float32)
         # img /= 255.
-        img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
+        # img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
 
         # input image range from -1 to 1
         img = img / 127.5 - 1
@@ -115,7 +115,7 @@ summaries.append(tf.summary.scalar('generator_loss', loss_G))
 lr = tf.train.exponential_decay(learning_rate=init_lr,
                                 global_step=global_step,
                                 decay_steps=lr_decay_steps,
-                                decay_rate=0.93)
+                                decay_rate=0.999)
 
 # Add a summary to track the learning rate.
 summaries.append(tf.summary.scalar('learning_rate', lr))
