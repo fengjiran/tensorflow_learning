@@ -177,12 +177,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.97)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.99)
+                                      decay_rate=0.97)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
@@ -248,21 +248,32 @@ def train():
                 iters = pickle.load(f)
 
         while iters < iters_total:
-            _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
+            _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
+                sess.run([train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_g],
+                         feed_dict={is_training: True})
+
+            print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_view_d,
-                lr_view_d))
-
-            _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-                int(iters / num_batch) + 1,
-                gs,  # iters,
                 loss_view_g,
+                lr_view_d,
                 lr_view_g))
+            # _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
+            #                                          feed_dict={is_training: True})
+            # print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
+            #     int(iters / num_batch) + 1,
+            #     gs,  # iters,
+            #     loss_view_d,
+            #     lr_view_d))
+
+            # _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
+            #                                          feed_dict={is_training: True})
+            # print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
+            #     int(iters / num_batch) + 1,
+            #     gs,  # iters,
+            #     loss_view_g,
+            #     lr_view_g))
 
             # if iters < iters_d:
             #     _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
