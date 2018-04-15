@@ -29,7 +29,7 @@ elif platform.system() == 'Linux':
 
 isFirstTimeTrain = False
 # isFirstTimeTrain = True
-batch_size = 4
+batch_size = 2
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-5
