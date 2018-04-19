@@ -31,9 +31,9 @@ init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 200000
 iters_d = 15000
-alpha_rec = 0.995
-alpha_global = 0.0025
-alpha_local = 0.0025
+alpha_rec = 0.99
+alpha_global = 0.005
+alpha_local = 0.005
 
 gt_height = 96
 gt_width = 96
