@@ -31,6 +31,7 @@ batch_size = 8
 weight_decay_rate = 1e-4
 init_lr = 5e-4
 lr_decay_steps = 1000
+alpha = 0.7
 iters_c = 10 * int(8026628 / batch_size)
 
 
@@ -99,11 +100,13 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
 images, images_with_hole, masks = iterator.get_next()
-completed_images = completion_network(images_with_hole, is_training, batch_size)
-completed_images = (1 - masks) * images + masks * completed_images
+syn_images = completion_network(images_with_hole, is_training, batch_size)
+completed_images = (1 - masks) * images + masks * syn_images
 # loss_recon = tf.reduce_mean(tf.nn.l2_loss(completed_images - images))
 # loss_recon = tf.reduce_mean(tf.square(completed_images - images))
-loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
+                            (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
+
 loss_G = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
 
