@@ -33,5 +33,6 @@ Inpainting/MPGAN/ParisStreetView/models_global_l1
 Inpainting/MPGAN/ParisStreetView/models_local_l1
 Inpainting/MPGAN/ParisStreetView/models_without_adv_l1
 Inpainting/MPGAN/ImageNet100k/models_without_adv_l1
+Inpainting/MPGAN/Places/models_without_adv_l1
 
 *.pickle
