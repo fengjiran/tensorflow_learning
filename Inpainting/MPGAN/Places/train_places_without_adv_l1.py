@@ -49,7 +49,7 @@ def input_parse(img_path):
 
         img = tf.cast(img_decoded, tf.float32)
         # img /= 255.
-        # img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
+        img = tf.image.resize_image_with_crop_or_pad(img, image_height, image_width)
 
         # input image range from -1 to 1
         img = img / 127.5 - 1
@@ -89,6 +89,7 @@ global_step = tf.get_variable('global_step',
                               trainable=False)
 filenames = tf.placeholder(tf.string, shape=[None])
 
+
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
 
@@ -98,9 +99,7 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
 # dataset = dataset.batch(batch_size)
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
-
 images, images_with_hole, masks = iterator.get_next()
-print(images.get_shape())
 
 syn_images = completion_network(images_with_hole, is_training, batch_size)
 completed_images = (1 - masks) * images + masks * syn_images
