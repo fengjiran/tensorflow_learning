@@ -100,6 +100,8 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
 images, images_with_hole, masks = iterator.get_next()
+print(images.get_shape())
+
 syn_images = completion_network(images_with_hole, is_training, batch_size)
 completed_images = (1 - masks) * images + masks * syn_images
 # loss_recon = tf.reduce_mean(tf.nn.l2_loss(completed_images - images))
