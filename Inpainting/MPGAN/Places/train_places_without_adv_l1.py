@@ -25,8 +25,8 @@ elif platform.system() == 'Linux':
         events_path = '/home/icie/richard/MPGAN/Places/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/Places/models_without_adv_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 batch_size = 8
 weight_decay_rate = 1e-4
 init_lr = 5e-4
