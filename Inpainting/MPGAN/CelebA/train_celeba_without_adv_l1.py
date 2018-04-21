@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from models import completion_network
+from mpgan_models import completion_network
 
 
 if platform.system() == 'Windows':
