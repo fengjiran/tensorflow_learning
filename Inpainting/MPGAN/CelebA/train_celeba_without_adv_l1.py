@@ -4,32 +4,44 @@ from __future__ import print_function
 import os
 import platform
 import pickle
+import yaml
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 
 from mpgan_models import completion_network
 
+with open('config.yaml', 'r') as f:
+    config = yaml.load(f)
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
-    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\events'
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
-
+    compress_path = config['trainset_path_win']
+    events_path = config['events_path_win']
+    model_path = config['model_path_win']
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
-    events_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1/events'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
+    compress_path = config['trainset_path_linux']
+    events_path = config['events_path_linux']
+    model_path = config['model_path_linux']
+
+# if platform.system() == 'Windows':
+#     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
+#     events_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1\\events'
+#     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
+
+# elif platform.system() == 'Linux':
+#     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
+#     events_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1/events'
+#     model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
 
 
-isFirstTimeTrain = False
+isFirstTimeTrain = config['isFirstTimeTrain']
 # isFirstTimeTrain = True
-batch_size = 32
-weight_decay_rate = 1e-4
-init_lr = 3e-4
-lr_decay_steps = 1000
-iters_c = 90000
-alpha = 0.7
+batch_size = config['batch_size']
+weight_decay_rate = config['weight_decay_rate']
+init_lr = config['init_lr']
+lr_decay_steps = config['lr_decay_steps']
+iters_c = config['iters_c']
+alpha = config['alpha']
 
 
 def input_parse(img_path):
