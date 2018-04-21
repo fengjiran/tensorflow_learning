@@ -1,0 +1,14 @@
+# if want to use None, use !!null
+
+# path for windows
+trainset_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle"
+events_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1\\events"
+model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1"
+
+# path for linux
+trainset_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle
+events_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1/events    
+model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1
+
+isFirstTimeTrain: false
+batch_size: 32
