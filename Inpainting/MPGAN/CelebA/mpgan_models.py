@@ -208,25 +208,25 @@ def markovian_discriminator(images, is_training, reuse=None):
     conv_layers = []
     bn_layers = []
     with tf.variable_scope('markovian_discriminator', reuse=reuse):
-        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        conv1 = Conv2dLayer(images, [3, 3, 3, 64], stride=2, name='conv1')
         bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
         bn1 = tf.nn.leaky_relu(bn1_layer.output, alpha=0.2)
         conv_layers.append(conv1)
         bn_layers.append(bn1_layer)
 
-        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        conv2 = Conv2dLayer(bn1, [3, 3, 64, 128], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
         bn2 = tf.nn.leaky_relu(bn2_layer.output, alpha=0.2)
         conv_layers.append(conv2)
         bn_layers.append(bn2_layer)
 
-        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        conv3 = Conv2dLayer(bn2, [3, 3, 128, 256], stride=2, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
         bn3 = tf.nn.leaky_relu(bn3_layer.output, alpha=0.2)
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
-        conv4 = Conv2dLayer(bn3, [5, 5, 256, 1], stride=1, name='conv4')
+        conv4 = Conv2dLayer(bn3, [3, 3, 256, 1], stride=1, name='conv4')
         conv_layers.append(conv4)
 
         print('Print the local discriminator network constructure:')
