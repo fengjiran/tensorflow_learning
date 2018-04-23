@@ -22,18 +22,18 @@ elif platform.system() == 'Linux':
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
-init_lr_g = 5e-4
+init_lr_g = 3e-4
 init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 200000
 iters_d = 15000
-alpha_rec = 0.98
-alpha_global = 0.01
-alpha_local = 0.01
+alpha_rec = 0.9
+alpha_global = 0.05
+alpha_local = 0.05
 
 gt_height = 96
 gt_width = 96
