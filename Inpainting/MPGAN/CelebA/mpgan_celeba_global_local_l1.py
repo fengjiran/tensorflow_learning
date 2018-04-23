@@ -14,12 +14,12 @@ from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
 if platform.system() == 'Windows':
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
-    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\models_without_adv_l1'
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_local_l1'
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/celeba_train_path_linux.pickle'
-    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/GlobalLocalImageCompletion_TF/CelebA/models_without_adv_l1'
+    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
+    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
 
 # isFirstTimeTrain = False
@@ -29,11 +29,13 @@ weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-5
 lr_decay_steps = 1000
-iters_total = 200000
+iters_total = 10 * int(202599 / batch_size)  # 200000
 iters_d = 15000
 alpha_rec = 0.9
 alpha_global = 0.05
 alpha_local = 0.05
+
+alpha = 0.7
 
 gt_height = 96
 gt_width = 96
@@ -109,8 +111,8 @@ def train():
     # iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
-    completed_images = completion_network(images_with_hole, is_training, batch_size)
-    completed_images = (1 - masks) * images + masks * completed_images
+    syn_images = completion_network(images_with_hole, is_training, batch_size)
+    completed_images = (1 - masks) * images + masks * syn_images
 
     local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
                                                                                     args[1],
@@ -128,7 +130,9 @@ def train():
                                       dtype=tf.float32)
 
     # loss function
-    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
+                                (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
