@@ -5,7 +5,7 @@ import cv2
 import tensorflow as tf
 import numpy as np
 
-from models import completion_network
+from mpgan_models import completion_network
 
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
