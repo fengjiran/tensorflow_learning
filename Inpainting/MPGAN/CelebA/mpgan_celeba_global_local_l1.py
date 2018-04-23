@@ -36,7 +36,7 @@ alpha_rec = 0.9
 alpha_global = 0.05
 alpha_local = 0.05
 
-alpha = 0.7
+alpha = 0.8
 
 gt_height = 96
 gt_width = 96
