@@ -20,7 +20,8 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
     g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+    # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+    model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
