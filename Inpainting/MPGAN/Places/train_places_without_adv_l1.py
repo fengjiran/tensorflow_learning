@@ -18,7 +18,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/places_train_path_linux_7810.pickle'
-        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Palaces/models_without_adv_l1/events'
+        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/models_without_adv_l1/events'
         model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/Places/models_without_adv_l1'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/Places/places_train_path_linux_7610.pickle'
