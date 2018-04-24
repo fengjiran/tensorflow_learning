@@ -11,9 +11,9 @@ events_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/mod
 model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1
 
 isFirstTimeTrain: true
-batch_size: 32
+batch_size: 16
 weight_decay_rate: 1.0e-4
-init_lr: 3.0e-3
+init_lr: 1.0e-3
 lr_decay_steps: 1000
 iters_c: 90000
 alpha: 0.8
