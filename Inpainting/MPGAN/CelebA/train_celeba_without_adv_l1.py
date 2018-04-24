@@ -191,7 +191,7 @@ with tf.Session() as sess:
 
         iters += 1
 
-        if iters % 100 == 0:
+        if iters % 200 == 0:
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
