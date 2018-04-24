@@ -10,7 +10,7 @@ from mpgan_models import completion_network
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
 color = (255, 255, 255)
-size = 10
+size = 25
 batch_size = 1
 
 if platform.system() == 'Windows':
