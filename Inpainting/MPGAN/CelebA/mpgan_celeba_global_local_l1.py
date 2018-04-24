@@ -18,10 +18,16 @@ if platform.system() == 'Windows':
     g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_local_l1'
 elif platform.system() == 'Linux':
-    compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
-    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
-    # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
-    model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
+    if platform.node() == 'icie-Precision-Tower-7810':
+        compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
+        g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
+        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
+    elif platform.node() == 'icie-Precision-T7610':
+        compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
+        g_model_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1'
+        model_path = '/home/icie/richard/MPGAN/CelebA/models_global_local_l1'
+        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
@@ -32,9 +38,9 @@ init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 10 * int(202599 / batch_size)  # 200000
 iters_d = 15000
-alpha_rec = 0.9
+alpha_rec = 0.8
 alpha_global = 0.05
-alpha_local = 0.05
+alpha_local = 0.15
 
 alpha = 0.8
 
