@@ -57,31 +57,31 @@ def completion_network(images, is_training, batch_size):
 
         # Dilated conv from here
         dilated_conv7 = DilatedConv2dLayer(bn6, [3, 3, 256, 256], rate=2, name='dilated_conv7')
-        # bn7_layer = BatchNormLayer(dilated_conv7.output, is_training, name='bn7')
-        # bn7 = tf.nn.relu(bn7_layer.output)  # N, 64, 64, 256
+        bn7_layer = BatchNormLayer(dilated_conv7.output, is_training, name='bn7')
+        bn7 = tf.nn.relu(bn7_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv7)
-        # bn_layers.append(bn7_layer)
+        bn_layers.append(bn7_layer)
 
-        dilated_conv8 = DilatedConv2dLayer(dilated_conv7.output, [3, 3, 256, 256], rate=4, name='dilated_conv8')
-        # bn8_layer = BatchNormLayer(dilated_conv8.output, is_training, name='bn8')
-        # bn8 = tf.nn.relu(bn8_layer.output)  # N, 64, 64, 256
+        dilated_conv8 = DilatedConv2dLayer(bn7, [3, 3, 256, 256], rate=4, name='dilated_conv8')
+        bn8_layer = BatchNormLayer(dilated_conv8.output, is_training, name='bn8')
+        bn8 = tf.nn.relu(bn8_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv8)
-        # bn_layers.append(bn8_layer)
+        bn_layers.append(bn8_layer)
 
-        dilated_conv9 = DilatedConv2dLayer(dilated_conv8.output, [3, 3, 256, 256], rate=8, name='dilated_conv9')
-        # bn9_layer = BatchNormLayer(dilated_conv9.output, is_training, name='bn9')
-        # bn9 = tf.nn.relu(bn9_layer.output)  # N, 64, 64, 256
+        dilated_conv9 = DilatedConv2dLayer(bn8, [3, 3, 256, 256], rate=8, name='dilated_conv9')
+        bn9_layer = BatchNormLayer(dilated_conv9.output, is_training, name='bn9')
+        bn9 = tf.nn.relu(bn9_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv9)
-        # bn_layers.append(bn9_layer)
+        bn_layers.append(bn9_layer)
 
-        dilated_conv10 = DilatedConv2dLayer(dilated_conv9.output, [3, 3, 256, 256], rate=16, name='dilated_conv10')
-        # bn10_layer = BatchNormLayer(dilated_conv10.output, is_training, name='bn10')
-        # bn10 = tf.nn.relu(bn10_layer.output)  # N, 64, 64, 256
+        dilated_conv10 = DilatedConv2dLayer(bn9, [3, 3, 256, 256], rate=16, name='dilated_conv10')
+        bn10_layer = BatchNormLayer(dilated_conv10.output, is_training, name='bn10')
+        bn10 = tf.nn.relu(bn10_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv10)
-        # bn_layers.append(bn10_layer)
+        bn_layers.append(bn10_layer)
 
         # resize back
-        conv11 = Conv2dLayer(dilated_conv10.output, [3, 3, 256, 256], stride=1, name='conv11')
+        conv11 = Conv2dLayer(bn10, [3, 3, 256, 256], stride=1, name='conv11')
         bn11_layer = BatchNormLayer(conv11.output, is_training, name='bn11')
         bn11 = tf.nn.relu(bn11_layer.output)  # N, 64, 64, 256
         conv_layers.append(conv11)
