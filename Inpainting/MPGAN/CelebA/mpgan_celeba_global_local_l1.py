@@ -33,10 +33,11 @@ elif platform.system() == 'Linux':
 isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
-init_lr_g = 3e-4
+init_lr_g = 2e-3
 init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 10 * int(202599 / batch_size)  # 200000
+iters_c = 90000
 iters_d = 15000
 alpha_rec = 0.7
 alpha_global = 0.1
@@ -100,7 +101,7 @@ def train():
     global_step_g = tf.get_variable('global_step_g',
                                     [],
                                     tf.int32,
-                                    initializer=tf.constant_initializer(0),
+                                    initializer=tf.constant_initializer(iters_c),
                                     trainable=False)
 
     global_step_d = tf.get_variable('global_step_d',
