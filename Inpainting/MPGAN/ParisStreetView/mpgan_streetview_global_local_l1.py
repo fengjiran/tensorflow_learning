@@ -27,13 +27,14 @@ elif platform.system() == 'Linux':
         g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
         model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 2
 weight_decay_rate = 1e-4
-init_lr_g = 5e-4
+init_lr_g = 1e-3
 init_lr_d = 3e-5
 lr_decay_steps = 1000
+iters_c = 10 * int(14900 / 4)
 iters_total = 200000
 iters_d = 15000
 alpha_rec = 0.99
@@ -96,7 +97,7 @@ def train():
     global_step_g = tf.get_variable('global_step_g',
                                     [],
                                     tf.int32,
-                                    initializer=tf.constant_initializer(0),
+                                    initializer=tf.constant_initializer(iters_c),
                                     trainable=False)
 
     global_step_d = tf.get_variable('global_step_d',
@@ -249,8 +250,8 @@ def train():
                 iters = pickle.load(f)
 
         while iters < iters_total:
-            _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
-                sess.run([train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_g],
+            _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
+                sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
                          feed_dict={is_training: True})
 
             print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
@@ -295,7 +296,7 @@ def train():
             #         lr_view_g))
 
             iters += 1
-            if iters % 100 == 0:
+            if iters % 200 == 0:
                 with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                     pickle.dump(iters, f, protocol=2)
                 saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
