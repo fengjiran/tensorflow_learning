@@ -19,9 +19,14 @@ if platform.system() == 'Windows':
     events_path = config['events_path_win']
     model_path = config['model_path_win']
 elif platform.system() == 'Linux':
-    compress_path = config['trainset_path_linux']
-    events_path = config['events_path_linux']
-    model_path = config['model_path_linux']
+    if platform.node() == 'icie-Precision-Tower-7810':
+        compress_path = config['trainset_path_linux']
+        events_path = config['events_path_linux']
+        model_path = config['model_path_linux']
+    elif platform.node() == 'icie-Precision-T7610':
+        compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
+        events_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1/events'
+        model_path = '/home/icie/richard/MPGAN/CelebA/models_global_local_l1'
 
 # if platform.system() == 'Windows':
 #     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\GlobalLocalImageCompletion_TF\\CelebA\\celeba_train_path_win.pickle'
