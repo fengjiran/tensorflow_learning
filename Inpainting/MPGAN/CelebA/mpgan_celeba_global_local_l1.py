@@ -138,9 +138,9 @@ def train():
                                       dtype=tf.float32)
 
     # loss function
-    # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
-    loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
-                                (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
+    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
+    #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
