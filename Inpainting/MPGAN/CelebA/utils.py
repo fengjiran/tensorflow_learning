@@ -39,7 +39,8 @@ class Conv2dLayer(object):
         with tf.variable_scope(name):
             self.w = tf.get_variable(name='w',
                                      shape=filter_shape,
-                                     initializer=tf.glorot_normal_initializer())
+                                     initializer=tf.keras.initializers.he_normal())
+    #  initializer=tf.glorot_normal_initializer())
 
             self.b = tf.get_variable(name='b',
                                      shape=filter_shape[-1],
@@ -66,7 +67,7 @@ class DeconvLayer(object):
         with tf.variable_scope(name):
             self.w = tf.get_variable(name='w',
                                      shape=filter_shape,
-                                     initializer=tf.glorot_normal_initializer())
+                                     initializer=tf.keras.initializers.he_normal())
 
             self.b = tf.get_variable(name='b',
                                      shape=filter_shape[-2],
@@ -96,7 +97,7 @@ class DilatedConv2dLayer(object):
         with tf.variable_scope(name):
             self.w = tf.get_variable(name='w',
                                      shape=filter_shape,
-                                     initializer=tf.glorot_normal_initializer())
+                                     initializer=tf.keras.initializers.he_normal())
 
             self.b = tf.get_variable(name='b',
                                      shape=filter_shape[-1],
@@ -127,7 +128,7 @@ class FCLayer(object):
         with tf.variable_scope(name):
             self.w = tf.get_variable(name='w',
                                      shape=[input_size, output_size],
-                                     initializer=tf.glorot_normal_initializer())
+                                     initializer=tf.keras.initializers.he_normal())
             self.b = tf.get_variable(name='b',
                                      shape=[output_size],
                                      initializer=tf.constant_initializer(0.))
