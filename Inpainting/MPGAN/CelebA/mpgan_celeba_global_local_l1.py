@@ -38,9 +38,9 @@ init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_total = 10 * int(202599 / batch_size)  # 200000
 iters_d = 15000
-alpha_rec = 0.8
-alpha_global = 0.05
-alpha_local = 0.15
+alpha_rec = 0.7
+alpha_global = 0.1
+alpha_local = 0.2
 
 alpha = 0.8
 
