@@ -30,18 +30,18 @@ elif platform.system() == 'Linux':
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
 isFirstTimeTrain_G = True
-isFirstTimeTrain_D = True
-batch_size = 2
+isFirstTimeTrain_Joint = True
+batch_size = 4
 weight_decay_rate = 1e-4
-init_lr_g = 1e-3
+init_lr_g = 3e-4
 init_lr_d = 3e-5
 lr_decay_steps = 1000
 iters_c = 5 * int(14900 / batch_size)
 iters_total = 200000
 iters_d = 15000
 alpha_rec = 0.7
-alpha_global = 0.1
-alpha_local = 0.2
+alpha_global = 0.2
+alpha_local = 0.1
 
 gt_height = 256
 gt_width = 256
@@ -247,22 +247,6 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         if isFirstTimeTrain:
-            iters = 0
-            with open(os.path.join(g_model_path, 'iter.pickle'), 'wb') as f:
-                pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
-        else:
-            if isFirstTimeTrain_G:
-                pass
-            else:
-                pass
-
-            if isFirstTimeTrain_D:
-                pass
-            else:
-                pass
-
-        if isFirstTimeTrain:
             # sess.run(tf.global_variables_initializer())
             # updates = []
             # for i, item in enumerate(old_var_G):
@@ -278,13 +262,17 @@ def train():
             # saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
             with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
-            if iters < iters_c:
-                saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
+
+            if iters == iters_c:
+                if isFirstTimeTrain_Joint:
+                    iters += 1
+                else:
+                    with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+                        iters = pickle.load(f)
+                    # iters += 1
+                    saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
             else:
-                with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
-                    iters = pickle.load(f)
-                iters += 1
-                saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
+                saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
 
         while iters <= iters_total:
             if iters <= iters_c:
