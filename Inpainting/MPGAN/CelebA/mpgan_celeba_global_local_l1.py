@@ -21,8 +21,8 @@ elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
         g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
-        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
-        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
+        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
         g_model_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1'
