@@ -57,31 +57,31 @@ def completion_network(images, is_training, batch_size):
 
         # Dilated conv from here
         dilated_conv7 = DilatedConv2dLayer(bn6, [3, 3, 256, 256], rate=2, name='dilated_conv7')
-        # bn7_layer = BatchNormLayer(dilated_conv7.output, is_training, name='bn7')
-        # bn7 = tf.nn.relu(bn7_layer.output)  # N, 64, 64, 256
+        bn7_layer = BatchNormLayer(dilated_conv7.output, is_training, name='bn7')
+        bn7 = tf.nn.relu(bn7_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv7)
-        # bn_layers.append(bn7_layer)
+        bn_layers.append(bn7_layer)
 
-        dilated_conv8 = DilatedConv2dLayer(dilated_conv7.output, [3, 3, 256, 256], rate=4, name='dilated_conv8')
-        # bn8_layer = BatchNormLayer(dilated_conv8.output, is_training, name='bn8')
-        # bn8 = tf.nn.relu(bn8_layer.output)  # N, 64, 64, 256
+        dilated_conv8 = DilatedConv2dLayer(bn7, [3, 3, 256, 256], rate=4, name='dilated_conv8')
+        bn8_layer = BatchNormLayer(dilated_conv8.output, is_training, name='bn8')
+        bn8 = tf.nn.relu(bn8_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv8)
-        # bn_layers.append(bn8_layer)
+        bn_layers.append(bn8_layer)
 
-        dilated_conv9 = DilatedConv2dLayer(dilated_conv8.output, [3, 3, 256, 256], rate=8, name='dilated_conv9')
-        # bn9_layer = BatchNormLayer(dilated_conv9.output, is_training, name='bn9')
-        # bn9 = tf.nn.relu(bn9_layer.output)  # N, 64, 64, 256
+        dilated_conv9 = DilatedConv2dLayer(bn8, [3, 3, 256, 256], rate=8, name='dilated_conv9')
+        bn9_layer = BatchNormLayer(dilated_conv9.output, is_training, name='bn9')
+        bn9 = tf.nn.relu(bn9_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv9)
-        # bn_layers.append(bn9_layer)
+        bn_layers.append(bn9_layer)
 
-        dilated_conv10 = DilatedConv2dLayer(dilated_conv9.output, [3, 3, 256, 256], rate=16, name='dilated_conv10')
-        # bn10_layer = BatchNormLayer(dilated_conv10.output, is_training, name='bn10')
-        # bn10 = tf.nn.relu(bn10_layer.output)  # N, 64, 64, 256
+        dilated_conv10 = DilatedConv2dLayer(bn9, [3, 3, 256, 256], rate=16, name='dilated_conv10')
+        bn10_layer = BatchNormLayer(dilated_conv10.output, is_training, name='bn10')
+        bn10 = tf.nn.relu(bn10_layer.output)  # N, 64, 64, 256
         conv_layers.append(dilated_conv10)
-        # bn_layers.append(bn10_layer)
+        bn_layers.append(bn10_layer)
 
         # resize back
-        conv11 = Conv2dLayer(dilated_conv10.output, [3, 3, 256, 256], stride=1, name='conv11')
+        conv11 = Conv2dLayer(bn10, [3, 3, 256, 256], stride=1, name='conv11')
         bn11_layer = BatchNormLayer(conv11.output, is_training, name='bn11')
         bn11 = tf.nn.relu(bn11_layer.output)  # N, 64, 64, 256
         conv_layers.append(conv11)
@@ -150,37 +150,37 @@ def global_discriminator(images, is_training, reuse=None):
     conv_layers = []
     bn_layers = []
     with tf.variable_scope('global_discriminator', reuse=reuse):
-        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        conv1 = Conv2dLayer(images, [3, 3, 3, 64], stride=2, name='conv1')
         bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
         bn1 = tf.nn.leaky_relu(bn1_layer.output)
         conv_layers.append(conv1)
         bn_layers.append(bn1_layer)
 
-        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        conv2 = Conv2dLayer(bn1, [3, 3, 64, 128], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
         bn2 = tf.nn.leaky_relu(bn2_layer.output)
         conv_layers.append(conv2)
         bn_layers.append(bn2_layer)
 
-        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        conv3 = Conv2dLayer(bn2, [3, 3, 128, 256], stride=2, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
         bn3 = tf.nn.leaky_relu(bn3_layer.output)
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
-        conv4 = Conv2dLayer(bn3, [5, 5, 256, 512], stride=2, name='conv4')
+        conv4 = Conv2dLayer(bn3, [3, 3, 256, 512], stride=2, name='conv4')
         bn4_layer = BatchNormLayer(conv4.output, is_training, name='bn4')
         bn4 = tf.nn.leaky_relu(bn4_layer.output)
         conv_layers.append(conv4)
         bn_layers.append(bn4_layer)
 
-        conv5 = Conv2dLayer(bn4, [5, 5, 512, 512], stride=2, name='conv5')
+        conv5 = Conv2dLayer(bn4, [3, 3, 512, 512], stride=2, name='conv5')
         bn5_layer = BatchNormLayer(conv5.output, is_training, name='bn5')
         bn5 = tf.nn.leaky_relu(bn5_layer.output)
         conv_layers.append(conv5)
         bn_layers.append(bn5_layer)
 
-        conv6 = Conv2dLayer(bn5, [5, 5, 512, 512], stride=2, name='conv6')
+        conv6 = Conv2dLayer(bn5, [3, 3, 512, 512], stride=2, name='conv6')
         bn6_layer = BatchNormLayer(conv6.output, is_training, name='bn6')
         bn6 = tf.nn.leaky_relu(bn6_layer.output)
         conv_layers.append(conv6)
@@ -208,25 +208,25 @@ def markovian_discriminator(images, is_training, reuse=None):
     conv_layers = []
     bn_layers = []
     with tf.variable_scope('markovian_discriminator', reuse=reuse):
-        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=2, name='conv1')
+        conv1 = Conv2dLayer(images, [3, 3, 3, 64], stride=2, name='conv1')
         bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
         bn1 = tf.nn.leaky_relu(bn1_layer.output, alpha=0.2)
         conv_layers.append(conv1)
         bn_layers.append(bn1_layer)
 
-        conv2 = Conv2dLayer(bn1, [5, 5, 64, 128], stride=2, name='conv2')
+        conv2 = Conv2dLayer(bn1, [3, 3, 64, 128], stride=2, name='conv2')
         bn2_layer = BatchNormLayer(conv2.output, is_training, name='bn2')
         bn2 = tf.nn.leaky_relu(bn2_layer.output, alpha=0.2)
         conv_layers.append(conv2)
         bn_layers.append(bn2_layer)
 
-        conv3 = Conv2dLayer(bn2, [5, 5, 128, 256], stride=2, name='conv3')
+        conv3 = Conv2dLayer(bn2, [3, 3, 128, 256], stride=2, name='conv3')
         bn3_layer = BatchNormLayer(conv3.output, is_training, name='bn3')
         bn3 = tf.nn.leaky_relu(bn3_layer.output, alpha=0.2)
         conv_layers.append(conv3)
         bn_layers.append(bn3_layer)
 
-        conv4 = Conv2dLayer(bn3, [5, 5, 256, 1], stride=2, name='conv4')
+        conv4 = Conv2dLayer(bn3, [3, 3, 256, 1], stride=1, name='conv4')
         conv_layers.append(conv4)
 
         print('Print the local discriminator network constructure:')
