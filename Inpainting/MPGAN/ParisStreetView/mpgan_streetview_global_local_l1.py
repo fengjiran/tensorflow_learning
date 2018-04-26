@@ -247,6 +247,9 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         if isFirstTimeTrain:
+            pass
+
+        if isFirstTimeTrain:
             # sess.run(tf.global_variables_initializer())
             # updates = []
             # for i, item in enumerate(old_var_G):
