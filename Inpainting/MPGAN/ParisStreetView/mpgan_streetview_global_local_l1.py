@@ -31,10 +31,10 @@ elif platform.system() == 'Linux':
 isFirstTimeTrain = True
 batch_size = 2
 weight_decay_rate = 1e-4
-init_lr_g = 2e-3
+init_lr_g = 1e-3
 init_lr_d = 3e-5
 lr_decay_steps = 1000
-iters_c = 90000
+iters_c = 5 * int(14900 / batch_size)
 iters_total = 200000
 iters_d = 15000
 alpha_rec = 0.7
@@ -252,17 +252,17 @@ def train():
             # sess.run(updates)
 
             iters = 0
-            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+            with open(os.path.join(g_model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
+            saver.save(sess, os.path.join(g_model_path, 'models_global_local_l1'))
         else:
             # sess.run(tf.global_variables_initializer())
             saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
             with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
 
-        while iters < iters_total:
-            if iters < iters_c:
+        while iters <= iters_total:
+            if iters <= iters_c:
                 _, loss_view_g, lr_view_g, gs = \
                     sess.run([train_op_only_g, loss_only_g, lr_g, global_step_g],
                              feed_dict={is_training: True})
@@ -272,10 +272,10 @@ def train():
                     loss_view_g,
                     lr_view_g))
 
-                if iters % 200 == 0:
-                    with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                if (iters % 200 == 0) or (iters == iters_c):
+                    with open(os.path.join(g_model_path, 'iter.pickle'), 'wb') as f:
                         pickle.dump(iters, f, protocol=2)
-                    saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
+                    saver.save(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
 
                     g_vars_mean, g_grads_mean = sess.run([view_only_g_weights,
                                                           view_only_g_grads],
@@ -283,7 +283,7 @@ def train():
                     # summary_writer.add_summary(summary_str, iters)
                     print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                         int(iters / num_batch) + 1,
-                        iters,
+                        gs,
                         g_vars_mean,
                         g_grads_mean))
 
@@ -300,7 +300,7 @@ def train():
                     lr_view_d,
                     lr_view_g))
 
-                if iters % 200 == 0:
+                if (iters % 200 == 0) or (iters == iters_total):
                     with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                         pickle.dump(iters, f, protocol=2)
                     saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
@@ -313,7 +313,7 @@ def train():
                     # summary_writer.add_summary(summary_str, iters)
                     print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                         int(iters / num_batch) + 1,
-                        iters,
+                        gs,
                         g_vars_mean,
                         g_grads_mean))
                     print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
