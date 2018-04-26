@@ -31,15 +31,15 @@ elif platform.system() == 'Linux':
 isFirstTimeTrain = True
 batch_size = 2
 weight_decay_rate = 1e-4
-init_lr_g = 1e-3
+init_lr_g = 2e-3
 init_lr_d = 3e-5
 lr_decay_steps = 1000
-iters_c = 10 * int(14900 / 4)
+iters_c = 90000
 iters_total = 200000
 iters_d = 15000
-alpha_rec = 0.99
-alpha_global = 0.005
-alpha_local = 0.005
+alpha_rec = 0.7
+alpha_global = 0.1
+alpha_local = 0.2
 
 gt_height = 256
 gt_width = 256
@@ -97,7 +97,7 @@ def train():
     global_step_g = tf.get_variable('global_step_g',
                                     [],
                                     tf.int32,
-                                    initializer=tf.constant_initializer(iters_c),
+                                    initializer=tf.constant_initializer(0),
                                     trainable=False)
 
     global_step_d = tf.get_variable('global_step_d',
@@ -115,8 +115,8 @@ def train():
     # iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
-    completed_images = completion_network(images_with_hole, is_training, batch_size)
-    completed_images = (1 - masks) * images + masks * completed_images
+    syn_images = completion_network(images_with_hole, is_training, batch_size)
+    completed_images = (1 - masks) * images + masks * syn_images
 
     local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
                                                                                     args[1],
@@ -135,6 +135,9 @@ def train():
 
     # loss function
     loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+
+    # loss function only for training generator
+    loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -189,11 +192,19 @@ def train():
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
 
+    # grads and vars
+    grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
+    train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
+
     grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
     train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
 
     grads_vars_d = opt_d.compute_gradients(loss_d, var_d)
     train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
+
+    # view grads and vars
+    view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
+    view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
 
     view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
     view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
@@ -205,21 +216,22 @@ def train():
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
+    train_op_only_g = tf.group(train_only_g, variable_averages_op)
     train_op_g = tf.group(train_g, variable_averages_op)
     train_op_d = tf.group(train_d, variable_averages_op)
 
     variables_to_restore = variable_averages.variables_to_restore()
     saver = tf.train.Saver(variables_to_restore)
 
-    if isFirstTimeTrain:
-        old_var_G = []
-        graph1 = tf.Graph()
-        with graph1.as_default():
-            with tf.Session(graph=graph1) as sess1:
-                saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l1.meta'))
-                saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
-                old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-                old_var_G = sess1.run(old_var_G)
+    # if isFirstTimeTrain:
+    #     old_var_G = []
+    #     graph1 = tf.Graph()
+    #     with graph1.as_default():
+    #         with tf.Session(graph=graph1) as sess1:
+    #             saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l1.meta'))
+    #             saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
+    #             old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
+    #             old_var_G = sess1.run(old_var_G)
 
     with tf.Session() as sess:
         # load trainset
@@ -234,10 +246,10 @@ def train():
 
         if isFirstTimeTrain:
             # sess.run(tf.global_variables_initializer())
-            updates = []
-            for i, item in enumerate(old_var_G):
-                updates.append(tf.assign(var_g[i], item))
-            sess.run(updates)
+            # updates = []
+            # for i, item in enumerate(old_var_G):
+            #     updates.append(tf.assign(var_g[i], item))
+            # sess.run(updates)
 
             iters = 0
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
@@ -250,70 +262,63 @@ def train():
                 iters = pickle.load(f)
 
         while iters < iters_total:
-            _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
-                sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
-                         feed_dict={is_training: True})
-
-            print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
-                int(iters / num_batch) + 1,
-                gs,  # iters,
-                loss_view_d,
-                loss_view_g,
-                lr_view_d,
-                lr_view_g))
-            # _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-            #                                          feed_dict={is_training: True})
-            # print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
-            #     int(iters / num_batch) + 1,
-            #     gs,  # iters,
-            #     loss_view_d,
-            #     lr_view_d))
-
-            # for i in range(5):
-            #     _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_g,
-            #         lr_view_g))
-
-            # if iters < iters_d:
-            #     _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_d,
-            #         lr_view_d))
-            # else:
-            #     _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_g,
-            #         lr_view_g))
-
-            iters += 1
-            if iters % 200 == 0:
-                with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
-                    pickle.dump(iters, f, protocol=2)
-                saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
-
-                g_vars_mean, g_grads_mean, d_vars_mean, d_grads_mean = sess.run([view_g_weights,
-                                                                                 view_g_grads,
-                                                                                 view_d_weights,
-                                                                                 view_d_grads],
-                                                                                feed_dict={is_training: True})
-                # summary_writer.add_summary(summary_str, iters)
-                print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
+            if iters < iters_c:
+                _, loss_view_g, lr_view_g, gs = \
+                    sess.run([train_op_only_g, loss_only_g, lr_g, global_step_g],
+                             feed_dict={is_training: True})
+                print('Epoch: {}, Iter: {},loss_g: {},lr_g: {}'.format(
                     int(iters / num_batch) + 1,
-                    iters,
-                    g_vars_mean,
-                    g_grads_mean))
-                print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
-                                                                                       d_grads_mean))
+                    gs,  # iters,
+                    loss_view_g,
+                    lr_view_g))
+
+                if iters % 200 == 0:
+                    with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                        pickle.dump(iters, f, protocol=2)
+                    saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
+
+                    g_vars_mean, g_grads_mean = sess.run([view_only_g_weights,
+                                                          view_only_g_grads],
+                                                         feed_dict={is_training: True})
+                    # summary_writer.add_summary(summary_str, iters)
+                    print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
+                        int(iters / num_batch) + 1,
+                        iters,
+                        g_vars_mean,
+                        g_grads_mean))
+
+            else:
+                _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
+                    sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
+                             feed_dict={is_training: True})
+
+                print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
+                    int(iters / num_batch) + 1,
+                    gs,  # iters,
+                    loss_view_d,
+                    loss_view_g,
+                    lr_view_d,
+                    lr_view_g))
+
+                if iters % 200 == 0:
+                    with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+                        pickle.dump(iters, f, protocol=2)
+                    saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
+
+                    g_vars_mean, g_grads_mean, d_vars_mean, d_grads_mean = sess.run([view_g_weights,
+                                                                                     view_g_grads,
+                                                                                     view_d_weights,
+                                                                                     view_d_grads],
+                                                                                    feed_dict={is_training: True})
+                    # summary_writer.add_summary(summary_str, iters)
+                    print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
+                        int(iters / num_batch) + 1,
+                        iters,
+                        g_vars_mean,
+                        g_grads_mean))
+                    print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
+                                                                                           d_grads_mean))
+            iters += 1
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from mpgan_models import completion_network
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
 color = (255, 255, 255)
-size = 20
+size = 25
 batch_size = 1
 
 if platform.system() == 'Windows':
@@ -22,8 +22,8 @@ elif platform.system() == 'Linux':
     img_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/000013.png'
 
 elif platform.system() == 'Darwin':
-    # checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1/models_global_local_l1'
-    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test/models_global_local_l1'
+    checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1/models_global_local_l1'
+    # checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test/models_global_local_l1'
     img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/000013.png'
 
 
