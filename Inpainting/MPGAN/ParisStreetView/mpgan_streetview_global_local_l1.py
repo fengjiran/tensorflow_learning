@@ -29,6 +29,8 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
+isFirstTimeTrain_G = True
+isFirstTimeTrain_D = True
 batch_size = 2
 weight_decay_rate = 1e-4
 init_lr_g = 1e-3
@@ -254,12 +256,19 @@ def train():
             iters = 0
             with open(os.path.join(g_model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(g_model_path, 'models_global_local_l1'))
+            saver.save(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
         else:
             # sess.run(tf.global_variables_initializer())
-            saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
-            with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+            # saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
+            with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
+            if iters < iters_c:
+                saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
+            else:
+                with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
+                    iters = pickle.load(f)
+                iters += 1
+                saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
 
         while iters <= iters_total:
             if iters <= iters_c:
