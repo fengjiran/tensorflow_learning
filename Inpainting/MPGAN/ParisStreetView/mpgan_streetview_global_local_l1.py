@@ -247,7 +247,20 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         if isFirstTimeTrain:
-            pass
+            iters = 0
+            with open(os.path.join(g_model_path, 'iter.pickle'), 'wb') as f:
+                pickle.dump(iters, f, protocol=2)
+            saver.save(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
+        else:
+            if isFirstTimeTrain_G:
+                pass
+            else:
+                pass
+
+            if isFirstTimeTrain_D:
+                pass
+            else:
+                pass
 
         if isFirstTimeTrain:
             # sess.run(tf.global_variables_initializer())
