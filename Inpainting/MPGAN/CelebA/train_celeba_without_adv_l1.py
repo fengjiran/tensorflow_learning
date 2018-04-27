@@ -115,10 +115,15 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
-images, images_with_hole, masks, _, _ = iterator.get_next()
+images, images_with_hole, masks, _, _, hole_heights, hole_widths = iterator.get_next()
 syn_images = completion_network(images_with_hole, is_training, batch_size)
-completed_images = (1 - masks) * images + masks * syn_images
-loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+# completed_images = (1 - masks) * images + masks * syn_images
+completed_images = tf.multiply(1 - masks, images) + tf.multiply(masks, syn_images)
+
+sizes = tf.multiply(hole_heights, hole_widths)
+temp = tf.abs(completed_images - images)
+loss_recon = tf.reduce_sum([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
+# loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
 #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
