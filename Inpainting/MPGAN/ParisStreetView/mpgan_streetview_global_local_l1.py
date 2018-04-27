@@ -95,7 +95,7 @@ def input_parse(img_path):
 
 
 def train():
-    is_training = tf.placeholder(tf.bool)
+    # is_training = tf.placeholder(tf.bool)
     global_step_g = tf.get_variable('global_step_g',
                                     [],
                                     tf.int32,
@@ -117,7 +117,7 @@ def train():
     # iterator_d = dataset.make_initializable_iterator()
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
-    syn_images = completion_network(images_with_hole, is_training, batch_size)
+    syn_images = completion_network(images_with_hole, batch_size)
     completed_images = (1 - masks) * images + masks * syn_images
 
     local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
@@ -141,12 +141,12 @@ def train():
     # loss function only for training generator
     loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
-    global_dis_outputs_real = global_discriminator(images, is_training)
-    global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
+    global_dis_outputs_real = global_discriminator(images)
+    global_dis_outputs_fake = global_discriminator(completed_images, reuse=True)
     global_dis_outputs_all = tf.concat([global_dis_outputs_real, global_dis_outputs_fake], axis=0)
 
-    local_dis_outputs_real = markovian_discriminator(local_dis_inputs_real, is_training)
-    local_dis_outputs_fake = markovian_discriminator(local_dis_inputs_fake, is_training, reuse=True)
+    local_dis_outputs_real = markovian_discriminator(local_dis_inputs_real)
+    local_dis_outputs_fake = markovian_discriminator(local_dis_inputs_fake, reuse=True)
     local_dis_outputs_all = tf.concat([local_dis_outputs_real, local_dis_outputs_fake], axis=0)
 
     labels_global_dis = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], axis=0)
@@ -276,8 +276,8 @@ def train():
         while iters <= iters_total:
             if iters <= iters_c:
                 _, loss_view_g, lr_view_g, gs = \
-                    sess.run([train_op_only_g, loss_only_g, lr_g, global_step_g],
-                             feed_dict={is_training: True})
+                    sess.run([train_op_only_g, loss_only_g, lr_g, global_step_g])
+                #  feed_dict={is_training: True})
                 print('Epoch: {}, Iter: {},loss_g: {},lr_g: {}'.format(
                     int(iters / num_batch) + 1,
                     gs,  # iters,
@@ -290,8 +290,8 @@ def train():
                     saver.save(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
 
                     g_vars_mean, g_grads_mean = sess.run([view_only_g_weights,
-                                                          view_only_g_grads],
-                                                         feed_dict={is_training: True})
+                                                          view_only_g_grads])
+                    #  feed_dict={is_training: True})
                     # summary_writer.add_summary(summary_str, iters)
                     print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                         int(iters / num_batch) + 1,
@@ -301,8 +301,8 @@ def train():
 
             else:
                 _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
-                    sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
-                             feed_dict={is_training: True})
+                    sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d])
+                #  feed_dict={is_training: True})
 
                 print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
                     int(iters / num_batch) + 1,
@@ -320,8 +320,8 @@ def train():
                     g_vars_mean, g_grads_mean, d_vars_mean, d_grads_mean = sess.run([view_g_weights,
                                                                                      view_g_grads,
                                                                                      view_d_weights,
-                                                                                     view_d_grads],
-                                                                                    feed_dict={is_training: True})
+                                                                                     view_d_grads])
+                    # feed_dict={is_training: True})
                     # summary_writer.add_summary(summary_str, iters)
                     print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                         int(iters / num_batch) + 1,
