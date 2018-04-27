@@ -97,7 +97,8 @@ def test(sess):
     res_image = sess.run(res_image, feed_dict={x: test_img,
                                                is_training: False})
 
-    res_image = (1 - test_mask) * orig_test + test_mask * res_image
+    # res_image = (1 - test_mask) * orig_test + test_mask * res_image
+    res_image = tf.multiply(1 - test_mask, orig_test) + tf.multiply(test_mask, res_image)
     res_image = res_image.astype(np.float32)
 
     orig = (orig_test[0] + 1) / 2
