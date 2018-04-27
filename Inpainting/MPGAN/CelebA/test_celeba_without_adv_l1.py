@@ -98,7 +98,7 @@ def test(sess):
                                                is_training: False})
 
     # res_image = (1 - test_mask) * orig_test + test_mask * res_image
-    res_image = tf.multiply(1 - test_mask, orig_test) + tf.multiply(test_mask, res_image)
+    res_image = np.multiply(1 - test_mask, orig_test) + np.multiply(test_mask, res_image)
     res_image = res_image.astype(np.float32)
 
     orig = (orig_test[0] + 1) / 2
