@@ -120,9 +120,10 @@ syn_images = completion_network(images_with_hole, is_training, batch_size)
 # completed_images = (1 - masks) * images + masks * syn_images
 completed_images = tf.multiply(1 - masks, images) + tf.multiply(masks, syn_images)
 
-sizes = tf.multiply(hole_heights, hole_widths)
+sizes = 3 * tf.multiply(hole_heights, hole_widths)
 temp = tf.abs(completed_images - images)
-loss_recon = tf.reduce_sum([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
+loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
+# loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
 # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
 #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
