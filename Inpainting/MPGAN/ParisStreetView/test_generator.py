@@ -84,9 +84,9 @@ def test(sess):
     test_img = test_img.astype(np.float32)
 
     print('Testing...')
-    is_training = tf.placeholder(tf.bool)
+    # is_training = tf.placeholder(tf.bool)
     x = tf.placeholder(tf.float32, [batch_size, height, width, 3])
-    res_image = completion_network(x, is_training, batch_size)
+    res_image = completion_network(x, batch_size)
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variables_to_restore = variable_averages.variables_to_restore()
 
@@ -94,8 +94,7 @@ def test(sess):
     saver.restore(sess, checkpoint_path)
     # sess.run(tf.global_variables_initializer())
 
-    res_image = sess.run(res_image, feed_dict={x: test_img,
-                                               is_training: False})
+    res_image = sess.run(res_image, feed_dict={x: test_img})
 
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
     res_image = res_image.astype(np.float32)
