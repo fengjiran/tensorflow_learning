@@ -79,7 +79,7 @@ def input_parse(img_path):
         mask = tf.reshape(mask, [image_height, image_width, 1])
         mask = tf.concat([mask] * 3, 2)
 
-        image_with_hole = img * (1 - mask) + mask
+        image_with_hole = tf.multiply(img, 1 - mask) + mask
 
         # generate the location of 300*300 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
@@ -91,7 +91,9 @@ def input_parse(img_path):
                                   maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
                                   dtype=tf.int32)
 
-        return ori_image, image_with_hole, mask, x_loc, y_loc
+        hole_height = tf.convert_to_tensor(hole_height, tf.float32)
+        hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        return ori_image, image_with_hole, mask, x_loc, y_loc, hole_height, hole_width
 
 
 def train():
@@ -115,7 +117,7 @@ def train():
     dataset = dataset.repeat()
     iterator = dataset.make_initializable_iterator()
     # iterator_d = dataset.make_initializable_iterator()
-    images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
+    images, images_with_hole, masks, x_locs, y_locs, hole_heights, hole_widths = iterator.get_next()
 
     syn_images = completion_network(images_with_hole, batch_size)
     # completed_images = (1 - masks) * images + masks * syn_images
@@ -137,7 +139,12 @@ def train():
                                       dtype=tf.float32)
 
     # loss function
-    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    # hole_heights = tf.convert_to_tensor(hole_heights)
+    # hole_widths = tf.convert_to_tensor(hole_widths)
+    sizes = tf.multiply(hole_heights, hole_widths)
+    temp = tf.abs(completed_images - images)
+    loss_recon = tf.reduce_sum([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
+    # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(tf.abs(masks * (syn_images - images)))
 
     # loss function only for training generator
