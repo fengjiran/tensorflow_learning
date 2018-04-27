@@ -2,7 +2,7 @@
 
 # path for windows
 trainset_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle"
-events_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1\\events"
+# events_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1\\events"
 # model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1"
 model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1_test"
 
