@@ -29,9 +29,9 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-isFirstTimeTrain_G = True
+# isFirstTimeTrain_G = True
 isFirstTimeTrain_Joint = True
-batch_size = 4
+batch_size = 2
 weight_decay_rate = 1e-4
 init_lr_g = 3e-4
 init_lr_d = 3e-5
@@ -262,6 +262,7 @@ def train():
             # saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
             with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
+            saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
 
             if iters == iters_c:
                 if isFirstTimeTrain_Joint:
@@ -271,8 +272,6 @@ def train():
                         iters = pickle.load(f)
                     # iters += 1
                     saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
-            else:
-                saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
 
         while iters <= iters_total:
             if iters <= iters_c:
