@@ -13,8 +13,8 @@ from mpgan_models import completion_network
 from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
-with open('config.yaml', 'r') as f:
-    config = yaml.load(f)
+# with open('config.yaml', 'r') as f:
+#     config = yaml.load(f)
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
@@ -30,14 +30,14 @@ elif platform.system() == 'Linux':
         # events_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/CelebA/models_global_local_l1'
 
-isFirstTimeTrain = config['isFirstTimeTrain']
-# isFirstTimeTrain = True
-batch_size = config['batch_size']
-weight_decay_rate = config['weight_decay_rate']
-init_lr = config['init_lr']
-lr_decay_steps = config['lr_decay_steps']
-iters_c = config['iters_c']
-alpha = config['alpha']
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
+batch_size = 16
+weight_decay_rate = 1e-4
+
+lr_decay_steps = 1000
+iters_c = 90000
+alpha = 0.8
 
 init_lr_g = 3e-4
 init_lr_d = 3e-5
