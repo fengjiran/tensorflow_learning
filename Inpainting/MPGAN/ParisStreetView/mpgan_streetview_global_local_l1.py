@@ -141,9 +141,10 @@ def train():
     # loss function
     # hole_heights = tf.convert_to_tensor(hole_heights)
     # hole_widths = tf.convert_to_tensor(hole_widths)
-    sizes = tf.multiply(hole_heights, hole_widths)
+    sizes = 3 * tf.multiply(hole_heights, hole_widths)
     temp = tf.abs(completed_images - images)
-    loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
+    loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
+    # loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
     # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(tf.abs(masks * (syn_images - images)))
 
