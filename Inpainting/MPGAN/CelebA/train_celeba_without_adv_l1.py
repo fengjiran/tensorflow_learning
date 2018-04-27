@@ -92,7 +92,9 @@ def input_parse(img_path):
                                   maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
                                   dtype=tf.int32)
 
-        return ori_image, image_with_hole, mask, x_loc, y_loc
+        hole_height = tf.convert_to_tensor(hole_height, tf.float32)
+        hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        return ori_image, image_with_hole, mask, x_loc, y_loc, hole_height, hole_width
 
 
 is_training = tf.placeholder(tf.bool)
