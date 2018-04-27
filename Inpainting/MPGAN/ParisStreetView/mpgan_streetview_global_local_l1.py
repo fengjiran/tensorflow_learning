@@ -39,8 +39,8 @@ lr_decay_steps = 1000
 iters_c = 5 * int(14900 / batch_size)
 iters_total = 200000
 iters_d = 15000
-alpha_rec = 0.7
-alpha_global = 0.2
+alpha_rec = 0.8
+alpha_global = 0.1
 alpha_local = 0.1
 
 gt_height = 256
@@ -118,7 +118,8 @@ def train():
     images, images_with_hole, masks, x_locs, y_locs = iterator.get_next()
 
     syn_images = completion_network(images_with_hole, batch_size)
-    completed_images = (1 - masks) * images + masks * syn_images
+    # completed_images = (1 - masks) * images + masks * syn_images
+    completed_images = tf.multiply(1 - masks, images) + tf.multiply(masks, syn_images)
 
     local_dis_inputs_fake = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(args[0],
                                                                                     args[1],
@@ -137,6 +138,7 @@ def train():
 
     # loss function
     loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    # loss_recon = tf.reduce_mean(tf.abs(masks * (syn_images - images)))
 
     # loss function only for training generator
     loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
@@ -175,21 +177,21 @@ def train():
     loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * loss_local_g
     loss_d = loss_global_dis + loss_local_dis
 
-    var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-    var_d = tf.get_collection('global_dis_params_conv') +\
-        tf.get_collection('global_dis_params_bn') +\
-        tf.get_collection('local_dis_params_conv') +\
-        tf.get_collection('local_dis_params_bn')
+    var_g = tf.get_collection('gen_params_conv')  # + tf.get_collection('gen_params_bn')
+    var_d = tf.get_collection('global_dis_params_conv') + tf.get_collection('local_dis_params_conv')
+    # tf.get_collection('global_dis_params_bn') +\
+    # tf.get_collection('local_dis_params_conv') +\
+    # tf.get_collection('local_dis_params_bn')
 
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.93)
+                                      decay_rate=0.98)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.93)
+                                      decay_rate=0.97)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
