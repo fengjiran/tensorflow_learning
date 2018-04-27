@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import platform
 import pickle
-import yaml
+# import yaml
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -39,7 +39,7 @@ lr_decay_steps = 1000
 iters_c = 90000
 alpha = 0.8
 
-init_lr_g = 3e-4
+init_lr_g = 8e-4
 init_lr_d = 3e-5
 alpha_rec = 1.0
 alpha_global = 0
