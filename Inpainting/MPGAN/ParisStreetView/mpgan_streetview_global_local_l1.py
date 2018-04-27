@@ -27,8 +27,8 @@ elif platform.system() == 'Linux':
         g_model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
         model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_global_local_l1'
 
-# isFirstTimeTrain = False
-isFirstTimeTrain = True
+isFirstTimeTrain = False
+# isFirstTimeTrain = True
 # isFirstTimeTrain_G = True
 isFirstTimeTrain_Joint = True
 batch_size = 2
@@ -143,7 +143,7 @@ def train():
     # hole_widths = tf.convert_to_tensor(hole_widths)
     sizes = tf.multiply(hole_heights, hole_widths)
     temp = tf.abs(completed_images - images)
-    loss_recon = tf.reduce_sum([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
+    loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
     # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(tf.abs(masks * (syn_images - images)))
 
