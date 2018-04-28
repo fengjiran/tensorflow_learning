@@ -13,16 +13,16 @@ from mpgan_models import completion_network
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\parisstreetview_train_path_win.pickle'
-    events_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1\\events'
+    # events_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1\\events'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\ParisStreetView\\models_without_adv_l1'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7810.pickle'
-        events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
+        # events_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1/events'
         model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/ParisStreetView/models_without_adv_l1'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/ParisStreetView/parisstreetview_train_path_linux_7610.pickle'
-        events_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1/events'
+        # events_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/ParisStreetView/models_without_adv_l1'
 
 # isFirstTimeTrain = False
