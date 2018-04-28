@@ -206,8 +206,8 @@ def train():
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
 
     # grads and vars
-    # grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
-    # train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
+    grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
+    train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
 
     grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
     train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
@@ -216,8 +216,8 @@ def train():
     train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
 
     # view grads and vars
-    # view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
-    # view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
+    view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
+    view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
 
     view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
     view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
