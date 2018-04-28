@@ -30,13 +30,13 @@ isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = config['init_lr_g']
-init_lr_d = 3e-4
+init_lr_d = 1e-4
 lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.9
-alpha_global = 0.1
+alpha_rec = 0.8
+alpha_global = 0.2
 alpha_local = 0
 
 gt_height = 96
@@ -146,7 +146,7 @@ def train():
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
     #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-    # loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+    loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -183,27 +183,27 @@ def train():
     loss_d = loss_global_dis  # + loss_local_dis
 
     var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-    var_d = tf.get_collection('global_dis_params_conv') +\
-        tf.get_collection('local_dis_params_conv') +\
-        tf.get_collection('global_dis_params_bn') +\
-        tf.get_collection('local_dis_params_bn')
+    var_d = tf.get_collection('global_dis_params_conv') + tf.get_collection('global_dis_params_bn')
+    # tf.get_collection('local_dis_params_conv') +\
+    # tf.get_collection('global_dis_params_bn') +\
+    # tf.get_collection('local_dis_params_bn')
 
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.98)
+                                      decay_rate=0.99)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.97)
+                                      decay_rate=0.99)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
 
     # grads and vars
-    # grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
-    # train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
+    grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
+    train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
 
     grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
     train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
@@ -212,8 +212,8 @@ def train():
     train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
 
     # view grads and vars
-    # view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
-    # view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
+    view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
+    view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
 
     view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
     view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
@@ -225,7 +225,7 @@ def train():
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    # train_op_only_g = tf.group(train_only_g, variable_averages_op)
+    train_op_only_g = tf.group(train_only_g, variable_averages_op)
     train_op_g = tf.group(train_g, variable_averages_op)
     train_op_d = tf.group(train_d, variable_averages_op)
 
