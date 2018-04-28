@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import platform
 import pickle
-# import yaml
+import yaml
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -13,8 +13,8 @@ from mpgan_models import completion_network
 from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
 
-# with open('config.yaml', 'r') as f:
-#     config = yaml.load(f)
+with open('config.yaml', 'r') as f:
+    config = yaml.load(f)
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
@@ -35,8 +35,8 @@ isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 
-lr_decay_steps = 1000
-iters_c = 90000
+lr_decay_steps = config['lr_decay_steps']
+iters_c = config['iters_c']
 alpha = 0.8
 
 init_lr_g = 8e-4
