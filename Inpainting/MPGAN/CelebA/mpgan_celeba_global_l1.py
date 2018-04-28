@@ -254,26 +254,21 @@ def train():
             with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
 
-        while iters < iters_total:
-            if iters < iters_d:
-                _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_global_dis, global_step_d, lr_d],
-                                                         feed_dict={is_training: True})
-                print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
-                    int(iters / num_batch) + 1,
-                    gs,  # iters,
-                    loss_view_d,
-                    lr_view_d))
-            else:
-                _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-                                                         feed_dict={is_training: True})
-                print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-                    int(iters / num_batch) + 1,
-                    gs,  # iters,
-                    loss_view_g,
-                    lr_view_g))
+        while iters <= iters_total:
+            _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
+                sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
+                         feed_dict={is_training: True})
 
-            iters += 1
-            if iters % 100 == 0:
+            print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
+                int(gs / num_batch) + 1,
+                gs,  # iters,
+                loss_view_d,
+                loss_view_g,
+                lr_view_d,
+                lr_view_g))
+
+            # iters += 1
+            if (iters % 200 == 0) or (iters == iters_total):
                 with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                     pickle.dump(iters, f, protocol=2)
                 saver.save(sess, os.path.join(model_path, 'models_global_l1'))
@@ -285,12 +280,14 @@ def train():
                                                                                 feed_dict={is_training: True})
                 # summary_writer.add_summary(summary_str, iters)
                 print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
-                    int(iters / num_batch) + 1,
+                    int(gs / num_batch) + 1,
                     iters,
                     g_vars_mean,
                     g_grads_mean))
                 print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
                                                                                        d_grads_mean))
+
+            iters += 1
 
 
 if __name__ == '__main__':
