@@ -15,7 +15,7 @@ model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/mode
 isFirstTimeTrain: true
 batch_size: 16
 weight_decay_rate: 1.0e-4
-init_lr: 3.0e-4
+init_lr_g: 8.0e-4
 lr_decay_steps: 1000
 iters_c: 90000
 alpha: 0.8
