@@ -9,10 +9,12 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-
 from mpgan_models import completion_network
 from mpgan_models import global_discriminator
 from mpgan_models import markovian_discriminator
+
+with open('config.yaml', 'r') as f:
+    config = yaml.load(f)
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
@@ -23,25 +25,23 @@ elif platform.system() == 'Linux':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
         g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
         model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1'
-        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
         g_model_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1'
         model_path = '/home/icie/richard/MPGAN/CelebA/models_global_local_l1'
-        # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_local_l1_test'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
 batch_size = 16
-weight_decay_rate = 1e-4
-init_lr_g = 2e-3
+weight_decay_rate = config['weight_decay_rate']
+init_lr_g = config['init_lr_g']
 init_lr_d = 3e-5
-lr_decay_steps = 1000
+lr_decay_steps = config['lr_decay_steps']
 iters_total = 10 * int(202599 / batch_size)  # 200000
-iters_c = 90000
-iters_d = 15000
-alpha_rec = 0.7
-alpha_global = 0.2
+# iters_c = 90000
+# iters_d = 15000
+alpha_rec = 0.8
+alpha_global = 0.1
 alpha_local = 0.1
 
 alpha = 0.8
@@ -82,7 +82,8 @@ def input_parse(img_path):
         mask = tf.reshape(mask, [image_height, image_width, 1])
         mask = tf.concat([mask] * 3, 2)
 
-        image_with_hole = img * (1 - mask) + mask
+        # image_with_hole = img * (1 - mask) + mask
+        image_with_hole = tf.multiply(img, 1 - mask) + mask
 
         # generate the location of 96*96 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
@@ -104,7 +105,7 @@ def train():
     global_step_g = tf.get_variable('global_step_g',
                                     [],
                                     tf.int32,
-                                    initializer=tf.constant_initializer(iters_c),
+                                    initializer=tf.constant_initializer(0),
                                     trainable=False)
 
     global_step_d = tf.get_variable('global_step_d',
@@ -142,9 +143,14 @@ def train():
                                       dtype=tf.float32)
 
     # loss function
-    loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
+    sizes = 3 * tf.multiply(hole_heights, hole_widths)
+    temp = tf.abs(completed_images - images)
+    loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
+    # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
     #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
+
+    # loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -189,21 +195,29 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.97)
+                                      decay_rate=0.98)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.97)
+                                      decay_rate=0.98)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
+
+    # grads and vars
+    # grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
+    # train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
 
     grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
     train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
 
     grads_vars_d = opt_d.compute_gradients(loss_d, var_d)
     train_d = opt_d.apply_gradients(grads_vars_d, global_step_d)
+
+    # view grads and vars
+    # view_only_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_only_g])
+    # view_only_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_only_g])
 
     view_g_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0. for gv in grads_vars_g])
     view_g_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
@@ -215,21 +229,12 @@ def train():
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
+    # train_op_only_g = tf.group(train_only_g, variable_averages_op)
     train_op_g = tf.group(train_g, variable_averages_op)
     train_op_d = tf.group(train_d, variable_averages_op)
 
     variables_to_restore = variable_averages.variables_to_restore()
     saver = tf.train.Saver(variables_to_restore)
-
-    if isFirstTimeTrain:
-        old_var_G = []
-        graph1 = tf.Graph()
-        with graph1.as_default():
-            with tf.Session(graph=graph1) as sess1:
-                saver1 = tf.train.import_meta_graph(os.path.join(g_model_path, 'models_without_adv_l1.meta'))
-                saver1.restore(sess1, os.path.join(g_model_path, 'models_without_adv_l1'))
-                old_var_G = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-                old_var_G = sess1.run(old_var_G)
 
     with tf.Session() as sess:
         # load trainset
@@ -244,70 +249,30 @@ def train():
 
         if isFirstTimeTrain:
             # sess.run(tf.global_variables_initializer())
-            updates = []
-            for i, item in enumerate(old_var_G):
-                updates.append(tf.assign(var_g[i], item))
-            sess.run(updates)
-
-            iters = 0
-            with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
-                pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
+            # iters = 0
+            with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
+                iters = pickle.load(f)
+            saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
         else:
             # sess.run(tf.global_variables_initializer())
             saver.restore(sess, os.path.join(model_path, 'models_global_local_l1'))
             with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
 
-        while iters < iters_total:
-            # _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-            #                                          feed_dict={is_training: True})
-            # print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
-            #     int(iters / num_batch) + 1,
-            #     gs,  # iters,
-            #     loss_view_d,
-            #     lr_view_d))
-
-            # for k in range(5):
-            #     _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_g,
-            #         lr_view_g))
-
+        while iters <= iters_total:
             _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
                 sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
                          feed_dict={is_training: True})
 
             print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
-                int(iters / num_batch) + 1,
+                int(gs / num_batch) + 1,
                 gs,  # iters,
                 loss_view_d,
                 loss_view_g,
                 lr_view_d,
                 lr_view_g))
 
-            # if iters < iters_d:
-            #     _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for d: {}, loss_d: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_d,
-            #         lr_view_d))
-            # else:
-            #     _, loss_view_g, gs, lr_view_g = sess.run([train_op_g, loss_g, global_step_g, lr_g],
-            #                                              feed_dict={is_training: True})
-            #     print('Epoch: {}, Iter for g: {}, loss_g: {}, lr: {}'.format(
-            #         int(iters / num_batch) + 1,
-            #         gs,  # iters,
-            #         loss_view_g,
-            #         lr_view_g))
-
-            iters += 1
-            if iters % 200 == 0:
+            if (iters % 200 == 0) or (iters == iters_total):
                 with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                     pickle.dump(iters, f, protocol=2)
                 saver.save(sess, os.path.join(model_path, 'models_global_local_l1'))
@@ -319,12 +284,13 @@ def train():
                                                                                 feed_dict={is_training: True})
                 # summary_writer.add_summary(summary_str, iters)
                 print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
-                    int(iters / num_batch) + 1,
-                    iters,
+                    int(gs / num_batch) + 1,
+                    gs,
                     g_vars_mean,
                     g_grads_mean))
                 print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
                                                                                        d_grads_mean))
+            iters += 1
 
 
 if __name__ == '__main__':
