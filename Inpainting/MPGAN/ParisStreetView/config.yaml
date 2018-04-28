@@ -1,0 +1,5 @@
+batch_size: 16
+weight_decay_rate: 1.0e-4
+init_lr_g: 8.0e-4
+lr_decay_steps: 1000
+iters_c: 90000
