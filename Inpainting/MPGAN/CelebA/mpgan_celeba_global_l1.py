@@ -35,8 +35,8 @@ lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.995
-alpha_global = 0.005
+alpha_rec = 0.99
+alpha_global = 0.01
 alpha_local = 0
 
 gt_height = 96
@@ -75,7 +75,8 @@ def input_parse(img_path):
         mask = tf.reshape(mask, [image_height, image_width, 1])
         mask = tf.concat([mask] * 3, 2)
 
-        image_with_hole = img * (1 - mask) + mask
+        # image_with_hole = img * (1 - mask) + mask
+        image_with_hole = tf.multiply(img, 1 - mask) + mask
 
         # generate the location of 96*96 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
@@ -145,7 +146,7 @@ def train():
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
     #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-    loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+    # loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -201,8 +202,8 @@ def train():
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
 
     # grads and vars
-    grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
-    train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
+    # grads_vars_only_g = opt_g.compute_gradients(loss_only_g, var_g)
+    # train_only_g = opt_g.apply_gradients(grads_vars_only_g, global_step_g)
 
     grads_vars_g = opt_g.compute_gradients(loss_g, var_g)
     train_g = opt_g.apply_gradients(grads_vars_g, global_step_g)
@@ -224,7 +225,7 @@ def train():
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    train_op_only_g = tf.group(train_only_g, variable_averages_op)
+    # train_op_only_g = tf.group(train_only_g, variable_averages_op)
     train_op_g = tf.group(train_g, variable_averages_op)
     train_op_d = tf.group(train_d, variable_averages_op)
 
@@ -281,7 +282,7 @@ def train():
                 # summary_writer.add_summary(summary_str, iters)
                 print('Epoch: {}, Iter: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                     int(gs / num_batch) + 1,
-                    iters,
+                    gs,
                     g_vars_mean,
                     g_grads_mean))
                 print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_vars_mean,
