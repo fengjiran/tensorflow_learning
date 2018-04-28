@@ -256,8 +256,16 @@ def train():
                 iters = pickle.load(f)
 
         while iters <= iters_total:
-            _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
-                sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
+            _, _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs =\
+                sess.run([train_op_g,
+                          train_op_g,
+                          train_op_g,
+                          train_op_d,
+                          loss_g,
+                          loss_d,
+                          lr_g,
+                          lr_d,
+                          global_step_d],
                          feed_dict={is_training: True})
 
             print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(
