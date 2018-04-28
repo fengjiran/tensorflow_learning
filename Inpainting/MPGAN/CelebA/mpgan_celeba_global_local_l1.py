@@ -35,9 +35,9 @@ isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = config['weight_decay_rate']
 init_lr_g = config['init_lr_g']
-init_lr_d = 3e-5
+init_lr_d = 1e-4
 lr_decay_steps = config['lr_decay_steps']
-iters_total = 10 * int(202599 / batch_size)  # 200000
+iters_total = 10 * int(202599 / batch_size) + config['iters_c']  # 200000
 # iters_c = 90000
 # iters_d = 15000
 alpha_rec = 0.8
@@ -120,7 +120,7 @@ def train():
     dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
     dataset = dataset.repeat()
     iterator = dataset.make_initializable_iterator()
-    # iterator_d = dataset.make_initializable_iterator()
+
     images, images_with_hole, masks, x_locs, y_locs, hole_heights, hole_widths = iterator.get_next()
 
     syn_images = completion_network(images_with_hole, is_training, batch_size)
@@ -150,7 +150,7 @@ def train():
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
     #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-    # loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+    loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -195,12 +195,12 @@ def train():
     lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                       global_step=global_step_g,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.98)
+                                      decay_rate=0.99)
 
     lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
                                       global_step=global_step_d,
                                       decay_steps=lr_decay_steps,
-                                      decay_rate=0.98)
+                                      decay_rate=0.99)
 
     opt_g = tf.train.AdamOptimizer(learning_rate=lr_g, beta1=0.5)
     opt_d = tf.train.AdamOptimizer(learning_rate=lr_d, beta1=0.5)
@@ -229,7 +229,7 @@ def train():
     variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    # train_op_only_g = tf.group(train_only_g, variable_averages_op)
+    train_op_only_g = tf.group(train_only_g, variable_averages_op)
     train_op_g = tf.group(train_g, variable_averages_op)
     train_op_d = tf.group(train_d, variable_averages_op)
 
