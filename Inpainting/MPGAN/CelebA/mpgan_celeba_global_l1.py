@@ -35,8 +35,8 @@ lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.99
-alpha_global = 0.01
+alpha_rec = 0.9
+alpha_global = 0.1
 alpha_local = 0
 
 gt_height = 96
