@@ -40,9 +40,9 @@ lr_decay_steps = config['lr_decay_steps']
 iters_total = 10 * int(202599 / batch_size) + config['iters_c']  # 200000
 # iters_c = 90000
 # iters_d = 15000
-alpha_rec = 0.8
-alpha_global = 0.1
-alpha_local = 0.1
+alpha_rec = 0.9
+alpha_global = 0.05
+alpha_local = 0.05
 
 alpha = 0.8
 
@@ -261,7 +261,14 @@ def train():
 
         while iters <= iters_total:
             _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs = \
-                sess.run([train_op_g, train_op_g, train_op_d, loss_g, loss_d, lr_g, lr_d, global_step_d],
+                sess.run([train_op_g,
+                          train_op_d,
+                          train_op_d,
+                          loss_g,
+                          loss_d,
+                          lr_g,
+                          lr_d,
+                          global_step_d],
                          feed_dict={is_training: True})
 
             print('Epoch: {}, Iter: {}, loss_d: {},loss_g: {}, lr_d: {}, lr_g: {}'.format(

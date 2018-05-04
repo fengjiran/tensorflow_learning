@@ -35,8 +35,8 @@ lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.9
-alpha_global = 0.1
+alpha_rec = 0.95
+alpha_global = 0.05
 alpha_local = 0
 
 gt_height = 96
@@ -256,10 +256,8 @@ def train():
                 iters = pickle.load(f)
 
         while iters <= iters_total:
-            _, _, _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs =\
+            _, _, loss_view_g, loss_view_d, lr_view_g, lr_view_d, gs =\
                 sess.run([train_op_g,
-                          train_op_g,
-                          train_op_g,
                           train_op_d,
                           loss_g,
                           loss_d,
