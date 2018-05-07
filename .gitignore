@@ -29,6 +29,7 @@ Inpainting/MPGAN/CelebA/models_global_local_l1
 Inpainting/MPGAN/CelebA/models_global_l1
 Inpainting/MPGAN/CelebA/models_local_l1
 Inpainting/MPGAN/CelebA/models_without_adv_l1
+Inpainting/MPGAN/CelebA/pretrain_model
 Inpainting/MPGAN/ParisStreetView/models_global_local_l1
 Inpainting/MPGAN/ParisStreetView/models_global_l1
 Inpainting/MPGAN/ParisStreetView/models_local_l1
