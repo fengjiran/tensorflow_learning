@@ -37,6 +37,7 @@ weight_decay_rate = 1e-4
 
 lr_decay_steps = config['lr_decay_steps']
 iters_c = config['iters_c']
+iters_d = 10000
 alpha = 0.8
 
 init_lr_g = 8e-4
@@ -163,12 +164,12 @@ labels_global_dis = tf.concat([tf.ones([batch_size]), tf.zeros([batch_size])], a
 labels_local_dis = tf.concat([tf.ones_like(local_dis_outputs_real),
                               tf.zeros_like(local_dis_outputs_fake)], axis=0)
 
-loss_global_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+loss_global_dis = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
     logits=global_dis_outputs_all,
     labels=labels_global_dis
 ))
 
-loss_local_dis = 2 * tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+loss_local_dis = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
     logits=local_dis_outputs_all,
     labels=labels_local_dis
 ))
