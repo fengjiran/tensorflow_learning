@@ -184,7 +184,7 @@ loss_local_g = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
 ))
 
 loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * loss_local_g
-loss_d = loss_global_dis + loss_local_dis
+loss_d = loss_global_dis  # + loss_local_dis
 
 var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
 var_d = tf.get_collection('global_dis_params_conv') +\
@@ -235,47 +235,7 @@ train_op_d = tf.group(train_d, variable_averages_op)
 
 variables_to_restore = variable_averages.variables_to_restore()
 saver = tf.train.Saver(variables_to_restore)
-# summaries = tf.get_collection(tf.GraphKeys.SUMMARIES)
 
-# Add a summary to track the loss.
-# summaries.append(tf.summary.scalar('generator_loss', loss_G))
-
-# lr = tf.train.exponential_decay(learning_rate=init_lr,
-#                                 global_step=global_step,
-#                                 decay_steps=lr_decay_steps,
-#                                 decay_rate=0.97)
-
-# Add a summary to track the learning rate.
-# summaries.append(tf.summary.scalar('learning_rate', lr))
-
-# opt = tf.train.AdamOptimizer(lr, beta1=0.5)
-# grads_vars_g = opt.compute_gradients(loss_G, var_G)
-
-# Add histograms for gradients.
-# for grad, var in grads_vars_g:
-#     if grad is not None:
-#         summaries.append(tf.summary.histogram(var.op.name + '/gradients', grad))
-
-# train_op_g = opt.apply_gradients(grads_vars_g, global_step)
-
-# # Add histograms for trainable variables.
-# for var in tf.trainable_variables():
-#     summaries.append(tf.summary.histogram(var.op.name, var))
-
-# Track the moving averages of all trainable variables.
-# variable_averages = tf.train.ExponentialMovingAverage(decay=0.999, num_updates=global_step)
-# variable_averages_op = variable_averages.apply(tf.trainable_variables())
-
-# train_op = tf.group(train_op_g, variable_averages_op)
-
-# view_grads = tf.reduce_mean([tf.reduce_mean(gv[0]) if gv[0] is not None else 0.
-#                              for gv in grads_vars_g])
-# view_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_g])
-
-# variables_to_restore = variable_averages.variables_to_restore()
-# saver = tf.train.Saver(variables_to_restore)
-# summary_op = tf.summary.merge(summaries)
-# summary_writer = tf.summary.FileWriter(events_path)
 
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
@@ -297,6 +257,8 @@ with tf.Session() as sess:
         with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
             iters = pickle.load(f)
 
+    while iters <= iters_c + iters_d:
+        pass
     while iters < iters_c:
         _, loss_g, gs, lr_view = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
                                           feed_dict={is_training: True})
