@@ -278,7 +278,7 @@ with tf.Session() as sess:
         if (iters % 200 == 0)or(iters == iters_c + iters_d):
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
+            saver.save(sess, os.path.join(model_path, 'pretrain_model_global'))
 
             g_weights_mean, g_grads_mean, d_weights_mean, d_grads_mean = sess.run([view_only_g_weights,
                                                                                    view_only_g_grads,
