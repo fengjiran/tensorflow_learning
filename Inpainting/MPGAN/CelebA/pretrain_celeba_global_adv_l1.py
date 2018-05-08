@@ -30,8 +30,8 @@ elif platform.system() == 'Linux':
         # events_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1/events'
         model_path = '/home/icie/richard/MPGAN/CelebA/pretrain_model_global'
 
-isFirstTimeTrain = False
-# isFirstTimeTrain = True
+# isFirstTimeTrain = False
+isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 
