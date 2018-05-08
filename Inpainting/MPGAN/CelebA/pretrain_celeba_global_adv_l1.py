@@ -259,21 +259,21 @@ with tf.Session() as sess:
 
     while iters <= iters_c + iters_d:
         if iters <= iters_c:
-            _, loss_view_g, gs, lr_view = sess.run([train_op_only_g, loss_only_g, global_step_d, lr_d],
-                                                   feed_dict={is_training: True})
-            print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
+            _, loss_view_g, gs, lr_view_g = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_d],
+                                                     feed_dict={is_training: True})
+            print('Epoch: {}, Iter_g: {}, loss_g: {}, lr_g: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_view_g,
-                lr_view))
+                lr_view_g))
         else:
-            _, loss_view_d, gs, lr_view = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-                                                   feed_dict={is_training: True})
-            print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
+            _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
+                                                     feed_dict={is_training: True})
+            print('Epoch: {}, Iter_d: {}, loss_d: {}, lr_d: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_view_d,
-                lr_view))
+                lr_view_d))
 
         if (iters % 200 == 0)or(iters == iters_c + iters_d):
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
