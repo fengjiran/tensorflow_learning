@@ -18,11 +18,13 @@ with open('config.yaml', 'r') as f:
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
-    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1'
+    # g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1'
+    g_model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\pretrain_model_global'
     model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_global_l1'
 elif platform.system() == 'Linux':
     compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
-    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
+    # g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
+    g_model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global'
     model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_global_l1'
 
 # isFirstTimeTrain = False
@@ -248,7 +250,8 @@ def train():
             # iters = 0
             with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
                 iters = pickle.load(f)
-            saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
+            # saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
+            saver.restore(sess, os.path.join(g_model_path, 'pretrain_model_global'))
         else:
             # sess.run(tf.global_variables_initializer())
             saver.restore(sess, os.path.join(model_path, 'models_global_l1'))
