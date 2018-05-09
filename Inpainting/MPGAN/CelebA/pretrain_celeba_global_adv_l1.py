@@ -123,6 +123,8 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
 images, images_with_hole, masks, x_locs, y_locs, hole_heights, hole_widths = iterator.get_next()
+image_height, image_width = images.get_shape()[1], images.get_shape()[2]
+
 syn_images = completion_network(images_with_hole, is_training, batch_size)
 # completed_images = (1 - masks) * images + masks * syn_images
 completed_images = tf.multiply(1 - masks, images) + tf.multiply(masks, syn_images)
