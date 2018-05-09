@@ -147,6 +147,12 @@ local_dis_inputs_real = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(
 sizes = 3 * tf.multiply(hole_heights, hole_widths)
 temp = tf.abs(completed_images - images)
 loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
+
+sizes2 = 3 * (image_height * image_width - tf.multiply(hole_heights, hole_widths))
+temp2 = tf.abs((1 - masks) * (syn_images - images))
+loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2))
+
+loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
 # loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
 # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
