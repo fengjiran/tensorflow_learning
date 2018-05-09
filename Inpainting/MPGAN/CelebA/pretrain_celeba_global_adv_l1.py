@@ -41,7 +41,7 @@ iters_d = 10000
 alpha = 0.8
 
 init_lr_g = config['init_lr_g']
-init_lr_d = 3e-5
+init_lr_d = config['init_lr_d']
 alpha_rec = 1.0
 alpha_global = 0
 alpha_local = 0
