@@ -38,7 +38,8 @@ weight_decay_rate = 1e-4
 lr_decay_steps = config['lr_decay_steps']
 iters_c = config['iters_c']
 iters_d = 10000
-alpha = 0.8
+# alpha = 0.8
+alpha = config['alpha']
 
 init_lr_g = config['init_lr_g']
 init_lr_d = config['init_lr_d']
