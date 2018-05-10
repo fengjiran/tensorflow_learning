@@ -196,10 +196,10 @@ loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * l
 loss_d = loss_global_dis  # + loss_local_dis
 
 var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
-var_d = tf.get_collection('global_dis_params_conv') +\
-    tf.get_collection('local_dis_params_conv') +\
-    tf.get_collection('global_dis_params_bn') +\
-    tf.get_collection('local_dis_params_bn')
+var_d = tf.get_collection('global_dis_params_conv') + tf.get_collection('global_dis_params_bn')
+# tf.get_collection('local_dis_params_conv') +\
+# tf.get_collection('global_dis_params_bn') +\
+# tf.get_collection('local_dis_params_bn')
 
 lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
                                   global_step=global_step_g,
