@@ -19,16 +19,16 @@ with open('config.yaml', 'r') as f:
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
     # events_path = config['events_path_win']
-    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\models_without_adv_l1'
+    model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\pretrain_model_global_local'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
         # events_path = config['events_path_linux']
-        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/models_without_adv_l1'
+        model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global_local'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
         # events_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1/events'
-        model_path = '/home/icie/richard/MPGAN/CelebA/models_global_local_l1'
+        model_path = '/home/icie/richard/MPGAN/CelebA/pretrain_model_global_local'
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
@@ -37,6 +37,7 @@ weight_decay_rate = 1e-4
 
 lr_decay_steps = config['lr_decay_steps']
 iters_c = config['iters_c']
+iters_d = 10000
 alpha = config['alpha']
 
 init_lr_g = 9e-4
@@ -296,36 +297,50 @@ with tf.Session() as sess:
 
     if isFirstTimeTrain:
         iters = 0
-        with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
-            pickle.dump(iters, f, protocol=2)
-        saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
+        # with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+        #     pickle.dump(iters, f, protocol=2)
+        # saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
     else:
-        saver.restore(sess, os.path.join(model_path, 'models_without_adv_l1'))
+        saver.restore(sess, os.path.join(model_path, 'pretrain_model_global_local'))
         with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
             iters = pickle.load(f)
 
-    while iters < iters_c:
-        _, loss_g, gs, lr_view = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
-                                          feed_dict={is_training: True})
-        print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
-            int(iters / num_batch) + 1,
-            gs,  # iters,
-            loss_g,
-            lr_view))
+    while iters <= iters_c + iters_d:
+        if iters <= iters_c:
+            _, loss_view_g, gs, lr_view_g = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
+                                                     feed_dict={is_training: True})
+            print('Epoch: {}, Iter: {}, loss_g: {}, lr: {}'.format(
+                int(iters / num_batch) + 1,
+                gs,  # iters,
+                loss_view_g,
+                lr_view_g))
+        else:
+            _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
+                                                     feed_dict={is_training: True})
+            print('Epoch: {}, Iter_d: {}, loss_d: {}, lr_d: {}'.format(
+                int(iters / num_batch) + 1,
+                gs,  # iters,
+                loss_view_d,
+                lr_view_d))
 
-        iters += 1
-
-        if iters % 200 == 0:
+        if (iters % 200 == 0) or (iters == iters_c + iters_d):
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
-            saver.save(sess, os.path.join(model_path, 'models_without_adv_l1'))
+            saver.save(sess, os.path.join(model_path, 'pretrain_model_global_local'))
 
-            weights_mean, grads_mean = sess.run([view_only_g_weights, view_only_g_grads],
-                                                feed_dict={is_training: True})
+            g_weights_mean, g_grads_mean, d_weights_mean, d_grads_mean = sess.run([view_only_g_weights,
+                                                                                   view_only_g_grads,
+                                                                                   view_d_weights,
+                                                                                   view_d_grads],
+                                                                                  feed_dict={is_training: True})
             # summary_writer.add_summary(summary_str, iters)
             print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
-                loss_g,
-                weights_mean,
-                grads_mean))
+                loss_view_g,
+                g_weights_mean,
+                g_grads_mean))
+            print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_weights_mean,
+                                                                                   d_grads_mean))
+
+        iters += 1
