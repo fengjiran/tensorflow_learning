@@ -32,7 +32,7 @@ isFirstTimeTrain = True
 batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = config['init_lr_g']
-init_lr_d = 1e-4
+init_lr_d = config['init_lr_d']
 lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
@@ -40,6 +40,8 @@ iters_d = 15000
 alpha_rec = 0.95
 alpha_global = 0.05
 alpha_local = 0
+
+alpha = config['alpha']
 
 gt_height = 96
 gt_width = 96
@@ -121,6 +123,8 @@ def train():
     iterator = dataset.make_initializable_iterator()
 
     images, images_with_hole, masks, x_locs, y_locs, hole_heights, hole_widths = iterator.get_next()
+    image_height, image_width = images.get_shape().as_list()[1], images.get_shape().as_list()[2]
+
     syn_images = completion_network(images_with_hole, is_training, batch_size)
     # completed_images = (1 - masks) * images + masks * syn_images
     completed_images = tf.multiply(1 - masks, images) + tf.multiply(masks, syn_images)
@@ -143,6 +147,12 @@ def train():
     sizes = 3 * tf.multiply(hole_heights, hole_widths)
     temp = tf.abs(completed_images - images)
     loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
+
+    sizes2 = 3 * (image_height * image_width - tf.multiply(hole_heights, hole_widths))
+    temp2 = tf.abs((1 - masks) * (syn_images - images))
+    loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2))
+
+    loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
     # loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
     # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
