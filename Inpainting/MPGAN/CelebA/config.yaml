@@ -18,5 +18,5 @@ weight_decay_rate: 1.0e-4
 init_lr_g: 9.0e-4
 init_lr_d: 3.0e-4
 lr_decay_steps: 1000
-iters_c: 90000
+iters_c: 30000
 alpha: 0.8
