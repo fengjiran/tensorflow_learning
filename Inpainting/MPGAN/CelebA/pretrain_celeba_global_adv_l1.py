@@ -72,7 +72,11 @@ def input_parse(img_path):
 
         ori_image = tf.identity(img)
 
-        hole_height, hole_width = np.random.randint(low, high, size=(2))
+        # hole_height, hole_width = np.random.randint(low, high, size=(2))
+        hole_size = tf.random_uniform([2], minval=low, maxval=high + 1, dtype=tf.int32)
+        hole_height = hole_size[0]
+        hole_width = hole_size[1]
+
         y = tf.random_uniform([], 0, image_height - hole_height, tf.int32)
         x = tf.random_uniform([], 0, image_width - hole_width, tf.int32)
 
@@ -94,8 +98,10 @@ def input_parse(img_path):
                                   maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
                                   dtype=tf.int32)
 
-        hole_height = tf.convert_to_tensor(hole_height, tf.float32)
-        hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        # hole_height = tf.convert_to_tensor(hole_height, tf.float32)
+        # hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        hole_height = tf.cast(hole_height, tf.float32)
+        hole_width = tf.cast(hole_width, tf.float32)
         return ori_image, image_with_hole, mask, x_loc, y_loc, hole_height, hole_width
 
 
