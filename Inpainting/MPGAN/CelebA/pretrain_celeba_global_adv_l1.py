@@ -55,8 +55,8 @@ def input_parse(img_path):
     with tf.device('/cpu:0'):
         low = 48
         high = 96
-        image_height = 178
-        image_width = 178
+        image_height = 218
+        image_width = 218
         gt_height = 96
         gt_width = 96
 
