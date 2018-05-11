@@ -295,7 +295,7 @@ with tf.Session() as sess:
                                                                                    view_d_grads],
                                                                                   feed_dict={is_training: True})
             # summary_writer.add_summary(summary_str, iters)
-            print('Epoch: {}, Iter: {}, loss_g: {}, weights_mean: {}, grads_mean: {}'.format(
+            print('Epoch: {}, Iter: {}, loss_g: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                 int(iters / num_batch) + 1,
                 gs,  # iters,
                 loss_view_g,
