@@ -47,18 +47,18 @@ alpha_rec = 1.0
 alpha_global = 0
 alpha_local = 0
 
-gt_height = 96
-gt_width = 96
+gt_height = 110
+gt_width = 110
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 48
-        high = 96
+        low = 96
+        high = 109
         image_height = 218
         image_width = 218
-        gt_height = 96
-        gt_width = 96
+        gt_height = 110
+        gt_width = 110
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
