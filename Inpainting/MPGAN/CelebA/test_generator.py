@@ -15,7 +15,7 @@ batch_size = 1
 
 if platform.system() == 'Windows':
     checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\pretrain_model_global\\pretrain_model_global'
-    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\000013.png'
+    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\000001.png'
 
 elif platform.system() == 'Linux':
     checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global/pretrain_model_global'
