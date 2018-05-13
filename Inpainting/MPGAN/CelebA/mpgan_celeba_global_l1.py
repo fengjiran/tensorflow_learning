@@ -43,18 +43,18 @@ alpha_local = 0
 
 alpha = config['alpha']
 
-gt_height = 96
-gt_width = 96
+gt_height = 110
+gt_width = 110
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 48
-        high = 96
-        image_height = 178
-        image_width = 178
-        gt_height = 96
-        gt_width = 96
+        low = 96
+        high = 109
+        image_height = 218
+        image_width = 218
+        gt_height = 110
+        gt_width = 110
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -69,7 +69,11 @@ def input_parse(img_path):
 
         ori_image = tf.identity(img)
 
-        hole_height, hole_width = np.random.randint(low, high, size=(2))
+        # hole_height, hole_width = np.random.randint(low, high, size=(2))
+        hole_size = tf.random_uniform([2], minval=low, maxval=high + 1, dtype=tf.int32)
+        hole_height = hole_size[0]
+        hole_width = hole_size[1]
+
         y = tf.random_uniform([], 0, image_height - hole_height, tf.int32)
         x = tf.random_uniform([], 0, image_width - hole_width, tf.int32)
 
@@ -82,7 +86,7 @@ def input_parse(img_path):
         # image_with_hole = img * (1 - mask) + mask
         image_with_hole = tf.multiply(img, 1 - mask) + mask
 
-        # generate the location of 96*96 patch for local discriminator
+        # generate the location of 110*110 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
                                   minval=tf.reduce_max([0, x + hole_width - gt_width]),
                                   maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
@@ -92,8 +96,10 @@ def input_parse(img_path):
                                   maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
                                   dtype=tf.int32)
 
-        hole_height = tf.convert_to_tensor(hole_height, tf.float32)
-        hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        # hole_height = tf.convert_to_tensor(hole_height, tf.float32)
+        # hole_width = tf.convert_to_tensor(hole_width, tf.float32)
+        hole_height = tf.cast(hole_height, tf.float32)
+        hole_width = tf.cast(hole_width, tf.float32)
         return ori_image, image_with_hole, mask, x_loc, y_loc, hole_height, hole_width
 
 
