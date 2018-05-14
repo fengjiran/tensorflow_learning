@@ -37,24 +37,24 @@ lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.7
-alpha_global = 0.3
+alpha_rec = 0.9
+alpha_global = 0.1
 alpha_local = 0
 
 alpha = config['alpha']
 
-gt_height = 110
-gt_width = 110
+gt_height = 96
+gt_width = 96
 
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
-        low = 96
-        high = 109
-        image_height = 218
-        image_width = 218
-        gt_height = 110
-        gt_width = 110
+        low = 48
+        high = 96
+        image_height = 128
+        image_width = 128
+        gt_height = 96
+        gt_width = 96
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -293,7 +293,7 @@ def train():
                 lr_view_g))
 
             # iters += 1
-            if (iters % 200 == 0) or (iters == iters_total):
+            if (iters % 500 == 0) or (iters == iters_total):
                 with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                     pickle.dump(iters, f, protocol=2)
                 saver.save(sess, os.path.join(model_path, 'models_global_l1'))
