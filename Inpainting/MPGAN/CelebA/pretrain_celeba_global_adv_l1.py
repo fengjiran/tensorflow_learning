@@ -32,7 +32,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 16
+batch_size = 32
 weight_decay_rate = 1e-4
 
 lr_decay_steps = config['lr_decay_steps']
@@ -47,8 +47,8 @@ alpha_rec = 1.0
 alpha_global = 0
 alpha_local = 0
 
-gt_height = 64
-gt_width = 64
+gt_height = 96
+gt_width = 96
 
 
 def input_parse(img_path):
@@ -57,8 +57,8 @@ def input_parse(img_path):
         high = 96
         image_height = 128
         image_width = 128
-        gt_height = 64
-        gt_width = 64
+        gt_height = 96
+        gt_width = 96
 
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
@@ -89,15 +89,17 @@ def input_parse(img_path):
         image_with_hole = img * (1 - mask) + mask
 
         # generate the location of 110*110 patch for local discriminator
-        x_loc = tf.random_uniform(shape=[],
-                                  minval=tf.reduce_max([0, x + hole_width - gt_width]),
-                                  maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
-                                  dtype=tf.int32)
-        y_loc = tf.random_uniform(shape=[],
-                                  minval=tf.reduce_max([0, y + hole_height - gt_height]),
-                                  maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
-                                  dtype=tf.int32)
+        # x_loc = tf.random_uniform(shape=[],
+        #                           minval=tf.reduce_max([0, x + hole_width - gt_width]),
+        #                           maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
+        #                           dtype=tf.int32)
+        # y_loc = tf.random_uniform(shape=[],
+        #                           minval=tf.reduce_max([0, y + hole_height - gt_height]),
+        #                           maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
+        #                           dtype=tf.int32)
 
+        x_loc = 64
+        y_loc = 64
         # hole_height = tf.convert_to_tensor(hole_height, tf.float32)
         # hole_width = tf.convert_to_tensor(hole_width, tf.float32)
         hole_height = tf.cast(hole_height, tf.float32)
@@ -290,7 +292,7 @@ with tf.Session() as sess:
                 loss_view_d,
                 lr_view_d))
 
-        if (iters % 200 == 0)or(iters == iters_c + iters_d):
+        if (iters % 500 == 0)or(iters == iters_c + iters_d):
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'pretrain_model_global'))
