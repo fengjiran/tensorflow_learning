@@ -51,8 +51,8 @@ def input_parse(img_path):
     with tf.device('/cpu:0'):
         low = 96
         high = 109
-        image_height = 218
-        image_width = 218
+        image_height = 128
+        image_width = 128
         gt_height = 110
         gt_width = 110
 
@@ -69,7 +69,6 @@ def input_parse(img_path):
 
         ori_image = tf.identity(img)
 
-        # hole_height, hole_width = np.random.randint(low, high, size=(2))
         hole_size = tf.random_uniform([2], minval=low, maxval=high + 1, dtype=tf.int32)
         hole_height = hole_size[0]
         hole_width = hole_size[1]
