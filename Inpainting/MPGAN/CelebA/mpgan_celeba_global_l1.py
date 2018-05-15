@@ -263,12 +263,12 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         if isFirstTimeTrain:
-            sess.run(tf.global_variables_initializer())
+            # sess.run(tf.global_variables_initializer())
             iters = 0
             # with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
             #     iters = pickle.load(f)
             # saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
-            # saver.restore(sess, os.path.join(g_model_path, 'pretrain_model_global'))
+            saver.restore(sess, os.path.join(g_model_path, 'pretrain_model_global'))
         else:
             # sess.run(tf.global_variables_initializer())
             saver.restore(sess, os.path.join(model_path, 'models_global_l1'))
