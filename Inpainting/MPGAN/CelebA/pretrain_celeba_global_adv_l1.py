@@ -32,7 +32,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 32
+batch_size = 16
 weight_decay_rate = 1e-4
 
 lr_decay_steps = config['lr_decay_steps']
