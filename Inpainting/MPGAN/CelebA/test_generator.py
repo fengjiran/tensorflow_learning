@@ -9,7 +9,8 @@ from mpgan_models import completion_network
 
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
-color = np.random.uniform(0, 255, size=(3)).astype(np.int32).tolist()
+color = (244, 100, 171)
+# color = np.random.uniform(0, 255, size=(3)).astype(np.int32).tolist()
 color1 = (255, 255, 255)
 size = 25
 batch_size = 1
@@ -24,7 +25,7 @@ elif platform.system() == 'Linux':
 
 elif platform.system() == 'Darwin':
     checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global/pretrain_model_global'
-    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/000001.png'
+    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/000013.png'
 
 
 def erase_img(img):
@@ -65,7 +66,7 @@ def erase_img(img):
     test_img = img / 127.5 - 1
     test_mask = mask / 255.
 
-    test_img = test_img * (1 - test_mask) + test_mask
+    # test_img = test_img * (1 - test_mask) + test_mask
 
     cv2.destroyAllWindows()
     return np.tile(test_img[np.newaxis, ...], [batch_size, 1, 1, 1]), np.tile(test_mask[np.newaxis, ...], [batch_size, 1, 1, 1])
