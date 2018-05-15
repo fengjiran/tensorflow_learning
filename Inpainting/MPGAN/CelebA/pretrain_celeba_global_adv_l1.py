@@ -157,14 +157,15 @@ local_dis_inputs_real = tf.map_fn(fn=lambda args: tf.image.crop_to_bounding_box(
                                   dtype=tf.float32)
 
 sizes = 3 * tf.multiply(hole_heights, hole_widths)
-temp = tf.abs(completed_images - images)
+# temp = tf.abs(completed_images - images)
+temp = tf.abs(tf.multiply(masks, syn_images - images))
 loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
 
 sizes2 = 3 * (image_height * image_width - tf.multiply(hole_heights, hole_widths))
 temp2 = tf.abs((1 - masks) * (syn_images - images))
 loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2))
 
-loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
+# loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
 # loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
 # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
@@ -277,34 +278,23 @@ with tf.Session() as sess:
         with open(os.path.join(model_path, 'iter.pickle'), 'rb') as f:
             iters = pickle.load(f)
 
-    while iters <= iters_c + iters_d:
-        if iters <= iters_c:
-            _, loss_view_g, gs, lr_view_g = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter_g: {}, loss_g: {}, lr_g: {}'.format(
-                int(iters / num_batch) + 1,
-                gs,  # iters,
-                loss_view_g,
-                lr_view_g))
-        else:
-            _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
-                                                     feed_dict={is_training: True})
-            print('Epoch: {}, Iter_d: {}, loss_d: {}, lr_d: {}'.format(
-                int(iters / num_batch) + 1,
-                gs,  # iters,
-                loss_view_d,
-                lr_view_d))
+    while iters <= iters_c:
+        _, loss_view_g, gs, lr_view_g = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
+                                                 feed_dict={is_training: True})
+        print('Epoch: {}, Iter_g: {}, loss_g: {}, lr_g: {}'.format(
+            int(iters / num_batch) + 1,
+            gs,  # iters,
+            loss_view_g,
+            lr_view_g))
 
         if (iters % 500 == 0)or(iters == iters_c + iters_d):
             with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
                 pickle.dump(iters, f, protocol=2)
             saver.save(sess, os.path.join(model_path, 'pretrain_model_global'))
 
-            g_weights_mean, g_grads_mean, d_weights_mean, d_grads_mean = sess.run([view_only_g_weights,
-                                                                                   view_only_g_grads,
-                                                                                   view_d_weights,
-                                                                                   view_d_grads],
-                                                                                  feed_dict={is_training: True})
+            g_weights_mean, g_grads_mean = sess.run([view_only_g_weights,
+                                                     view_only_g_grads],
+                                                    feed_dict={is_training: True})
             # summary_writer.add_summary(summary_str, iters)
             print('Epoch: {}, Iter: {}, loss_g: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
                 int(iters / num_batch) + 1,
@@ -312,10 +302,48 @@ with tf.Session() as sess:
                 loss_view_g,
                 g_weights_mean,
                 g_grads_mean))
-            print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_weights_mean,
-                                                                                   d_grads_mean))
 
         iters += 1
+
+    # while iters <= iters_c + iters_d:
+    #     if iters <= iters_c:
+    #         _, loss_view_g, gs, lr_view_g = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
+    #                                                  feed_dict={is_training: True})
+    #         print('Epoch: {}, Iter_g: {}, loss_g: {}, lr_g: {}'.format(
+    #             int(iters / num_batch) + 1,
+    #             gs,  # iters,
+    #             loss_view_g,
+    #             lr_view_g))
+    #     else:
+    #         _, loss_view_d, gs, lr_view_d = sess.run([train_op_d, loss_d, global_step_d, lr_d],
+    #                                                  feed_dict={is_training: True})
+    #         print('Epoch: {}, Iter_d: {}, loss_d: {}, lr_d: {}'.format(
+    #             int(iters / num_batch) + 1,
+    #             gs,  # iters,
+    #             loss_view_d,
+    #             lr_view_d))
+
+    #     if (iters % 500 == 0)or(iters == iters_c + iters_d):
+    #         with open(os.path.join(model_path, 'iter.pickle'), 'wb') as f:
+    #             pickle.dump(iters, f, protocol=2)
+    #         saver.save(sess, os.path.join(model_path, 'pretrain_model_global'))
+
+    #         g_weights_mean, g_grads_mean, d_weights_mean, d_grads_mean = sess.run([view_only_g_weights,
+    #                                                                                view_only_g_grads,
+    #                                                                                view_d_weights,
+    #                                                                                view_d_grads],
+    #                                                                               feed_dict={is_training: True})
+    #         # summary_writer.add_summary(summary_str, iters)
+    #         print('Epoch: {}, Iter: {}, loss_g: {}, g_weights_mean: {}, g_grads_mean: {}'.format(
+    #             int(iters / num_batch) + 1,
+    #             gs,  # iters,
+    #             loss_view_g,
+    #             g_weights_mean,
+    #             g_grads_mean))
+    #         print('-------------------d_weights_mean: {}, d_grads_mean: {}'.format(d_weights_mean,
+    #                                                                                d_grads_mean))
+
+    #     iters += 1
 
     # while iters < iters_c:
     #     _, loss_g, gs, lr_view = sess.run([train_op_only_g, loss_only_g, global_step_g, lr_g],
