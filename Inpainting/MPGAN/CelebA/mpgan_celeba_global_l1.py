@@ -150,11 +150,13 @@ def train():
                                       dtype=tf.float32)
 
     sizes = 3 * tf.multiply(hole_heights, hole_widths)
-    temp = tf.abs(completed_images - images)
+    # temp = tf.abs(completed_images - images)
+    temp = tf.abs(tf.multiply(masks, syn_images - images))
     loss_recon = tf.reduce_mean(tf.div(tf.reduce_sum(temp, axis=[1, 2, 3]), sizes))
 
     sizes2 = 3 * (image_height * image_width - tf.multiply(hole_heights, hole_widths))
-    temp2 = tf.abs((1 - masks) * (syn_images - images))
+    # temp2 = tf.abs((1 - masks) * (syn_images - images))
+    temp2 = tf.abs(tf.multiply(1 - masks, syn_images - images))
     loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2))
 
     loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
