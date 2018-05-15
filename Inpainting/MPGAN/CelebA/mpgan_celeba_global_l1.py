@@ -76,6 +76,10 @@ def input_parse(img_path):
         y = tf.random_uniform([], 0, image_height - hole_height, tf.int32)
         x = tf.random_uniform([], 0, image_width - hole_width, tf.int32)
 
+        fill_value = tf.pad(tensor=tf.random_uniform([hole_height, hole_width, 3], minval=-1, maxval=1),
+                            paddings=[[y, image_height - hole_height - y],
+                                      [x, image_width - hole_width - x],
+                                      [0, 0]])
         mask = tf.pad(tensor=tf.ones((hole_height, hole_width)),
                       paddings=[[y, image_height - hole_height - y],
                                 [x, image_width - hole_width - x]])
@@ -83,7 +87,7 @@ def input_parse(img_path):
         mask = tf.concat([mask] * 3, 2)
 
         # image_with_hole = img * (1 - mask) + mask
-        image_with_hole = tf.multiply(img, 1 - mask) + mask
+        image_with_hole = tf.multiply(img, 1 - mask) + mask * fill_value
 
         # generate the location of 110*110 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
@@ -159,13 +163,13 @@ def train():
     temp2 = tf.abs(tf.multiply(1 - masks, syn_images - images))
     loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2))
 
-    loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
+    # loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
     # loss_recon = tf.reduce_mean([tf.div(temp[i], sizes[i]) for i in range(batch_size)])
     # loss_recon = tf.reduce_mean(tf.abs(completed_images - images))
     # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
     #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-    loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+    loss_only_g = loss_recon  # + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
     global_dis_outputs_real = global_discriminator(images, is_training)
     global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
