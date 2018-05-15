@@ -9,7 +9,8 @@ from mpgan_models import completion_network
 
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
-color = (255, 255, 255)
+color = np.random.uniform(0, 255, size=(3)).astype(np.int32).tolist()
+color1 = (255, 255, 255)
 size = 25
 batch_size = 1
 
@@ -23,7 +24,7 @@ elif platform.system() == 'Linux':
 
 elif platform.system() == 'Darwin':
     checkpoint_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global/pretrain_model_global'
-    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/000013.png'
+    img_path = '/Users/apple/Desktop/richard/Tensorflow_Learning/Inpainting/MPGAN/CelebA/000001.png'
 
 
 def erase_img(img):
@@ -35,17 +36,17 @@ def erase_img(img):
             drawing = True
             if drawing == True:
                 cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_MOUSEMOVE:
             if drawing == True:
                 cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_LBUTTONUP:
             drawing = False
             cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-            cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+            cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
     cv2.namedWindow('image')
     # cv2.namedWindow('mask')
@@ -116,3 +117,4 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         print('Start Testing...')
         test(sess)
+        print('The fill value is: {}'.format(color))
