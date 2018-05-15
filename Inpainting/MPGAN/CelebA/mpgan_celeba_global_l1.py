@@ -29,7 +29,7 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 16
+batch_size = 32
 weight_decay_rate = 1e-4
 init_lr_g = config['init_lr_g']
 init_lr_d = config['init_lr_d']
@@ -261,12 +261,12 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         if isFirstTimeTrain:
-            # sess.run(tf.global_variables_initializer())
+            sess.run(tf.global_variables_initializer())
             iters = 0
             # with open(os.path.join(g_model_path, 'iter.pickle'), 'rb') as f:
             #     iters = pickle.load(f)
             # saver.restore(sess, os.path.join(g_model_path, 'models_without_adv_l1'))
-            saver.restore(sess, os.path.join(g_model_path, 'pretrain_model_global'))
+            # saver.restore(sess, os.path.join(g_model_path, 'pretrain_model_global'))
         else:
             # sess.run(tf.global_variables_initializer())
             saver.restore(sess, os.path.join(model_path, 'models_global_l1'))
