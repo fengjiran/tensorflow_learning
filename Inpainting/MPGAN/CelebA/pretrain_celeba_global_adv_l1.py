@@ -55,8 +55,8 @@ def input_parse(img_path):
     with tf.device('/cpu:0'):
         low = 48
         high = 96
-        image_height = 128
-        image_width = 128
+        image_height = 178
+        image_width = 178
         gt_height = 96
         gt_width = 96
 
@@ -80,26 +80,29 @@ def input_parse(img_path):
         y = tf.random_uniform([], 0, image_height - hole_height, tf.int32)
         x = tf.random_uniform([], 0, image_width - hole_width, tf.int32)
 
+        # fill_value = tf.random_uniform([], minval=-1, maxval=1)
+        fill_value = tf.pad(tensor=tf.random_uniform([hole_height, hole_width, 3], minval=-1, maxval=1),
+                            paddings=[[y, image_height - hole_height - y],
+                                      [x, image_width - hole_width - x],
+                                      [0, 0]])
         mask = tf.pad(tensor=tf.ones((hole_height, hole_width)),
                       paddings=[[y, image_height - hole_height - y],
                                 [x, image_width - hole_width - x]])
         mask = tf.reshape(mask, [image_height, image_width, 1])
         mask = tf.concat([mask] * 3, 2)
 
-        image_with_hole = img * (1 - mask) + mask
+        image_with_hole = img * (1 - mask) + mask * fill_value
 
         # generate the location of 110*110 patch for local discriminator
-        # x_loc = tf.random_uniform(shape=[],
-        #                           minval=tf.reduce_max([0, x + hole_width - gt_width]),
-        #                           maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
-        #                           dtype=tf.int32)
-        # y_loc = tf.random_uniform(shape=[],
-        #                           minval=tf.reduce_max([0, y + hole_height - gt_height]),
-        #                           maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
-        #                           dtype=tf.int32)
+        x_loc = tf.random_uniform(shape=[],
+                                  minval=tf.reduce_max([0, x + hole_width - gt_width]),
+                                  maxval=tf.reduce_min([x, image_width - gt_width]) + 1,
+                                  dtype=tf.int32)
+        y_loc = tf.random_uniform(shape=[],
+                                  minval=tf.reduce_max([0, y + hole_height - gt_height]),
+                                  maxval=tf.reduce_min([y, image_height - gt_height]) + 1,
+                                  dtype=tf.int32)
 
-        x_loc = 64
-        y_loc = 64
         # hole_height = tf.convert_to_tensor(hole_height, tf.float32)
         # hole_width = tf.convert_to_tensor(hole_width, tf.float32)
         hole_height = tf.cast(hole_height, tf.float32)
@@ -167,7 +170,7 @@ loss_recon = alpha * loss_recon + (1 - alpha) * loss_recon2
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
 #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-loss_only_g = loss_recon# + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+loss_only_g = loss_recon  # + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
 global_dis_outputs_real = global_discriminator(images, is_training)
 global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
