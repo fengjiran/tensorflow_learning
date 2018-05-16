@@ -29,16 +29,16 @@ elif platform.system() == 'Linux':
 
 # isFirstTimeTrain = False
 isFirstTimeTrain = True
-batch_size = 32
+batch_size = 16
 weight_decay_rate = 1e-4
 init_lr_g = config['init_lr_g']
-init_lr_d = config['init_lr_d']
+init_lr_d = 1e-5  # config['init_lr_d']
 lr_decay_steps = config['lr_decay_steps']
 iters_total = 200000
 iters_d = 15000
 
-alpha_rec = 0.9
-alpha_global = 0.1
+alpha_rec = 1
+alpha_global = 300
 alpha_local = 0
 
 alpha = config['alpha']
@@ -51,8 +51,8 @@ def input_parse(img_path):
     with tf.device('/cpu:0'):
         low = 48
         high = 96
-        image_height = 128
-        image_width = 128
+        image_height = 178
+        image_width = 178
         gt_height = 96
         gt_width = 96
 
