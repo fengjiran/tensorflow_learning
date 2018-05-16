@@ -9,7 +9,8 @@ from mpgan_models import completion_network
 
 drawing = False  # true if mouse is pressed
 ix, iy = -1, -1
-color = (255, 255, 255)
+color = (244, 100, 171)
+color1 = (255, 255, 255)
 size = 25
 batch_size = 1
 
@@ -35,17 +36,17 @@ def erase_img(img):
             drawing = True
             if drawing == True:
                 cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_MOUSEMOVE:
             if drawing == True:
                 cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_LBUTTONUP:
             drawing = False
             cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
-            cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color, -1)
+            cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
     cv2.namedWindow('image')
     # cv2.namedWindow('mask')
@@ -64,7 +65,7 @@ def erase_img(img):
     test_img = img / 127.5 - 1
     test_mask = mask / 255.
 
-    test_img = test_img * (1 - test_mask) + test_mask
+    # test_img = test_img * (1 - test_mask) + test_mask
 
     cv2.destroyAllWindows()
     return np.tile(test_img[np.newaxis, ...], [batch_size, 1, 1, 1]), np.tile(test_mask[np.newaxis, ...], [batch_size, 1, 1, 1])
