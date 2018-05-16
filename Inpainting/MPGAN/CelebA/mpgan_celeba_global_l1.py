@@ -203,7 +203,7 @@ def train():
     ))
 
     loss_g = alpha_rec * loss_recon + alpha_global * loss_global_g + alpha_local * loss_local_g
-    loss_d = loss_global_dis  # + loss_local_dis
+    loss_d = alpha_global * loss_global_dis  # + loss_local_dis
 
     var_g = tf.get_collection('gen_params_conv') + tf.get_collection('gen_params_bn')
     var_d = tf.get_collection('global_dis_params_conv') + tf.get_collection('global_dis_params_bn')
