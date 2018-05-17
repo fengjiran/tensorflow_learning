@@ -245,15 +245,20 @@ def train():
     view_d_weights = tf.reduce_mean([tf.reduce_mean(gv[1]) for gv in grads_vars_d])
 
     # Track the moving averages of all trainable variables.
-    variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
-    variable_averages_op = variable_averages.apply(tf.trainable_variables())
+    # variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    # variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    train_op_only_g = tf.group(train_only_g, variable_averages_op)
-    train_op_g = tf.group(train_g, variable_averages_op)
-    train_op_d = tf.group(train_d, variable_averages_op)
+    train_op_only_g = train_only_g
+    train_op_g = train_g
+    train_op_d = train_d
 
-    variables_to_restore = variable_averages.variables_to_restore()
-    saver = tf.train.Saver(variables_to_restore)
+    # train_op_only_g = tf.group(train_only_g, variable_averages_op)
+    # train_op_g = tf.group(train_g, variable_averages_op)
+    # train_op_d = tf.group(train_d, variable_averages_op)
+
+    # variables_to_restore = variable_averages.variables_to_restore()
+    # saver = tf.train.Saver(variables_to_restore)
+    saver = tf.train.Saver()
 
     with tf.Session() as sess:
         # load trainset
