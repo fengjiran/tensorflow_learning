@@ -12,7 +12,7 @@ ix, iy = -1, -1
 color = (244, 100, 171)
 # color = np.random.uniform(0, 255, size=(3)).astype(np.int32).tolist()
 color1 = (255, 255, 255)
-size = 25
+size = 10
 batch_size = 1
 
 if platform.system() == 'Windows':
@@ -89,10 +89,11 @@ def test(sess):
     is_training = tf.placeholder(tf.bool)
     x = tf.placeholder(tf.float32, [batch_size, height, width, 3])
     res_image = completion_network(x, is_training, batch_size)
-    variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
-    variables_to_restore = variable_averages.variables_to_restore()
+    # variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
+    # variables_to_restore = variable_averages.variables_to_restore()
 
-    saver = tf.train.Saver(variables_to_restore)
+    # saver = tf.train.Saver(variables_to_restore)
+    saver = tf.train.Saver()
     saver.restore(sess, checkpoint_path)
     # sess.run(tf.global_variables_initializer())
 
