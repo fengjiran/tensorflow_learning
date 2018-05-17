@@ -35,17 +35,17 @@ def erase_img(img):
         if event == cv2.EVENT_LBUTTONDOWN:
             drawing = True
             if drawing == True:
-                cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color1, -1)
                 cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_MOUSEMOVE:
             if drawing == True:
-                cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
+                cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color1, -1)
                 cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
         elif event == cv2.EVENT_LBUTTONUP:
             drawing = False
-            cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color, -1)
+            cv2.rectangle(img, (x - size, y - size), (x + size, y + size), color1, -1)
             cv2.rectangle(mask, (x - size, y - size), (x + size, y + size), color1, -1)
 
     cv2.namedWindow('image')
