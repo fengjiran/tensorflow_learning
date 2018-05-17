@@ -16,7 +16,7 @@ def completion_network(images, is_training, batch_size):
     bn_layers = []
 
     with tf.variable_scope('generator'):
-        conv1 = Conv2dLayer(images, [5, 5, 3, 64], stride=1, name='conv1')
+        conv1 = Conv2dLayer(images, [5, 5, 4, 64], stride=1, name='conv1')
         bn1_layer = BatchNormLayer(conv1.output, is_training, name='bn1')
         bn1 = tf.nn.relu(bn1_layer.output)  # N, 256, 256, 64
         conv_layers.append(conv1)
