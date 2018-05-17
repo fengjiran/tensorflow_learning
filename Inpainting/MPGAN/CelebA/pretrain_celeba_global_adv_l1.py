@@ -93,7 +93,8 @@ def input_parse(img_path):
 
         image_with_hole = img * (1 - mask) + mask * fill_value
 
-        image_with_hole = tf.concat([image_with_hole, mask], axis=-1)
+        image_with_hole = tf.concat([image_with_hole, tf.reshape(mask[:, :, 0], [image_height, image_width, 1])],
+                                    axis=-1)
 
         # generate the location of 110*110 patch for local discriminator
         x_loc = tf.random_uniform(shape=[],
