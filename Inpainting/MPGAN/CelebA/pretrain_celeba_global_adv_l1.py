@@ -171,7 +171,7 @@ loss_recon2 = tf.reduce_mean(tf.div(tf.reduce_sum(temp2, axis=[1, 2, 3]), sizes2
 # loss_recon = tf.reduce_mean(alpha * tf.abs(completed_images - images) +
 #                             (1 - alpha) * tf.abs((1 - masks) * (syn_images - images)))
 
-loss_only_g = loss_recon  # + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
+loss_only_g = loss_recon + weight_decay_rate * tf.reduce_mean(tf.get_collection('weight_decay_gen'))
 
 global_dis_outputs_real = global_discriminator(images, is_training)
 global_dis_outputs_fake = global_discriminator(completed_images, is_training, reuse=True)
@@ -261,7 +261,6 @@ train_op_d = train_d
 # variables_to_restore = variable_averages.variables_to_restore()
 # saver = tf.train.Saver(variables_to_restore)
 saver = tf.train.Saver()
-
 
 with tf.Session() as sess:
     train_path = pd.read_pickle(compress_path)
