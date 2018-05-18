@@ -87,7 +87,7 @@ def test(sess):
 
     print('Testing...')
     is_training = tf.placeholder(tf.bool)
-    x = tf.placeholder(tf.float32, [batch_size, height, width, 3])
+    x = tf.placeholder(tf.float32, [batch_size, height, width, 4])
     res_image = completion_network(x, is_training, batch_size)
     # variable_averages = tf.train.ExponentialMovingAverage(decay=0.999)
     # variables_to_restore = variable_averages.variables_to_restore()
