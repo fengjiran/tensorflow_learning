@@ -17,7 +17,7 @@ batch_size = 1
 
 if platform.system() == 'Windows':
     checkpoint_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\pretrain_model_global\\pretrain_model_global'
-    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\000001.png'
+    img_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\000013.png'
 
 elif platform.system() == 'Linux':
     checkpoint_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global/pretrain_model_global'
@@ -85,6 +85,17 @@ def test(sess):
     test_img, test_mask = erase_img(img)
     test_img = test_img.astype(np.float32)
 
+    height = test_img.shape[1]
+    width = test_img.shape[2]
+
+    input_image = np.concatenate([test_img,
+                                  np.reshape(test_mask[:, :, :, 0], [batch_size, height, width, 1])],
+                                 axis=-1)
+
+    # input_image = tf.concat([test_img,
+    #                          tf.reshape(test_mask[:, :, :, 0], [batch_size, height, width, 1])],
+    #                         axis=-1)
+
     print('Testing...')
     is_training = tf.placeholder(tf.bool)
     x = tf.placeholder(tf.float32, [batch_size, height, width, 4])
@@ -97,7 +108,7 @@ def test(sess):
     saver.restore(sess, checkpoint_path)
     # sess.run(tf.global_variables_initializer())
 
-    res_image = sess.run(res_image, feed_dict={x: test_img,
+    res_image = sess.run(res_image, feed_dict={x: input_image,
                                                is_training: False})
 
     res_image = (1 - test_mask) * orig_test + test_mask * res_image
