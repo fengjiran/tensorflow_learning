@@ -8,10 +8,10 @@ from utils import DilatedConv2dLayer
 from utils import FCLayer
 
 
-def completion_network(images, is_training, batch_size):
+def completion_network(images, batch_size):
     """Construct completion network."""
     # batch_size = images.get_shape().as_list()[0]
-    conv_layers = []
+    # conv_layers = []
     cnum = 32
     input_channel = images.get_shape().as_list()[3]
 
