@@ -11,7 +11,7 @@ from utils import FCLayer
 def completion_network(images, batch_size):
     """Construct completion network."""
     # batch_size = images.get_shape().as_list()[0]
-    # conv_layers = []
+    conv_layers = []
     cnum = 32
     input_channel = images.get_shape().as_list()[3]
 
@@ -31,15 +31,15 @@ def completion_network(images, batch_size):
         conv12 = Conv2dLayer(tf.nn.elu(conv11.output), [3, 3, 4 * cnum, 4 * cnum], stride=1, name='conv12')
         conv13 = DeconvLayer(inputs=tf.nn.elu(conv12.output),
                              filter_shape=[3, 3, 2 * cnum, 4 * cnum],
-                             output_shape=[batch_size, conv4.output_shape[1],
-                                           conv4.output_shape[2], 2 * cnum],
+                             output_shape=[batch_size, conv3.output_shape[1],
+                                           conv3.output_shape[2], 2 * cnum],
                              stride=1,
                              name='conv13_upsample')
         conv14 = Conv2dLayer(tf.nn.elu(conv13.output), [3, 3, 2 * cnum, 2 * cnum], stride=1, name='conv14')
         conv15 = DeconvLayer(inputs=tf.nn.elu(conv14.output),
                              filter_shape=[3, 3, cnum, 2 * cnum],
-                             output_shape=[batch_size, conv2.output_shape[1],
-                                           conv2.output_shape[2], 2 * cnum],
+                             output_shape=[batch_size, conv1.output_shape[1],
+                                           conv1.output_shape[2], cnum],
                              stride=1,
                              name='conv15_upsample')
         conv16 = Conv2dLayer(tf.nn.elu(conv15.output), [3, 3, cnum, int(cnum / 2)], stride=1, name='conv16')
@@ -47,4 +47,15 @@ def completion_network(images, batch_size):
 
         conv_output = tf.clip_by_value(conv17.output, -1., 1.)
 
+        for i in range(1, 18):
+            conv_layers.append(eval('conv{}'.format(i)))
+
+        for conv in conv_layers:
+            print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.output_shape))
+
         return conv_output
+
+
+if __name__ == '__main__':
+    x = tf.random_uniform([10, 256, 256, 3])
+    y = completion_network(x, 10)
