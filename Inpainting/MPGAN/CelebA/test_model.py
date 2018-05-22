@@ -141,6 +141,28 @@ def build_discriminator(global_input, local_input, reuse=None):
         return dout_global, dout_local
 
 
+def build_graph_with_losses(batch_data,
+                            image_shape,
+                            hole_height,
+                            hole_width,
+                            summary=False):
+    batch_size = batch_data.get_shape().as_list()[0]
+    batch_pos = batch_data / 127.5 - 1
+    bbox = random_bbox(image_shape, hole_height, hole_width)
+    mask = bbox2mask(image_shape, bbox)  # (1,height,width,1)
+    batch_incomplete = batch_pos * (1. - mask)
+    ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
+    x = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
+
+    coarse_output = coarse_network(x, batch_size)
+
+    # apply mask and complete image
+    batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+
+    # local patches
+    local_patch_batch_pos = local_patch(batch_pos, bbox)
+
+
 def spatial_discounting_mask(gamma, height, width):
     shape = [1, height, width, 1]
     mask_values = np.ones((height, width))
