@@ -145,7 +145,9 @@ def build_graph_with_losses(batch_data,
                             image_shape,
                             hole_height,
                             hole_width,
+                            pretrain_coarse=True,
                             summary=False):
+    l1_alpha = 1.2
     batch_size = batch_data.get_shape().as_list()[0]
     batch_pos = batch_data / 127.5 - 1
     bbox = random_bbox(image_shape, hole_height, hole_width)
@@ -158,17 +160,35 @@ def build_graph_with_losses(batch_data,
 
     # apply mask and complete image
     batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
-
     refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
-
     refine_output = refine_network(refine_network_input, batch_size)
-    batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
+
+    if pretrain_coarse:
+        batch_predicted = coarse_output
+    else:
+        batch_predicted = refine_output
+
+    batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
 
     # local patches
     local_patch_batch_pos = local_patch(batch_pos, bbox)
-    # local_patch_batch_predicted = local_patch(coarse_output, bbox)
+    local_patch_batch_predicted = local_patch(batch_predicted, bbox)
     local_patch_coarse = local_patch(coarse_output, bbox)
     local_patch_refine = local_patch(refine_output, bbox)
+    local_patch_batch_complete = local_patch(batch_complete, bbox)
+
+    losses = {}
+    losses['l1_loss'] = l1_alpha * tf.reduce_mean(tf.abs(local_patch_batch_pos - local_patch_coarse) *
+                                                  spatial_discounting_mask(0.9, hole_height, hole_width))
+
+    if not pretrain_coarse:
+        losses['l1_loss'] += tf.reduce_mean(tf.abs(local_patch_batch_pos - local_patch_refine) *
+                                            spatial_discounting_mask(0.9, hole_height, hole_width))
+
+    losses['ae_loss'] = l1_alpha * tf.reduce_mean(tf.abs(batch_pos - coarse_output) * (1. - mask))
+    if not pretrain_coarse:
+        losses['ae_loss'] += tf.reduce_mean(tf.abs(batch_pos - refine_output) * (1. - mask))
+    losses['ae_loss'] /= tf.reduce_mean(1. - mask)  # good idea
 
 
 def spatial_discounting_mask(gamma, height, width):
@@ -240,9 +260,10 @@ def local_patch(x, bbox):
 
 
 if __name__ == '__main__':
-    # x = tf.random_uniform([10, 178, 218, 3])
+    x = tf.random_uniform([10, 256, 256, 3])
     # y = refine_network(x, 10)
     image_shape = (256, 256, 3)
     bbox = (5, 5, 128, 128)
-    mask = bbox2mask(image_shape, bbox)
-    print(mask.get_shape())
+    # mask = bbox2mask(image_shape, bbox)
+    y = local_patch(x, bbox)
+    print(y.get_shape())
