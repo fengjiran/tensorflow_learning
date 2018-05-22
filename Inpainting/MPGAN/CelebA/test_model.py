@@ -159,8 +159,16 @@ def build_graph_with_losses(batch_data,
     # apply mask and complete image
     batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
 
+    refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+
+    refine_output = refine_network(refine_network_input, batch_size)
+    batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
+
     # local patches
     local_patch_batch_pos = local_patch(batch_pos, bbox)
+    # local_patch_batch_predicted = local_patch(coarse_output, bbox)
+    local_patch_coarse = local_patch(coarse_output, bbox)
+    local_patch_refine = local_patch(refine_output, bbox)
 
 
 def spatial_discounting_mask(gamma, height, width):
