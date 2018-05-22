@@ -79,6 +79,31 @@ def local_discriminator(x, reuse=None):
         return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4.output))
 
 
+def build_discriminator(global_input, local_input, reuse=None):
+    with tf.variable_scope('discriminator', reuse=reuse):
+        dglobal = global_discriminator(global_input, reuse=reuse)
+        dlocal = local_discriminator(local_input, reuse=reuse)
+
+        dout_global = tf.layers.dense(dglobal, 1, name='dout_global_fc')
+        dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
+
+        return dout_global, dout_local
+
+
+def spatial_discounting_mask(gamma, height, width):
+    shape = [1, height, width, 1]
+    mask_values = np.ones((height, width))
+
+    for i in range(height):
+        for j in range(width):
+            mask_values[i, j] = gamma**min(i, j, height - i, width - j)
+
+    mask_values = np.expand_dims(mask_values, 0)
+    mask_values = np.expand_dims(mask_values, 3)
+
+    return tf.constant(mask_values, dtype=tf.float32, shape=shape)
+
+
 if __name__ == '__main__':
     x = tf.random_uniform([10, 178, 218, 3])
     y = completion_network(x, 10)
