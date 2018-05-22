@@ -130,8 +130,8 @@ def local_discriminator(x, reuse=None):
         return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4.output))
 
 
-def build_discriminator(global_input, local_input, reuse=None):
-    with tf.variable_scope('discriminator', reuse=reuse):
+def build_wgan_discriminator(global_input, local_input, reuse=None):
+    with tf.variable_scope('wgan_discriminator', reuse=reuse):
         dglobal = global_discriminator(global_input, reuse=reuse)
         dlocal = local_discriminator(local_input, reuse=reuse)
 
@@ -146,8 +146,16 @@ def build_graph_with_losses(batch_data,
                             hole_height,
                             hole_width,
                             pretrain_coarse=True,
+                            reuse=None,
                             summary=False):
     l1_alpha = 1.2
+    global_wgan_loss_alpha = 1.
+    wgan_gp_lambda = 10
+    gan_loss_alpha = 0.001
+    l1_loss_alpha = 1.2
+    ae_loss_alpha = 1.2
+    ae_loss = True
+
     batch_size = batch_data.get_shape().as_list()[0]
     batch_pos = batch_data / 127.5 - 1
     bbox = random_bbox(image_shape, hole_height, hole_width)
@@ -176,6 +184,7 @@ def build_graph_with_losses(batch_data,
     local_patch_coarse = local_patch(coarse_output, bbox)
     local_patch_refine = local_patch(refine_output, bbox)
     local_patch_batch_complete = local_patch(batch_complete, bbox)
+    local_patch_mask = local_patch(mask, bbox)
 
     losses = {}
     losses['l1_loss'] = l1_alpha * tf.reduce_mean(tf.abs(local_patch_batch_pos - local_patch_coarse) *
@@ -189,6 +198,53 @@ def build_graph_with_losses(batch_data,
     if not pretrain_coarse:
         losses['ae_loss'] += tf.reduce_mean(tf.abs(batch_pos - refine_output) * (1. - mask))
     losses['ae_loss'] /= tf.reduce_mean(1. - mask)  # good idea
+
+    # if summary:
+    #     scalar_summary('losses/l1_loss', losses['l1_loss'])
+    #     scalar_summary('losses/ae_loss', losses['ae_loss'])
+    #     viz_img = [batch_pos, batch_incomplete, batch_complete]
+
+    #     images_summary(tf.concat(viz_img, axis=2), 'raw_incomplete_predicted_complete', 10)
+
+    # gan
+    batch_pos_neg = tf.concat([batch_pos, batch_complete], axis=0)
+
+    # local deteminator patch
+    local_patch_batch_pos_neg = tf.concat([local_patch_batch_pos, local_patch_batch_complete], axis=0)
+
+    # wgan with gradient penalty
+    pos_neg_global, pos_neg_local = build_wgan_discriminator(batch_pos_neg, local_patch_batch_pos_neg, reuse)
+    pos_global, neg_global = tf.split(pos_neg_global, 2)
+    pos_local, neg_local = tf.split(pos_neg_local, 2)
+
+    # wgan loss
+    g_loss_global, d_loss_global = gan_wgan_loss(pos_global, neg_global)
+    g_loss_local, d_loss_local = gan_wgan_loss(pos_local, neg_local)
+
+    losses['g_loss'] = global_wgan_loss_alpha * g_loss_global + g_loss_local
+    losses['d_loss'] = d_loss_global + d_loss_local
+
+    # gradient penalty
+    interpolates_global = random_interpolates(batch_pos, batch_complete)
+    interpolates_local = random_interpolates(local_patch_batch_pos, local_patch_batch_complete)
+    dout_global, dout_local = build_wgan_discriminator(interpolates_global, interpolates_local, reuse=True)
+
+    # apply penalty
+    penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask)
+    penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask)
+
+    losses['gp_loss'] = wgan_gp_lambda * (penalty_global + penalty_local)
+    losses['d_loss'] = losses['d_loss'] + losses['gp_loss']
+
+    if pretrain_coarse:
+        losses['g_loss'] = 0
+    else:
+        losses['g_loss'] = gan_loss_alpha * losses['g_loss']
+
+    losses['g_loss'] += l1_loss_alpha * losses['l1_loss']
+
+    if ae_loss:
+        losses['g_loss'] += ae_loss_alpha * losses['ae_loss']
 
 
 def spatial_discounting_mask(gamma, height, width):
@@ -257,6 +313,38 @@ def local_patch(x, bbox):
     """
     x = tf.image.crop_to_bounding_box(x, bbox[0], bbox[1], bbox[2], bbox[3])
     return x
+
+
+def gan_wgan_loss(pos, neg):
+    d_loss = tf.reduce_mean(neg - pos)
+    g_loss = -tf.reduce_mean(neg)
+
+    return g_loss, d_loss
+
+
+def random_interpolates(x, y, alpha=None):
+    """Generate.
+
+    x: first dimension as batch_size
+    y: first dimension as batch_size
+    alpha: [BATCH_SIZE, 1]
+    """
+    shape = x.get_shape().as_list()
+    x = tf.reshape(x, [shape[0], -1])
+    y = tf.reshape(y, [shape[0], -1])
+
+    if alpha is None:
+        alpha = tf.random_uniform(shape=[shape[0], 1])
+    interpolates = x + alpha * (y - x)
+    return tf.reshape(interpolates, shape)
+
+
+def gradient_penalty(x, y, mask=None, norm=1.):
+    gradients = tf.gradients(y, x)[0]
+    if mask is None:
+        mask = tf.ones_like(gradients)
+    slopes = tf.sqrt(tf.reduce_mean(tf.square(gradients) * mask, axis=[1, 2, 3]))
+    return tf.reduce_mean(tf.square(slopes - norm))
 
 
 if __name__ == '__main__':
