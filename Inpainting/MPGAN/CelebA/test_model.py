@@ -44,7 +44,6 @@ def completion_network(images, batch_size):
                              name='conv15_upsample')
         conv16 = Conv2dLayer(tf.nn.elu(conv15.output), [3, 3, cnum, int(cnum / 2)], stride=1, name='conv16')
         conv17 = Conv2dLayer(tf.nn.elu(conv16.output), [3, 3, int(cnum / 2), 3], stride=1, name='conv17')
-
         conv_output = tf.clip_by_value(conv17.output, -1., 1.)
 
         for i in range(1, 18):
@@ -56,6 +55,30 @@ def completion_network(images, batch_size):
         return conv_output
 
 
+def global_discriminator(x, reuse=None):
+    cnum = 64
+    input_channel = x.get_shape().as_list()[3]
+    with tf.variable_scope('global_discriminator', reuse=reuse):
+        conv1 = Conv2dLayer(x, [5, 5, input_channel, cnum], stride=2, name='conv1')
+        conv2 = Conv2dLayer(tf.nn.leaky_relu(conv1.output), [5, 5, cnum, 2 * cnum], stride=2, name='conv2')
+        conv3 = Conv2dLayer(tf.nn.leaky_relu(conv2.output), [5, 5, 2 * cnum, 4 * cnum], stride=2, name='conv3')
+        conv4 = Conv2dLayer(tf.nn.leaky_relu(conv3.output), [5, 5, 4 * cnum, 4 * cnum], stride=2, name='conv4')
+
+        return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4.output))
+
+
+def local_discriminator(x, reuse=None):
+    cnum = 64
+    input_channel = x.get_shape().as_list()[3]
+    with tf.variable_scope('local_discriminator', reuse=reuse):
+        conv1 = Conv2dLayer(x, [5, 5, input_channel, cnum], stride=2, name='conv1')
+        conv2 = Conv2dLayer(tf.nn.leaky_relu(conv1.output), [5, 5, cnum, 2 * cnum], stride=2, name='conv2')
+        conv3 = Conv2dLayer(tf.nn.leaky_relu(conv2.output), [5, 5, 2 * cnum, 4 * cnum], stride=2, name='conv3')
+        conv4 = Conv2dLayer(tf.nn.leaky_relu(conv3.output), [5, 5, 4 * cnum, 8 * cnum], stride=2, name='conv4')
+
+        return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4.output))
+
+
 if __name__ == '__main__':
-    x = tf.random_uniform([10, 256, 256, 3])
+    x = tf.random_uniform([10, 178, 218, 3])
     y = completion_network(x, 10)
