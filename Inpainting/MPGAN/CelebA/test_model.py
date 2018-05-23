@@ -9,7 +9,7 @@ from utils import DilatedConv2dLayer
 # from utils import FCLayer
 
 
-def coarse_network_(images):
+def coarse_network(images):
     """Construct coarse network."""
     # batch_size = images.get_shape().as_list()[0]
     conv_layers = []
@@ -44,13 +44,32 @@ def coarse_network_(images):
         conv12 = tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
                                   kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv12')
 
-        conv13 = tf.layers.conv2d_transpose(conv12, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
-                                            kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv13_upsample')
+        conv13 = tf.layers.conv2d(
+            inputs=tf.image.resize_nearest_neighbor(conv12,
+                                                    (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
+            filters=2 * cnum,
+            kernel_size=3,
+            strides=1,
+            padding='same',
+            activation=tf.nn.elu,
+            kernel_initializer=tf.keras.initializers.glorot_normal(),
+            name='conv13_upsample')
+        # conv13 = tf.layers.conv2d_transpose(conv12, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
+        #                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv13_upsample')
         conv14 = tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
                                   kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv14')
-        conv15 = tf.layers.conv2d_transpose(conv14, cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
-                                            kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv15_upsample')
-
+        conv15 = tf.layers.conv2d(
+            inputs=tf.image.resize_nearest_neighbor(conv14,
+                                                    (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
+            filters=cnum,
+            kernel_size=3,
+            strides=1,
+            padding='same',
+            activation=tf.nn.elu,
+            kernel_initializer=tf.keras.initializers.glorot_normal(),
+            name='conv15_upsample')
+        # conv15 = tf.layers.conv2d_transpose(conv14, cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
+        #                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv15_upsample')
         conv16 = tf.layers.conv2d(conv15, int(cnum / 2), 3, strides=1, padding='same', activation=tf.nn.elu,
                                   kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv16')
         conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
@@ -67,7 +86,7 @@ def coarse_network_(images):
         return conv_output
 
 
-def coarse_network(images, batch_size):
+def coarse_network_(images, batch_size):
     """Construct coarse network."""
     # batch_size = images.get_shape().as_list()[0]
     conv_layers = []
@@ -453,8 +472,8 @@ def scalar_summary(name, value, sess=None, summary_writer=None, step=None):
 
 
 if __name__ == '__main__':
-    x = tf.random_uniform([10, 178, 218, 3])
-    y = coarse_network_(x)
+    x = tf.random_uniform([10, 177, 218, 3])
+    y = coarse_network(x)
     image_shape = (256, 256, 3)
     bbox = (5, 5, 128, 128)
     # mask = bbox2mask(image_shape, bbox)
