@@ -571,12 +571,12 @@ def scalar_summary(name, value, sess=None, summary_writer=None, step=None):
 
 
 if __name__ == '__main__':
-    x = tf.random_uniform([10, 177, 218, 3])
-    y = refine_network(x)
+    x = tf.random_uniform([10, 256, 256, 3])
+    # y = refine_network(x)
     image_shape = (256, 256, 3)
     bbox = (5, 5, 128, 128)
     # mask = bbox2mask(image_shape, bbox)
     # y = local_patch(x, bbox)
     # print(y.get_shape())
-    # g_vars, d_vars, losses = build_graph_with_losses(x, image_shape, 128, 128)
-    # print(len(g_vars), len(d_vars))
+    g_vars, d_vars, losses = build_graph_with_losses(x, image_shape, 128, 128)
+    print(len(g_vars), len(d_vars))
