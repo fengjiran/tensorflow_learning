@@ -1,3 +1,4 @@
+# if want to use None, use !!null
 # parameters
 val: false
 pretrain_coarse_network: true
