@@ -376,12 +376,13 @@ def build_graph_with_losses(batch_data,
         losses['ae_loss'] += tf.reduce_mean(tf.abs(batch_pos - refine_output) * (1. - mask))
     losses['ae_loss'] /= tf.reduce_mean(1. - mask)  # good idea
 
-    # if summary:
-    #     scalar_summary('losses/l1_loss', losses['l1_loss'])
-    #     scalar_summary('losses/ae_loss', losses['ae_loss'])
-    #     viz_img = [batch_pos, batch_incomplete, batch_complete]
+    if summary:
+        tf.summary.scalar('losses/l1_loss', losses['l1_loss'])
+        tf.summary.scalar('losses/ae_loss', losses['ae_loss'])
 
-    #     images_summary(tf.concat(viz_img, axis=2), 'raw_incomplete_predicted_complete', 10)
+        visual_img = [batch_pos, batch_incomplete, batch_complete]
+        visual_img = tf.concat(visual_img, axis=2)
+        images_summary(visual_img, 'raw_incomplete_predicted', 3)
 
     # gan
     batch_pos_neg = tf.concat([batch_pos, batch_complete], axis=0)
@@ -412,6 +413,9 @@ def build_graph_with_losses(batch_data,
 
     losses['gp_loss'] = wgan_gp_lambda * (penalty_global + penalty_local)
     losses['d_loss'] = losses['d_loss'] + losses['gp_loss']
+
+    if summary and not pretrain_coarse:
+        pass
 
     if pretrain_coarse:
         losses['g_loss'] = 0
@@ -531,43 +535,70 @@ def gradient_penalty(x, y, mask=None, norm=1.):
     return tf.reduce_mean(tf.square(slopes - norm))
 
 
-def collection_to_dict(collection):
-    """Utility function to construct collection dict with names."""
-    return {v.name[:v.name.rfind(':')]: v for v in collection}
+def images_summary(images, name, max_outs, color_format='BGR'):
+    """Summary images.
 
-
-def scalar_summary(name, value, sess=None, summary_writer=None, step=None):
-    """Add scalar summary.
-
-    In addition to summary tf.Tensor and tf.Variable, this function supports
-    summary of constant values by creating placeholder.
-    Example usage:
-    >>> scalar_summary('lr', lr)
-    :param name: name of summary variable
-    :param value: numpy or tensorflow tensor
-    :param summary_writer: if summary writer is provided, write to summary
-        instantly
-    :param step: if summary writer is provided, write to summary with step
+    **Note** that images should be scaled to [-1, 1] for 'RGB' or 'BGR',
+    [0, 1] for 'GREY'.
+    :param images: images tensor (in NHWC format)
+    :param name: name of images summary
+    :param max_outs: max_outputs for images summary
+    :param color_format: 'BGR', 'RGB' or 'GREY'
     :return: None
-
     """
-    def is_tensor_or_var(value):
-        return isinstance(value, tf.Tensor) or isinstance(value, tf.Variable)
+    with tf.variable_scope(name), tf.device('/cpu:0'):
+        if color_format == 'BGR':
+            img = tf.clip_by_value(
+                (tf.reverse(images, [-1]) + 1.) * 127.5, 0., 255.)
+        elif color_format == 'RGB':
+            img = tf.clip_by_value((images + 1.) * 127.5, 0, 255)
+        elif color_format == 'GREY':
+            img = tf.clip_by_value(images * 255., 0, 255)
+        else:
+            raise NotImplementedError("color format is not supported.")
+        tf.summary.image(name, img, max_outputs=max_outs)
 
-    # get scope name
-    sname = tf.get_variable_scope().name
-    fname = name if not sname else sname + '/' + name
+def gradients_summary(y,x,norm=tf.abs,name='gradients_y_wrt_x'):
+    grad = tf.reduce_mean(norm(tf.gradients(y,x)))
+    tf.summary.scalar(name, grad)
+    
+# def collection_to_dict(collection):
+#     """Utility function to construct collection dict with names."""
+#     return {v.name[:v.name.rfind(':')]: v for v in collection}
 
-    # construct summary dict
-    collection = collection_to_dict(ops.get_collection(ops.GraphKeys.SUMMARIES))
 
-    # tensorflow tensor
-    if fname in collection:
-        if not is_tensor_or_var(value):
-            ph_collection = collection_to_dict(tf.get_collection('SUMMARY_PLACEHOLDERS'))
-            op_collection = collection_to_dict(tf.get_collection('SUMMARY_OPS'))
-            ph = ph_collection[fname + '_ph']
-            op = op_collection[fname + '_op']
+# def scalar_summary(name, value, sess=None, summary_writer=None, step=None):
+#     """Add scalar summary.
+
+#     In addition to summary tf.Tensor and tf.Variable, this function supports
+#     summary of constant values by creating placeholder.
+#     Example usage:
+#     >>> scalar_summary('lr', lr)
+#     :param name: name of summary variable
+#     :param value: numpy or tensorflow tensor
+#     :param summary_writer: if summary writer is provided, write to summary
+#         instantly
+#     :param step: if summary writer is provided, write to summary with step
+#     :return: None
+
+#     """
+#     def is_tensor_or_var(value):
+#         return isinstance(value, tf.Tensor) or isinstance(value, tf.Variable)
+
+#     # get scope name
+#     sname = tf.get_variable_scope().name
+#     fname = name if not sname else sname + '/' + name
+
+#     # construct summary dict
+#     collection = collection_to_dict(ops.get_collection(ops.GraphKeys.SUMMARIES))
+
+#     # tensorflow tensor
+#     if fname in collection:
+#         if not is_tensor_or_var(value):
+#             ph_collection = collection_to_dict(tf.get_collection('SUMMARY_PLACEHOLDERS'))
+#             op_collection = collection_to_dict(tf.get_collection('SUMMARY_OPS'))
+#             ph = ph_collection[fname + '_ph']
+#             op = op_collection[fname + '_op']
 
 
 if __name__ == '__main__':
