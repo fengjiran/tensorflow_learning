@@ -86,6 +86,76 @@ def coarse_network(images):
         return conv_output
 
 
+def refine_network(images):
+    """Construct refine network."""
+    conv_layers = []
+    cnum = 32
+
+    with tf.variable_scope('refine'):
+        conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
+        conv2 = tf.layers.conv2d(conv1, cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2_downsample')
+        conv3 = tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
+        conv4 = tf.layers.conv2d(conv3, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4_downsample')
+        conv5 = tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
+        conv6 = tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv6')
+
+        conv7 = tf.layers.conv2d(conv6, 4 * cnum, 3, padding='same', dilation_rate=2, activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv7_atrous')
+        conv8 = tf.layers.conv2d(conv7, 4 * cnum, 3, padding='same', dilation_rate=4, activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv8_atrous')
+        conv9 = tf.layers.conv2d(conv8, 4 * cnum, 3, padding='same', dilation_rate=8, activation=tf.nn.elu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv9_atrous')
+        conv10 = tf.layers.conv2d(conv9, 4 * cnum, 3, padding='same', dilation_rate=16, activation=tf.nn.elu,
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv10_atrous')
+
+        conv11 = tf.layers.conv2d(conv10, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv11')
+        conv12 = tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv12')
+
+        conv13 = tf.layers.conv2d(
+            inputs=tf.image.resize_nearest_neighbor(conv12,
+                                                    (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
+            filters=2 * cnum,
+            kernel_size=3,
+            strides=1,
+            padding='same',
+            activation=tf.nn.elu,
+            kernel_initializer=tf.keras.initializers.glorot_normal(),
+            name='conv13_upsample')
+        conv14 = tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv14')
+        conv15 = tf.layers.conv2d(
+            inputs=tf.image.resize_nearest_neighbor(conv14,
+                                                    (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
+            filters=cnum,
+            kernel_size=3,
+            strides=1,
+            padding='same',
+            activation=tf.nn.elu,
+            kernel_initializer=tf.keras.initializers.glorot_normal(),
+            name='conv15_upsample')
+        conv16 = tf.layers.conv2d(conv15, int(cnum / 2), 3, strides=1, padding='same', activation=tf.nn.elu,
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv16')
+        conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
+                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv17')
+        conv_output = tf.clip_by_value(conv17, -1., 1.)
+
+        for i in range(1, 18):
+            conv_layers.append(eval('conv{}'.format(i)))
+
+        for conv in conv_layers:
+            print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
+
+        return conv_output
+
+
 def coarse_network_(images, batch_size):
     """Construct coarse network."""
     # batch_size = images.get_shape().as_list()[0]
@@ -134,7 +204,7 @@ def coarse_network_(images, batch_size):
         return conv_output
 
 
-def refine_network(images, batch_size):
+def refine_network_(images, batch_size):
     """Construct refine network."""
     conv_layers = []
     cnum = 32
@@ -186,6 +256,36 @@ def refine_network(images, batch_size):
 
 def global_discriminator(x, reuse=None):
     cnum = 64
+    with tf.variable_scope('global_discriminator', reuse=reuse):
+        conv1 = tf.layers.conv2d(x, cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
+        conv2 = tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2')
+        conv3 = tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
+        conv4 = tf.layers.conv2d(conv3, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
+
+        return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4))
+
+
+def local_discriminator(x, reuse=None):
+    cnum = 64
+    with tf.variable_scope('local_discriminator', reuse=reuse):
+        conv1 = tf.layers.conv2d(x, cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
+        conv2 = tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2')
+        conv3 = tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
+        conv4 = tf.layers.conv2d(conv3, 8 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
+
+        return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4))
+
+
+def global_discriminator_(x, reuse=None):
+    cnum = 64
     input_channel = x.get_shape().as_list()[3]
     with tf.variable_scope('global_discriminator', reuse=reuse):
         conv1 = Conv2dLayer(x, [5, 5, input_channel, cnum], stride=2, name='conv1')
@@ -196,7 +296,7 @@ def global_discriminator(x, reuse=None):
         return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4.output))
 
 
-def local_discriminator(x, reuse=None):
+def local_discriminator_(x, reuse=None):
     cnum = 64
     input_channel = x.get_shape().as_list()[3]
     with tf.variable_scope('local_discriminator', reuse=reuse):
@@ -234,20 +334,19 @@ def build_graph_with_losses(batch_data,
     ae_loss_alpha = 1.2
     ae_loss = True
 
-    batch_size = batch_data.get_shape().as_list()[0]
+    # batch_size = batch_data.get_shape().as_list()[0]
     batch_pos = batch_data / 127.5 - 1
     bbox = random_bbox(image_shape, hole_height, hole_width)
     mask = bbox2mask(image_shape, bbox)  # (1,height,width,1)
     batch_incomplete = batch_pos * (1. - mask)
     ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
     x = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
-
-    coarse_output = coarse_network(x, batch_size)
+    coarse_output = coarse_network(x)
 
     # apply mask and complete image
     batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
     refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
-    refine_output = refine_network(refine_network_input, batch_size)
+    refine_output = refine_network(refine_network_input)
 
     if pretrain_coarse:
         batch_predicted = coarse_output
@@ -473,7 +572,7 @@ def scalar_summary(name, value, sess=None, summary_writer=None, step=None):
 
 if __name__ == '__main__':
     x = tf.random_uniform([10, 177, 218, 3])
-    y = coarse_network(x)
+    y = refine_network(x)
     image_shape = (256, 256, 3)
     bbox = (5, 5, 128, 128)
     # mask = bbox2mask(image_shape, bbox)
