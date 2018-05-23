@@ -4,25 +4,37 @@ import numpy as np
 import tensorflow as tf
 # from tensorflow.python.framework import ops
 
+# with open('config.yaml', 'r') as f:
+#     cfg = yaml.load(f)
 
-def spatial_discounting_mask(gamma, height, width):
+
+def spatial_discounting_mask(cfg):
+    gamma = cfg['spatial_discount_gamma']
+    height = cfg['hole_height']
+    width = cfg['hole_width']
     shape = [1, height, width, 1]
-    mask_values = np.ones((height, width))
 
-    for i in range(height):
-        for j in range(width):
-            mask_values[i, j] = gamma**min(i, j, height - i, width - j)
+    if cfg['discount_mask']:
+        mask_values = np.ones((height, width))
+        for i in range(height):
+            for j in range(width):
+                mask_values[i, j] = gamma**min(i, j, height - i, width - j)
 
-    mask_values = np.expand_dims(mask_values, 0)
-    mask_values = np.expand_dims(mask_values, 3)
+        mask_values = np.expand_dims(mask_values, 0)
+        mask_values = np.expand_dims(mask_values, 3)
+    else:
+        mask_values = np.ones(shape)
 
     return tf.constant(mask_values, dtype=tf.float32, shape=shape)
 
 
-def random_bbox(image_shape, hole_height, hole_width):
+def random_bbox(cfg):
     # image_shape:(H,W,C)
-    height = image_shape[0]
-    width = image_shape[1]
+    height = cfg['img_height']
+    width = cfg['img_width']
+
+    hole_height = cfg['hole_height']
+    hole_width = cfg['hole_width']
 
     top = tf.random_uniform([], minval=0, maxval=height - hole_height, dtype=tf.int32)
     left = tf.random_uniform([], minval=0, maxval=width - hole_width, dtype=tf.int32)
@@ -32,7 +44,7 @@ def random_bbox(image_shape, hole_height, hole_width):
     return (top, left, h, w)
 
 
-def bbox2mask(image_shape, bbox):
+def bbox2mask(bbox, cfg):
     """Generate mask tensor from bbox.
 
     Args:
@@ -45,8 +57,8 @@ def bbox2mask(image_shape, bbox):
         tf.Tensor: output with shape [1, H, W, 1]
 
     """
-    height = image_shape[0]
-    width = image_shape[1]
+    height = cfg['img_height']
+    width = cfg['img_width']
     top, left, h, w = bbox
 
     mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
