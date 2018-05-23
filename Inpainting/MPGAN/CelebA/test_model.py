@@ -415,7 +415,25 @@ def build_graph_with_losses(batch_data,
     losses['d_loss'] = losses['d_loss'] + losses['gp_loss']
 
     if summary and not pretrain_coarse:
-        pass
+        gradients_summary(g_loss_global, batch_predicted, name='g_loss_global')
+        gradients_summary(g_loss_local, batch_predicted, name='g_loss_local')
+
+        tf.summary.scalar('convergence/d_loss', losses['d_loss'])
+        tf.summary.scalar('convergence/local_d_loss', d_loss_local)
+        tf.summary.scalar('convergence/global_d_loss', d_loss_global)
+
+        tf.summary.scalar('wgan_loss/gp_loss', losses['gp_loss'])
+        tf.summary.scalar('wgan_loss/gp_penalty_local', penalty_local)
+        tf.summary.scalar('wgan_loss/gp_penalty_global', penalty_global)
+
+        # summary the magnitude of gradients from different losses w.r.t. predicted image
+        gradients_summary(losses['g_loss'], batch_predicted, name='g_loss')
+        gradients_summary(losses['g_loss'], coarse_output, name='g_loss_to_coarse')
+        gradients_summary(losses['g_loss'], refine_output, name='g_loss_to_refine')
+        gradients_summary(losses['l1_loss'], coarse_output, name='l1_loss_to_coarse')
+        gradients_summary(losses['l1_loss'], refine_output, name='l1_loss_to_refine')
+        gradients_summary(losses['ae_loss'], coarse_output, name='ae_loss_to_coarse')
+        gradients_summary(losses['ae_loss'], refine_output, name='ae_loss_to_refine')
 
     if pretrain_coarse:
         losses['g_loss'] = 0
@@ -558,10 +576,11 @@ def images_summary(images, name, max_outs, color_format='BGR'):
             raise NotImplementedError("color format is not supported.")
         tf.summary.image(name, img, max_outputs=max_outs)
 
-def gradients_summary(y,x,norm=tf.abs,name='gradients_y_wrt_x'):
-    grad = tf.reduce_mean(norm(tf.gradients(y,x)))
+
+def gradients_summary(y, x, norm=tf.abs, name='gradients_y_wrt_x'):
+    grad = tf.reduce_mean(norm(tf.gradients(y, x)))
     tf.summary.scalar(name, grad)
-    
+
 # def collection_to_dict(collection):
 #     """Utility function to construct collection dict with names."""
 #     return {v.name[:v.name.rfind(':')]: v for v in collection}
