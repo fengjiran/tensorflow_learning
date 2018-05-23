@@ -9,14 +9,14 @@ from utils import DilatedConv2dLayer
 # from utils import FCLayer
 
 
-def coarse_network(images):
+def coarse_network(images, reuse=None):
     """Construct coarse network."""
     # batch_size = images.get_shape().as_list()[0]
     conv_layers = []
     cnum = 32
     # input_channel = images.get_shape().as_list()[3]
 
-    with tf.variable_scope('coarse'):
+    with tf.variable_scope('coarse', reuse=reuse):
         conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same', activation=tf.nn.elu,
                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
         conv2 = tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
@@ -86,12 +86,12 @@ def coarse_network(images):
         return conv_output
 
 
-def refine_network(images):
+def refine_network(images, reuse=None):
     """Construct refine network."""
     conv_layers = []
     cnum = 32
 
-    with tf.variable_scope('refine'):
+    with tf.variable_scope('refine', reuse=reuse):
         conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same', activation=tf.nn.elu,
                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
         conv2 = tf.layers.conv2d(conv1, cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
@@ -341,12 +341,12 @@ def build_graph_with_losses(batch_data,
     batch_incomplete = batch_pos * (1. - mask)
     ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
     x = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
-    coarse_output = coarse_network(x)
+    coarse_output = coarse_network(x, reuse)
 
     # apply mask and complete image
     batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
     refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
-    refine_output = refine_network(refine_network_input)
+    refine_output = refine_network(refine_network_input, reuse)
 
     if pretrain_coarse:
         batch_predicted = coarse_output
@@ -450,6 +450,40 @@ def build_graph_with_losses(batch_data,
     d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
 
     return g_vars, d_vars, losses
+
+
+def build_infer_graph(batch_data, image_shape, hole_height, hole_width,
+                      bbox=None, pretrain_coarse=True, name='val'):
+    reuse = True
+    if bbox is None:
+        bbox = random_bbox(image_shape, hole_height, hole_width)
+    mask = bbox2mask(image_shape, bbox)
+
+    batch_pos = batch_data / 127.5 - 1.
+    batch_incomplete = batch_pos * (1. - mask)
+
+    # completion
+    coarse_output = coarse_network(batch_incomplete, reuse)
+    batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+    refine_output = refine_network(batch_complete_coarse, reuse)
+
+    if pretrain_coarse:
+        batch_predicted = coarse_output
+    else:
+        batch_predicted = refine_output
+
+    # apply mask and reconstruct
+    batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
+
+    # global image visualization
+    visual_img = [batch_pos, batch_incomplete, batch_complete]
+    images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_complete', 3)
+
+    return batch_complete
+
+
+def build_static_infer_graph(batch_data, name):
+    pass
 
 
 def spatial_discounting_mask(gamma, height, width):
