@@ -246,6 +246,12 @@ def build_graph_with_losses(batch_data,
     if ae_loss:
         losses['g_loss'] += ae_loss_alpha * losses['ae_loss']
 
+    g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse') +\
+        tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+    d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+
+    return g_vars, d_vars, losses
+
 
 def spatial_discounting_mask(gamma, height, width):
     shape = [1, height, width, 1]
