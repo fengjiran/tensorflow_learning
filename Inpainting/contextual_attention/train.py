@@ -36,5 +36,13 @@ def input_parse(img_path):
         return img
 
 
+filenames = tf.placeholder(tf.string, shape=[None])
+dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = dataset.map(input_parse)
+dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
+dataset = dataset.repeat()
+iterator = dataset.make_initializable_iterator()
+
+
 model = CompletionModel()
 g_vars, d_vars, losses = model.build_graph_with_losses(images, cfg)
