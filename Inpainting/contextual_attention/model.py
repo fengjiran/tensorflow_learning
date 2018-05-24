@@ -18,7 +18,7 @@ class CompletionModel(object):
     """Construct model."""
 
     def __init__(self):
-        pass
+        print('Construct the model')
 
     def coarse_network(self, images, reuse=None):
         conv_layers = []
@@ -353,3 +353,15 @@ class CompletionModel(object):
                 tf.constant(cfg['hole_height']), tf.constant(cfg['hole_width']))
 
         return self.build_infer_graph(batch_data, cfg, bbox, name)
+
+
+if __name__ == '__main__':
+    import yaml
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
+
+    model = CompletionModel()
+    x = tf.random_uniform([10, 256, 256, 3])
+
+    g_vars, d_vars, losses = model.build_graph_with_losses(x, cfg)
+    print(len(g_vars), len(d_vars))
