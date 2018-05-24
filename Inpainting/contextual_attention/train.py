@@ -43,6 +43,21 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
+batch_data = iterator.get_next()
 
 model = CompletionModel()
-g_vars, d_vars, losses = model.build_graph_with_losses(images, cfg)
+g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
+
+if cfg['val']:
+    pass
+
+# training settings
+lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(1e-4))
+g_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+d_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+
+global_step = tf.get_variable('global_step',
+                              [],
+                              tf.int32,
+                              initializer=tf.zeros_initializer(),
+                              trainable=False)
