@@ -16,7 +16,9 @@ img_height: 256
 img_width: 256
 hole_height: 128
 hole_width: 128
+
 batch_size: 16
+max_iters: 1000000
 
 l1_loss: true
 ae_loss: true
