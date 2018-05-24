@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import platform
 import yaml
-import numpy as np
+# import numpy as np
 import tensorflow as tf
 from model import CompletionModel
 
@@ -11,12 +11,12 @@ with open('config.yaml', 'r') as f:
 
 if platform.system() == 'Windows':
     compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle'
-    # events_path = config['events_path_win']
+    log_dir = cfg['log_dir_win']
     # model_path = 'E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\pretrain_model_global'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle'
-        # events_path = config['events_path_linux']
+        log_dir = cfg['log_dir_linux']
         # model_path = '/home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/pretrain_model_global'
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
@@ -56,8 +56,18 @@ lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_in
 g_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 d_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 
+# initialize primary trainer
 global_step = tf.get_variable('global_step',
                               [],
                               tf.int32,
                               initializer=tf.zeros_initializer(),
                               trainable=False)
+
+g_loss = cfg['g_loss']
+d_loss = cfg['d_loss']
+
+g_grads_vars = g_opt.compute_gradients(g_loss, g_vars)
+g_train = g_opt.apply_gradients(g_grads_vars, global_step)
+
+d_grads_vars = d_opt.compute_gradients(d_loss, d_vars)
+d_train = d_opt.apply_gradients(d_grads_vars, global_step)
