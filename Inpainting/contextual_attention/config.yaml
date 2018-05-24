@@ -23,3 +23,6 @@ ae_loss: true
 global_wgan_loss_alpha: 1.0
 
 spatial_discount_gamma: 0.9
+
+log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention"
+log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/contextual_attention
