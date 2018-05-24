@@ -263,3 +263,60 @@ class CompletionModel(object):
         # wgan loss
         g_loss_global, d_loss_global = gan_wgan_loss(pos_global, neg_global)
         g_loss_local, d_loss_local = gan_wgan_loss(pos_local, neg_local)
+
+        losses['g_loss'] = cfg['global_wgan_loss_alpha'] * g_loss_global + g_loss_local
+        losses['d_loss'] = d_loss_global + d_loss_local
+
+        # gradient penalty
+        interpolates_global = random_interpolates(batch_pos, batch_complete)
+        interpolates_local = random_interpolates(local_patch_batch_pos, local_patch_batch_complete)
+        dout_global, dout_local = self.build_wgan_discriminator(interpolates_global,
+                                                                interpolates_local,
+                                                                reuse=True)
+
+        # apply penalty
+        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask)
+        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask)
+
+        losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
+        losses['d_loss'] += losses['gp_loss']
+
+        if summary and not cfg['pretrain_coarse_network']:
+            gradients_summary(g_loss_global, batch_predicted, name='g_loss_global')
+            gradients_summary(g_loss_local, batch_predicted, name='g_loss_local')
+
+            tf.summary.scalar('convergence/d_loss', losses['d_loss'])
+            tf.summary.scalar('convergence/local_d_loss', d_loss_local)
+            tf.summary.scalar('convergence/global_d_loss', d_loss_global)
+
+            tf.summary.scalar('wgan_loss/gp_loss', losses['gp_loss'])
+            tf.summary.scalar('wgan_loss/gp_penalty_local', penalty_local)
+            tf.summary.scalar('wgan_loss/gp_penalty_global', penalty_global)
+
+            # summary the magnitude of gradients from different losses w.r.t. predicted image
+            gradients_summary(losses['g_loss'], batch_predicted, name='g_loss')
+            gradients_summary(losses['g_loss'], coarse_output, name='g_loss_to_coarse')
+            gradients_summary(losses['g_loss'], refine_output, name='g_loss_to_refine')
+            gradients_summary(losses['l1_loss'], coarse_output, name='l1_loss_to_coarse')
+            gradients_summary(losses['l1_loss'], refine_output, name='l1_loss_to_refine')
+            gradients_summary(losses['ae_loss'], coarse_output, name='ae_loss_to_coarse')
+            gradients_summary(losses['ae_loss'], refine_output, name='ae_loss_to_refine')
+
+        if cfg['pretrain_coarse_network']:
+            losses['g_loss'] = 0
+        else:
+            losses['g_loss'] = cfg['gan_loss_alpha'] * losses['g_loss']
+
+        losses['g_loss'] += cfg['l1_loss_alpha'] * losses['l1_loss']
+
+        if cfg['ae_loss']:
+            losses['g_loss'] += cfg['ae_loss_alpha'] * losses['ae_loss']
+
+        g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse') +\
+            tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+
+        return g_vars, d_vars, losses
+
+    def build_infer_graph(self, batch_data, cfg, bbox=None, name='val'):
+        pass
