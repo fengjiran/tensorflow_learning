@@ -199,7 +199,8 @@ class CompletionModel(object):
             return dout_global, dout_local
 
     def build_graph_with_losses(self, batch_data, cfg, summary=True, reuse=None):
-        batch_pos = batch_data / 127.5 - 1
+        # batch_pos = batch_data / 127.5 - 1
+        batch_pos = batch_data
         bbox = random_bbox(cfg)
         mask = bbox2mask(bbox, cfg)
 
@@ -282,9 +283,9 @@ class CompletionModel(object):
             tf.summary.scalar('losses/refine_l1_loss', losses['refine_l1_loss'])
             tf.summary.scalar('losses/refine_ae_loss', losses['refine_ae_loss'])
 
-            visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
-            visual_img = tf.concat(visual_img, axis=2)
-            images_summary(visual_img, 'raw_incomplete_predicted_coarse_refine', 3)
+            # visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
+            # visual_img = tf.concat(visual_img, axis=2)
+            images_summary(batch_pos, 'raw_incomplete_coarse_refine', 3)
 
             # stage2
             gradients_summary(g_loss_global, refine_output, name='g_loss_global')
@@ -464,7 +465,7 @@ class CompletionModel(object):
 
         # global image visualization
         visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
-        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarsecomplete_refinecomplete', 3)
+        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarse_refine', 3)
 
         return batch_complete_coarse, batch_complete_refine
 
