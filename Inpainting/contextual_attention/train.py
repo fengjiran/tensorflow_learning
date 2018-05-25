@@ -64,14 +64,23 @@ global_step = tf.get_variable('global_step',
                               initializer=tf.zeros_initializer(),
                               trainable=False)
 
-g_loss = losses['g_loss']
-d_loss = losses['d_loss']
+coarse_l1_loss = losses['coarse_l1_loss'] + losses['coarse_ae_loss']
+refine_g_loss = losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss']
+refine_d_loss = losses['refine_d_loss']
+# g_loss = losses['g_loss']
+# d_loss = losses['d_loss']
 
-g_grads_vars = g_opt.compute_gradients(g_loss, g_vars)
-g_train = g_opt.apply_gradients(g_grads_vars, global_step)
+# stage 1
+coarse_grads_vars = g_opt.compute_gradients(coarse_l1_loss, g_vars)
+coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step)
 
-d_grads_vars = d_opt.compute_gradients(d_loss, d_vars)
-d_train = d_opt.apply_gradients(d_grads_vars, global_step)
+# stage 2 generator
+refine_g_grads_vars = g_opt.compute_gradients(refine_g_loss, g_vars)
+refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
+
+# stage 2 discriminator
+refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
+refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 
 saver = tf.train.Saver()
 
