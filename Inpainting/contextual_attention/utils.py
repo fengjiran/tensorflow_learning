@@ -118,7 +118,7 @@ def gradient_penalty(x, y, mask=None, norm=1.):
     return tf.reduce_mean(tf.square(slopes - norm))
 
 
-def images_summary(images, name, max_outs, color_format='BGR'):
+def images_summary(images, name, max_outs):
     """Summary images.
 
     **Note** that images should be scaled to [-1, 1] for 'RGB' or 'BGR',
@@ -129,17 +129,22 @@ def images_summary(images, name, max_outs, color_format='BGR'):
     :param color_format: 'BGR', 'RGB' or 'GREY'
     :return: None
     """
-    with tf.variable_scope(name), tf.device('/cpu:0'):
-        if color_format == 'BGR':
-            img = tf.clip_by_value(
-                (tf.reverse(images, [-1]) + 1.) * 127.5, 0., 255.)
-        elif color_format == 'RGB':
-            img = tf.clip_by_value((images + 1.) * 127.5, 0, 255)
-        elif color_format == 'GREY':
-            img = tf.clip_by_value(images * 255., 0, 255)
-        else:
-            raise NotImplementedError("color format is not supported.")
-        tf.summary.image(name, img, max_outputs=max_outs)
+    # img = tf.cast((images + 1) * 127.5, tf.int8)
+    img = (images + 1) / 2.
+    tf.summary.image(name, img, max_outs)
+    # with tf.variable_scope(name), tf.device('/cpu:0'):
+    #     if color_format == 'BGR':
+    #         img = tf.clip_by_value(
+    #             (tf.reverse(images, [-1]) + 1.) * 127.5, 0., 255.)
+    #     elif color_format == 'RGB':
+    #         # img = tf.clip_by_value((images + 1.) * 127.5, 0, 255)
+    #         # img = (images + 1) / 2
+    #         img = tf.cast((img + 1) * 127.5, tf.int8)
+    #     elif color_format == 'GREY':
+    #         img = tf.clip_by_value(images * 255., 0, 255)
+    #     else:
+    #         raise NotImplementedError("color format is not supported.")
+    #     tf.summary.image(name, img, max_outputs=max_outs)
 
 
 def gradients_summary(y, x, norm=tf.abs, name='gradients_y_wrt_x'):
