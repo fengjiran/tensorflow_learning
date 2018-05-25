@@ -64,8 +64,8 @@ global_step = tf.get_variable('global_step',
                               initializer=tf.zeros_initializer(),
                               trainable=False)
 
-g_loss = cfg['g_loss']
-d_loss = cfg['d_loss']
+g_loss = losses['g_loss']
+d_loss = losses['d_loss']
 
 g_grads_vars = g_opt.compute_gradients(g_loss, g_vars)
 g_train = g_opt.apply_gradients(g_grads_vars, global_step)
