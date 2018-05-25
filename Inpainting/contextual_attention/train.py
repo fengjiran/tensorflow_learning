@@ -27,11 +27,14 @@ elif platform.system() == 'Linux':
 
 def input_parse(img_path):
     with tf.device('/cpu:0'):
+        img_height = 218
+        img_width = 178
         img_file = tf.read_file(img_path)
         img_decoded = tf.image.decode_image(img_file, channels=3)
         img = tf.cast(img_decoded, tf.float32)
+        img = tf.image.resize_image_with_crop_or_pad(img, img_height, img_width)
         img = tf.image.resize_images(img, [315, 256])
-        img = tf.image.random_crop(img, [cfg['img_height'], cfg['img_width']])
+        img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
         img = img / 127.5 - 1
 
         return img
@@ -45,6 +48,9 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 
 batch_data = iterator.get_next()
+# batch_data = tf.image.resize_images(batch_data, [315, 256])
+# batch_data = tf.image.random_crop(batch_data, [cfg['img_height'], cfg['img_width']])
+# batch_data = batch_data / 127.5 - 1
 
 model = CompletionModel()
 g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
@@ -82,8 +88,13 @@ refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
 refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
 refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 
-saver = tf.train.Saver()
+# summary
+tf.summary.scalar('learning_rate', lr)
+for var in tf.trainable_variables():
+    tf.summary.histogram(var.name, var)
+all_summary = tf.summary.merge_all()
 
+saver = tf.train.Saver()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
@@ -97,7 +108,12 @@ with tf.Session(config=config) as sess:
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
     sess.run(tf.global_variables_initializer())
 
+    summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
+
     step = 0
     max_iters = cfg['max_iters']
     while step < max_iters:
-        _, loss_value = sess.run([g_train, losses['g_loss']])
+        _, loss_value, summary = sess.run([coarse_train, coarse_l1_loss, all_summary])
+        summary_writer.add_summary(summary, step)
+        print(loss_value)
+        step += 1
