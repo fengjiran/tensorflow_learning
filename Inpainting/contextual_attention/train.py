@@ -70,14 +70,14 @@ global_step = tf.get_variable('global_step',
                               initializer=tf.zeros_initializer(),
                               trainable=False)
 
-coarse_l1_loss = losses['coarse_l1_loss'] + losses['coarse_ae_loss']
+coarse_rec_loss = losses['coarse_l1_loss'] + losses['coarse_ae_loss']
 refine_g_loss = losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss']
 refine_d_loss = losses['refine_d_loss']
 # g_loss = losses['g_loss']
 # d_loss = losses['d_loss']
 
 # stage 1
-coarse_grads_vars = g_opt.compute_gradients(coarse_l1_loss, g_vars)
+coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
 coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step)
 
 # stage 2 generator
@@ -113,7 +113,7 @@ with tf.Session(config=config) as sess:
     step = 0
     max_iters = cfg['max_iters']
     while step < max_iters:
-        _, loss_value, summary = sess.run([coarse_train, coarse_l1_loss, all_summary])
+        _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
         summary_writer.add_summary(summary, step)
         print(loss_value)
         step += 1
