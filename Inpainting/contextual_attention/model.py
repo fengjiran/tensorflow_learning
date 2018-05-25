@@ -283,9 +283,9 @@ class CompletionModel(object):
             tf.summary.scalar('losses/refine_l1_loss', losses['refine_l1_loss'])
             tf.summary.scalar('losses/refine_ae_loss', losses['refine_ae_loss'])
 
-            # visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
-            # visual_img = tf.concat(visual_img, axis=2)
-            images_summary(batch_pos, 'raw_incomplete_coarse_refine', 3)
+            visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
+            visual_img = tf.concat(visual_img, axis=2)
+            images_summary(visual_img, 'raw_incomplete_coarse_refine', 3)
 
             # stage2
             gradients_summary(g_loss_global, refine_output, name='g_loss_global')
