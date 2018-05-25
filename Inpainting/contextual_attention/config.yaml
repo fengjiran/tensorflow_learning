@@ -18,7 +18,8 @@ hole_height: 128
 hole_width: 128
 
 batch_size: 16
-max_iters: 1000000
+coarse_iters: 100000
+total_iters: 1000000
 
 l1_loss: true
 ae_loss: true
