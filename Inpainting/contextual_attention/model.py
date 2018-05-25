@@ -278,39 +278,41 @@ class CompletionModel(object):
 
         if summary:
             # stage1
-            tf.summary.scalar('losses/coarse_l1_loss', losses['coarse_l1_loss'])
-            tf.summary.scalar('losses/coarse_ae_loss', losses['coarse_ae_loss'])
-            tf.summary.scalar('losses/refine_l1_loss', losses['refine_l1_loss'])
-            tf.summary.scalar('losses/refine_ae_loss', losses['refine_ae_loss'])
+            tf.summary.scalar('rec_loss/coarse_rec_loss', losses['coarse_l1_loss'] + losses['coarse_ae_loss'])
+            # tf.summary.scalar('rec_loss/coarse_l1_loss', losses['coarse_l1_loss'])
+            # tf.summary.scalar('rec_loss/coarse_ae_loss', losses['coarse_ae_loss'])
+            tf.summary.scalar('rec_loss/refine_rec_loss', losses['refine_l1_loss'] + losses['refine_ae_loss'])
+            # tf.summary.scalar('rec_loss/refine_l1_loss', losses['refine_l1_loss'])
+            # tf.summary.scalar('rec_loss/refine_ae_loss', losses['refine_ae_loss'])
 
             visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
             visual_img = tf.concat(visual_img, axis=2)
-            images_summary(visual_img, 'raw_incomplete_coarse_refine', 3)
+            images_summary(visual_img, 'raw_incomplete_coarse_refine', 4)
 
             # stage2
             gradients_summary(g_loss_global, refine_output, name='g_loss_global')
             gradients_summary(g_loss_local, refine_output, name='g_loss_local')
 
-            tf.summary.scalar('convergence/d_loss', losses['refine_d_loss'])
+            tf.summary.scalar('convergence/refine_d_loss', losses['refine_d_loss'])
             tf.summary.scalar('convergence/local_d_loss', d_loss_local)
             tf.summary.scalar('convergence/global_d_loss', d_loss_global)
 
-            tf.summary.scalar('wgan_loss/gp_loss', losses['gp_loss'])
-            tf.summary.scalar('wgan_loss/gp_penalty_local', penalty_local)
-            tf.summary.scalar('wgan_loss/gp_penalty_global', penalty_global)
+            tf.summary.scalar('gradient_penalty/gp_loss', losses['gp_loss'])
+            tf.summary.scalar('gradient_penalty/gp_penalty_local', penalty_local)
+            tf.summary.scalar('gradient_penalty/gp_penalty_global', penalty_global)
 
             # summary the magnitude of gradients from different losses w.r.t. predicted image
             # gradients_summary(losses['g_loss'], refine_output, name='g_loss')
             gradients_summary(losses['coarse_l1_loss'] + losses['coarse_ae_loss'],
                               coarse_output,
-                              name='g_loss_to_coarse')
+                              name='rec_loss_grad_to_coarse')
             gradients_summary(losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss'],
                               refine_output,
-                              name='g_loss_to_refine')
-            gradients_summary(losses['coarse_l1_loss'], coarse_output, name='l1_loss_to_coarse')
-            gradients_summary(losses['refine_l1_loss'], refine_output, name='l1_loss_to_refine')
-            gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_to_coarse')
-            gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_to_refine')
+                              name='rec_loss_grad_to_refine')
+            gradients_summary(losses['coarse_l1_loss'], coarse_output, name='l1_loss_grad_to_coarse')
+            gradients_summary(losses['refine_l1_loss'], refine_output, name='l1_loss_grad_to_refine')
+            gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_grad_to_coarse')
+            gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_grad_to_refine')
 
         return g_vars, d_vars, losses
 
