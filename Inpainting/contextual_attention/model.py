@@ -205,13 +205,131 @@ class CompletionModel(object):
 
         batch_incomplete = batch_pos * (1. - mask)
         ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
+        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
+
+        coarse_output = self.coarse_network(coarse_network_input, reuse)
+        batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+
+        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        refine_output = self.refine_network(refine_network_input, reuse)
+        batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
+
+        losses = {}
+
+        # local patches
+        local_patch_pos = local_patch(batch_pos, bbox)
+        local_patch_coarse = local_patch(coarse_output, bbox)
+        local_patch_refine = local_patch(refine_output, bbox)
+        local_patch_mask = local_patch(mask, bbox)
+
+        l1_alpha = cfg['coarse_l1_alpha']
+        losses['coarse_l1_loss'] = l1_alpha * tf.reduce_mean(tf.abs(local_patch_pos - local_patch_coarse) *
+                                                             spatial_discounting_mask(cfg))
+        losses['coarse_ae_loss'] = l1_alpha * tf.reduce_mean(tf.abs(batch_pos - coarse_output) * (1. - mask))
+
+        losses['refine_l1_loss'] = losses['coarse_l1_loss'] + \
+            tf.reduce_mean(tf.abs(local_patch_pos - local_patch_refine) *
+                           spatial_discounting_mask(cfg))
+        losses['refine_ae_loss'] = losses['coarse_ae_loss'] + \
+            tf.reduce_mean(tf.abs(batch_pos - refine_output) * (1. - mask))
+
+        losses['coarse_ae_loss'] /= tf.reduce_mean(1. - mask)
+        losses['refine_ae_loss'] /= tf.reduce_mean(1. - mask)
+
+        # wgan
+        batch_pos_neg = tf.concat([batch_pos, batch_complete_refine], axis=0)
+
+        # local discriminator patch
+        local_patch_pos_neg = tf.concat([local_patch_pos, local_patch_refine], axis=0)
+
+        # wgan with gradient penalty
+        pos_neg_global, pos_neg_local = self.build_wgan_discriminator(batch_pos_neg,
+                                                                      local_patch_pos_neg,
+                                                                      reuse)
+
+        pos_global, neg_global = tf.split(pos_neg_global, 2)
+        pos_local, neg_local = tf.split(pos_neg_local, 2)
+
+        # wgan loss
+        g_loss_global, d_loss_global = gan_wgan_loss(pos_global, neg_global)
+        g_loss_local, d_loss_local = gan_wgan_loss(pos_local, neg_local)
+
+        losses['refine_g_loss'] = cfg['global_wgan_loss_alpha'] * g_loss_global + g_loss_local
+        losses['refine_d_loss'] = g_loss_global + d_loss_local
+
+        # gradient penalty
+        interpolates_global = random_interpolates(batch_pos, batch_complete_refine)
+        interpolates_local = random_interpolates(local_patch_pos, local_patch_refine)
+        dout_global, dout_local = self.build_wgan_discriminator(interpolates_global,
+                                                                interpolates_local,
+                                                                reuse=True)
+
+        # apply penalty
+        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask)
+        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask)
+
+        losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
+        losses['refine_d_loss'] += losses['gp_loss']
+
+        g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse') +\
+            tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+
+        if summary:
+            # stage1
+            tf.summary.scalar('losses/coarse_l1_loss', losses['coarse_l1_loss'])
+            tf.summary.scalar('losses/coarse_ae_loss', losses['coarse_ae_loss'])
+            tf.summary.scalar('losses/refine_l1_loss', losses['refine_l1_loss'])
+            tf.summary.scalar('losses/refine_ae_loss', losses['refine_ae_loss'])
+
+            visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
+            visual_img = tf.concat(visual_img, axis=2)
+            images_summary(visual_img, 'raw_incomplete_predicted_coarse_refine', 3)
+
+            # stage2
+            gradients_summary(g_loss_global, refine_output, name='g_loss_global')
+            gradients_summary(g_loss_local, refine_output, name='g_loss_local')
+
+            tf.summary.scalar('convergence/d_loss', losses['refine_d_loss'])
+            tf.summary.scalar('convergence/local_d_loss', d_loss_local)
+            tf.summary.scalar('convergence/global_d_loss', d_loss_global)
+
+            tf.summary.scalar('wgan_loss/gp_loss', losses['gp_loss'])
+            tf.summary.scalar('wgan_loss/gp_penalty_local', penalty_local)
+            tf.summary.scalar('wgan_loss/gp_penalty_global', penalty_global)
+
+            # summary the magnitude of gradients from different losses w.r.t. predicted image
+            # gradients_summary(losses['g_loss'], refine_output, name='g_loss')
+            gradients_summary(losses['coarse_l1_loss'] + losses['coarse_ae_loss'],
+                              coarse_output,
+                              name='g_loss_to_coarse')
+            gradients_summary(losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss'],
+                              refine_output,
+                              name='g_loss_to_refine')
+            gradients_summary(losses['coarse_l1_loss'], coarse_output, name='l1_loss_to_coarse')
+            gradients_summary(losses['refine_l1_loss'], refine_output, name='l1_loss_to_refine')
+            gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_to_coarse')
+            gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_to_refine')
+
+        return g_vars, d_vars, losses
+
+    def build_graph_with_losses_v2(self, batch_data, cfg, summary=True, reuse=None):
+        batch_pos = batch_data / 127.5 - 1
+        bbox = random_bbox(cfg)
+        mask = bbox2mask(bbox, cfg)
+
+        batch_incomplete = batch_pos * (1. - mask)
+        ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
         x = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
         coarse_output = self.coarse_network(x, reuse)
+
         # apply mask and complete image
         batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+
         refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
         refine_output = self.refine_network(refine_network_input, reuse)
+        # batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
 
         if cfg['pretrain_coarse_network']:
             batch_predicted = coarse_output
@@ -334,19 +452,21 @@ class CompletionModel(object):
         batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
         refine_output = self.refine_network(batch_complete_coarse, reuse=True)
 
-        if cfg['pretrain_coarse_network']:
-            batch_predicted = coarse_output
-        else:
-            batch_predicted = refine_output
+        # if cfg['pretrain_coarse_network']:
+        #     batch_predicted = coarse_output
+        # else:
+        #     batch_predicted = refine_output
 
         # apply mask and reconstruct
-        batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
+        # batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
+        batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+        batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
 
         # global image visualization
-        visual_img = [batch_pos, batch_incomplete, batch_complete]
-        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_complete', 3)
+        visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
+        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarsecomplete_refinecomplete', 3)
 
-        return batch_complete
+        return batch_complete_coarse, batch_complete_refine
 
     def build_static_infer_graph(self, batch_data, cfg, name):
         bbox = (tf.constant(cfg['hole_height'] // 2), tf.constant(cfg['hole_width'] // 2),
