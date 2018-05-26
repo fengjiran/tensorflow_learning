@@ -116,17 +116,15 @@ with tf.Session(config=config) as sess:
     num_batch = int(len(train_path) / cfg['batch_size'])
 
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
-    sess.run(tf.global_variables_initializer())
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
     if cfg['firstTimeTrain']:
         step = 0
+        sess.run(tf.global_variables_initializer())
     else:
         saver.restore(sess, os.path.join(model_path, 'model'))
         step = global_step.eval()
-
-    # print(step)
 
     total_iters = cfg['total_iters']
     while step < total_iters:
