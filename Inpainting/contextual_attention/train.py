@@ -111,8 +111,8 @@ with tf.Session(config=config) as sess:
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
     step = 0
-    max_iters = cfg['max_iters']
-    while step < max_iters:
+    total_iters = cfg['total_iters']
+    while step < total_iters:
         _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
         summary_writer.add_summary(summary, step)
         print(loss_value)
