@@ -91,7 +91,8 @@ refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
 
 # stage 2 discriminator
 refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
-refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
+refine_d_train = d_opt.apply_gradients(refine_d_grads_vars)
+# refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 refine_d_train_ops = []
 for i in range(5):
     refine_d_train_ops.append(refine_d_train)
@@ -129,18 +130,20 @@ with tf.Session(config=config) as sess:
 
     total_iters = cfg['total_iters']
     while step < total_iters:
-        # stage 1
+
         if step < cfg['coarse_iters']:
+            # stage 1
             _, loss_value = sess.run([coarse_train, coarse_rec_loss])
             print('Epoch: {}, Iter: {}, coarse_rec_loss: {}'.format(
-                int(global_step / num_batch) + 1,
-                global_step,
+                int(step / num_batch) + 1,
+                step,
                 loss_value))
         else:
+            # stage 2
             _, _, g_loss, d_loss = sess.run([refine_g_train, refine_d_train, refine_g_loss, refine_d_loss])
             print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}'.format(
-                int(global_step / num_batch) + 1,
-                global_step,
+                int(step / num_batch) + 1,
+                step,
                 g_loss,
                 d_loss))
 
