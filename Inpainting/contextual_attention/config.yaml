@@ -35,4 +35,4 @@ model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention\\mode
 model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention/model
 
 log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention\\log"
-log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/contextual_attention/log
+log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention/log
