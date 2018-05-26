@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 import platform
 import yaml
 import numpy as np
@@ -110,10 +111,20 @@ with tf.Session(config=config) as sess:
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
-    step = 0
+    if cfg['firstTimeTrain']:
+        step = 0
+    else:
+        saver.restore(sess, os.path.join(model_path, 'model'))
+        step = global_step.eval()
+
+    # step = 0
     total_iters = cfg['total_iters']
     while step < total_iters:
         _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
         summary_writer.add_summary(summary, step)
         print(loss_value)
+
+        if step % 100 == 0:
+            saver.save(sess, os.path.join(model_path, 'model'))
+
         step += 1
