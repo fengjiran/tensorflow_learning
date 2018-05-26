@@ -60,7 +60,7 @@ if cfg['val']:
     pass
 
 # training settings
-init_lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(1e-4))
+init_lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(3e-4))
 
 # initialize primary trainer
 global_step = tf.get_variable('global_step',
