@@ -92,6 +92,10 @@ refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
 # stage 2 discriminator
 refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
 refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
+refine_d_train_ops = []
+for i in range(5):
+    refine_d_train_ops.append(refine_d_train)
+refine_d_train = tf.group(*refine_d_train_ops)
 
 # summary
 tf.summary.scalar('learning_rate', lr)
@@ -121,15 +125,30 @@ with tf.Session(config=config) as sess:
         saver.restore(sess, os.path.join(model_path, 'model'))
         step = global_step.eval()
 
-    print(step)
+    # print(step)
 
-    # total_iters = cfg['total_iters']
-    # while step < total_iters:
-    #     _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
-    #     summary_writer.add_summary(summary, step)
-    #     print(loss_value)
+    total_iters = cfg['total_iters']
+    while step < total_iters:
+        # stage 1
+        if step < cfg['coarse_iters']:
+            _, loss_value = sess.run([coarse_train, coarse_rec_loss])
+            print('Epoch: {}, Iter: {}, coarse_rec_loss: {}'.format(
+                int(global_step / num_batch) + 1,
+                global_step,
+                loss_value))
+        else:
+            _, _, g_loss, d_loss = sess.run([refine_g_train, refine_d_train, refine_g_loss, refine_d_loss])
+            print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}'.format(
+                int(global_step / num_batch) + 1,
+                global_step,
+                g_loss,
+                d_loss))
 
-    #     if step % 100 == 0:
-    #         saver.save(sess, os.path.join(model_path, 'model'))
+        if (step % 5 == 0) or (step == cfg['total_iters'] - 1):
+            summary = sess.run(all_summary)
+            summary_writer.add_summary(summary, step)
 
-    #     step += 1
+        if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
+            saver.save(sess, os.path.join(model_path, 'model'))
+
+        step += 1
