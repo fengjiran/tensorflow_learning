@@ -60,9 +60,7 @@ if cfg['val']:
     pass
 
 # training settings
-lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(1e-4))
-g_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
-d_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+init_lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(1e-4))
 
 # initialize primary trainer
 global_step = tf.get_variable('global_step',
@@ -70,6 +68,12 @@ global_step = tf.get_variable('global_step',
                               tf.int32,
                               initializer=tf.zeros_initializer(),
                               trainable=False)
+lr = tf.train.exponential_decay(learning_rate=init_lr,
+                                global_step=global_step,
+                                decay_steps=1000,
+                                decay_rate=0.98)
+g_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+d_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
 
 coarse_rec_loss = losses['coarse_l1_loss'] + losses['coarse_ae_loss']
 refine_g_loss = losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss']
@@ -117,14 +121,15 @@ with tf.Session(config=config) as sess:
         saver.restore(sess, os.path.join(model_path, 'model'))
         step = global_step.eval()
 
-    # step = 0
-    total_iters = cfg['total_iters']
-    while step < total_iters:
-        _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
-        summary_writer.add_summary(summary, step)
-        print(loss_value)
+    print(step)
 
-        if step % 100 == 0:
-            saver.save(sess, os.path.join(model_path, 'model'))
+    # total_iters = cfg['total_iters']
+    # while step < total_iters:
+    #     _, loss_value, summary = sess.run([coarse_train, coarse_rec_loss, all_summary])
+    #     summary_writer.add_summary(summary, step)
+    #     print(loss_value)
 
-        step += 1
+    #     if step % 100 == 0:
+    #         saver.save(sess, os.path.join(model_path, 'model'))
+
+    #     step += 1
