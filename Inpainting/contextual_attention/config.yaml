@@ -1,6 +1,7 @@
 # if want to use None, use !!null
 # parameters
 val: true
+# val: false
 firstTimeTrain: true
 # firstTimeTrain: false
 pretrain_coarse_network: true
