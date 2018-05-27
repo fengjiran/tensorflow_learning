@@ -70,20 +70,25 @@ g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 #                             initializer=tf.constant_initializer(cfg['init_lr_d']))
 
 # initialize primary trainer
-global_step = tf.get_variable('global_step',
-                              [],
-                              tf.int32,
-                              initializer=tf.zeros_initializer(),
-                              trainable=False)
+global_step_g = tf.get_variable('global_step_g',
+                                [],
+                                tf.int32,
+                                initializer=tf.zeros_initializer(),
+                                trainable=False)
+global_step_d = tf.get_variable('global_step_d',
+                                [],
+                                tf.int32,
+                                initializer=tf.zeros_initializer(),
+                                trainable=False)
 
 lr_g = tf.train.exponential_decay(learning_rate=cfg['init_lr_g'],
-                                  global_step=global_step,
+                                  global_step=global_step_g,
                                   decay_steps=1000,
                                   decay_rate=0.99)
 
 lr_d = tf.train.exponential_decay(learning_rate=cfg['init_lr_d'],
-                                  global_step=global_step,
-                                  decay_steps=1000,
+                                  global_step=global_step_d,
+                                  decay_steps=5000,
                                   decay_rate=0.98)
 
 g_opt = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
@@ -100,15 +105,15 @@ refine_d_loss = losses['refine_d_loss']
 
 # stage 1
 coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
-coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step)
+coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step_g)
 
 # stage 2 generator
 refine_g_grads_vars = g_opt.compute_gradients(refine_g_loss, g_vars)
-refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
+refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step_g)
 
 # stage 2 discriminator
 refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
-refine_d_train = d_opt.apply_gradients(refine_d_grads_vars)
+refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step_d)
 # refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 
 refine_d_train_ops = []
@@ -158,7 +163,7 @@ with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
     else:
         saver.restore(sess, os.path.join(coarse_model_path, 'model'))
-        step = global_step.eval()
+        step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
     while step < total_iters:
@@ -182,7 +187,7 @@ with tf.Session(config=config) as sess:
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
-        if (step % 20 == 0) or (step == cfg['total_iters'] - 1):
+        if (step % 50 == 0) or (step == cfg['total_iters'] - 1):
             summary = sess.run(all_summary)
             summary_writer.add_summary(summary, step)
 
