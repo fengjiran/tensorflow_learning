@@ -60,7 +60,10 @@ if cfg['val']:
     pass
 
 # training settings
-init_lr = tf.get_variable('lr', shape=[], trainable=False, initializer=tf.constant_initializer(3e-4))
+init_lr_g = tf.get_variable('lr', shape=[], trainable=False,
+                            initializer=tf.constant_initializer(cfg['init_lr_g']))
+init_lr_d = tf.get_variable('lr', shape=[], trainable=False,
+                            initializer=tf.constant_initializer(cfg['init_lr_d']))
 
 # initialize primary trainer
 global_step = tf.get_variable('global_step',
@@ -68,18 +71,22 @@ global_step = tf.get_variable('global_step',
                               tf.int32,
                               initializer=tf.zeros_initializer(),
                               trainable=False)
-lr = tf.train.exponential_decay(learning_rate=init_lr,
-                                global_step=global_step,
-                                decay_steps=1000,
-                                decay_rate=0.98)
-g_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
-d_opt = tf.train.AdamOptimizer(lr, beta1=0.5, beta2=0.9)
+lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
+                                  global_step=global_step,
+                                  decay_steps=1000,
+                                  decay_rate=0.99)
+
+lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
+                                  global_step=global_step,
+                                  decay_steps=1000,
+                                  decay_rate=0.98)
+
+g_opt = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
+d_opt = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
 
 coarse_rec_loss = losses['coarse_l1_loss'] + losses['coarse_ae_loss']
 refine_g_loss = losses['refine_l1_loss'] + losses['refine_ae_loss'] + losses['refine_g_loss']
 refine_d_loss = losses['refine_d_loss']
-# g_loss = losses['g_loss']
-# d_loss = losses['d_loss']
 
 # stage 1
 coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
@@ -99,7 +106,8 @@ for i in range(5):
 refine_d_train = tf.group(*refine_d_train_ops)
 
 # summary
-tf.summary.scalar('learning_rate', lr)
+tf.summary.scalar('learning_rate/lr_g', lr_g)
+tf.summary.scalar('learning_rate/lr_d', lr_d)
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
 all_summary = tf.summary.merge_all()
@@ -145,7 +153,7 @@ with tf.Session(config=config) as sess:
                 g_loss,
                 d_loss))
 
-        if (step % 5 == 0) or (step == cfg['total_iters'] - 1):
+        if (step % 10 == 0) or (step == cfg['total_iters'] - 1):
             summary = sess.run(all_summary)
             summary_writer.add_summary(summary, step)
 
