@@ -147,13 +147,6 @@ saver = tf.train.Saver()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    # load trainset
-    # train_path = pd.read_pickle(compress_path)
-    # train_path.index = range(len(train_path))
-    # train_path = train_path.ix[np.random.permutation(len(train_path))]
-    # train_path = train_path[:]['image_path'].values.tolist()
-    # num_batch = int(len(train_path) / cfg['batch_size'])
-
     sess.run(iterator.initializer, feed_dict={filenames: train_path})
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
