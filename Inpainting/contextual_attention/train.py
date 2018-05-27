@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 import platform
 import yaml
-import numpy as np
+# import numpy as np
 import pandas as pd
 import tensorflow as tf
 from model import CompletionModel
@@ -64,10 +64,10 @@ g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
 # training settings
-init_lr_g = tf.get_variable('lr', shape=[], trainable=False,
-                            initializer=tf.constant_initializer(cfg['init_lr_g']))
-init_lr_d = tf.get_variable('lr', shape=[], trainable=False,
-                            initializer=tf.constant_initializer(cfg['init_lr_d']))
+# init_lr_g = tf.get_variable('lr', shape=[], trainable=False,
+#                             initializer=tf.constant_initializer(cfg['init_lr_g']))
+# init_lr_d = tf.get_variable('lr', shape=[], trainable=False,
+#                             initializer=tf.constant_initializer(cfg['init_lr_d']))
 
 # initialize primary trainer
 global_step = tf.get_variable('global_step',
@@ -76,12 +76,12 @@ global_step = tf.get_variable('global_step',
                               initializer=tf.zeros_initializer(),
                               trainable=False)
 
-lr_g = tf.train.exponential_decay(learning_rate=init_lr_g,
+lr_g = tf.train.exponential_decay(learning_rate=cfg['init_lr_g'],
                                   global_step=global_step,
                                   decay_steps=1000,
                                   decay_rate=0.99)
 
-lr_d = tf.train.exponential_decay(learning_rate=init_lr_d,
+lr_d = tf.train.exponential_decay(learning_rate=cfg['init_lr_d'],
                                   global_step=global_step,
                                   decay_steps=1000,
                                   decay_rate=0.98)
@@ -110,6 +110,7 @@ refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step)
 refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
 refine_d_train = d_opt.apply_gradients(refine_d_grads_vars)
 # refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
+
 refine_d_train_ops = []
 for i in range(5):
     refine_d_train_ops.append(refine_d_train)
