@@ -449,11 +449,15 @@ class CompletionModel(object):
 
         batch_pos = batch_data
         batch_incomplete = batch_pos * (1. - mask)
+        ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
+        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
         # inpaint
-        coarse_output = self.coarse_network(batch_incomplete, reuse=True)
+        coarse_output = self.coarse_network(coarse_network_input, reuse=True)
         batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
-        refine_output = self.refine_network(batch_complete_coarse, reuse=True)
+
+        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        refine_output = self.refine_network(refine_network_input, reuse=True)
 
         # apply mask and reconstruct
         # batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
