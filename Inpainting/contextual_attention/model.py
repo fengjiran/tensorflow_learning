@@ -447,18 +447,13 @@ class CompletionModel(object):
             bbox = random_bbox(cfg)
         mask = bbox2mask(bbox, cfg)
 
-        batch_pos = batch_data / 127.5 - 1.
+        batch_pos = batch_data
         batch_incomplete = batch_pos * (1. - mask)
 
         # inpaint
         coarse_output = self.coarse_network(batch_incomplete, reuse=True)
         batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
         refine_output = self.refine_network(batch_complete_coarse, reuse=True)
-
-        # if cfg['pretrain_coarse_network']:
-        #     batch_predicted = coarse_output
-        # else:
-        #     batch_predicted = refine_output
 
         # apply mask and reconstruct
         # batch_complete = batch_predicted * mask + batch_incomplete * (1. - mask)
@@ -467,9 +462,9 @@ class CompletionModel(object):
 
         # global image visualization
         visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
-        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarse_refine', 3)
+        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarse_refine', 4)
 
-        return batch_complete_coarse, batch_complete_refine
+        return (batch_complete_coarse, batch_complete_refine)
 
     def build_static_infer_graph(self, batch_data, cfg, name):
         bbox = (tf.constant(cfg['hole_height'] // 2), tf.constant(cfg['hole_width'] // 2),
