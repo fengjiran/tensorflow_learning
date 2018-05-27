@@ -131,6 +131,7 @@ if cfg['val']:
         static_fname = val_path[i]
         static_image = input_parse(static_fname)
         static_image = tf.expand_dims(static_image, 0)
+        # print(static_image.get_shape())
         static_inpainted_image = model.build_static_infer_graph(
             static_image,
             cfg,
