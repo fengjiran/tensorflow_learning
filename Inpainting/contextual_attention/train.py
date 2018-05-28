@@ -165,7 +165,7 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
