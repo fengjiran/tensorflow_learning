@@ -104,16 +104,19 @@ refine_g_loss = cfg['l1_loss_alpha'] * losses['refine_l1_loss'] +\
 refine_d_loss = losses['refine_d_loss']
 
 # stage 1
-coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
-coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step_g)
+coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars)
+# coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
+# coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step_g)
 
 # stage 2 generator
-refine_g_grads_vars = g_opt.compute_gradients(refine_g_loss, g_vars)
-refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step_g)
+refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_list=g_vars)
+# refine_g_grads_vars = g_opt.compute_gradients(refine_g_loss, g_vars)
+# refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step_g)
 
 # stage 2 discriminator
-refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
-refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step_d)
+refine_d_train = d_opt.minimize(refine_d_loss, global_step=global_step_d, var_list=d_vars)
+# refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
+# refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step_d)
 # refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 
 refine_d_train_ops = []
@@ -162,7 +165,7 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(coarse_model_path, 'model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
