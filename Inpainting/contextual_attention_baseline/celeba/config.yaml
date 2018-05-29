@@ -2,8 +2,8 @@
 # parameters
 val: true
 # val: false
-# firstTimeTrain: true
-firstTimeTrain: false
+firstTimeTrain: true
+# firstTimeTrain: false
 pretrain_coarse_network: true
 gan_loss_alpha: 0.001
 wgan_gp_lambda: 10
@@ -36,12 +36,12 @@ spatial_discount_gamma: 0.9
 compress_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle"
 compress_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle
 
-coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention\\model\\coarse"
-coarse_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention/model/coarse
+coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celeba\\model\\coarse"
+coarse_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celeba/model/coarse
 
-refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention\\model\\refine"
-refine_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention/model/refine
+refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celeba\\model\\refine"
+refine_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celeba/model/refine
 
 
-log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention\\log"
-log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention/log
+log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celeba\\log"
+log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celeba/log
