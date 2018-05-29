@@ -89,7 +89,7 @@ lr_g = tf.train.exponential_decay(learning_rate=cfg['init_lr_g'],
 
 lr_d = tf.train.exponential_decay(learning_rate=cfg['init_lr_d'],
                                   global_step=global_step_d,
-                                  decay_steps=5000,
+                                  decay_steps=2000,
                                   decay_rate=0.98)
 
 g_opt = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
@@ -165,7 +165,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
