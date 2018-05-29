@@ -46,6 +46,7 @@ def input_parse(img_path):
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
+dataset = dataset.shuffle(buffer_size=10000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
@@ -139,7 +140,6 @@ if cfg['val']:
         static_fname = val_path[i]
         static_image = input_parse(static_fname)
         static_image = tf.expand_dims(static_image, 0)
-        # print(static_image.get_shape())
         static_inpainted_image = model.build_static_infer_graph(
             static_image,
             cfg,
