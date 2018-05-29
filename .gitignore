@@ -37,9 +37,9 @@ Inpainting/MPGAN/ParisStreetView/models_local_l1
 Inpainting/MPGAN/ParisStreetView/models_without_adv_l1
 Inpainting/MPGAN/ImageNet100k/models_without_adv_l1
 Inpainting/MPGAN/Places/models_without_adv_l1
-Inpainting/contextual_attention/celeba/log
-Inpainting/contextual_attention/celeba/model
-Inpainting/contextual_attention/celebahq/log
-Inpainting/contextual_attention/celebahq/model
+Inpainting/contextual_attention_baseline/celeba/log
+Inpainting/contextual_attention_baseline/celeba/model
+Inpainting/contextual_attention_baseline/celebahq/log
+Inpainting/contextual_attention_baseline/celebahq/model
 
 *.pickle
