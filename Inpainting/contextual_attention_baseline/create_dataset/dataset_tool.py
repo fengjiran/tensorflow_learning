@@ -26,6 +26,8 @@ def error(msg):
 
 
 class TFRecordExporter:
+    """Create tfrcord dataset."""
+
     def __init__(self, tfrecord_dir, expected_images, print_progress=True, progress_interval=10):
         self.tfrecord_dir = tfrecord_dir
         self.tfr_prefix = os.path.join(self.tfrecord_dir, os.path.basename(self.tfrecord_dir))
