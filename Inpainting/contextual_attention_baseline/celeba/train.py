@@ -46,7 +46,7 @@ def input_parse(img_path):
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
-dataset = dataset.shuffle(buffer_size=10000)
+dataset = dataset.shuffle(buffer_size=5000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
@@ -81,16 +81,17 @@ global_step_d = tf.get_variable('global_step_d',
                                 tf.int32,
                                 initializer=tf.zeros_initializer(),
                                 trainable=False)
+lr_g = cfg['init_lr_g']
+lr_d = cfg['init_lr_d']
+# lr_g = tf.train.exponential_decay(learning_rate=cfg['init_lr_g'],
+#                                   global_step=global_step_g,
+#                                   decay_steps=1000,
+#                                   decay_rate=0.99)
 
-lr_g = tf.train.exponential_decay(learning_rate=cfg['init_lr_g'],
-                                  global_step=global_step_g,
-                                  decay_steps=1000,
-                                  decay_rate=0.99)
-
-lr_d = tf.train.exponential_decay(learning_rate=cfg['init_lr_d'],
-                                  global_step=global_step_d,
-                                  decay_steps=2000,
-                                  decay_rate=0.98)
+# lr_d = tf.train.exponential_decay(learning_rate=cfg['init_lr_d'],
+#                                   global_step=global_step_d,
+#                                   decay_steps=2000,
+#                                   decay_rate=0.98)
 
 g_opt = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
 d_opt = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
