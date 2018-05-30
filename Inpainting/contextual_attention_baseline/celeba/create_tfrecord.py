@@ -64,6 +64,8 @@ def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
         # img = PIL.Image.open(image_filenames[order[idx]])
         img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
         assert img.shape == (218, 178, 3)
+        img = img.astype(np.float32)
+        img = img / 127.5 - 1
 
     # with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
     #     order = tfr.choose_shuffled_order()
