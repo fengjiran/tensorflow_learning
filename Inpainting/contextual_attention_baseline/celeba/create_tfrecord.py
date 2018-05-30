@@ -49,6 +49,7 @@ class TFRecordExporter(object):
 
 
 def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
+    num = 1000
     print('Loading CelebA from "%s"' % celeba_dir)
     glob_pattern = os.path.join(celeba_dir, 'img_align_celeba_png', '*.png')
     image_filenames = sorted(glob.glob(glob_pattern))
@@ -56,22 +57,28 @@ def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
     if len(image_filenames) != expected_images:
         error('Expected to find %d images' % expected_images)
 
+    num_tfrecords = expected_images // num + 1 if expected_images % num else expected_images // num
+    tfrecord_num = 1
+    # tfrecord_name = 'celeba_traindata.tfrecord-%.3d' % tfrecord_num
     order = np.arange(expected_images)
     np.random.RandomState(123).shuffle(order)
 
-    for idx in range(order.size):
-        print('%d / %d\r' % (idx + 1, expected_images), end='', flush=True)
-        # img = PIL.Image.open(image_filenames[order[idx]])
-        img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
-        assert img.shape == (218, 178, 3)
-        img = img.astype(np.float32)
-        img = img / 127.5 - 1
-
-    # with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
-    #     order = tfr.choose_shuffled_order()
-    #     for idx in range(order.size):
-    #         img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
-    #         assert img.shape == (218, 178, 3)
-    #         img = img[cy - 64: cy + 64, cx - 64: cx + 64]
-    #         img = img.transpose(2, 0, 1)  # HWC => CHW
-    #         tfr.add_image(img)
+    for i in range(num_tfrecords):
+        print('write ', i + 1, ' file')
+        filename = 'celeba_trainset.tfrecord-%.3d' % (i + 1)
+        writer = tf.python_io.TFRecordWriter(path=filename)
+        for j in range(num):
+            print('write ', j + 1, ' image')
+            img = np.asarray(PIL.Image.open(image_filenames[order[i * num + j]]))
+            assert img.shape == (218, 178, 3)
+            img = img.astype(np.float32)
+            img = img / 127.5 - 1
+            example = tf.train.Example(
+                features=tf.train.Features(
+                    feature={
+                        'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=img.shape)),
+                        'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img.tostring()]))
+                    }
+                ))
+            writer.write(record=example.SerializeToString())
+        writer.close()
