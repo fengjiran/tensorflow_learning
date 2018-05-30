@@ -61,8 +61,7 @@ def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
 
     for idx in range(order.size):
         print('%d / %d\r' % (idx + 1, expected_images), end='', flush=True)
-        img = PIL.Image.open(image_filenames[order[idx]])
-
+        # img = PIL.Image.open(image_filenames[order[idx]])
         img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
         assert img.shape == (218, 178, 3)
 
