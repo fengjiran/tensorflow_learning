@@ -33,7 +33,7 @@ global_wgan_loss_alpha: 1.0
 
 spatial_discount_gamma: 0.9
 
-compress_path_win: "F:\\Datasets\\celeba_tfrecords"
+compress_path_win: "F:\\Datasets\\celeba_tfrecords\\train"
 # compress_path_win: "E:\\TensorFlow_Learning\\Inpainting\\MPGAN\\CelebA\\celeba_train_path_win.pickle"
 compress_path_linux: /home/richard/TensorFlow_Learning/Inpainting/MPGAN/CelebA/celeba_train_path_linux.pickle
 
