@@ -53,6 +53,17 @@ def parse_tfrecord(example_proto):
     return img
 
 
+def parse_tfrecord_val(example_proto):
+    features = {'shape': tf.FixedLenFeature([3], tf.int64),
+                'data': tf.FixedLenFeature([], tf.string)}
+    parsed_features = tf.parse_single_example(example_proto, features)
+    data = tf.decode_raw(parsed_features['data'], tf.float32)
+    img = tf.reshape(data, parsed_features['shape'])
+    img = tf.image.resize_images(img, [315, 256])
+    img = tf.image.resize_image_with_crop_or_pad(img, cfg['img_height'], cfg['img_width'])
+    return img
+
+
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.TFRecordDataset(filenames)
 dataset = dataset.map(parse_tfrecord)
@@ -62,13 +73,13 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 batch_data = iterator.get_next()
 
-# val_filenames = tf.placeholder(tf.string, shape=[None])
-# val_dataset = tf.data.Dataset.from_tensor_slices(val_filenames)
-# val_dataset = val_dataset.map(input_parse)
-# val_dataset = val_dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
-# val_dataset = val_dataset.repeat()
-# val_iterator = val_dataset.make_initializable_iterator()
-# val_batch_data = val_iterator.get_next()
+val_filenames = tf.placeholder(tf.string, shape=[None])
+val_data = tf.data.TFRecordDataset(val_filenames)
+val_data = val_data.map(parse_tfrecord_val)
+val_data = val_data.batch(cfg['batch_size'])
+val_data = val_data.repeat()
+val_iterator = val_data.make_initializable_iterator()
+val_batch_data = val_iterator.get_next()
 
 model = CompletionModel()
 g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
@@ -137,16 +148,16 @@ tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_fil
 # num_batch = int(len(train_path) / cfg['batch_size'])
 num_batch = 182637 // cfg['batch_size']
 
-# if cfg['val']:
-#     # progress monitor by visualizing static images
-#     for i in range(cfg['static_view_num']):
-#         static_fname = val_path[i]
-#         static_image = input_parse(static_fname)
-#         static_image = tf.expand_dims(static_image, 0)
-#         static_inpainted_image = model.build_static_infer_graph(
-#             static_image,
-#             cfg,
-#             'static_view/%d' % i)
+if cfg['val']:
+    # progress monitor by visualizing static images
+    for i in range(cfg['static_view_num']):
+        static_fname = val_path[i]
+        static_image = input_parse(static_fname)
+        static_image = tf.expand_dims(static_image, 0)
+        static_inpainted_image = model.build_static_infer_graph(
+            static_image,
+            cfg,
+            'static_view/%d' % i)
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
