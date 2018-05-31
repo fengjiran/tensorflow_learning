@@ -343,7 +343,7 @@ class CompletionModel(object):
 
         # global image visualization
         visual_img = [batch_pos, batch_incomplete, batch_complete_coarse, batch_complete_refine]
-        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarse_refine', 4)
+        images_summary(tf.concat(visual_img, axis=2), name + '_raw_incomplete_coarse_refine', 10)
 
         return (batch_complete_coarse, batch_complete_refine)
 
