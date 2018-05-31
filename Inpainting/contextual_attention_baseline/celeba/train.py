@@ -150,14 +150,18 @@ num_batch = 182637 // cfg['batch_size']
 
 if cfg['val']:
     # progress monitor by visualizing static images
-    for i in range(cfg['static_view_num']):
-        static_fname = val_path[i]
-        static_image = input_parse(static_fname)
-        static_image = tf.expand_dims(static_image, 0)
-        static_inpainted_image = model.build_static_infer_graph(
-            static_image,
-            cfg,
-            'static_view/%d' % i)
+    static_inpainted_images = model.build_static_infer_graph(
+        val_batch_data,
+        cfg,
+        'static_images')
+    # for i in range(cfg['static_view_num']):
+    #     static_fname = val_path[i]
+    #     static_image = input_parse(static_fname)
+    #     static_image = tf.expand_dims(static_image, 0)
+    #     static_inpainted_image = model.build_static_infer_graph(
+    #         static_image,
+    #         cfg,
+    #         'static_view/%d' % i)
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
