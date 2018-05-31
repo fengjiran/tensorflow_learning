@@ -13,12 +13,14 @@ with open('config.yaml', 'r') as f:
 
 if platform.system() == 'Windows':
     compress_path = cfg['compress_path_win']
+    val_path = cfg['val_path_win']
     log_dir = cfg['log_dir_win']
     coarse_model_path = cfg['coarse_model_path_win']
     refine_model_path = cfg['refine_model_path_win']
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
         compress_path = cfg['compress_path_linux']
+        val_path = cfg['val_path_linux']
         log_dir = cfg['log_dir_linux']
         coarse_model_path = cfg['coarse_model_path_linux']
         refine_model_path = cfg['refine_model_path_linux']
@@ -139,6 +141,10 @@ for _, _, files in os.walk(compress_path):
     tfrecord_filenames = files
 tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_filenames]
 
+for _, _, files in os.walk(val_path):
+    val_tfrecord_filenames = files
+val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
+
 # load trainset and validation set
 # data_path = pd.read_pickle(compress_path)
 # data_path.index = range(len(data_path))
@@ -148,6 +154,7 @@ tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_fil
 # num_batch = int(len(train_path) / cfg['batch_size'])
 num_batch = 182637 // cfg['batch_size']
 
+print(val_batch_data.get_shape())
 if cfg['val']:
     # progress monitor by visualizing static images
     static_inpainted_images = model.build_static_infer_graph(
@@ -176,6 +183,7 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
     sess.run(iterator.initializer, feed_dict={filenames: tfrecord_filenames})
+    sess.run(val_iterator.initializer, feed_dict={val_filenames: val_tfrecord_filenames})
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
@@ -183,8 +191,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
