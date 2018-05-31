@@ -24,8 +24,6 @@ elif platform.system() == 'Linux':
         refine_model_path = cfg['refine_model_path_linux']
     elif platform.node() == 'icie-Precision-T7610':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
-        # events_path = '/home/icie/richard/MPGAN/CelebA/models_without_adv_l1/events'
-        # model_path = '/home/icie/richard/MPGAN/CelebA/pretrain_model_global'
 
 
 def input_parse(img_path):
@@ -56,10 +54,8 @@ def parse_tfrecord(example_proto):
 
 
 filenames = tf.placeholder(tf.string, shape=[None])
-# dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = tf.data.TFRecordDataset(filenames)
 dataset = dataset.map(parse_tfrecord)
-# dataset = dataset.map(input_parse)
 dataset = dataset.shuffle(buffer_size=5000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
@@ -79,11 +75,6 @@ g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
 # training settings
-# init_lr_g = tf.get_variable('lr', shape=[], trainable=False,
-#                             initializer=tf.constant_initializer(cfg['init_lr_g']))
-# init_lr_d = tf.get_variable('lr', shape=[], trainable=False,
-#                             initializer=tf.constant_initializer(cfg['init_lr_d']))
-
 # initialize primary trainer
 global_step_g = tf.get_variable('global_step_g',
                                 [],
@@ -121,26 +112,18 @@ refine_d_loss = losses['refine_d_loss']
 
 # stage 1
 coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars)
-# coarse_grads_vars = g_opt.compute_gradients(coarse_rec_loss, g_vars)
-# coarse_train = g_opt.apply_gradients(coarse_grads_vars, global_step_g)
 
 # stage 2 generator
 refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_list=g_vars)
-# refine_g_grads_vars = g_opt.compute_gradients(refine_g_loss, g_vars)
-# refine_g_train = g_opt.apply_gradients(refine_g_grads_vars, global_step_g)
 
 # stage 2 discriminator
 refine_d_train = d_opt.minimize(refine_d_loss, global_step=global_step_d, var_list=d_vars)
-# refine_d_grads_vars = d_opt.compute_gradients(refine_d_loss, d_vars)
-# refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step_d)
-# refine_d_train = d_opt.apply_gradients(refine_d_grads_vars, global_step)
 
 refine_d_train_ops = []
 for i in range(5):
     refine_d_train_ops.append(refine_d_train)
 refine_d_train = tf.group(*refine_d_train_ops)
 
-# num_tfrecords = len(os.listdir(compress_path))
 for _, _, files in os.walk(compress_path):
     tfrecord_filenames = files
 tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_filenames]
