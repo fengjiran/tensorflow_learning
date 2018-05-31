@@ -43,9 +43,23 @@ def input_parse(img_path):
         return img
 
 
+def parse_tfrecord(example_proto):
+    features = {'shape': tf.FixedLenFeature([3], tf.int64),
+                'data': tf.FixedLenFeature([], tf.string)}
+    parsed_features = tf.parse_single_example(example_proto, features)
+    data = tf.decode_raw(parsed_features['data'], tf.float32)
+    img = tf.reshape(data, parsed_features['shape'])
+    img = tf.image.resize_images(img, [315, 256])
+    img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
+
+    return img
+
+
 filenames = tf.placeholder(tf.string, shape=[None])
-dataset = tf.data.Dataset.from_tensor_slices(filenames)
-dataset = dataset.map(input_parse)
+# dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = tf.data.TFRecordDataset(filenames)
+dataset = dataset.map(parse_tfrecord)
+# dataset = dataset.map(input_parse)
 dataset = dataset.shuffle(buffer_size=5000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
@@ -126,10 +140,14 @@ for i in range(5):
     refine_d_train_ops.append(refine_d_train)
 refine_d_train = tf.group(*refine_d_train_ops)
 
+# num_tfrecords = len(os.listdir(compress_path))
+for _, _, files in os.walk(compress_path):
+    tfrecord_filenames = files
+tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_filenames]
+
 # load trainset and validation set
 data_path = pd.read_pickle(compress_path)
 data_path.index = range(len(data_path))
-# train_path = train_path.ix[np.random.permutation(len(train_path))]
 data_path = data_path[:]['image_path'].values.tolist()
 train_path = data_path[0:182637]
 val_path = data_path[182638:]
@@ -158,7 +176,7 @@ saver = tf.train.Saver()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    sess.run(iterator.initializer, feed_dict={filenames: train_path})
+    sess.run(iterator.initializer, feed_dict={filenames: tfrecord_filenames})
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
