@@ -116,7 +116,7 @@ def gradient_penalty(x, y, mask=None, norm=1.):
     if mask is None:
         mask = tf.ones_like(gradients)
     slopes = tf.sqrt(tf.reduce_mean(tf.square(gradients) * mask, axis=[1, 2, 3]))
-    return tf.reduce_mean(tf.square(slopes - norm))
+    return tf.reduce_mean(tf.square(slopes - norm) / (norm**2))
 
 
 def images_summary(images, name, max_outs):

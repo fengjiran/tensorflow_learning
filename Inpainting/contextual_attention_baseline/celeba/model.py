@@ -266,8 +266,8 @@ class CompletionModel(object):
                                                                 reuse=True)
 
         # apply penalty
-        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask)
-        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask)
+        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask, norm=750.)
+        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
 
         losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
         losses['refine_d_loss'] += losses['gp_loss']
