@@ -1,6 +1,6 @@
 from __future__ import print_function
 import os
-import sys
+# import sys
 import glob
 import numpy as np
 import PIL.Image
@@ -51,24 +51,28 @@ class TFRecordExporter(object):
 def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
     num = 1000
     print('Loading CelebA from "%s"' % celeba_dir)
-    glob_pattern = os.path.join(celeba_dir, 'img_align_celeba_png', '*.png')
+    glob_pattern = os.path.join(celeba_dir, '*.png')
     image_filenames = sorted(glob.glob(glob_pattern))
-    expected_images = 202599
-    if len(image_filenames) != expected_images:
-        error('Expected to find %d images' % expected_images)
+    # print(len(image_filenames))
+    # expected_images = 202599
+    expected_images = 182637
+    # if len(image_filenames) != expected_images:
+    #     error('Expected to find %d images' % expected_images)
 
-    num_tfrecords = expected_images // num + 1 if expected_images % num else expected_images // num
-    tfrecord_num = 1
+    # num_tfrecords = expected_images // num + 1 if expected_images % num else expected_images // num
+    # tfrecord_num = 1
     # tfrecord_name = 'celeba_traindata.tfrecord-%.3d' % tfrecord_num
+    num_tfrecords = expected_images // num
     order = np.arange(expected_images)
-    np.random.RandomState(123).shuffle(order)
+    # np.random.RandomState(123).shuffle(order)
 
-    for i in range(num_tfrecords):
+    cur_img = 1
+    for i in range(num_tfrecords - 1):
         print('write ', i + 1, ' file')
-        filename = 'celeba_trainset.tfrecord-%.3d' % (i + 1)
-        writer = tf.python_io.TFRecordWriter(path=filename)
+        tfrecordname = os.path.join(tfrecord_dir, 'celeba_trainset.tfrecord-%.3d' % (i + 1))
+        writer = tf.python_io.TFRecordWriter(path=tfrecordname)
         for j in range(num):
-            print('write ', j + 1, ' image')
+            print('write ', cur_img, ' image')
             img = np.asarray(PIL.Image.open(image_filenames[order[i * num + j]]))
             assert img.shape == (218, 178, 3)
             img = img.astype(np.float32)
@@ -81,4 +85,31 @@ def create_celeba_tfrecord(tfrecord_dir, celeba_dir):
                     }
                 ))
             writer.write(record=example.SerializeToString())
+            cur_img += 1
         writer.close()
+
+    print('write ', num_tfrecords, ' file')
+    tfrecordname = os.path.join(tfrecord_dir, 'celeba_trainset.tfrecord-%.3d' % num_tfrecords)
+    writer = tf.python_io.TFRecordWriter(path=tfrecordname)
+    for idx in order[(num_tfrecords - 1) * num:]:
+        print('write ', cur_img, ' image')
+        img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+        assert img.shape == (218, 178, 3)
+        img = img.astype(np.float32)
+        img = img / 127.5 - 1
+        example = tf.train.Example(
+            features=tf.train.Features(
+                feature={
+                    'shape': tf.train.Feature(int64_list=tf.train.Int64List(value=img.shape)),
+                    'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img.tostring()]))
+                }
+            ))
+        writer.write(record=example.SerializeToString())
+        cur_img += 1
+    writer.close()
+
+
+if __name__ == '__main__':
+    celeba_dir = 'F:\\Datasets\\CelebA\\Img\\img_align_celeba_png.7z\\img_align_celeba_png'
+    tfrecord_dir = 'F:\\Datasets\\celeba_tfrecords'
+    create_celeba_tfrecord(tfrecord_dir, celeba_dir)
