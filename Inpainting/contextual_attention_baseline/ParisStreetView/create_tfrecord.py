@@ -15,11 +15,9 @@ def error(msg):
 def create_parisview_tfrecord(tfrecord_dir, data_dir):
     num = 1000
     print('Loading paris street view from "%s"' % data_dir)
-    glob_pattern = os.path.join(celeba_dir, '*.png')
+    glob_pattern = os.path.join(data_dir, '*.JPG')
     image_filenames = sorted(glob.glob(glob_pattern))
     # print(len(image_filenames))
-    # expected_images = 202599
-    # expected_images = 182637
     expected_images = 14900
     if len(image_filenames) != expected_images:
         error('Expected to find %d images' % expected_images)
@@ -36,7 +34,7 @@ def create_parisview_tfrecord(tfrecord_dir, data_dir):
         for j in range(num):
             print('write ', cur_img, ' image')
             img = np.asarray(PIL.Image.open(image_filenames[order[i * num + j]]))
-            assert img.shape == (936, 537, 3)
+            assert img.shape == (537, 936, 3)
             img = img.astype(np.float32)
             img = img / 127.5 - 1
             example = tf.train.Example(
@@ -55,8 +53,8 @@ def create_parisview_tfrecord(tfrecord_dir, data_dir):
     writer = tf.python_io.TFRecordWriter(path=tfrecordname)
     for idx in order[(num_tfrecords - 1) * num:]:
         print('write ', cur_img, ' image')
-        img = np.asarray(PIL.Image.open(image_filenames[idx]))
-        assert img.shape == (936, 537, 3)
+        img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+        assert img.shape == (537, 936, 3)
         img = img.astype(np.float32)
         img = img / 127.5 - 1
         example = tf.train.Example(
@@ -72,6 +70,6 @@ def create_parisview_tfrecord(tfrecord_dir, data_dir):
 
 
 if __name__ == '__main__':
-    celeba_dir = 'F:\\Datasets\\CelebA\\Img\\img_align_celeba_png.7z\\img_align_celeba_png'
-    tfrecord_dir = 'F:\\Datasets\\celeba_tfrecords\\test'
-    create_celeba_tfrecord(tfrecord_dir, celeba_dir)
+    paris_dir = 'F:\\Datasets\\Paris_StreetView\\paris_train_original'
+    tfrecord_dir = 'F:\\Datasets\\paris_tfrecords\\train'
+    create_parisview_tfrecord(tfrecord_dir, paris_dir)
