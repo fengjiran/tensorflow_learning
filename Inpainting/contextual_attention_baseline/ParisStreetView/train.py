@@ -76,13 +76,13 @@ dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 batch_data = iterator.get_next()
 
-val_filenames = tf.placeholder(tf.string, shape=[None])
-val_data = tf.data.TFRecordDataset(val_filenames)
-val_data = val_data.map(parse_tfrecord)
-val_data = val_data.batch(cfg['batch_size'])
-val_data = val_data.repeat()
-val_iterator = val_data.make_initializable_iterator()
-val_batch_data = val_iterator.get_next()
+# val_filenames = tf.placeholder(tf.string, shape=[None])
+# val_data = tf.data.TFRecordDataset(val_filenames)
+# val_data = val_data.map(parse_tfrecord)
+# val_data = val_data.batch(cfg['batch_size'])
+# val_data = val_data.repeat()
+# val_iterator = val_data.make_initializable_iterator()
+# val_batch_data = val_iterator.get_next()
 
 
 model = CompletionModel()
@@ -148,13 +148,7 @@ for _, _, files in os.walk(val_path):
     val_tfrecord_filenames = files
 val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
 
-# load trainset and validation set
-# data_path = pd.read_pickle(compress_path)
-# data_path.index = range(len(data_path))
-# data_path = data_path[:]['image_path'].values.tolist()
-# train_path = data_path[0:182637]
-# val_path = data_path[182638:]
-# num_batch = int(len(train_path) / cfg['batch_size'])
+
 num_batch = 14900 // cfg['batch_size']
 
 
@@ -178,7 +172,7 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
     sess.run(iterator.initializer, feed_dict={filenames: tfrecord_filenames})
-    sess.run(val_iterator.initializer, feed_dict={val_filenames: val_tfrecord_filenames})
+    # sess.run(val_iterator.initializer, feed_dict={val_filenames: val_tfrecord_filenames})
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
@@ -186,8 +180,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']

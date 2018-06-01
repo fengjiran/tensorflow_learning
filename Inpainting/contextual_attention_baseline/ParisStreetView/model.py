@@ -199,7 +199,6 @@ class CompletionModel(object):
             return dout_global, dout_local
 
     def build_graph_with_losses(self, batch_data, cfg, summary=True, reuse=None):
-        # batch_pos = batch_data / 127.5 - 1
         batch_pos = batch_data
         bbox = random_bbox(cfg)
         mask = bbox2mask(bbox, cfg)
