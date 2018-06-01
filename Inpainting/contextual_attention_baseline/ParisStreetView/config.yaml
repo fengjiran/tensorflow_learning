@@ -1,0 +1,49 @@
+# if want to use None, use !!null
+# parameters
+# val: true
+val: false
+firstTimeTrain: true
+# firstTimeTrain: false
+pretrain_coarse_network: true
+gan_loss_alpha: 0.001
+wgan_gp_lambda: 10
+coarse_l1_alpha: 1.2
+l1_loss_alpha: 1.2
+ae_loss_alpha: 1.2
+max_delta_height: 32
+max_delta_width: 32
+
+discount_mask: true
+
+img_height: 256
+img_width: 256
+hole_height: 128
+hole_width: 128
+static_view_num: 30
+
+init_lr_g: 5.0e-5
+init_lr_d: 1.0e-5
+batch_size: 16
+coarse_iters: 50000
+total_iters: 1000000
+
+l1_loss: true
+ae_loss: true
+global_wgan_loss_alpha: 1.0
+
+spatial_discount_gamma: 0.9
+
+compress_path_win: "F:\\Datasets\\paris_tfrecords\\train"
+compress_path_linux: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/paris_tfrecords/train
+
+val_path_win: "F:\\Datasets\\paris_tfrecords\\val"
+val_path_linux: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/paris_tfrecords/val
+
+coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\ParisStreetView\\model\\coarse"
+coarse_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/ParisStreetView/model/coarse
+
+refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\ParisStreetView\\model\\refine"
+refine_model_path_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/ParisStreetView/model/refine
+
+log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\ParisStreetView\\log"
+log_dir_linux: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/ParisStreetView/log
