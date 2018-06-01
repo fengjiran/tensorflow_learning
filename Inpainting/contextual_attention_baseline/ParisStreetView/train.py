@@ -49,7 +49,7 @@ def parse_tfrecord(example_proto):
     parsed_features = tf.parse_single_example(example_proto, features)
     data = tf.decode_raw(parsed_features['data'], tf.float32)
     img = tf.reshape(data, parsed_features['shape'])
-    img = tf.image.resize_images(img, [315, 256])
+    # img = tf.image.resize_images(img, [315, 256])
     img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
 
     return img
@@ -155,23 +155,15 @@ val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_
 # train_path = data_path[0:182637]
 # val_path = data_path[182638:]
 # num_batch = int(len(train_path) / cfg['batch_size'])
-num_batch = 182637 // cfg['batch_size']
+num_batch = 14900 // cfg['batch_size']
 
-# print(val_batch_data.get_shape())
-if cfg['val']:
-    # progress monitor by visualizing static images
-    static_inpainted_images = model.build_static_infer_graph(
-        val_batch_data,
-        cfg,
-        'static_images')
-    # for i in range(cfg['static_view_num']):
-    #     static_fname = val_path[i]
-    #     static_image = input_parse(static_fname)
-    #     static_image = tf.expand_dims(static_image, 0)
-    #     static_inpainted_image = model.build_static_infer_graph(
-    #         static_image,
-    #         cfg,
-    #         'static_view/%d' % i)
+
+# if cfg['val']:
+#     # progress monitor by visualizing static images
+#     static_inpainted_images = model.build_static_infer_graph(
+#         val_batch_data,
+#         cfg,
+#         'static_images')
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
