@@ -55,15 +55,16 @@ def parse_tfrecord(example_proto):
     return img
 
 
-def parse_tfrecord_val(example_proto):
-    features = {'shape': tf.FixedLenFeature([3], tf.int64),
-                'data': tf.FixedLenFeature([], tf.string)}
-    parsed_features = tf.parse_single_example(example_proto, features)
-    data = tf.decode_raw(parsed_features['data'], tf.float32)
-    img = tf.reshape(data, parsed_features['shape'])
-    img = tf.image.resize_images(img, [315, 256])
-    img = tf.image.resize_image_with_crop_or_pad(img, cfg['img_height'], cfg['img_width'])
-    return img
+# def parse_tfrecord_val(example_proto):
+#     features = {'shape': tf.FixedLenFeature([3], tf.int64),
+#                 'data': tf.FixedLenFeature([], tf.string)}
+#     parsed_features = tf.parse_single_example(example_proto, features)
+#     data = tf.decode_raw(parsed_features['data'], tf.float32)
+#     img = tf.reshape(data, parsed_features['shape'])
+#     img = tf.image.resize_images(img, [315, 256])
+#     img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
+
+#     return img
 
 
 filenames = tf.placeholder(tf.string, shape=[None])
@@ -77,13 +78,15 @@ batch_data = iterator.get_next()
 
 val_filenames = tf.placeholder(tf.string, shape=[None])
 val_data = tf.data.TFRecordDataset(val_filenames)
-val_data = val_data.map(parse_tfrecord_val)
+val_data = val_data.map(parse_tfrecord)
 val_data = val_data.batch(cfg['batch_size'])
 val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
 
+
 model = CompletionModel()
+# print(batch_data.get_shape())
 g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
@@ -154,7 +157,7 @@ val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_
 # num_batch = int(len(train_path) / cfg['batch_size'])
 num_batch = 182637 // cfg['batch_size']
 
-print(val_batch_data.get_shape())
+# print(val_batch_data.get_shape())
 if cfg['val']:
     # progress monitor by visualizing static images
     static_inpainted_images = model.build_static_infer_graph(
