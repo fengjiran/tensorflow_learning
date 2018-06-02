@@ -294,6 +294,7 @@ class CompletionModel(object):
             gradients_summary(g_loss_local, refine_output, name='g_loss_local')
 
             tf.summary.scalar('convergence/refine_d_loss', losses['refine_d_loss'])
+            # tf.summary.scalar('convergence/refine_g_loss', losses['refine_g_loss'])
             tf.summary.scalar('convergence/local_d_loss', d_loss_local)
             tf.summary.scalar('convergence/global_d_loss', d_loss_global)
 
