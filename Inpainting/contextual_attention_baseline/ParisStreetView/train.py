@@ -70,7 +70,7 @@ def parse_tfrecord(example_proto):
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.TFRecordDataset(filenames)
 dataset = dataset.map(parse_tfrecord)
-dataset = dataset.shuffle(buffer_size=5000)
+dataset = dataset.shuffle(buffer_size=1000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
@@ -86,7 +86,6 @@ batch_data = iterator.get_next()
 
 
 model = CompletionModel()
-# print(batch_data.get_shape())
 g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
