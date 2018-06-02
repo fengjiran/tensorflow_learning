@@ -176,6 +176,7 @@ if cfg['val']:
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
 tf.summary.scalar('learning_rate/lr_d', lr_d)
+tf.summary.scalar('convergence/refine_g_loss', refine_g_loss)
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
 all_summary = tf.summary.merge_all()
@@ -194,8 +195,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
@@ -211,12 +212,17 @@ with tf.Session(config=config) as sess:
                 saver.save(sess, os.path.join(coarse_model_path, 'coarse_model'))
         else:
             # stage 2
-            _, _, g_loss, d_loss = sess.run([refine_g_train, refine_d_train, refine_g_loss, refine_d_loss])
-            print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}'.format(
+            _, _, g_loss, d_loss, gp_loss = sess.run([refine_g_train,
+                                                      refine_d_train,
+                                                      refine_g_loss,
+                                                      refine_d_loss,
+                                                      losses['gp_loss']])
+            print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}, gp_loss: {}'.format(
                 int(step / num_batch) + 1,
                 step,
                 g_loss,
-                d_loss))
+                d_loss,
+                gp_loss))
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
