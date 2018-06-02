@@ -24,7 +24,7 @@ static_view_num: 30
 init_lr_g: 1.0e-4
 init_lr_d: 1.0e-5
 batch_size: 16
-coarse_iters: 50000
+coarse_iters: 60000
 total_iters: 1000000
 
 l1_loss: true
