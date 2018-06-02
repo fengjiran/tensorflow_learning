@@ -161,6 +161,7 @@ num_batch = 14900 // cfg['batch_size']
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
 tf.summary.scalar('learning_rate/lr_d', lr_d)
+tf.summary.scalar('convergence/refine_g_loss', refine_g_loss)
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
 all_summary = tf.summary.merge_all()
