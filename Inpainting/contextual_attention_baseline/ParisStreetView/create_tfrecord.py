@@ -35,8 +35,8 @@ def create_parisview_tfrecord(tfrecord_dir, data_dir):
             print('write ', cur_img, ' image')
             img = np.asarray(PIL.Image.open(image_filenames[order[i * num + j]]))
             assert img.shape == (537, 936, 3)
-            img = img.astype(np.float32)
-            img = img / 127.5 - 1
+            # img = img.astype(np.float32)
+            # img = img / 127.5 - 1
             example = tf.train.Example(
                 features=tf.train.Features(
                     feature={
@@ -55,8 +55,8 @@ def create_parisview_tfrecord(tfrecord_dir, data_dir):
         print('write ', cur_img, ' image')
         img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
         assert img.shape == (537, 936, 3)
-        img = img.astype(np.float32)
-        img = img / 127.5 - 1
+        # img = img.astype(np.float32)
+        # img = img / 127.5 - 1
         example = tf.train.Example(
             features=tf.train.Features(
                 feature={
