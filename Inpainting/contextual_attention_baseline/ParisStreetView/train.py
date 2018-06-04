@@ -51,6 +51,7 @@ def parse_tfrecord(example_proto):
     img = tf.reshape(data, parsed_features['shape'])
     # img = tf.image.resize_images(img, [315, 256])
     img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
+    img = img / 127.5 - 1
 
     return img
 
