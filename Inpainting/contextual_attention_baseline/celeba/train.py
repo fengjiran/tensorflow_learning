@@ -49,7 +49,8 @@ def parse_tfrecord(example_proto):
     parsed_features = tf.parse_single_example(example_proto, features)
     data = tf.decode_raw(parsed_features['data'], tf.float32)
     img = tf.reshape(data, parsed_features['shape'])
-    img = tf.image.resize_images(img, [315, 256])
+    img = tf.image.resize_area(img, [315, 256])
+    img = tf.clip_by_value(img, 0., 255.)
     img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
     img = img / 127.5 - 1
 

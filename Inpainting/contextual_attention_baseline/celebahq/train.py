@@ -28,28 +28,14 @@ elif platform.system() == 'Linux':
         compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
 
 
-def input_parse(img_path):
-    with tf.device('/cpu:0'):
-        img_height = 218
-        img_width = 178
-        img_file = tf.read_file(img_path)
-        img_decoded = tf.image.decode_image(img_file, channels=3)
-        img = tf.cast(img_decoded, tf.float32)
-        img = tf.image.resize_image_with_crop_or_pad(img, img_height, img_width)
-        img = tf.image.resize_images(img, [315, 256])
-        img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
-        img = img / 127.5 - 1
-
-        return img
-
-
 def parse_tfrecord(example_proto):
     features = {'shape': tf.FixedLenFeature([3], tf.int64),
                 'data': tf.FixedLenFeature([], tf.string)}
     parsed_features = tf.parse_single_example(example_proto, features)
     data = tf.decode_raw(parsed_features['data'], tf.float32)
     img = tf.reshape(data, parsed_features['shape'])
-    img = tf.image.resize_images(img, [256, 256])
+    img = tf.image.resize_area(img, [256, 256])
+    img = tf.clip_by_value(img, 0., 255.)
     img = img / 127.5 - 1
 
     return img
@@ -70,7 +56,7 @@ def parse_tfrecord(example_proto):
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.TFRecordDataset(filenames)
 dataset = dataset.map(parse_tfrecord)
-dataset = dataset.shuffle(buffer_size=5000)
+dataset = dataset.shuffle(buffer_size=1000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
@@ -148,14 +134,7 @@ for _, _, files in os.walk(val_path):
     val_tfrecord_filenames = files
 val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
 
-# load trainset and validation set
-# data_path = pd.read_pickle(compress_path)
-# data_path.index = range(len(data_path))
-# data_path = data_path[:]['image_path'].values.tolist()
-# train_path = data_path[0:182637]
-# val_path = data_path[182638:]
-# num_batch = int(len(train_path) / cfg['batch_size'])
-num_batch = 182637 // cfg['batch_size']
+num_batch = 29000 // cfg['batch_size']
 
 # print(val_batch_data.get_shape())
 if cfg['val']:
