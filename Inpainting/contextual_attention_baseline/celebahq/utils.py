@@ -4,10 +4,6 @@ import numpy as np
 import tensorflow as tf
 # from tensorflow.python.framework import ops
 
-# with open('config.yaml', 'r') as f:
-#     cfg = yaml.load(f)
-# /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/CelebA/Img/img_align_celeba_png.7z/img_align_celeba_png
-
 
 def spatial_discounting_mask(cfg):
     gamma = cfg['spatial_discount_gamma']
