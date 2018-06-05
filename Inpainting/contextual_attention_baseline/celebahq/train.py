@@ -32,11 +32,15 @@ def parse_tfrecord(example_proto):
     features = {'shape': tf.FixedLenFeature([3], tf.int64),
                 'data': tf.FixedLenFeature([], tf.string)}
     parsed_features = tf.parse_single_example(example_proto, features)
-    data = tf.decode_raw(parsed_features['data'], tf.float32)
-    img = tf.reshape(data, parsed_features['shape'])
-    img = tf.image.resize_area(img, [256, 256])
-    img = tf.clip_by_value(img, 0., 255.)
-    img = img / 127.5 - 1
+    data = tf.decode_raw(parsed_features['data'], tf.uint8)
+    # img = tf.reshape(data, parsed_features['shape'])
+    img = tf.reshape(data, [1024, 1024, 3])
+    # img = tf.image.resize_images(img, [256, 256])
+    # print(img.get_shape())
+    # img = tf.image.resize_area(img, [256, 256])
+    # img = tf.clip_by_value(img, 0., 255.)
+    # img = img / 127.5 - 1
+    # img = tf.random_crop(img, [1024, 1024, 3])
 
     return img
 
@@ -61,6 +65,10 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 batch_data = iterator.get_next()
+batch_data = tf.image.resize_area(batch_data, [256, 256])
+batch_data = tf.clip_by_value(batch_data, 0., 255.)
+batch_data = batch_data / 127.5 - 1
+# print(batch_data.get_shape())
 
 val_filenames = tf.placeholder(tf.string, shape=[None])
 val_data = tf.data.TFRecordDataset(val_filenames)
@@ -69,6 +77,9 @@ val_data = val_data.batch(cfg['batch_size'])
 val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
+val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
+val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
+val_batch_data = val_batch_data / 127.5 - 1
 
 
 model = CompletionModel()
@@ -174,8 +185,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
