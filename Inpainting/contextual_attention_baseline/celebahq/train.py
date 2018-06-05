@@ -19,13 +19,17 @@ if platform.system() == 'Windows':
     refine_model_path = cfg['refine_model_path_win']
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-Tower-7810':
-        compress_path = cfg['compress_path_linux']
-        val_path = cfg['val_path_linux']
-        log_dir = cfg['log_dir_linux']
-        coarse_model_path = cfg['coarse_model_path_linux']
-        refine_model_path = cfg['refine_model_path_linux']
+        compress_path = cfg['compress_path_linux_7810']
+        val_path = cfg['val_path_linux_7810']
+        log_dir = cfg['log_dir_linux_7810']
+        coarse_model_path = cfg['coarse_model_path_linux_7810']
+        refine_model_path = cfg['refine_model_path_linux_7810']
     elif platform.node() == 'icie-Precision-T7610':
-        compress_path = '/home/icie/richard/MPGAN/CelebA/celeba_train_path_linux.pickle'
+        compress_path = cfg['compress_path_linux_7610']
+        val_path = cfg['val_path_linux_7610']
+        log_dir = cfg['log_dir_linux_7610']
+        coarse_model_path = cfg['coarse_model_path_linux_7610']
+        refine_model_path = cfg['refine_model_path_linux_7610']
 
 
 def parse_tfrecord(example_proto):
