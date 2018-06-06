@@ -240,6 +240,7 @@ class CompletionModel(object):
         losses['refine_ae_loss'] /= tf.reduce_mean(1. - mask)
 
         # wgan
+        # global discriminator patch
         batch_pos_neg = tf.concat([batch_pos, batch_complete_refine], axis=0)
 
         # local discriminator patch
