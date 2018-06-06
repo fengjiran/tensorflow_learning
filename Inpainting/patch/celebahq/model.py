@@ -185,8 +185,9 @@ class CompletionModel(object):
                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
             conv4 = tf.layers.conv2d(conv3, 8 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
-
-            return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4))
+            conv5 = tf.layers.conv2d(conv4, 1, 1, padding='same', activation=tf.nn.leaky_relu,
+                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
+            return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
         with tf.variable_scope('wgan_discriminator', reuse=reuse):
