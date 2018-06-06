@@ -43,5 +43,7 @@ Inpainting/contextual_attention_baseline/celebahq/log
 Inpainting/contextual_attention_baseline/celebahq/model
 Inpainting/contextual_attention_baseline/ParisStreetView/log
 Inpainting/contextual_attention_baseline/ParisStreetView/model
+Inpainting/patch/celebahq/log
+Inpainting/patch/celebahq/model
 
 *.pickle
