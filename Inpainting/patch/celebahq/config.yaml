@@ -2,8 +2,8 @@
 # parameters
 val: true
 # val: false
-# firstTimeTrain: true
-firstTimeTrain: false
+firstTimeTrain: true
+# firstTimeTrain: false
 pretrain_coarse_network: true
 gan_loss_alpha: 0.001
 wgan_gp_lambda: 10
@@ -42,14 +42,14 @@ val_path_win: "F:\\Datasets\\celebahq_tfrecords\\val"
 val_path_linux_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/celebahq_tfrecords/val
 val_path_linux_7610: /home/icie/Datasets/celebahq_tfrecords/val
 
-coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celebahq\\model\\coarse"
-coarse_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/model/coarse
-coarse_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/model/coarse
+coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\celebahq\\model\\coarse"
+coarse_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/coarse
+coarse_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/coarse
 
-refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celebahq\\model\\refine"
-refine_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/model/refine
-refine_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/model/refine
+refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\celebahq\\model\\refine"
+refine_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/refine
+refine_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/refine
 
-log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\contextual_attention_baseline\\celebahq\\log"
-log_dir_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/log
-log_dir_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/contextual_attention_baseline/celebahq/log
+log_dir_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\celebahq\\log"
+log_dir_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/celebahq/log
+log_dir_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/patch/celebahq/log
