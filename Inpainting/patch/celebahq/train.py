@@ -64,7 +64,7 @@ def parse_tfrecord(example_proto):
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.TFRecordDataset(filenames)
 dataset = dataset.map(parse_tfrecord)
-dataset = dataset.shuffle(buffer_size=1000)
+dataset = dataset.shuffle(buffer_size=2000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
@@ -189,8 +189,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
