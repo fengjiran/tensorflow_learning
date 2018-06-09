@@ -24,9 +24,6 @@ def create_celebahq_tfrecord(tfrecord_dir, celebahq_dir):
     # if len(image_filenames) != expected_images:
     #     error('Expected to find %d images' % expected_images)
 
-    # num_tfrecords = expected_images // num + 1 if expected_images % num else expected_images // num
-    # tfrecord_num = 1
-    # tfrecord_name = 'celeba_traindata.tfrecord-%.3d' % tfrecord_num
     num_tfrecords = expected_images // num
     order = np.arange(expected_images) + 29000
     # np.random.RandomState(123).shuffle(order)
