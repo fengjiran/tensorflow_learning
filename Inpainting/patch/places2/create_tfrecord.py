@@ -28,7 +28,7 @@ def create_places256_tfrecord(tfrecord_dir, places256_dir):
         error('Expected to find %d images' % expected_images)
 
     num_tfrecords = expected_images // num
-    order = np.arange(expected_images) + 29000
+    order = np.arange(expected_images)
     # np.random.RandomState(123).shuffle(order)
 
     cur_img = 1
