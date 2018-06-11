@@ -4,7 +4,7 @@ import os
 import platform
 import yaml
 # import numpy as np
-# import pandas as pd
+import pandas as pd
 import tensorflow as tf
 from model import CompletionModel
 
@@ -139,15 +139,24 @@ for i in range(5):
     refine_d_train_ops.append(refine_d_train)
 refine_d_train = tf.group(*refine_d_train_ops)
 
-for _, _, files in os.walk(compress_path):
-    tfrecord_filenames = files
-tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_filenames]
+train_path = pd.read_pickle(compress_path)
+train_path.index = range(len(train_path))
+train_path = train_path[:]['image_path'].values.tolist()
+num_batch = len(train_path) // cfg['batch_size']
 
-for _, _, files in os.walk(val_path):
-    val_tfrecord_filenames = files
-val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
+val_path = pd.read_pickle(val_path)
+val_path.index = range(len(val_path))
+val_path = val_path[:]['image_path'].values.tolist()
 
-num_batch = 29000 // cfg['batch_size']
+# for _, _, files in os.walk(compress_path):
+#     tfrecord_filenames = files
+# tfrecord_filenames = [os.path.join(compress_path, file) for file in tfrecord_filenames]
+
+# for _, _, files in os.walk(val_path):
+#     val_tfrecord_filenames = files
+# val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
+
+# num_batch = 29000 // cfg['batch_size']
 
 # print(val_batch_data.get_shape())
 if cfg['val']:
@@ -178,8 +187,8 @@ saver = tf.train.Saver()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    sess.run(iterator.initializer, feed_dict={filenames: tfrecord_filenames})
-    sess.run(val_iterator.initializer, feed_dict={val_filenames: val_tfrecord_filenames})
+    sess.run(iterator.initializer, feed_dict={filenames: train_path})
+    sess.run(val_iterator.initializer, feed_dict={val_filenames: val_path})
 
     summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
@@ -218,7 +227,7 @@ with tf.Session(config=config) as sess:
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
-        if (step % 50 == 0) or (step == cfg['total_iters'] - 1):
+        if (step % 100 == 0) or (step == cfg['total_iters'] - 1):
             summary = sess.run(all_summary)
             summary_writer.add_summary(summary, step)
 
