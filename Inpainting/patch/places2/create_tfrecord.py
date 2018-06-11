@@ -20,9 +20,9 @@ def create_places256_tfrecord(tfrecord_dir, places256_dir):
     # print(len(image_filenames))
     # expected_images = 202599
     # expected_images = 182637
-    expected_images = 1000
-    # if len(image_filenames) != expected_images:
-    #     error('Expected to find %d images' % expected_images)
+    expected_images = 8026628
+    if len(image_filenames) != expected_images:
+        error('Expected to find %d images' % expected_images)
 
     num_tfrecords = expected_images // num
     order = np.arange(expected_images) + 29000
