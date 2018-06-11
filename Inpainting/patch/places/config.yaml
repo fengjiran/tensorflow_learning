@@ -46,7 +46,7 @@ coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\mode
 coarse_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/places/model/coarse
 # coarse_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/coarse
 
-refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\palces\\model\\refine"
+refine_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\model\\refine"
 refine_model_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/places/model/refine
 # refine_model_path_linux_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/refine
 
