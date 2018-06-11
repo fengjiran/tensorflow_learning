@@ -15,8 +15,11 @@ def error(msg):
 def create_places256_tfrecord(tfrecord_dir, places256_dir):
     num = 2000
     print('Loading Places365 from "%s"' % places256_dir)
-    glob_pattern = os.path.join(places256_dir, '*.jpg')
-    image_filenames = sorted(glob.glob(glob_pattern))
+    image_filenames = []
+    for (root, dirs, files) in os.walk(places256_dir):
+        image_filenames.extend(glob.glob(os.path.join(root, '*.jpg')))
+    # glob_pattern = os.path.join(places256_dir, '*.jpg')
+    # image_filenames = sorted(glob.glob(glob_pattern))
     # print(len(image_filenames))
     # expected_images = 202599
     # expected_images = 182637
