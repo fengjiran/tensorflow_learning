@@ -60,28 +60,28 @@ def parse_tfrecord(example_proto):
 
 
 filenames = tf.placeholder(tf.string, shape=[None])
-dataset = tf.data.TFRecordDataset(filenames)
-dataset = dataset.map(parse_tfrecord)
+dataset = tf.data.Dataset.from_tensor_slices(filenames)
+dataset = dataset.map(input_parse)
 dataset = dataset.shuffle(buffer_size=2000)
 dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size']))
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 batch_data = iterator.get_next()
-batch_data = tf.image.resize_area(batch_data, [256, 256])
-batch_data = tf.clip_by_value(batch_data, 0., 255.)
-batch_data = batch_data / 127.5 - 1
+# batch_data = tf.image.resize_area(batch_data, [256, 256])
+# batch_data = tf.clip_by_value(batch_data, 0., 255.)
+# batch_data = batch_data / 127.5 - 1
 # print(batch_data.get_shape())
 
 val_filenames = tf.placeholder(tf.string, shape=[None])
-val_data = tf.data.TFRecordDataset(val_filenames)
-val_data = val_data.map(parse_tfrecord)
+val_data = tf.data.Dataset.from_tensor_slices(val_filenames)
+val_data = val_data.map(input_parse)
 val_data = val_data.batch(cfg['batch_size'])
 val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
-val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
-val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
-val_batch_data = val_batch_data / 127.5 - 1
+# val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
+# val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
+# val_batch_data = val_batch_data / 127.5 - 1
 
 
 model = CompletionModel()
