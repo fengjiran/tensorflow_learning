@@ -32,6 +32,16 @@ elif platform.system() == 'Linux':
         refine_model_path = cfg['refine_model_path_linux_7610']
 
 
+def input_parse(img_path):
+    with tf.device('/cpu:0'):
+        img_file = tf.read_file(img_path)
+        img_decoded = tf.image.decode_jpeg(img_file, channels=3)
+        img = tf.cast(img_decoded, tf.float32)
+        img = tf.image.resize_image_with_crop_or_pad(img, cfg['img_height'], cfg['img_width'])
+        img = img / 127.5 - 1
+        return img
+
+
 def parse_tfrecord(example_proto):
     features = {'shape': tf.FixedLenFeature([3], tf.int64),
                 'data': tf.FixedLenFeature([], tf.string)}
@@ -47,18 +57,6 @@ def parse_tfrecord(example_proto):
     # img = tf.random_crop(img, [1024, 1024, 3])
 
     return img
-
-
-# def parse_tfrecord_val(example_proto):
-#     features = {'shape': tf.FixedLenFeature([3], tf.int64),
-#                 'data': tf.FixedLenFeature([], tf.string)}
-#     parsed_features = tf.parse_single_example(example_proto, features)
-#     data = tf.decode_raw(parsed_features['data'], tf.float32)
-#     img = tf.reshape(data, parsed_features['shape'])
-#     img = tf.image.resize_images(img, [315, 256])
-#     img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
-
-#     return img
 
 
 filenames = tf.placeholder(tf.string, shape=[None])
