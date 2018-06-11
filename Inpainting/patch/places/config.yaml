@@ -33,13 +33,12 @@ global_wgan_loss_alpha: 1.0
 
 spatial_discount_gamma: 0.9
 
-compress_path_win: "F:\\Datasets\\Places\\Places365-challenge\\Small-images\\data_256"
-compress_path_linux_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/Places/Places365-challenge/Small-images/data_256
-# compress_path_linux_7610: /home/icie/Datasets/celebahq_tfrecords/train
+compress_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\places_train_path_win.pickle"
+compress_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/places/places_train_path_linux_7810.pickle
 
 
-val_path_win: "F:\\Datasets\\Places\\Places365-challenge\\Small-images\\val_256"
-val_path_linux_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/Places/Places365-challenge/Small-images/val_256
+val_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\places_val_path_win.pickle"
+val_path_linux_7810: /home/richard/TensorFlow_Learning/Inpainting/patch/places/places_val_path_linux_7810.pickle
 # val_path_linux_7610: /home/icie/Datasets/celebahq_tfrecords/val
 
 coarse_model_path_win: "E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\model\\coarse"
