@@ -42,25 +42,6 @@ def input_parse(img_path):
         return img
 
 
-def parse_tfrecord(example_proto):
-    features = {'shape': tf.FixedLenFeature([3], tf.int64),
-                'data': tf.FixedLenFeature([], tf.string)}
-    parsed_features = tf.parse_single_example(example_proto, features)
-    data = tf.decode_raw(parsed_features['data'], tf.uint8)
-    # img = tf.reshape(data, parsed_features['shape'])
-    img = tf.reshape(data, [1024, 1024, 3])
-    # img = tf.image.resize_images(img, [256, 256])
-    # print(img.get_shape())
-    # img = tf.image.resize_area(img, [256, 256])
-    # img = tf.clip_by_value(img, 0., 255.)
-    # img = img / 127.5 - 1
-    # img = tf.random_crop(img, [1024, 1024, 3])
-
-    return img
-
-# commnet
-
-
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
 dataset = dataset.map(input_parse)
