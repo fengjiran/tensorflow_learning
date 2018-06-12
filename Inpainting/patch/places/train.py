@@ -58,6 +58,8 @@ def parse_tfrecord(example_proto):
 
     return img
 
+# commnet
+
 
 filenames = tf.placeholder(tf.string, shape=[None])
 dataset = tf.data.Dataset.from_tensor_slices(filenames)
