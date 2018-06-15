@@ -37,14 +37,9 @@ def parse_tfrecord(example_proto):
                 'data': tf.FixedLenFeature([], tf.string)}
     parsed_features = tf.parse_single_example(example_proto, features)
     data = tf.decode_raw(parsed_features['data'], tf.uint8)
-    # img = tf.reshape(data, parsed_features['shape'])
-    img = tf.reshape(data, [1024, 1024, 3])
-    # img = tf.image.resize_images(img, [256, 256])
-    # print(img.get_shape())
-    # img = tf.image.resize_area(img, [256, 256])
-    # img = tf.clip_by_value(img, 0., 255.)
-    # img = img / 127.5 - 1
-    # img = tf.random_crop(img, [1024, 1024, 3])
+    img = tf.reshape(data, parsed_features['shape'])
+    img = tf.image.resize_images(img, [315, 256])
+    img = tf.random_crop(img, [cfg['img_height'], cfg['img_width'], 3])
 
     return img
 
@@ -69,10 +64,8 @@ dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(cfg['batch_size
 dataset = dataset.repeat()
 iterator = dataset.make_initializable_iterator()
 batch_data = iterator.get_next()
-batch_data = tf.image.resize_area(batch_data, [256, 256])
-batch_data = tf.clip_by_value(batch_data, 0., 255.)
 batch_data = batch_data / 127.5 - 1
-# print(batch_data.get_shape())
+
 
 val_filenames = tf.placeholder(tf.string, shape=[None])
 val_data = tf.data.TFRecordDataset(val_filenames)
@@ -81,13 +74,10 @@ val_data = val_data.batch(cfg['batch_size'])
 val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
-val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
-val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
 val_batch_data = val_batch_data / 127.5 - 1
 
 
 model = CompletionModel()
-# print(batch_data.get_shape())
 g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
@@ -149,23 +139,14 @@ for _, _, files in os.walk(val_path):
     val_tfrecord_filenames = files
 val_tfrecord_filenames = [os.path.join(val_path, file) for file in val_tfrecord_filenames]
 
-num_batch = 29000 // cfg['batch_size']
+num_batch = 200599 // cfg['batch_size']
 
-# print(val_batch_data.get_shape())
 if cfg['val']:
     # progress monitor by visualizing static images
     static_inpainted_images = model.build_static_infer_graph(
         val_batch_data,
         cfg,
         'static_images')
-    # for i in range(cfg['static_view_num']):
-    #     static_fname = val_path[i]
-    #     static_image = input_parse(static_fname)
-    #     static_image = tf.expand_dims(static_image, 0)
-    #     static_inpainted_image = model.build_static_infer_graph(
-    #         static_image,
-    #         cfg,
-    #         'static_view/%d' % i)
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
