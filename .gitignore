@@ -47,5 +47,7 @@ Inpainting/patch/celebahq/log
 Inpainting/patch/celebahq/model
 Inpainting/patch/places/log
 Inpainting/patch/places/model
+Inpainting/patch/celeba/log
+Inpainting/patch/celeba/model
 
 *.pickle
