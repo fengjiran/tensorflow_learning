@@ -186,9 +186,9 @@ class CompletionModel(object):
                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
             conv4 = tf.layers.conv2d(conv3, 8 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
-            conv5 = tf.layers.conv2d(conv4, 1, 1, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
-            return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
+            # conv5 = tf.layers.conv2d(conv4, 1, 1, padding='same', activation=tf.nn.leaky_relu,
+            #                          kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
+            return conv4 # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
         with tf.variable_scope('wgan_discriminator', reuse=reuse):
@@ -196,9 +196,10 @@ class CompletionModel(object):
             dlocal = self.local_discriminator(local_input, reuse=reuse)
 
             dout_global = tf.layers.dense(dglobal, 1, name='dout_global_fc')
+            dout_local = dlocal
             # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
-            dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
-            dout_local = tf.reduce_mean(dout_local, axis=1)
+            # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
+            # dout_local = tf.reduce_mean(dout_local, axis=1)
 
             return dout_global, dout_local
 
