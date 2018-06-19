@@ -195,6 +195,7 @@ class CompletionModel(object):
             dlocal = self.local_discriminator(local_input, reuse=reuse)
 
             dout_global = tf.layers.dense(dglobal, 1, name='dout_global_fc')
+            dout_local = dlocal
             # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
             # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
             # dout_local = tf.reduce_mean(dout_local, axis=1)
