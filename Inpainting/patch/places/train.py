@@ -210,7 +210,7 @@ with tf.Session(config=config) as sess:
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
-        if (step % 100 == 0) or (step == cfg['total_iters'] - 1):
+        if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
             summary = sess.run(all_summary)
             summary_writer.add_summary(summary, step)
 
