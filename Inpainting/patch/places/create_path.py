@@ -9,7 +9,7 @@ import pandas as pd
 if platform.system() == 'Windows':
     # path = 'F:\\Datasets\\CelebA\\Img\\img_align_celeba_png.7z\\img_align_celeba_png'
     path = 'F:\\Datasets\\Places\\Places365-challenge\\Small-images\\test_256'
-    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\places_test_path_win.pickle'
+    compress_path = 'E:\\TensorFlow_Learning\\Inpainting\\patch\\places\\places_train_path_win.pickle'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-T7610':
         pass
