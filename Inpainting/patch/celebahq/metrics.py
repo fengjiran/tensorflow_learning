@@ -13,6 +13,10 @@ def ssim(batch_img1, batch_img2, max_val):
     return tf.reduce_mean(tf.image.ssim(batch_img1, batch_img2, max_val))
 
 
+def tv_loss(images):
+    return tf.reduce_mean(tf.image.total_variation(images))
+
+
 def _FSpecialGauss(size, sigma):
     """Function to mimic the 'fspecial' gaussian MATLAB function."""
     radius = size // 2
