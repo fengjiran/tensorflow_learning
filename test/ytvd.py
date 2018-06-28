@@ -12,7 +12,7 @@ def download_main(link):
 
 
 if __name__ == '__main__':
-    link = 'https://www.youtube.com/watch?v=RKWuj1OlDPo'
+    link = 'https://www.youtube.com/watch?v=EzCVpaEb0kQ&t=114s'
     YouTube(link).streams.first().download('F:\\YouTube_download')
     # download_main(sys.argv[1])
     # for link in links_lizhi[11:]:
