@@ -166,6 +166,8 @@ if cfg['val']:
     #         static_image,
     #         cfg,
     #         'static_view/%d' % i)
+val_l1_loss = tf.reduce_mean(tf.abs(val_batch_data - static_inpainted_images[1]))
+val_l2_loss = tf.reduce_mean(tf.square(val_batch_data - static_inpainted_images[1]))
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)
@@ -189,8 +191,8 @@ with tf.Session(config=config) as sess:
         step = 0
         sess.run(tf.global_variables_initializer())
     else:
-        # saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
-        saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
+        saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+        # saver.restore(sess, os.path.join(coarse_model_path, 'coarse_model'))
         step = global_step_g.eval()
 
     total_iters = cfg['total_iters']
@@ -206,17 +208,21 @@ with tf.Session(config=config) as sess:
                 saver.save(sess, os.path.join(coarse_model_path, 'coarse_model'))
         else:
             # stage 2
-            _, _, g_loss, d_loss, gp_loss = sess.run([refine_g_train,
-                                                      refine_d_train,
-                                                      refine_g_loss,
-                                                      refine_d_loss,
-                                                      losses['gp_loss']])
+            _, _, g_loss, d_loss, gp_loss, l1_loss, l2_loss = sess.run([refine_g_train,
+                                                                        refine_d_train,
+                                                                        refine_g_loss,
+                                                                        refine_d_loss,
+                                                                        losses['gp_loss'],
+                                                                        val_l1_loss,
+                                                                        val_l2_loss])
             print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}, gp_loss: {}'.format(
                 int(step / num_batch) + 1,
                 step,
                 g_loss,
                 d_loss,
                 gp_loss))
+            print('val_l1_loss: {}, val_l2_loss: {}'.format(l1_loss, l2_loss))
+
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
