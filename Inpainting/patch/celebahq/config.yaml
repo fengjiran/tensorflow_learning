@@ -19,6 +19,8 @@ img_height: 256
 img_width: 256
 hole_height: 128
 hole_width: 128
+test_hole_height: 8
+test_hole_width: 8
 static_view_num: 30
 
 # init_lr_g: 1.0e-4
