@@ -1,20 +1,24 @@
 import numpy as np
 from scipy import signal
-from scipy.ndimage.filters import convolve
+# from scipy.ndimage.filters import convolve
 
 import tensorflow as tf
 
 
-def psnr(batch_img1, batch_img2, max_val):
+def tf_psnr(batch_img1, batch_img2, max_val):
     return tf.reduce_mean(tf.image.psnr(batch_img1, batch_img2, max_val))
 
 
-def ssim(batch_img1, batch_img2, max_val):
+def tf_ssim(batch_img1, batch_img2, max_val):
     return tf.reduce_mean(tf.image.ssim(batch_img1, batch_img2, max_val))
 
 
-def tv_loss(images):
-    return tf.reduce_mean(tf.image.total_variation(images))
+def tf_l1_loss(batch_img1, batch_img2):
+    return tf.reduce_mean(tf.abs(batch_img1 - batch_img2))
+
+
+def tf_l2_loss(batch_img1, batch_img2):
+    return tf.reduce_mean(tf.square(batch_img1 - batch_img2))
 
 
 def _FSpecialGauss(size, sigma):
