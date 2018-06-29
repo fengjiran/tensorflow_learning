@@ -49,5 +49,6 @@ Inpainting/patch/places/log
 Inpainting/patch/places/model
 Inpainting/patch/celeba/log
 Inpainting/patch/celeba/model
+Inpainting/patch/test_generative_inpainting/model_logs
 
 *.pickle
