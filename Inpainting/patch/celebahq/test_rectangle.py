@@ -68,3 +68,6 @@ with tf.Session(config=config) as sess:
     # sess.run(iterator.initializer, feed_dict={filenames: tfrecord_filenames})
     sess.run(val_iterator.initializer, feed_dict={val_filenames: val_tfrecord_filenames})
     saver.restore(sess, os.path.join(refine_model_path, 'refine_model'))
+
+    val_l1_loss = tf.reduce_mean(tf.abs(val_batch_data - batch_complete_refine))
+    val_l2_loss = tf.reduce_mean(tf.square(val_batch_data - batch_complete_refine))
