@@ -71,3 +71,7 @@ with tf.Session(config=config) as sess:
 
     val_l1_loss = tf.reduce_mean(tf.abs(val_batch_data - batch_complete_refine))
     val_l2_loss = tf.reduce_mean(tf.square(val_batch_data - batch_complete_refine))
+    psnr = tf.reduce_mean(tf.image.psnr(val_batch_data, batch_complete_refine, 2))
+    ssim = tf.reduce_mean(tf.image.ssim(val_batch_data, batch_complete_refine, 2))
+
+    m1, m2, m3, m4 = sess.run([val_l1_loss, val_l2_loss, psnr, ssim])
