@@ -73,6 +73,9 @@ bbox = (tf.constant((image_size - hole_size) // 2),
         tf.constant(hole_size),
         tf.constant(hole_size))
 
+mask = bbox2mask(bbox, image_size, image_size)
+
+
 ng.get_gpus(1)
 # args = parser.parse_args()
 model = InpaintCAModel()
