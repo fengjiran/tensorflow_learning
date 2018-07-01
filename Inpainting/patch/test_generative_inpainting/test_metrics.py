@@ -58,14 +58,14 @@ elif platform.system() == 'Linux':
 val_filenames = tf.placeholder(tf.string, shape=[None])
 val_data = tf.data.TFRecordDataset(val_filenames)
 val_data = val_data.map(parse_tfrecord)
-# val_data = val_data.batch(1000)
+val_data = val_data.batch(10)
 # val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
 val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
 val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
 val_batch_data = val_batch_data / 127.5 - 1
-
+# val_batch_data = tf.placeholder(tf.float32, shape=[10,256,256,3])
 hole_size = 16
 image_size = 256
 bbox = (tf.constant((image_size - hole_size) // 2),
@@ -74,8 +74,17 @@ bbox = (tf.constant((image_size - hole_size) // 2),
         tf.constant(hole_size))
 
 mask = bbox2mask(bbox, image_size, image_size)
-
-
-ng.get_gpus(1)
+ones_x = tf.ones_like(val_batch_data)
+mask = ones_x * mask
+input_image = tf.concat([val_batch_data, mask], axis=2)
+# print(mask.get_shape())
+print(input_image.get_shape())
+# ng.get_gpus(1)
 # args = parser.parse_args()
 model = InpaintCAModel()
+
+sess_config = tf.ConfigProto()
+sess_config.gpu_options.allow_growth = True
+with tf.Session(config=sess_config) as sess:
+    # input_image = tf.constant(input_image, dtype=tf.float32)
+    output = model.build_server_graph(input_image)
