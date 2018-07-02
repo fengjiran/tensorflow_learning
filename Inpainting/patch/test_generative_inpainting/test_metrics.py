@@ -31,7 +31,7 @@ def bbox2mask(bbox, height, width):
                             [left, width - w - left]])
 
     mask = tf.expand_dims(mask, 0)
-    mask = tf.expand_dims(mask, -1)
+    # mask = tf.expand_dims(mask, -1)
     mask = tf.concat([mask, mask, mask], axis=3)
     return mask
 
@@ -65,7 +65,7 @@ val_batch_data = val_iterator.get_next()
 val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
 val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
 val_batch_data = val_batch_data / 127.5 - 1
-# val_batch_data = tf.placeholder(tf.float32, shape=[10,256,256,3])
+
 hole_size = 16
 image_size = 256
 bbox = (tf.constant((image_size - hole_size) // 2),
