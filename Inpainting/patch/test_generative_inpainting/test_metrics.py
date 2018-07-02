@@ -74,24 +74,39 @@ bbox = (tf.constant((image_size - hole_size) // 2),
         tf.constant(hole_size),
         tf.constant(hole_size))
 
-mask = bbox2mask(bbox, image_size, image_size)  # (256,256,3)
-mask = tf.expand_dims(mask, 0)
-print(mask.get_shape())
-print(val_batch_data.get_shape())
-# ones_x = tf.ones_like(val_batch_data)
-# mask = ones_x * mask
-input_image = tf.concat([val_batch_data, mask], axis=2)
+mask = bbox2mask(bbox, image_size, image_size) * 255  # (256,256,3)
+mask = tf.expand_dims(mask, 0)  # (1,256,256,3)
 # print(mask.get_shape())
-print(input_image.get_shape())
+# print(val_batch_data.get_shape())
+
+input_image = tf.concat([val_batch_data, mask], axis=2)  # (1,256,512,3)
+
+# print(input_image.get_shape())
 # ng.get_gpus(1)
 # args = parser.parse_args()
 model = InpaintCAModel()
+# output = model.build_server_graph(input_image)
 
 sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
     sess.run(val_iterator.initializer, feed_dict={val_filenames: val_path})
-    # input_image = tf.constant(input_image, dtype=tf.float32)
-    # output = model.build_server_graph(input_image)
-    a = sess.run(input_image)
-    print(a.shape)
+    input_image = sess.run(input_image)
+    input_image = tf.constant(input_image, dtype=tf.float32)
+    output = model.build_server_graph(input_image)
+    output = (output + 1.) * 127.5
+    output = tf.reverse(output, [-1])
+    output = tf.saturate_cast(output, tf.uint8)
+    # load pretrained model
+    vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+    assign_ops = []
+    for var in vars_list:
+        vname = var.name
+        from_name = vname
+        var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+        assign_ops.append(tf.assign(var, var_value))
+    sess.run(assign_ops)
+    print('Model loaded.')
+    result = sess.run(output)
+    print(result.shape)
+    cv2.imwrite('F:\\output.png', result[0][:, :, ::-1])
