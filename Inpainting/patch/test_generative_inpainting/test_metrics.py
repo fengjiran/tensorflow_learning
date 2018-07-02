@@ -131,5 +131,5 @@ with tf.Session(config=sess_config) as sess:
     # print(result.max())
     cv2.imwrite('F:\\output.png', result[0])
 
-    show_ssim = sess.run(ssim)
-    print(show_ssim)
+    show_ssim, show_psnr, show_l1, show_l2 = sess.run([ssim, psnr, l1_loss, l2_loss])
+    print(show_ssim, show_psnr, show_l1, show_l2)
