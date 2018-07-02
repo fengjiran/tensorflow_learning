@@ -55,7 +55,7 @@ elif platform.system() == 'Linux':
         val_path = '/home/icie/Datasets/celebahq_tfrecords/val/celebahq_valset.tfrecord-001'
         checkpoint_dir = '/home/richard/TensorFlow_Learning/Inpainting/patch/test_generative_inpainting/model_logs/release_celebahq_256'
 
-val_filenames = tf.placeholder(tf.string, shape=[None])
+val_filenames = tf.placeholder(tf.string)
 val_data = tf.data.TFRecordDataset(val_filenames)
 val_data = val_data.map(parse_tfrecord)
 val_data = val_data.batch(1)
@@ -90,6 +90,7 @@ model = InpaintCAModel()
 sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
+    sess.run(val_iterator.initializer, feed_dict={val_filenames: val_path})
     # input_image = tf.constant(input_image, dtype=tf.float32)
     # output = model.build_server_graph(input_image)
     a = sess.run(input_image)
