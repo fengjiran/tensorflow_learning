@@ -64,10 +64,10 @@ val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
 val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
 # val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
-val_batch_data = val_batch_data / 127.5 - 1
+# val_batch_data = val_batch_data / 127.5 - 1
 # val_batch_data = tf.reshape(val_batch_data, [256, 256, 3])
 
-hole_size = 16
+hole_size = 64
 image_size = 256
 bbox = (tf.constant((image_size - hole_size) // 2),
         tf.constant((image_size - hole_size) // 2),
@@ -99,10 +99,16 @@ with tf.Session(config=sess_config) as sess:
     # cv2.imwrite('F:\\val.png', val[:, :, ::-1])
 
     input_image = tf.constant(input_image, dtype=tf.float32)
-    output = model.build_server_graph(input_image)
-    # output = (output + 1.) * 127.5
-    # output = tf.reverse(output, [-1])
-    # output = tf.saturate_cast(output, tf.uint8)
+    output = model.build_server_graph(input_image)  # (-1, 1)
+    output = (output + 1.) * 127.5  # (0, 255)
+    output = tf.saturate_cast(output, tf.uint8)
+
+    ssim = tf.image.ssim(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
+    psnr = tf.image.psnr(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
+    l1_loss = tf.abs(tf.saturate_cast(val_batch_data[0], tf.uint8) - output[0])
+    l2_loss = tf.square(tf.saturate_cast(val_batch_data[0], tf.uint8) - output[0])
+
+    output = tf.reverse(output, [-1])
 
     # load pretrained model
     vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
@@ -116,10 +122,14 @@ with tf.Session(config=sess_config) as sess:
     print('Model loaded.')
 
     result = sess.run(output)
-    print(result.min())
-    print(result.shape)
-    result = np.reshape(result, (256, 256, 3))
-    result = (result + 1) * 127.5
-    resule = result.astype(np.uint8)
-    print(result.max())
-    cv2.imwrite('F:\\output.png', result[:, :, ::-1])
+    # print(result.min())
+    # print(result.max())
+    # print(result.shape)
+    # result = np.reshape(result, (256, 256, 3))
+    # result = (result + 1) * 127.5
+    # resule = result.astype(np.uint8)
+    # print(result.max())
+    cv2.imwrite('F:\\output.png', result[0])
+
+    show_ssim = sess.run(ssim)
+    print(show_ssim)
