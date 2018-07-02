@@ -58,7 +58,7 @@ elif platform.system() == 'Linux':
 val_filenames = tf.placeholder(tf.string, shape=[None])
 val_data = tf.data.TFRecordDataset(val_filenames)
 val_data = val_data.map(parse_tfrecord)
-val_data = val_data.batch(10)
+val_data = val_data.batch(1)
 # val_data = val_data.repeat()
 val_iterator = val_data.make_initializable_iterator()
 val_batch_data = val_iterator.get_next()
