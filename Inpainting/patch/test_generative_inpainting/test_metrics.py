@@ -65,6 +65,7 @@ val_batch_data = val_iterator.get_next()
 val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
 val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
 val_batch_data = val_batch_data / 127.5 - 1
+val_batch_data = tf.reshape(val_batch_data, [256, 256, 3])
 
 hole_size = 16
 image_size = 256
