@@ -94,9 +94,9 @@ with tf.Session(config=sess_config) as sess:
     input_image = sess.run(input_image)
     input_image = tf.constant(input_image, dtype=tf.float32)
     output = model.build_server_graph(input_image)
-    output = (output + 1.) * 127.5
-    output = tf.reverse(output, [-1])
-    output = tf.saturate_cast(output, tf.uint8)
+    # output = (output + 1.) * 127.5
+    # output = tf.reverse(output, [-1])
+    # output = tf.saturate_cast(output, tf.uint8)
     # load pretrained model
     vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     assign_ops = []
@@ -107,6 +107,12 @@ with tf.Session(config=sess_config) as sess:
         assign_ops.append(tf.assign(var, var_value))
     sess.run(assign_ops)
     print('Model loaded.')
+
     result = sess.run(output)
+    print(result.min())
     print(result.shape)
-    cv2.imwrite('F:\\output.png', result[0][:, :, ::-1])
+    result = np.reshape(result, (256, 256, 3))
+    result = (result + 1) * 127.5
+    resule = result.astype(np.uint8)
+    print(result.max())
+    cv2.imwrite('F:\\output.png', result[:, :, ::-1])
