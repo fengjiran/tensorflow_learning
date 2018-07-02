@@ -50,5 +50,6 @@ Inpainting/patch/places/model
 Inpainting/patch/celeba/log
 Inpainting/patch/celeba/model
 Inpainting/patch/test_generative_inpainting/model_logs
+Inpainting/patch/test_generative_inpainting/neuralgym_logs
 
 *.pickle
