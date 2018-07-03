@@ -91,14 +91,25 @@ mask = bbox2mask_np(bbox_np, image_size, image_size)
 #     sess.run(assign_ops)
 #     print('Model loaded.')
 
-for i in range(1000):
-    img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
-    image = cv2.imread(img_path)
-    image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
-    image = np.expand_dims(image, 0)
-    assert image.shape == mask.shape  # (1,256,256,3)
+model = InpaintCAModel()
+sess_config = tf.ConfigProto()
+sess_config.gpu_options.allow_growth = True
+with tf.Session(config=sess_config) as sess:
 
-    input_image = np.concatenate([image, mask], axis=2)
+    for i in range(1000):
+        img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+        image = cv2.imread(img_path)
+        image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
+        image = np.expand_dims(image, 0)
+        assert image.shape == mask.shape  # (1,256,256,3)
+
+        input_image = np.concatenate([image, mask], axis=2)
+        input_image = tf.constant(input_image, dtype=tf.float32)
+        if i == 0:
+            output = model.build_server_graph(input_image)
+        else:
+            output = model.build_server_graph(input_image, reuse=True)
+        # print(i)
 
 
 # val_filenames = tf.placeholder(tf.string)
