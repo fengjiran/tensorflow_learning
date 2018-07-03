@@ -117,7 +117,12 @@ with tf.Session(config=sess_config) as sess:
             sess.run(assign_ops)
         else:
             output = model.build_server_graph(input_image, reuse=True)
-        # print(i)
+
+        output = (output + 1.) * 127.5
+        output = tf.reverse(output, -1)
+        output = tf.saturate_cast(output, tf.uint8)
+        result = sess.run(output)
+        cv2.imwrite('F:\\output.png', result[0])
 
 
 # val_filenames = tf.placeholder(tf.string)
