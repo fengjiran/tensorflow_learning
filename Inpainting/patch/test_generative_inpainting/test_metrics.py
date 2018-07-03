@@ -87,7 +87,7 @@ with tf.Session(config=sess_config) as sess:
     l1_losses = []
     l2_losses = []
     tv_losses = []
-    for i in range(2):
+    for i in range(1000):
         print('{}th image'.format(i + 1))
         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
         image = cv2.imread(img_path)
@@ -141,9 +141,9 @@ with tf.Session(config=sess_config) as sess:
     mean_l1 = np.mean(l1_losses)
     mean_l2 = np.mean(l2_losses)
     mean_tv = np.mean(tv_losses)
-    print('ssim: {}'.fotmat(mean_ssim))
-    print('psnr: {}'.fotmat(mean_psnr))
-    print('l1_loss: {}'.fotmat(mean_l1))
-    print('l2_loss: {}'.fotmat(mean_l2))
-    print('tv_loss: {}'.fotmat(mean_tv))
+    print('ssim: {}'.format(mean_ssim))
+    print('psnr: {}'.format(mean_psnr))
+    print('l1_loss: {}'.format(mean_l1))
+    print('l2_loss: {}'.format(mean_l2))
+    print('tv_loss: {}'.format(mean_tv))
     # print(ssim, psnr, l1, l2, tv)
