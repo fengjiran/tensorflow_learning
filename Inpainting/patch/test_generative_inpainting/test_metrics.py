@@ -9,6 +9,18 @@ import neuralgym as ng
 from inpaint_model import InpaintCAModel
 
 
+def bbox2mask_np(bbox, height, width):
+    top, left, h, w = bbox
+    mask = np.pad(array=np.ones((h, w)),
+                  pad_width=((top, height - h - top), (left, width - w - left)),
+                  mode='constant',
+                  constant_values=0)
+    mask = np.expand_dims(mask, 0)
+    mask = np.expand_dims(mask, -1)
+    mask = np.concatenate((mask, mask, mask), axis=3)
+    return mask
+
+
 def bbox2mask(bbox, height, width):
     """Generate mask tensor from bbox.
 
@@ -80,6 +92,8 @@ mask = tf.expand_dims(mask, 0)  # (1,256,256,3)
 # print(val_batch_data.get_shape())
 
 input_image = tf.concat([val_batch_data, mask], axis=2)  # (1,256,512,3)
+# input_image = tf.cast(input_image, tf.float32)
+# input_image = tf.constant(input_image, dtype=tf.float32)
 
 # print(input_image.get_shape())
 # ng.get_gpus(1)
@@ -91,28 +105,28 @@ sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
     sess.run(val_iterator.initializer, feed_dict={val_filenames: val_path})
-    input_image = sess.run(input_image)
-    val = sess.run(val_batch_data)
+    # input_image = sess.run(input_image)
+    # val, _ = np.split(input_image, 2, axis=2)
+    # val = sess.run(val_batch_data)
     # val = (val + 1) * 127.5
-    val = np.reshape(val, (256, 256, 3))
-    val = val.astype(np.uint8)
-    cv2.imwrite('F:\\val.png', val[:, :, ::-1])
+    # val = np.reshape(val, (256, 256, 3))
+    # val = val.astype(np.uint8)
+    # cv2.imwrite('F:\\val.png', val[:, :, ::-1])
 
-    input_image = tf.constant(input_image, dtype=tf.float32)
+    # input_image = tf.constant(input_image, dtype=tf.float32)
     output = model.build_server_graph(input_image)  # (-1, 1)
     output = (output + 1.) * 127.5  # (0, 255)
     output = tf.saturate_cast(output, tf.uint8)
-
-    ssim = tf.image.ssim(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
-    psnr = tf.image.psnr(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
-
-    tmp1 = val_batch_data[0] / 127.5 - 1
-    tmp2 = tf.cast(output[0], tf.float32) / 127.5 - 1
-
-    l1_loss = tf.reduce_mean(tf.abs(tmp1 - tmp2))
-    l2_loss = tf.reduce_mean(tf.square(tmp1 - tmp2))
-
     output = tf.reverse(output, [-1])
+
+    ssim = tf.image.ssim(tf.saturate_cast(val_batch_data[0][:, :, ::-1], tf.uint8), output[0], 255)
+    psnr = tf.image.psnr(tf.saturate_cast(val_batch_data[0][:, :, ::-1], tf.uint8), output[0], 255)
+
+    # tmp1 = val_batch_data[0] / 127.5 - 1
+    # tmp2 = tf.cast(output[0], tf.float32) / 127.5 - 1
+
+    # l1_loss = tf.reduce_mean(tf.abs(tmp1 - tmp2))
+    # l2_loss = tf.reduce_mean(tf.square(tmp1 - tmp2))
 
     # load pretrained model
     vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
@@ -125,7 +139,7 @@ with tf.Session(config=sess_config) as sess:
     sess.run(assign_ops)
     print('Model loaded.')
 
-    result = sess.run(output)
+    result, val, ssim, psnr = sess.run([output, val_batch_data, ssim, psnr])
     # print(result.min())
     # print(result.max())
     # print(result.shape)
@@ -134,6 +148,10 @@ with tf.Session(config=sess_config) as sess:
     # resule = result.astype(np.uint8)
     # print(result.max())
     cv2.imwrite('F:\\output.png', result[0])
+    cv2.imwrite('F:\\val.png', val[0][:, :, ::-1])
+    # ssim = tf.image.ssim(tf.constant(val), tf.constant(result[0]), 255)
+    # show_ssim = sess.run(ssim)
+    # print(show_ssim)
 
-    show_ssim, show_psnr, show_l1, show_l2 = sess.run([ssim, psnr, l1_loss, l2_loss])
-    print(show_ssim, show_psnr, show_l1, show_l2)
+    # show_ssim, show_psnr, show_l1, show_l2 = sess.run([ssim, psnr, l1_loss, l2_loss])
+    # print(show_ssim, show_psnr, show_l1, show_l2)
