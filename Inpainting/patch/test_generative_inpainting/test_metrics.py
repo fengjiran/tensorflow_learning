@@ -107,6 +107,14 @@ with tf.Session(config=sess_config) as sess:
         input_image = tf.constant(input_image, dtype=tf.float32)
         if i == 0:
             output = model.build_server_graph(input_image)
+            vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+            assign_ops = []
+            for var in vars_list:
+                vname = var.name
+                from_name = vname
+                var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+                assign_ops.append(tf.assign(var, var_value))
+            sess.run(assign_ops)
         else:
             output = model.build_server_graph(input_image, reuse=True)
         # print(i)
