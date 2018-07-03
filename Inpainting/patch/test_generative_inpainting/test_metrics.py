@@ -96,7 +96,7 @@ sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
 
-    for i in range(1000):
+    for i in range(1):
         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
         image = cv2.imread(img_path)
         image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
@@ -119,10 +119,11 @@ with tf.Session(config=sess_config) as sess:
             output = model.build_server_graph(input_image, reuse=True)
 
         output = (output + 1.) * 127.5
-        output = tf.reverse(output, -1)
+        output = tf.reverse(output, [-1])
         output = tf.saturate_cast(output, tf.uint8)
         result = sess.run(output)
-        cv2.imwrite('F:\\output.png', result[0])
+        cv2.imwrite('F:\\output.png', result[0][:, :, ::-1])
+        cv2.imwrite('F:\\val.png', image[0])
 
 
 # val_filenames = tf.placeholder(tf.string)
