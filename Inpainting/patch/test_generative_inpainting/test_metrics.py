@@ -1,4 +1,4 @@
-# import os
+import os
 import platform
 # import yaml
 import cv2
@@ -17,7 +17,7 @@ def bbox2mask_np(bbox, height, width):
                   constant_values=0)
     mask = np.expand_dims(mask, 0)
     mask = np.expand_dims(mask, -1)
-    mask = np.concatenate((mask, mask, mask), axis=3)
+    mask = np.concatenate((mask, mask, mask), axis=3) * 255
     return mask
 
 
@@ -60,34 +60,47 @@ def parse_tfrecord(example_proto):
 
 
 if platform.system() == 'Windows':
+    prefix = 'F:\\Datasets\\celebahq'
     val_path = 'F:\\Datasets\\celebahq_tfrecords\\val\\celebahq_valset.tfrecord-001'
     checkpoint_dir = 'E:\\TensorFlow_Learning\\Inpainting\\patch\\test_generative_inpainting\\model_logs\\release_celebahq_256'
 elif platform.system() == 'Linux':
     if platform.node() == 'icie-Precision-T7610':
+        prefix = '/home/icie/Datasets/celebahq'
         val_path = '/home/icie/Datasets/celebahq_tfrecords/val/celebahq_valset.tfrecord-001'
         checkpoint_dir = '/home/richard/TensorFlow_Learning/Inpainting/patch/test_generative_inpainting/model_logs/release_celebahq_256'
 
-val_filenames = tf.placeholder(tf.string)
-val_data = tf.data.TFRecordDataset(val_filenames)
-val_data = val_data.map(parse_tfrecord)
-val_data = val_data.batch(1)
-# val_data = val_data.repeat()
-val_iterator = val_data.make_initializable_iterator()
-val_batch_data = val_iterator.get_next()
-val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
+hole_size = 128
+image_size = 256
+bbox_np = ((image_size - hole_size) // 2,
+           (image_size - hole_size) // 2,
+           hole_size,
+           hole_size)
+mask = bbox2mask_np(bbox_np, image_size, image_size)
+
+for i in range(29000, 30000):
+    img_path = os.path.join(prefix, 'img%.8d.png' % i)
+    image = cv2.imread(img_path)
+# val_filenames = tf.placeholder(tf.string)
+# val_data = tf.data.TFRecordDataset(val_filenames)
+# val_data = val_data.map(parse_tfrecord)
+# val_data = val_data.batch(1)
+# # val_data = val_data.repeat()
+# val_iterator = val_data.make_initializable_iterator()
+# val_batch_data = val_iterator.get_next()
+# val_batch_data = tf.image.resize_area(val_batch_data, [256, 256])
+
 # val_batch_data = tf.clip_by_value(val_batch_data, 0., 255.)
 # val_batch_data = val_batch_data / 127.5 - 1
 # val_batch_data = tf.reshape(val_batch_data, [256, 256, 3])
 
-hole_size = 128
-image_size = 256
+
 bbox = (tf.constant((image_size - hole_size) // 2),
         tf.constant((image_size - hole_size) // 2),
         tf.constant(hole_size),
         tf.constant(hole_size))
 
-mask = bbox2mask(bbox, image_size, image_size) * 255  # (256,256,3)
-mask = tf.expand_dims(mask, 0)  # (1,256,256,3)
+# mask = bbox2mask(bbox, image_size, image_size) * 255  # (256,256,3)
+# mask = tf.expand_dims(mask, 0)  # (1,256,256,3)
 # print(mask.get_shape())
 # print(val_batch_data.get_shape())
 
