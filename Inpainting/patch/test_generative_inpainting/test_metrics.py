@@ -106,8 +106,8 @@ with tf.Session(config=sess_config) as sess:
     ssim = tf.image.ssim(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
     psnr = tf.image.psnr(tf.saturate_cast(val_batch_data[0], tf.uint8), output[0], 255)
 
-    tmp1 = val_batch_data[0] / 255.  # / 127.5 - 1
-    tmp2 = tf.cast(output[0], tf.float32) / 255.  # / 127.5 - 1
+    tmp1 = val_batch_data[0] / 127.5 - 1
+    tmp2 = tf.cast(output[0], tf.float32) / 127.5 - 1
 
     l1_loss = tf.reduce_mean(tf.abs(tmp1 - tmp2))
     l2_loss = tf.reduce_mean(tf.square(tmp1 - tmp2))
