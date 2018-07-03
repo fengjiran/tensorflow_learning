@@ -82,6 +82,11 @@ sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
 
+    ssims = []
+    psnrs = []
+    l1_losses = []
+    l2_losses = []
+    tv_losses = []
     for i in range(2):
         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
         image = cv2.imread(img_path)
@@ -122,6 +127,11 @@ with tf.Session(config=sess_config) as sess:
                                            tf.cast(output[0], dtype=tf.float32))) / 16256.25
 
         result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
+        ssims.append(ssim)
+        psnrs.append(psnr)
+        l1_losses.append(l1)
+        l2_losses.append(l2)
+        tv_losses.append(tv)
         cv2.imwrite('F:\\output.png', result[0])
         cv2.imwrite('F:\\val.png', image[0])
         print(ssim, psnr, l1, l2, tv)
