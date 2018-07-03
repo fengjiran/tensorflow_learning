@@ -92,11 +92,11 @@ sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
     sess.run(val_iterator.initializer, feed_dict={val_filenames: val_path})
     input_image = sess.run(input_image)
-    # val = sess.run(val_batch_data)
+    val = sess.run(val_batch_data)
     # val = (val + 1) * 127.5
-    # val = np.reshape(val, (256, 256, 3))
-    # val = val.astype(np.uint8)
-    # cv2.imwrite('F:\\val.png', val[:, :, ::-1])
+    val = np.reshape(val, (256, 256, 3))
+    val = val.astype(np.uint8)
+    cv2.imwrite('F:\\val.png', val[:, :, ::-1])
 
     input_image = tf.constant(input_image, dtype=tf.float32)
     output = model.build_server_graph(input_image)  # (-1, 1)
