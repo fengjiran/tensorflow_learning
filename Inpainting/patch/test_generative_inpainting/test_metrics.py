@@ -136,8 +136,8 @@ with tf.Session(config=sess_config) as sess:
         l1_losses.append(l1)
         l2_losses.append(l2)
         tv_losses.append(tv)
-        cv2.imwrite('F:\\output.png', result[0])
-        cv2.imwrite('F:\\val.png', image[0])
+        # cv2.imwrite('F:\\output.png', result[0])
+        # cv2.imwrite('F:\\val.png', image[0])
 
     mean_ssim = np.mean(ssims)
     mean_psnr = np.mean(psnrs)
