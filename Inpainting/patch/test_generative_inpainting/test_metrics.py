@@ -69,12 +69,14 @@ elif platform.system() == 'Linux':
         val_path = '/home/icie/Datasets/celebahq_tfrecords/val/celebahq_valset.tfrecord-001'
         checkpoint_dir = '/home/richard/TensorFlow_Learning/Inpainting/patch/test_generative_inpainting/model_logs/release_celebahq_256'
 
-hole_size = 128
+hole_size = 64
 image_size = 256
-bbox_np = ((image_size - hole_size) // 2,
-           (image_size - hole_size) // 2,
-           hole_size,
-           hole_size)
+# bbox_np = ((image_size - hole_size) // 2,
+#            (image_size - hole_size) // 2,
+#            hole_size,
+#            hole_size)
+# bbox_np = (54, 83, 80, 100)
+bbox_np = (148, 100, 84, 117)
 mask = bbox2mask_np(bbox_np, image_size, image_size)
 
 model = InpaintCAModel()
@@ -89,7 +91,8 @@ with tf.Session(config=sess_config) as sess:
     tv_losses = []
     for i in range(1):
         print('{}th image'.format(i + 1))
-        img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+        # img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+        img_path = '2.jpeg'
         image = cv2.imread(img_path)
         image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
         image = np.expand_dims(image, 0)
@@ -133,8 +136,8 @@ with tf.Session(config=sess_config) as sess:
         l1_losses.append(l1)
         l2_losses.append(l2)
         tv_losses.append(tv)
-        # cv2.imwrite('F:\\output.png', result[0])
-        # cv2.imwrite('F:\\val.png', image[0])
+        cv2.imwrite('F:\\output.png', result[0])
+        cv2.imwrite('F:\\val.png', image[0])
 
     mean_ssim = np.mean(ssims)
     mean_psnr = np.mean(psnrs)
