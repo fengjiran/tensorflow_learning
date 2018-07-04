@@ -87,7 +87,7 @@ with tf.Session(config=sess_config) as sess:
     l1_losses = []
     l2_losses = []
     tv_losses = []
-    for i in range(1000):
+    for i in range(1):
         print('{}th image'.format(i + 1))
         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
         image = cv2.imread(img_path)
