@@ -79,81 +79,160 @@ bbox_np = ((image_size - hole_size) // 2,
 # bbox_np = (148, 100, 84, 117)
 mask = bbox2mask_np(bbox_np, image_size, image_size)
 
-model = InpaintCAModel()
-sess_config = tf.ConfigProto()
-sess_config.gpu_options.allow_growth = True
-with tf.Session(config=sess_config) as sess:
-    ssims = []
-    psnrs = []
-    l1_losses = []
-    l2_losses = []
-    tv_losses = []
-    for i in range(1000):
-        print('{}th image'.format(i + 1))
-        img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
-        # img_path = '2.jpeg'
-        image = cv2.imread(img_path)
-        image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
-        image = np.expand_dims(image, 0)
-        assert image.shape == mask.shape  # (1,256,256,3)
+# model = InpaintCAModel()
 
-        input_image = np.concatenate([image, mask], axis=2)
+ssims = []
+psnrs = []
+l1_losses = []
+l2_losses = []
+tv_losses = []
+for i in range(1000):
+    print('{}th image'.format(i + 1))
+    img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+    # img_path = '2.jpeg'
+    image = cv2.imread(img_path)
+    image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
+    image = np.expand_dims(image, 0)
+    assert image.shape == mask.shape  # (1,256,256,3)
+    input_image = np.concatenate([image, mask], axis=2)
+    # input_image = tf.constant(input_image, dtype=tf.float32)
+    sess_config = tf.ConfigProto()
+    sess_config.gpu_options.allow_growth = True
+    with tf.Session(config=sess_config) as sess:
+        model = InpaintCAModel()
         input_image = tf.constant(input_image, dtype=tf.float32)
-    #     if i == 0:
-    #         output = model.build_server_graph(input_image)
-    #         vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
-    #         assign_ops = []
-    #         for var in vars_list:
-    #             vname = var.name
-    #             from_name = vname
-    #             var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
-    #             assign_ops.append(tf.assign(var, var_value))
-    #         sess.run(assign_ops)
-    #         print('Model loaded.')
-    #     else:
-    #         output = model.build_server_graph(input_image, reuse=True)
+        if i == 0:
+            output = model.build_server_graph(input_image)
+            vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+            assign_ops = []
+            for var in vars_list:
+                vname = var.name
+                from_name = vname
+                var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+                assign_ops.append(tf.assign(var, var_value))
+            sess.run(assign_ops)
+            print('Model loaded.')
+        else:
+            vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+            assign_ops = []
+            for var in vars_list:
+                vname = var.name
+                from_name = vname
+                var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+                assign_ops.append(tf.assign(var, var_value))
+            sess.run(assign_ops)
+            # print('Model loaded.')
+            output = model.build_server_graph(input_image, reuse=True)
 
-    #     output = (output + 1.) * 127.5
-    #     output = tf.saturate_cast(output, tf.uint8)
+        output = (output + 1.) * 127.5
+        output = tf.saturate_cast(output, tf.uint8)
+        # image value in (0,255)
+        ssim = tf.image.ssim(tf.constant(image[0]), output[0], 255)
+        psnr = tf.image.psnr(tf.constant(image[0]), output[0], 255)
+        tv_loss = tf.image.total_variation(tf.constant(image[0], dtype=tf.float32)) -\
+            tf.image.total_variation(tf.cast(output[0], dtype=tf.float32))
+        tv_loss = tv_loss / tf.image.total_variation(tf.constant(image[0], dtype=tf.float32))
 
-    #     # image value in (0,255)
-    #     ssim = tf.image.ssim(tf.constant(image[0]), output[0], 255)
-    #     psnr = tf.image.psnr(tf.constant(image[0]), output[0], 255)
-    #     tv_loss = tf.image.total_variation(tf.constant(image[0], dtype=tf.float32)) -\
-    #         tf.image.total_variation(tf.cast(output[0], dtype=tf.float32))
-    #     tv_loss = tv_loss / tf.image.total_variation(tf.constant(image[0], dtype=tf.float32))
+        # image value in (-1,1)
+        l1_loss = tf.reduce_mean(tf.abs(tf.constant(image[0], dtype=tf.float32) -
+                                        tf.cast(output[0], dtype=tf.float32))) / 127.5
+        l2_loss = tf.reduce_mean(tf.square(tf.constant(image[0], dtype=tf.float32) -
+                                           tf.cast(output[0], dtype=tf.float32))) / 16256.25
 
-    #     # image value in (-1,1)
-    #     l1_loss = tf.reduce_mean(tf.abs(tf.constant(image[0], dtype=tf.float32) -
-    #                                     tf.cast(output[0], dtype=tf.float32))) / 127.5
-    #     l2_loss = tf.reduce_mean(tf.square(tf.constant(image[0], dtype=tf.float32) -
-    #                                        tf.cast(output[0], dtype=tf.float32))) / 16256.25
+        result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
 
-    #     # result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
-    #     ssims.append(ssim)
-    #     psnrs.append(psnr)
-    #     l1_losses.append(l1_loss)
-    #     l2_losses.append(l2_loss)
-    #     tv_losses.append(tv_loss)
+        ssims.append(ssim)
+        psnrs.append(psnr)
+        l1_losses.append(l1)
+        l2_losses.append(l2)
+        tv_losses.append(tv)
 
-    # mean_ssim = tf.reduce_mean(ssims)
-    # mean_psnr = tf.reduce_mean(psnrs)
-    # mean_l1 = tf.reduce_mean(l1_losses)
-    # mean_l2 = tf.reduce_mean(l2_losses)
-    # mean_tv = tf.reduce_mean(tv_losses)
+mean_ssim = np.mean(ssims)
+mean_psnr = np.mean(psnrs)
+mean_l1 = np.mean(l1_losses)
+mean_l2 = np.mean(l2_losses)
+mean_tv = np.mean(tv_losses)
 
-    # mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv = sess.run([mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv])
+print('ssim: {}'.format(mean_ssim))
+print('psnr: {}'.format(mean_psnr))
+print('l1_loss: {}'.format(mean_l1))
+print('l2_loss: {}'.format(mean_l2))
+print('tv_loss: {}'.format(mean_tv))
 
-    # # cv2.imwrite('F:\\output.png', result[0])
-    # # cv2.imwrite('F:\\val.png', image[0])
+# sess_config = tf.ConfigProto()
+# sess_config.gpu_options.allow_growth = True
+# with tf.Session(config=sess_config) as sess:
+#     ssims = []
+#     psnrs = []
+#     l1_losses = []
+#     l2_losses = []
+#     tv_losses = []
+#     for i in range(1000):
+#         print('{}th image'.format(i + 1))
+#         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+#         # img_path = '2.jpeg'
+#         image = cv2.imread(img_path)
+#         image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
+#         image = np.expand_dims(image, 0)
+#         assert image.shape == mask.shape  # (1,256,256,3)
 
-    # # mean_ssim = np.mean(ssims)
-    # # mean_psnr = np.mean(psnrs)
-    # # mean_l1 = np.mean(l1_losses)
-    # # mean_l2 = np.mean(l2_losses)
-    # # mean_tv = np.mean(tv_losses)
-    # print('ssim: {}'.format(mean_ssim))
-    # print('psnr: {}'.format(mean_psnr))
-    # print('l1_loss: {}'.format(mean_l1))
-    # print('l2_loss: {}'.format(mean_l2))
-    # print('tv_loss: {}'.format(mean_tv))
+#         input_image = np.concatenate([image, mask], axis=2)
+#         input_image = tf.constant(input_image, dtype=tf.float32)
+#     if i == 0:
+#         output = model.build_server_graph(input_image)
+#         vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+#         assign_ops = []
+#         for var in vars_list:
+#             vname = var.name
+#             from_name = vname
+#             var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+#             assign_ops.append(tf.assign(var, var_value))
+#         sess.run(assign_ops)
+#         print('Model loaded.')
+#     else:
+#         output = model.build_server_graph(input_image, reuse=True)
+
+#     output = (output + 1.) * 127.5
+#     output = tf.saturate_cast(output, tf.uint8)
+
+#     # image value in (0,255)
+#     ssim = tf.image.ssim(tf.constant(image[0]), output[0], 255)
+#     psnr = tf.image.psnr(tf.constant(image[0]), output[0], 255)
+#     tv_loss = tf.image.total_variation(tf.constant(image[0], dtype=tf.float32)) -\
+#         tf.image.total_variation(tf.cast(output[0], dtype=tf.float32))
+#     tv_loss = tv_loss / tf.image.total_variation(tf.constant(image[0], dtype=tf.float32))
+
+#     # image value in (-1,1)
+#     l1_loss = tf.reduce_mean(tf.abs(tf.constant(image[0], dtype=tf.float32) -
+#                                     tf.cast(output[0], dtype=tf.float32))) / 127.5
+#     l2_loss = tf.reduce_mean(tf.square(tf.constant(image[0], dtype=tf.float32) -
+#                                        tf.cast(output[0], dtype=tf.float32))) / 16256.25
+
+#     # result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
+#     ssims.append(ssim)
+#     psnrs.append(psnr)
+#     l1_losses.append(l1_loss)
+#     l2_losses.append(l2_loss)
+#     tv_losses.append(tv_loss)
+
+# mean_ssim = tf.reduce_mean(ssims)
+# mean_psnr = tf.reduce_mean(psnrs)
+# mean_l1 = tf.reduce_mean(l1_losses)
+# mean_l2 = tf.reduce_mean(l2_losses)
+# mean_tv = tf.reduce_mean(tv_losses)
+
+# mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv = sess.run([mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv])
+
+# # cv2.imwrite('F:\\output.png', result[0])
+# # cv2.imwrite('F:\\val.png', image[0])
+
+# # mean_ssim = np.mean(ssims)
+# # mean_psnr = np.mean(psnrs)
+# # mean_l1 = np.mean(l1_losses)
+# # mean_l2 = np.mean(l2_losses)
+# # mean_tv = np.mean(tv_losses)
+# print('ssim: {}'.format(mean_ssim))
+# print('psnr: {}'.format(mean_psnr))
+# print('l1_loss: {}'.format(mean_l1))
+# print('l2_loss: {}'.format(mean_l2))
+# print('tv_loss: {}'.format(mean_tv))
