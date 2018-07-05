@@ -157,4 +157,3 @@ with tf.Session(config=sess_config) as sess:
     print('l1_loss: {}'.format(mean_l1))
     print('l2_loss: {}'.format(mean_l2))
     print('tv_loss: {}'.format(mean_tv))
-    # print(ssim, psnr, l1, l2, tv)
