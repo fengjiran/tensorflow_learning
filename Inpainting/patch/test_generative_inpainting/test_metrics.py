@@ -83,13 +83,12 @@ model = InpaintCAModel()
 sess_config = tf.ConfigProto()
 sess_config.gpu_options.allow_growth = True
 with tf.Session(config=sess_config) as sess:
-
     ssims = []
     psnrs = []
     l1_losses = []
     l2_losses = []
     tv_losses = []
-    for i in range(1):
+    for i in range(1000):
         print('{}th image'.format(i + 1))
         img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
         # img_path = '2.jpeg'
@@ -130,20 +129,29 @@ with tf.Session(config=sess_config) as sess:
         l2_loss = tf.reduce_mean(tf.square(tf.constant(image[0], dtype=tf.float32) -
                                            tf.cast(output[0], dtype=tf.float32))) / 16256.25
 
-        result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
+        # result, ssim, psnr, l1, l2, tv = sess.run([output, ssim, psnr, l1_loss, l2_loss, tv_loss])
         ssims.append(ssim)
         psnrs.append(psnr)
-        l1_losses.append(l1)
-        l2_losses.append(l2)
-        tv_losses.append(tv)
-        # cv2.imwrite('F:\\output.png', result[0])
-        # cv2.imwrite('F:\\val.png', image[0])
+        l1_losses.append(l1_loss)
+        l2_losses.append(l2_loss)
+        tv_losses.append(tv_loss)
 
-    mean_ssim = np.mean(ssims)
-    mean_psnr = np.mean(psnrs)
-    mean_l1 = np.mean(l1_losses)
-    mean_l2 = np.mean(l2_losses)
-    mean_tv = np.mean(tv_losses)
+    mean_ssim = tf.reduce_mean(ssims)
+    mean_psnr = tf.reduce_mean(psnrs)
+    mean_l1 = tf.reduce_mean(l1_losses)
+    mean_l2 = tf.reduce_mean(l2_losses)
+    mean_tv = tf.reduce_mean(tv_losses)
+
+    mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv = sess.run([mean_ssim, mean_psnr, mean_l1, mean_l2, mean_tv])
+
+    # cv2.imwrite('F:\\output.png', result[0])
+    # cv2.imwrite('F:\\val.png', image[0])
+
+    # mean_ssim = np.mean(ssims)
+    # mean_psnr = np.mean(psnrs)
+    # mean_l1 = np.mean(l1_losses)
+    # mean_l2 = np.mean(l2_losses)
+    # mean_tv = np.mean(tv_losses)
     print('ssim: {}'.format(mean_ssim))
     print('psnr: {}'.format(mean_psnr))
     print('l1_loss: {}'.format(mean_l1))
