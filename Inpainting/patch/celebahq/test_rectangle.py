@@ -2,12 +2,10 @@ from __future__ import print_function
 
 import os
 import platform
-import yaml
+# import yaml
 import tensorflow as tf
 from model import CompletionModel
 
-with open('config.yaml', 'r') as f:
-    cfg = yaml.load(f)
 
 if platform.system() == 'Windows':
     compress_path = cfg['compress_path_win']
