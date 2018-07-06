@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import platform
 import numpy as np
+import cv2
 # import yaml
 import tensorflow as tf
 from model import CompletionModel
@@ -70,4 +71,47 @@ tv_losses = []
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    pass
+    vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+    assign_ops = []
+    for var in vars_list:
+        vname = var.name
+        from_name = vname
+        var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
+        assign_ops.append(tf.assign(var, var_value))
+    sess.run(assign_ops)
+    print('Model loaded.')
+
+    for i in range(1000):
+        print('{}th image'.format(i + 1))
+        img_path = os.path.join(prefix, 'img%.8d.png' % (i + 29000))
+        # img_path = '2.jpeg'
+        image = cv2.imread(img_path)
+        image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
+        image = np.expand_dims(image, 0)
+        image = image.astype(np.float32)
+        assert image.shape == mask.shape  # (1,256,256,3)
+        # input_image = np.concatenate([image, mask], axis=2)
+
+        result, ssim, psnr, l1, l2, tv = sess.run([outputs, ssim_tf, psnr_tf, l1_loss, l2_loss, tv_loss],
+                                                  feed_dict={image_ph: image, mask_ph: mask})
+
+        ssims.append(ssim)
+        psnrs.append(psnr)
+        l1_losses.append(l1)
+        l2_losses.append(l2)
+        tv_losses.append(tv)
+
+    cv2.imwrite('F:\\val.png', image.astype(np.uint8)[0])
+    cv2.imwrite('F:\\output.png', result[0])
+
+mean_ssim = np.mean(ssims)
+mean_psnr = np.mean(psnrs)
+mean_l1 = np.mean(l1_losses)
+mean_l2 = np.mean(l2_losses)
+mean_tv = np.mean(tv_losses)
+
+print('ssim: {}'.format(mean_ssim))
+print('psnr: {}'.format(mean_psnr))
+print('l1_loss: {}'.format(mean_l1))
+print('l2_loss: {}'.format(mean_l2))
+print('tv_loss: {}'.format(mean_tv))
