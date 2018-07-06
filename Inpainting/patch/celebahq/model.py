@@ -361,20 +361,19 @@ class CompletionModel(object):
         return self.build_infer_graph(batch_data, cfg, bbox, name)
 
     def build_test_graph(self, batch_data, reuse=None):
-        bbox = (tf.constant((cfg['img_height'] - cfg['test_hole_height']) // 2),
-                tf.constant((cfg['img_width'] - cfg['test_hole_width']) // 2),
-                tf.constant(cfg['test_hole_height']),
-                tf.constant(cfg['test_hole_width']))
-        mask = bbox2mask(bbox, cfg)
-        batch_incomplete = batch_data * (1. - mask)
-        ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
-        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
-        coarse_output = self.coarse_network(coarse_network_input, reuse=True)
-        batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+        batch_raw, masks_raw = tf.split(batch_data, 2, axis=2)
+        masks = tf.cast(masks_raw[0:1, :, :, 0:1] > 127.5, tf.float32)
+        batch_pos = batch_raw / 127.5 - 1.
+        batch_incomplete = batch_pos * (1. - masks)
 
-        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
-        refine_output = self.refine_network(refine_network_input, reuse=True)
-        batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
+        ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
+        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * masks], axis=3)
+        coarse_output = self.coarse_network(coarse_network_input, reuse=reuse)
+        batch_complete_coarse = coarse_output * masks + batch_incomplete * (1. - masks)
+
+        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * masks], axis=3)
+        refine_output = self.refine_network(refine_network_input, reuse=reuse)
+        batch_complete_refine = refine_output * masks + batch_incomplete * (1. - masks)
 
         return (batch_incomplete, batch_complete_coarse, batch_complete_refine)
 
