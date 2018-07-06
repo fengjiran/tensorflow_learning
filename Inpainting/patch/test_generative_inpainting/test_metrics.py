@@ -80,6 +80,8 @@ bbox_np = ((image_size - hole_size) // 2,
 mask = bbox2mask_np(bbox_np, image_size, image_size)
 
 model = InpaintCAModel()
+inputs = tf.placeholder(tf.float32, (1, 256, 512, 3))
+outputs = model.build_server_graph(inputs)
 
 ssims = []
 psnrs = []
