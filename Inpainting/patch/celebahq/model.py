@@ -360,7 +360,7 @@ class CompletionModel(object):
 
         return self.build_infer_graph(batch_data, cfg, bbox, name)
 
-    def test(self, batch_data, cfg):
+    def build_test_graph(self, batch_data, reuse=None):
         bbox = (tf.constant((cfg['img_height'] - cfg['test_hole_height']) // 2),
                 tf.constant((cfg['img_width'] - cfg['test_hole_width']) // 2),
                 tf.constant(cfg['test_hole_height']),
