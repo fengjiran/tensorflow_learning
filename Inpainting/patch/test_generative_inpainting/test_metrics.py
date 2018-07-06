@@ -79,7 +79,7 @@ bbox_np = ((image_size - hole_size) // 2,
 # bbox_np = (148, 100, 84, 117)
 mask = bbox2mask_np(bbox_np, image_size, image_size)
 
-# model = InpaintCAModel()
+model = InpaintCAModel()
 
 ssims = []
 psnrs = []
