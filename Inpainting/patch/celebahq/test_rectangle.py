@@ -92,7 +92,7 @@ with tf.Session(config=config) as sess:
         assert image.shape == mask.shape  # (1,256,256,3)
         # input_image = np.concatenate([image, mask], axis=2)
 
-        result, ssim, psnr, l1, l2, tv = sess.run([outputs, ssim_tf, psnr_tf, l1_loss, l2_loss, tv_loss],
+        result, ssim, psnr, l1, l2, tv = sess.run([batch_complete_refine, ssim_tf, psnr_tf, l1_loss, l2_loss, tv_loss],
                                                   feed_dict={image_ph: image, mask_ph: mask})
 
         ssims.append(ssim)
