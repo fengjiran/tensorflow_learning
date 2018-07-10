@@ -16,7 +16,7 @@ def bbox2mask_np(bbox, height, width):
 
 
 img_path = 'F:\\Datasets\\celebahq\\img00029978.png'
-hole_size = 90
+hole_size = 100
 image_size = 256
 bbox_np = ((image_size - hole_size) // 2,
            (image_size - hole_size) // 2,
@@ -28,4 +28,4 @@ image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
 
 image = image * (1 - mask) + mask * 0.5 * 255
 image = image.astype(np.uint8)
-cv2.imwrite('F:\\mask_90.png', image)
+cv2.imwrite('F:\\mask_100.png', image)
