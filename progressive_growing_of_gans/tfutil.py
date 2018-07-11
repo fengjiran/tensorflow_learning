@@ -63,3 +63,23 @@ def init_tf(config_dict=dict()):
     if tf.get_default_session() is None:
         tf.set_random_seed(np.random.randint(1 << 31))
         create_session(config_dict, force_as_default=True)
+
+#----------------------------------------------------------------------------
+# Create tf.Session based on config dict of the form
+# {'gpu_options.allow_growth': True}
+
+
+def create_session(config_dict=dict(), force_as_default=False):
+    config = tf.ConfigProto()
+    for key, value in config_dict.items():
+        fields = key.split('.')
+        obj = config
+        for field in fields[:-1]:
+            obj = getattr(obj, field)
+        setattr(obj, fields[-1], value)
+    session = tf.Session(config=config)
+    if force_as_default:
+        session._default_session = session.as_default()
+        session._default_session.enforce_nesting = False
+        session._default_session.__enter__()
+    return session
