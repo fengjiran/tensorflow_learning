@@ -31,3 +31,8 @@ def shape_to_list(shape):
 def flatten(x):
     with tf.name_scope('Flatten'):
         return tf.reshape(x, [-1])
+
+
+def log2(x):
+    with tf.name_scope('Log2'):
+        return tf.log(x) * np.float32(1.0 / np.log(2.0))
