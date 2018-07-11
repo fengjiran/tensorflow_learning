@@ -20,4 +20,5 @@ def run(*args, **kwargs):  # Run the specified ops in the default session.
 
 
 def is_tf_expression(x):
-    return isinstance(x, tf.Tensor) or isinstance(x, tf.Variable) or isinstance(x, tf.Operation)
+    return isinstance(x, (tf.Tensor, tf.Variable, tf.Operation))
+    # return isinstance(x, tf.Tensor) or isinstance(x, tf.Variable) or isinstance(x, tf.Operation)
