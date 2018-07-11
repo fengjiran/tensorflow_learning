@@ -55,3 +55,11 @@ def lerp_clip(a, b, t):
 
 def absolute_name_scope(scope):  # Forcefully enter the specified name scope, ignoring any surrounding scopes.
     return tf.name_scope(scope + '/')
+
+# Initialize TensorFlow graph and session using good default settings.
+
+
+def init_tf(config_dict=dict()):
+    if tf.get_default_session() is None:
+        tf.set_random_seed(np.random.randint(1 << 31))
+        create_session(config_dict, force_as_default=True)
