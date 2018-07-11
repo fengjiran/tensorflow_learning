@@ -13,3 +13,7 @@ import imp
 import numpy as np
 from collections import OrderedDict
 import tensorflow as tf
+
+
+def run(*args, **kwargs):  # Run the specified ops in the default session.
+    return tf.get_default_session().run(*args, **kwargs)
