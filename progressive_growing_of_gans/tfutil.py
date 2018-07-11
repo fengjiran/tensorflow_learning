@@ -46,3 +46,12 @@ def exp2(x):
 def lerp(a, b, t):
     with tf.name_scope('Lerp'):
         return a + (b - a) * t
+
+
+def lerp_clip(a, b, t):
+    with tf.name_scope('LerpClip'):
+        return a + (b - a) * tf.clip_by_value(t, 0.0, 1.0)
+
+
+def absolute_name_scope(scope):  # Forcefully enter the specified name scope, ignoring any surrounding scopes.
+    return tf.name_scope(scope + '/')
