@@ -26,3 +26,8 @@ def is_tf_expression(x):
 
 def shape_to_list(shape):
     return [dim.value for dim in shape]
+
+
+def flatten(x):
+    with tf.name_scope('Flatten'):
+        return tf.reshape(x, [-1])
