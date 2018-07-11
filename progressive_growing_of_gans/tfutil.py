@@ -41,3 +41,8 @@ def log2(x):
 def exp2(x):
     with tf.name_scope('Exp2'):
         return tf.exp(x * np.float32(np.log(2.0)))
+
+
+def lerp(a, b, t):
+    with tf.name_scope('Lerp'):
+        return a + (b - a) * t
