@@ -36,3 +36,8 @@ def flatten(x):
 def log2(x):
     with tf.name_scope('Log2'):
         return tf.log(x) * np.float32(1.0 / np.log(2.0))
+
+
+def exp2(x):
+    with tf.name_scope('Exp2'):
+        return tf.exp(x * np.float32(np.log(2.0)))
