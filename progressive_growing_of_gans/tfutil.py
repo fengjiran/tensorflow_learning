@@ -107,3 +107,8 @@ def init_uninited_vars(vars=None):
                     test_ops.append(tf.is_variable_initialized(var))
     init_vars = [var for var, inited in zip(test_vars, run(test_ops)) if not inited]
     run([var.initializer for var in init_vars])
+
+# ----------------------------------------------------------------------------
+# Set the values of given tf.Variables.
+# Equivalent to the following, but more efficient and does not bloat the tf graph:
+# tfutil.run([tf.assign(var, value) for var, value in var_to_value_dict.items()]
