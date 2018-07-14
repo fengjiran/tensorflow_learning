@@ -64,7 +64,7 @@ def init_tf(config_dict=dict()):
         tf.set_random_seed(np.random.randint(1 << 31))
         create_session(config_dict, force_as_default=True)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Create tf.Session based on config dict of the form
 # {'gpu_options.allow_growth': True}
 
