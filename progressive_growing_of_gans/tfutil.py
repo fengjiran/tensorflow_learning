@@ -112,3 +112,20 @@ def init_uninited_vars(vars=None):
 # Set the values of given tf.Variables.
 # Equivalent to the following, but more efficient and does not bloat the tf graph:
 # tfutil.run([tf.assign(var, value) for var, value in var_to_value_dict.items()]
+
+
+def set_vars(var_to_value_dict):
+    ops = []
+    feed_dict = {}
+    for var, value in var_to_value_dict.items():
+        assert is_tf_expression(var)
+        try:
+            setter = tf.get_default_graph().get_tensor_by_name(var.name.replace(':0', '/setter:0'))  # look for existing op
+        except KeyError:
+            with absolute_name_scope(var.name.split(':')[0]):
+                with tf.control_dependencies(None):  # ignore surrounding control_dependencies
+                    setter = tf.assign(var, tf.placeholder(var.dtype, var.shape, 'new_value'),
+                                       name='setter')  # create new setter
+        ops.append(setter)
+        feed_dict[setter.op.inputs[1]] = value
+    run(ops, feed_dict)
