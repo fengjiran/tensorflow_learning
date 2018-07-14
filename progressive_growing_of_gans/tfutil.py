@@ -83,3 +83,8 @@ def create_session(config_dict=dict(), force_as_default=False):
         session._default_session.enforce_nesting = False
         session._default_session.__enter__()
     return session
+
+# ----------------------------------------------------------------------------
+# Initialize all tf.Variables that have not already been initialized.
+# Equivalent to the following, but more efficient and does not bloat the tf graph:
+# tf.variables_initializer(tf.report_unitialized_variables()).run()
