@@ -129,3 +129,18 @@ def set_vars(var_to_value_dict):
         ops.append(setter)
         feed_dict[setter.op.inputs[1]] = value
     run(ops, feed_dict)
+
+# ----------------------------------------------------------------------------
+# Autosummary creates an identity op that internally keeps track of the input
+# values and automatically shows up in TensorBoard. The reported value
+# represents an average over input components. The average is accumulated
+# constantly over time and flushed when save_summaries() is called.
+#
+# Notes:
+# - The output tensor must be used as an input for something else in the
+#   graph. Otherwise, the autosummary op will not get executed, and the average
+#   value will not get accumulated.
+# - It is perfectly fine to include autosummaries with the same name in
+#   several places throughout the graph, even if they are executed concurrently.
+# - It is ok to also pass in a python scalar or numpy array. In this case, it
+#   is added to the average immediately.
