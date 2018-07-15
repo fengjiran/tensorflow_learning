@@ -144,3 +144,8 @@ def set_vars(var_to_value_dict):
 #   several places throughout the graph, even if they are executed concurrently.
 # - It is ok to also pass in a python scalar or numpy array. In this case, it
 #   is added to the average immediately.
+
+
+_autosummary_vars = OrderedDict()  # name => [var, ...]
+_autosummary_immediate = OrderedDict()  # name => update_op, update_value
+_autosummary_finalized = False
