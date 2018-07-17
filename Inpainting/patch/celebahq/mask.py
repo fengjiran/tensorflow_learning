@@ -15,6 +15,7 @@ def bbox2mask_np(bbox, height, width):
     return mask
 
 
+# img_path = 'F:\\Datasets\\celebahq\\img00029978.png'
 img_path = 'F:\\Datasets\\celebahq\\img00029978.png'
 hole_size = 80
 image_size = 256
