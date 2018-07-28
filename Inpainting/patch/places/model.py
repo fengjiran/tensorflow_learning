@@ -323,7 +323,7 @@ class CompletionModel(object):
             gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_grad_to_coarse')
             gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_grad_to_refine')
 
-        return g_vars, d_vars, losses
+        return g_vars, g_vars_coarse, d_vars, losses
 
     def build_infer_graph(self, batch_data, cfg, bbox=None, name='val'):
         cfg['max_delta_height'] = 0
