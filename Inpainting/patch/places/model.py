@@ -277,8 +277,11 @@ class CompletionModel(object):
         losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
         losses['refine_d_loss'] += losses['gp_loss']
 
-        g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse') +\
-            tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        # g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse') +\
+        #     tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        g_vars_coarse = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse')
+        g_vars_refine = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        g_vars = g_vars_coarse + g_vars_refine
         d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
 
         if summary:
