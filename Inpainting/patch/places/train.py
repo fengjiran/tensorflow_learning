@@ -69,7 +69,7 @@ val_batch_data = val_iterator.get_next()
 
 model = CompletionModel()
 # print(batch_data.get_shape())
-g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
+g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
 # training settings
