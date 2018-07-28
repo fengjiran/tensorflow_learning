@@ -109,7 +109,7 @@ refine_g_loss = cfg['l1_loss_alpha'] * losses['refine_l1_loss'] +\
 refine_d_loss = losses['refine_d_loss']
 
 # stage 1
-coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars)
+coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars_coarse)
 
 # stage 2 generator
 refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_list=g_vars)
