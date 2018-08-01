@@ -31,7 +31,7 @@ elif platform.system() == 'Linux':
         val_path = '/home/icie/Datasets/celebahq_tfrecords/val/celebahq_valset.tfrecord-001'
         checkpoint_dir = '/home/richard/TensorFlow_Learning/Inpainting/patch/celebahq/model/refine'
 
-hole_size = 100
+hole_size = 120
 image_size = 256
 bbox_np = ((image_size - hole_size) // 2,
            (image_size - hole_size) // 2,
