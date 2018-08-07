@@ -371,5 +371,5 @@ if __name__ == '__main__':
     model = CompletionModel()
     x = tf.random_uniform([10, 256, 256, 3])
 
-    g_vars, d_vars, losses = model.build_graph_with_losses(x, cfg)
+    g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
     print(len(g_vars), len(d_vars))
