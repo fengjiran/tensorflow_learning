@@ -21,9 +21,9 @@ hole_height: 128
 hole_width: 128
 static_view_num: 30
 
-# init_lr_g: 1.0e-4
-init_lr_g: 1.0e-5
-init_lr_d: 1.0e-5
+init_lr_g: 1.0e-4
+# init_lr_g: 1.0e-5
+init_lr_d: 1.0e-4
 batch_size: 16
 coarse_iters: 1000000
 total_iters: 5000000
