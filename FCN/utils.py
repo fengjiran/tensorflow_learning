@@ -34,4 +34,10 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=
 
 
 def get_model_data(dir_path, model_url):
-    pass
+    maybe_download_and_extract(dir_path, model_url)
+    filename = model_url.split('/')[-1]
+    filepath = os.path.join(dir_path, filename)
+    if not os.path.exists(filepath):
+        raise IOError('VGG model not found!')
+    data = scipy.io.loadmat(filepath)
+    return data
