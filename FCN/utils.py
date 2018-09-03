@@ -51,3 +51,9 @@ def save_image(image, save_dir, name, mean=None):
     if mean:
         image = unprocess_image(image, mean)
     misc.imsave(os.path.join(save_dir, name + '.png'), image)
+
+
+def get_variable(weights, name):
+    init = tf.constant_initializer(weights, dtype=tf.float32)
+    var = tf.get_variable(name=name, initializer=init, shape=weights.shape)
+    return var
