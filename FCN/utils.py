@@ -41,3 +41,13 @@ def get_model_data(dir_path, model_url):
         raise IOError('VGG model not found!')
     data = scipy.io.loadmat(filepath)
     return data
+
+
+def unprocess_image(image, mean_pixel):
+    return image + mean_pixel
+
+
+def save_image(image, save_dir, name, mean=None):
+    if mean:
+        image = unprocess_image(image, mean)
+    misc.imsave(os.path.join(save_dir, name + '.png'), image)
