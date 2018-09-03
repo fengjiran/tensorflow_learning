@@ -7,3 +7,7 @@ from six.moves import urllib
 import tarfile
 import zipfile
 import scipy.io
+
+
+def get_model_data(dir_path, model_url):
+    pass
