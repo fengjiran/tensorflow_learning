@@ -21,6 +21,17 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=
             )
             sys.stdout.flush()
 
+        filepath, _ = urllib.request.urlretrieve(url_name, filepath, reporthook=_progress)
+        print()
+        statinfo = os.stat(filepath)
+        print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
+        if is_tarfile:
+            tarfile.open(filepath, 'r:gz').extractall(dir_path)
+        elif is_zipfile:
+            with zipfile.ZipFile(filepath) as zf:
+                zip_dir = zf.namelist()[0]
+                zf.extractall(dir_path)
+
 
 def get_model_data(dir_path, model_url):
     pass
