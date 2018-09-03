@@ -65,3 +65,11 @@ def weight_variable(shape, stddev=0.02, name=None):
         return tf.Variable(initial)
     else:
         return tf.get_variable(name, initializer=initial)
+
+
+def bias_variable(shape, name=None):
+    init = tf.constant(0.0, shape=shape)
+    if name is None:
+        return tf.Variable(init)
+    else:
+        tf.get_variable(name, initializer=init)
