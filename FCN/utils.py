@@ -77,4 +77,5 @@ def bias_variable(shape, name=None):
 
 def get_tensor_size(tensor):
     from operator import mul
-    return reduce(mul, (d.value for d in tensor.geet_shape()), 1)
+    from functools import reduce
+    return reduce(mul, (d.value for d in tensor.get_shape()), 1)
