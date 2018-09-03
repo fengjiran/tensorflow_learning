@@ -79,3 +79,8 @@ def get_tensor_size(tensor):
     from operator import mul
     from functools import reduce
     return reduce(mul, (d.value for d in tensor.get_shape()), 1)
+
+
+def conv2d_basic(x, W, bias):
+    conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.bias_add(conv, bias)
