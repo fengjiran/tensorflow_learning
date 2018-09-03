@@ -57,3 +57,11 @@ def get_variable(weights, name):
     init = tf.constant_initializer(weights, dtype=tf.float32)
     var = tf.get_variable(name=name, initializer=init, shape=weights.shape)
     return var
+
+
+def weight_variable(shape, stddev=0.02, name=None):
+    initial = tf.truncated_normal(shape, stddev=stddev)
+    if name is None:
+        return tf.Variable(initial)
+    else:
+        return tf.get_variable(name, initializer=initial)
