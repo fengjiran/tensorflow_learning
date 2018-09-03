@@ -3,9 +3,9 @@ import sys
 import tarfile
 import zipfile
 import scipy.io
+import scipy.misc as misc
 import tensorflow as tf
 import numpy as np
-import scipy.misc as misc
 from six.moves import urllib
 
 
