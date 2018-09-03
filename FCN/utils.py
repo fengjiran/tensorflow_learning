@@ -73,3 +73,8 @@ def bias_variable(shape, name=None):
         return tf.Variable(init)
     else:
         tf.get_variable(name, initializer=init)
+
+
+def get_tensor_size(tensor):
+    from operator import mul
+    return reduce(mul, (d.value for d in tensor.geet_shape()), 1)
