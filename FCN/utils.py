@@ -9,5 +9,9 @@ import zipfile
 import scipy.io
 
 
+def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=False):
+    pass
+
+
 def get_model_data(dir_path, model_url):
     pass
