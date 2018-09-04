@@ -142,3 +142,7 @@ def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
                             lambda: (ema.average(batch_mean), ema.average(batch_var)))
         normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, eps)
     return normed
+
+
+def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False, name=None):
+    pass
