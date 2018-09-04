@@ -145,7 +145,26 @@ def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
 
 
 def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False, name=None):
-    pass
+    def conv_transpose(tensor, out_channel, shape, strides, name=None):
+        out_shape = tensor.get_shape().as_list()
+        in_channel = out_shape[-1]
+        kernel = weight_variable([shape, shape, out_channel, in_channel], name=name)
+        shape[-1] = out_channel
+        return tf.nn.conv2d_transpose(x, kernel, output_shape=out_shape, strides=[1, strides, strides, 1],
+                                      padding='SAME', name='conv_transpose')
+
+    def conv(tensor, out_chans, shape, strides, name=None):
+        in_channel = tensor.get_shape().as_list()[-1]
+        kernel = weight_variable([shape, shape, in_channel, out_chans], name=name)
+        return tf.nn.conv2d(x, kernel, strides=[1, strides, strides, 1], padding='SAME', name='conv')
+
+    def bn(tensor, name=None):
+        """
+        :param tensor: 4D tensor input
+        :param name: name of the operation
+        :return: local response normalized tensor - not using batch normalization :(
+        """
+        return tf.nn.lrn(tensor, depth_radius=5, bias=2, alpha=1e-4, beta=0.75, name=name)
 
 
 def add_to_regularization_and_summary(var):
