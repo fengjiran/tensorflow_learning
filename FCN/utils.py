@@ -119,4 +119,8 @@ def local_response_norm(x):
 
 
 def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
-    pass
+    with tf.variable_scope(scope):
+        beta = tf.get_variable(name='beta', shape=[n_out], initializer=tf.constant_initializer(0.0),
+                               trainable=True)
+        gamma = tf.get_variable(name='gamma', shape=[n_out], initializer=tf.random_normal_initializer(1.0, 0.02),
+                                trainable=True)
