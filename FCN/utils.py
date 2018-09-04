@@ -160,11 +160,27 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
 
     def bn(tensor, name=None):
         """
-        :param tensor: 4D tensor input
+        :param tensor: 4D tensor input.
+
         :param name: name of the operation
         :return: local response normalized tensor - not using batch normalization :(
         """
         return tf.nn.lrn(tensor, depth_radius=5, bias=2, alpha=1e-4, beta=0.75, name=name)
+
+    in_chans = x.get_shape().as_list()[3]
+    if down_stride or up_stride:
+        first_stride = 2
+    else:
+        first_stride = 1
+
+    with tf.variable_scope('res%s' % name):
+        if in_chans == out_chan2:
+            b1 = x
+        else:
+            with tf.variable_scope('branch1'):
+                if up_stride:
+                    b1 = conv_transpose(x, out_chans=out_chan2, shape=1, strides=first_stride,
+                                        name='res%s_branch1' % name)
 
 
 def add_to_regularization_and_summary(var):
