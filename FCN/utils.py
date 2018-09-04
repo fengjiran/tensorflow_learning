@@ -100,3 +100,11 @@ def conv2d_transpose_strided(x, W, b, output_shape=None, stride=2):
 
     conv = tf.nn.conv2d_transpose(x, W, output_shape, strides=[1, stride, stride, 1], padding='SAME')
     return tf.nn.bias_add(conv, b)
+
+
+def leaky_relu(x, alpha=0.2, name=''):
+    return tf.nn.leaky_relu(x, alpha, name)
+
+
+def max_pool_2x2(x):
+    return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
