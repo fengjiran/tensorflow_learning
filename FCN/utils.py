@@ -179,7 +179,7 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
         else:
             with tf.variable_scope('branch1'):
                 if up_stride:
-                    b1 = conv_transpose(x, out_chans=out_chan2, shape=1, strides=first_stride,
+                    b1 = conv_transpose(x, out_channel=out_chan2, shape=1, strides=first_stride,
                                         name='res%s_branch1' % name)
 
 
