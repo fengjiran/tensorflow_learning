@@ -152,3 +152,14 @@ def add_to_regularization_and_summary(var):
     if var is not None:
         tf.summary.histogram(var.op.name, var)
         tf.add_to_collection('reg_loss', tf.nn.l2_loss(var))
+
+
+def add_activation_summary(var):
+    if var is not None:
+        tf.summary.histogram(var.op.name + "/activation", var)
+        tf.summary.scalar(var.op.name + "/sparsity", tf.nn.zero_fraction(var))
+
+
+def add_gradient_summary(grad, var):
+    if grad is not None:
+        tf.summary.histogram(var.op.name + "/gradient", grad)
