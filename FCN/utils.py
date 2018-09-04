@@ -146,3 +146,9 @@ def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
 
 def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False, name=None):
     pass
+
+
+def add_to_regularization_and_summary(var):
+    if var is not None:
+        tf.summary.histogram(var.op.name, var)
+        tf.add_to_collection('reg_loss', tf.nn.l2_loss(var))
