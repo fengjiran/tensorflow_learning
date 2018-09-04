@@ -116,3 +116,7 @@ def avg_pool_2x2(x):
 
 def local_response_norm(x):
     return tf.nn.lrn(x, depth_radius=5, bias=2, alpha=1e-4, beta=0.75)
+
+
+def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
+    pass
