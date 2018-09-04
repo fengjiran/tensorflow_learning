@@ -124,3 +124,4 @@ def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
                                trainable=True)
         gamma = tf.get_variable(name='gamma', shape=[n_out], initializer=tf.random_normal_initializer(1.0, 0.02),
                                 trainable=True)
+        batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
