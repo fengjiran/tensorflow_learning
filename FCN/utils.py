@@ -107,4 +107,8 @@ def leaky_relu(x, alpha=0.2, name=''):
 
 
 def max_pool_2x2(x):
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+
+def avg_pool_2x2(x):
     return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
