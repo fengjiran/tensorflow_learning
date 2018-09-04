@@ -47,6 +47,10 @@ def unprocess_image(image, mean_pixel):
     return image + mean_pixel
 
 
+def process_image(image, mean_pixel):
+    return image - mean_pixel
+
+
 def save_image(image, save_dir, name, mean=None):
     if mean:
         image = unprocess_image(image, mean)
