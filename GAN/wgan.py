@@ -49,6 +49,13 @@ class WGAN(object):
             raise NotImplementedError
 
     def discriminator(self, x, is_training=True, reuse=None):
+        axis = list(range(len(x.get_shape()) - 1))
         with tf.variable_scope('discriminator', reuse=reuse):
-            x = tf.layers.conv2d(x, 64, 4, 2, padding='same', activation=tf.nn.leaky_relu,
+            x = tf.layers.conv2d(x, 64, 4, 2, padding='same',
                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_conv1')
+            x = tf.nn.leaky_relu(x)
+
+            x = tf.layers.conv2d(x, 128, 4, 2, padding='same',
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_conv2')
+            x = tf.layers.batch_normalization(x, axis=axis, training=is_training)
+            x = tf.nn.leaky_relu(x)
