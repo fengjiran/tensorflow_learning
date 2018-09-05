@@ -42,5 +42,12 @@ class WGAN(object):
             # load mnist
             self.data_X, self.data_y = load_mnist(self.dataset_name)
 
+            # get number of batches for a single epoch
+            self.num_batches = len(self.data_X) // self.batch_size
+
         else:
             raise NotImplementedError
+
+    def discriminator(self, x, is_training=True, reuse=None):
+        with tf.variable_scope('discriminator', reuse=reuse):
+            pass
