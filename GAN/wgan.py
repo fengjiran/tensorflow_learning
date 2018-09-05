@@ -4,6 +4,8 @@ import time
 import numpy as np
 import tensorflow as tf
 
+from utils import load_mnist
+
 
 class WGAN(object):
     """Construct WGAN class."""
@@ -36,6 +38,9 @@ class WGAN(object):
 
             # test
             self.sample_num = 64  # number of generated images to be saved
+
+            # load mnist
+            self.data_X, self.data_y = load_mnist(self.dataset_name)
 
         else:
             raise NotImplementedError
