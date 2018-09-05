@@ -30,5 +30,9 @@ class WGAN(object):
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
+            # train
             self.learning_rate = 0.0002
             self.beta1 = 0.5
+
+            # test
+            self.sample_num = 64  # number of generated images to be saved
