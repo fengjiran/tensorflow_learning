@@ -36,3 +36,6 @@ class WGAN(object):
 
             # test
             self.sample_num = 64  # number of generated images to be saved
+
+        else:
+            raise NotImplementedError
