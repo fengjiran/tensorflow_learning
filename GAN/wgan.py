@@ -18,3 +18,17 @@ class WGAN(object):
         self.log_dir = log_dir
         self.epoch = epoch
         self.batch_size = batch_size
+
+        if dataset_name == 'mnist' or dataset_name == 'fashion-mnist':
+            self.input_height = 28
+            self.input_width = 28
+            self.output_height = 28
+            self.output_width = 28
+
+            self.z_dim = z_dim
+            self.c_dim = 1
+
+            self.disc_iters = 1  # The number of critic iterations for one step generator
+
+            self.learning_rate = 0.0002
+            self.beta1 = 0.5
