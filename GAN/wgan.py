@@ -50,4 +50,5 @@ class WGAN(object):
 
     def discriminator(self, x, is_training=True, reuse=None):
         with tf.variable_scope('discriminator', reuse=reuse):
-            pass
+            x = tf.layers.conv2d(x, 64, 4, 2, padding='same', activation=tf.nn.leaky_relu,
+                                 kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_conv1')
