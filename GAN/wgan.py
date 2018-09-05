@@ -79,3 +79,5 @@ class WGAN(object):
             x = tf.layers.dense(x, 128 * 7 * 7, name='g_fc2')
             x = tf.layers.batch_normalization(x, axis=axis, training=is_training, name='g_bn2')
             x = tf.nn.relu(x)
+
+            x = tf.reshape(x, [self.batch_size, 7, 7, 128])
