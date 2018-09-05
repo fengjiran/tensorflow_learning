@@ -70,4 +70,12 @@ class WGAN(object):
             return out, out_logit, x
 
     def generator(self, z, is_training=True, reuse=None):
-        pass
+        axis = list(range(len(z.get_shape()) - 1))
+        with tf.variable_scope('generator', reuse=reuse):
+            x = tf.layers.dense(z, 1024, name='g_fc1')
+            x = tf.layers.batch_normalization(x, axis=axis, training=is_training, name='g_bn1')
+            x = tf.nn.relu(x)
+
+            x = tf.layers.dense(x, 128 * 7 * 7, name='g_fc2')
+            x = tf.layers.batch_normalization(x, axis=axis, training=is_training, name='g_bn2')
+            x = tf.nn.relu(x)
