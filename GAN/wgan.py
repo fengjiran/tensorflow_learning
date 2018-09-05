@@ -57,5 +57,17 @@ class WGAN(object):
 
             x = tf.layers.conv2d(x, 128, 4, 2, padding='same',
                                  kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_conv2')
-            x = tf.layers.batch_normalization(x, axis=axis, training=is_training)
+            x = tf.layers.batch_normalization(x, axis=axis, training=is_training, name='d_bn2')
             x = tf.nn.leaky_relu(x)
+
+            x = tf.reshape(x, [self.batch_size, -1])
+            x = tf.layers.dense(x, 1024, kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_fc3')
+            x = tf.layers.batch_normalization(x, axis=axis, training=is_training, name='d_bn3')
+            x = tf.nn.leaky_relu(x)
+            out_logit = tf.layers.dense(x, 1, kernel_initializer=tf.keras.initializers.glorot_normal(), name='d_fc4')
+            out = tf.nn.sigmoid(out_logit)
+
+            return out, out_logit, x
+
+    def generator(self, z, is_training=True, reuse=None):
+        pass
