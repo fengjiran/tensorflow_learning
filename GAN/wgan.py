@@ -35,6 +35,8 @@ class WGAN(object):
             self.g_loss = None
             self.d_optim = None
             self.g_optim = None
+            self.clip_D = None
+            self.fake_images = None
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
@@ -135,3 +137,14 @@ class WGAN(object):
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATA_OPS)):
             self.d_optim = tf.train.AdamOptimizer(
                 self.learning_rate, beta1=self.beta1).minimize(self.d_loss, var_list=d_vars)
+
+            self.g_optim = tf.train.AdamOptimizer(
+                self.learning_rate * 5, beta1=self.beta1).minimize(self.g_loss, var_list=g_vars)
+
+        # weight clipping
+        self.clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in d_vars]
+
+        # test
+        self.fake_images = self.generator(self.z, is_training=False, reuse=True)
+
+        # summary
