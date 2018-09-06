@@ -40,6 +40,8 @@ class WGAN(object):
             self.g_sum = None
             self.d_sum = None
             self.sample_z = None
+            self.saver = None
+            self.writer = None
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
@@ -171,3 +173,5 @@ class WGAN(object):
 
         # summary writer
         self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_name, self.sess.graph)
+
+        # restore checkpoint if it exits
