@@ -81,3 +81,4 @@ class WGAN(object):
             x = tf.nn.relu(x)
 
             x = tf.reshape(x, [self.batch_size, 7, 7, 128])
+            x = tf.layers.conv2d_transpose(x, 64, )
