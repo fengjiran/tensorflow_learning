@@ -29,6 +29,10 @@ class WGAN(object):
 
             self.z_dim = z_dim
             self.c_dim = 1
+            self.inputs = None
+            self.z = None
+            self.d_loss = None
+            self.g_loss = None
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
@@ -93,3 +97,35 @@ class WGAN(object):
             out = tf.nn.sigmoid(x)
 
             return out
+
+    def build_model(self):
+        image_dims = [self.input_height, self.input_width, self.c_dim]
+        bs = self.batch_size
+
+        # images
+        self.inputs = tf.placeholder(tf.float32, [bs] + image_dims, name='real_image')
+
+        # noises
+        self.z = tf.placeholder(tf.float32, [bs, self.z_dim], name='z')
+
+        # loss function
+
+        # output of D for real images
+        D_real, D_real_logits, _ = self.discriminator(self.inputs, is_training=True)
+
+        # output of D for fake images
+        G = self.generator(self.z, is_training=True)
+        D_fake, D_fake_logits, _ = self.discriminator(G, is_training=True, reuse=True)
+
+        # get loss for discriminator
+        d_loss_real = -tf.reduce_mean(D_real_logits)
+        d_loss_fake = tf.reduce_mean(D_fake_logits)
+
+        self.d_loss = d_loss_real + d_loss_fake
+
+        # get loss for generator
+        self.g_loss = -d_loss_fake
+
+        t_vars = tf.trainable_variables()
+        d_vars = [var for var in t_vars if 'd_' in var.name]
+        g_vars = [var for var in t_vars if 'g_' in var.name]
