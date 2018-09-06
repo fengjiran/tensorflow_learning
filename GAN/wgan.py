@@ -177,9 +177,15 @@ class WGAN(object):
         # restore checkpoint if it exits
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
         if could_load:
-            pass
+            start_epoch = (int)(checkpoint_counter / self.num_batches)
+            start_batch_id = checkpoint_counter - start_epoch * self.num_batches
+            counter = checkpoint_counter
+            print(' [*] Load SUCCESS')
         else:
-            pass
+            start_epoch = 0
+            start_batch_id = 0
+            counter = 1
+            print(' [!] Load failed...')
 
     @property
     def model_dir(self):
