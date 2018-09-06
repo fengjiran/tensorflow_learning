@@ -187,6 +187,13 @@ class WGAN(object):
             counter = 1
             print(' [!] Load failed...')
 
+        # loop for epoch
+        for epoch in range(start_epoch, self.epoch):
+            # get batch data
+            for idx in range(start_batch_id, self.num_batches):
+                batch_images = self.data_X[idx * self.batch_size:(idx + 1) * self.batch_size]
+                batch_z = np.random.uniform(-1, 1, [self.batch_size, self.z_dim]).astype(np.float32)
+
     @property
     def model_dir(self):
         return '{}_{}_{}_{}'.format(self.model_name, self.dataset_name, self.batch_size, self.z_dim)
