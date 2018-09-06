@@ -39,6 +39,7 @@ class WGAN(object):
             self.fake_images = None
             self.g_sum = None
             self.d_sum = None
+            self.sample_z = None
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
@@ -157,3 +158,16 @@ class WGAN(object):
 
         self.g_sum = tf.summary.merge([d_loss_fake_sum, g_loss_sum])
         self.d_sum = tf.summary.merge([d_loss_real_sum, d_loss_sum])
+
+    def train(self):
+        # initialize all the variables
+        tf.global_variables_initializer().run()
+
+        # graph inputs for visualize training results
+        self.sample_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+
+        # save the model
+        self.saver = tf.train.Saver()
+
+        # summary writer
+        self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_name, self.sess.graph)
