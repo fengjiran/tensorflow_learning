@@ -175,6 +175,11 @@ class WGAN(object):
         self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_name, self.sess.graph)
 
         # restore checkpoint if it exits
+        could_load, checkpoint_counter = self.load(self.checkpoint_dir)
+        if could_load:
+            pass
+        else:
+            pass
 
     @property
     def model_dir(self):
