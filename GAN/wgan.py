@@ -175,3 +175,18 @@ class WGAN(object):
         self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_name, self.sess.graph)
 
         # restore checkpoint if it exits
+
+    @property
+    def model_dir(self):
+        return '{}_{}_{}_{}'.format(self.model_name, self.dataset_name, self.batch_size, self.z_dim)
+
+    def save(self, checkpoint_dir, step):
+        checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir, self.model_name)
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
+        self.saver.save(self.sess, os.path.join(checkpoint_dir, self.model_name + '.model'), global_step=step)
+
+    def load(self, checkpoint_dir):
+        import re
+        print(' [*] Reading checkpoint...')
+        checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir, self.model_name)
