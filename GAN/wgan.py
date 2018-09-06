@@ -33,6 +33,8 @@ class WGAN(object):
             self.z = None
             self.d_loss = None
             self.g_loss = None
+            self.d_optim = None
+            self.g_optim = None
 
             self.disc_iters = 1  # The number of critic iterations for one step generator
 
@@ -128,3 +130,8 @@ class WGAN(object):
 
         d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
         g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator')
+
+        # optimizers
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATA_OPS)):
+            self.d_optim = tf.train.AdamOptimizer(
+                self.learning_rate, beta1=self.beta1).minimize(self.d_loss, var_list=d_vars)
