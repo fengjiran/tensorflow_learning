@@ -194,6 +194,11 @@ class WGAN(object):
                 batch_images = self.data_X[idx * self.batch_size:(idx + 1) * self.batch_size]
                 batch_z = np.random.uniform(-1, 1, [self.batch_size, self.z_dim]).astype(np.float32)
 
+                # update G network
+                if (counter - 1) % self.disc_iters == 0:
+                    _, summary_str, g_loss = self.sess.run([self.g_optim, self.g_sum, self.g_loss],
+                                                           feed_dict={self.z: batch_z})
+
     @property
     def model_dir(self):
         return '{}_{}_{}_{}'.format(self.model_name, self.dataset_name, self.batch_size, self.z_dim)
