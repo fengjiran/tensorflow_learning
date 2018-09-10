@@ -9,8 +9,8 @@ class DCGAN(object):
     """Construct dcgan model."""
 
     def __init__(self, input_height=108, input_width=108, batch_size=16, sample_num=64):
-        pass
+        print('Construct the model.')
 
-    def generator(self, z, y=None):
-        with tf.variable_scope('generator'):
+    def generator(self, z, reuse=None):
+        with tf.variable_scope('generator', reuse=reuse):
             pass
