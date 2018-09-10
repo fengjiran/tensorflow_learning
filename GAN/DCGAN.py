@@ -13,4 +13,4 @@ class DCGAN(object):
 
     def generator(self, z, reuse=None):
         with tf.variable_scope('generator', reuse=reuse):
-            pass
+            x = tf.layers.dense(z, 256 * 8 * 8, activation=tf.nn.relu)
