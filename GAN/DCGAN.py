@@ -17,3 +17,4 @@ class DCGAN(object):
                                 kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                 name='layer1')
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)))
+            x = tf.reshape(x, (256, 8, 8))
