@@ -12,4 +12,5 @@ class DCGAN(object):
         pass
 
     def generator(self, z, y=None):
-        pass
+        with tf.variable_scope('generator'):
+            pass
