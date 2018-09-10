@@ -25,3 +25,4 @@ class DCGAN(object):
             x = tf.layers.conv2d_transpose(x, 64, (3, 3), strides=(2, 2), padding='same', activation=tf.nn.relu,
                                            kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                            name='layer3')
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn3')
