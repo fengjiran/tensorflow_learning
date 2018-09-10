@@ -18,11 +18,18 @@ class DCGAN(object):
                                 name='layer1')
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn1')
             x = tf.reshape(x, (-1, 256, 8, 8))
+
             x = tf.layers.conv2d_transpose(x, 128, (3, 3), strides=(2, 2), padding='same', activation=tf.nn.relu,
                                            kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                            name='layer2')
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn2')
+
             x = tf.layers.conv2d_transpose(x, 64, (3, 3), strides=(2, 2), padding='same', activation=tf.nn.relu,
                                            kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                            name='layer3')
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn3')
+
+            x = tf.layers.conv2d_transpose(x, 32, (3, 3), strides=(2, 2), padding='same', activation=tf.nn.relu,
+                                           kernel_initializer=tf.keras.initializers.glorot_uniform(),
+                                           name='layer4')
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn4')
