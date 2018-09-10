@@ -16,6 +16,8 @@ class DCGAN(object):
             x = tf.layers.dense(z, 256 * 8 * 8, activation=tf.nn.relu,
                                 kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                 name='layer1')
-            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)))
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), name='bn1')
             x = tf.reshape(x, (-1, 256, 8, 8))
-            x = tf.layers.conv2d_transpose(x, 128, (3, 3), strides=(2, 2), padding='same')
+            x = tf.layers.conv2d_transpose(x, 128, (3, 3), strides=(2, 2), padding='same',
+                                           kernel_initializer=tf.keras.initializers.glorot_uniform(),
+                                           name='layer2')
