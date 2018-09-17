@@ -53,5 +53,12 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         net = tf.layers.conv2d(net, 192, 3, strides=1, padding='same', activation=tf.nn.relu,
                                kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                                name=end_point)
+        end_points[end_point] = net
+        if final_endpoint == end_point:
+            return net, end_points
+
+        end_point = 'MaxPool_3a_3x3'
+        net = tf.layers.max_pooling2d(net, 3, strides=2, padding='same', name=end_point)
+        end_points[end_point] = net
         if final_endpoint == end_point:
             return net, end_points
