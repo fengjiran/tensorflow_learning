@@ -28,7 +28,7 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
     end_points = {}
     with tf.variable_scope(scope):
         end_point = 'Conv2d_1a_7x7'
-        net = tf.layers.conv2d(inputs, 64, 7, strides=2, padding='SAME', activation=tf.nn.relu,
+        net = tf.layers.conv2d(inputs, 64, 7, strides=2, padding='same', activation=tf.nn.relu,
                                kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                                name=end_point)
         end_points[end_point] = net
@@ -36,3 +36,7 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
             return net, end_points
 
         end_point = 'MaxPool_2a_3x3'
+        net = tf.layers.max_pooling2d(net, 3, strides=2, padding='same', name=end_point)
+        end_points[end_point] = net
+        if final_endpoint == end_point:
+            return net, end_points
