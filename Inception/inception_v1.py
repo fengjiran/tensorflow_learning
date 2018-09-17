@@ -83,3 +83,19 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
                 branch_2 = tf.layers.conv2d(branch_2, 32, 3, padding='same', activation=tf.nn.relu,
                                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                                             name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 32, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            name='Conv2d_0b_3x3')
+            net = tf.concat(axis=3, values=[branch_0, branch_1, branch_2, branch_3])
+        end_points[end_point] = net
+        if final_endpoint == end_point:
+            return net, end_points
+
+        end_point = 'Mixed_3c'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            name='Conv2d_0a_1x1')
