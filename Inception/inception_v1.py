@@ -23,3 +23,5 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
 
     """
     end_points = {}
+    with tf.variable_scope(scope):
+        pass
