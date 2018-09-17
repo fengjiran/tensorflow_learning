@@ -62,3 +62,5 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         end_points[end_point] = net
         if final_endpoint == end_point:
             return net, end_points
+
+        end_point = 'Mixed_3b'
