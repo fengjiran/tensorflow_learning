@@ -122,3 +122,9 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         end_points[end_point] = net
         if final_endpoint == end_point:
             return net, end_points
+
+        end_point = 'MaxPool_4a_3x3'
+        net = tf.layers.max_pooling2d(net, 3, 2, padding='same', name=end_point)
+        end_points[end_point] = net
+        if final_endpoint == end_point:
+            return net, end_points
