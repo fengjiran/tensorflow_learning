@@ -15,6 +15,11 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
          'Conv2d_2c_3x3', 'MaxPool_3a_3x3', 'Mixed_3b', 'Mixed_3c',
          'MaxPool_4a_3x3', 'Mixed_4b', 'Mixed_4c', 'Mixed_4d', 'Mixed_4e',
          'Mixed_4f', 'MaxPool_5a_2x2', 'Mixed_5b', 'Mixed_5c']
+    scope: optional variable_scope
+
+    Returns
+    -------
+    A dictionary from components of the network to the corresponding activation.
 
     """
     end_points = {}
