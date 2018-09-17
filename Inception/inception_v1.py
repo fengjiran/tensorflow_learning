@@ -128,3 +128,10 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         end_points[end_point] = net
         if final_endpoint == end_point:
             return net, end_points
+
+        end_point = 'Mixed_4b'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 192, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            name='Conv2d_0a_1x1')
