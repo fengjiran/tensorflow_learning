@@ -76,3 +76,10 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
                 branch_1 = tf.layers.conv2d(branch_1, 128, 3, padding='same', activation=tf.nn.relu,
                                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                                             name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 16, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 32, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            name='Conv2d_0b_3x3')
