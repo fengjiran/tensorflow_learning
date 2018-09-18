@@ -64,3 +64,13 @@ class DCGAN(object):
                                  kernel_initializer=tf.keras.initializers.glorot_uniform())
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
             x = tf.nn.leaky_relu(x)
+
+            x = tf.layers.conv2d(x, 256, (5, 5), strides=(2, 2), padding='same',
+                                 kernel_initializer=tf.keras.initializers.glorot_uniform())
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
+            x = tf.nn.leaky_relu(x)
+
+            x = tf.layers.conv2d(x, 512, (5, 5), strides=(2, 2), padding='same',
+                                 kernel_initializer=tf.keras.initializers.glorot_uniform())
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
+            x = tf.nn.leaky_relu(x)
