@@ -46,3 +46,5 @@ class DCGAN(object):
                                            kernel_initializer=tf.keras.initializers.glorot_uniform(),
                                            name='layer5')
             outputs = tf.tanh(x, name='outputs')
+
+        return outputs
