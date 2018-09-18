@@ -15,6 +15,7 @@ class DCGAN(object):
         self.z = None
         self.batch_size = None
         self.g_loss = None
+        self.d_loss = None
 
     def generator(self, z, training, reuse=None):
         with tf.variable_scope('generator', reuse=reuse):
@@ -93,9 +94,20 @@ class DCGAN(object):
         d_fake_outputs = self.discriminator(fake_images, training=True)
         d_real_outputs = self.discriminator(batch_data, training=True, reuse=True)
 
-        self.g_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=tf.ones([self.batch_size],
-                                                                                                   dtype=ft.int64),
-                                                                                    logits=d_fake_outputs))
+        self.g_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=tf.ones([self.batch_size], dtype=tf.int64),
+            logits=d_fake_outputs))
+
+        d_real_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=tf.ones([self.batch_size], dtype=tf.int64),
+            logits=d_real_outputs
+        ))
+        d_fake_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=tf.zeros([self.batch_size], dtype=tf.int64),
+            logits=d_fake_outputs
+        ))
+
+        self.d_loss = d_fake_loss + d_real_loss
 
         # add each loss to collection
         tf.add_to_collection('g_losses', self.g_loss)
