@@ -87,4 +87,5 @@ class DCGAN(object):
         """Build model."""
         self.z = tf.random_uniform([batch_size, z_dim], minval=-1.0, maxval=1.0)
         fake_images = self.generator(self.z, training=True)
-        d_outputs = self.discriminator(fake_images, training=True)
+        d_fake_outputs = self.discriminator(fake_images, training=True)
+        d_real_outputs = self.discriminator(batch_data, training=True, reuse=True)
