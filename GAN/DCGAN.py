@@ -12,6 +12,7 @@ class DCGAN(object):
         print('Construct the model.')
         self.g_vars = None
         self.d_vars = None
+        self.z = None
 
     def generator(self, z, training, reuse=None):
         with tf.variable_scope('generator', reuse=reuse):
@@ -81,3 +82,8 @@ class DCGAN(object):
 
         self.d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='discriminator')
         return outputs
+
+    def build_model(self, batch_data, batch_size=128, z_dim=100):
+        """Build model."""
+        self.z = tf.random_uniform([batch_size, z_dim], minval=-1.0, maxval=1.0)
+        fake_images = self.generator(self.z, training=True)
