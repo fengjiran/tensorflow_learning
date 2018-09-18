@@ -54,5 +54,5 @@ class DCGAN(object):
         return outputs
 
     def discriminator(self, inputs, training, reuse=None):
-        with tf.variable_scope('discriminator'):
-            pass
+        with tf.variable_scope('discriminator', reuse=reuse):
+            x = tf.layers.conv2d(inputs, 64, (5, 5), strides=(2, 2), padding='same')
