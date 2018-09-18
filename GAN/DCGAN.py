@@ -10,6 +10,8 @@ class DCGAN(object):
 
     def __init__(self):
         print('Construct the model.')
+        self.g_vars = None
+        self.d_vars = None
 
     def generator(self, z, training, reuse=None):
         with tf.variable_scope('generator', reuse=reuse):
@@ -47,4 +49,10 @@ class DCGAN(object):
                                            name='layer5')
             outputs = tf.tanh(x, name='outputs')
 
+        self.g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='generator')
+
         return outputs
+
+    def discriminator(self, inputs, training, reuse=None):
+        with tf.variable_scope('discriminator'):
+            pass
