@@ -55,4 +55,12 @@ class DCGAN(object):
 
     def discriminator(self, inputs, training, reuse=None):
         with tf.variable_scope('discriminator', reuse=reuse):
-            x = tf.layers.conv2d(inputs, 64, (5, 5), strides=(2, 2), padding='same')
+            x = tf.layers.conv2d(inputs, 64, (5, 5), strides=(2, 2), padding='same',
+                                 kernel_initializer=tf.keras.initializers.glorot_uniform())
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
+            x = tf.nn.leaky_relu(x)
+
+            x = tf.layers.conv2d(x, 128, (5, 5), strides=(2, 2), padding='same',
+                                 kernel_initializer=tf.keras.initializers.glorot_uniform())
+            x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
+            x = tf.nn.leaky_relu(x)
