@@ -73,4 +73,11 @@ class DCGAN(object):
             x = tf.layers.conv2d(x, 512, (5, 5), strides=(2, 2), padding='same',
                                  kernel_initializer=tf.keras.initializers.glorot_uniform())
             x = tf.layers.batch_normalization(x, axis=list(range(len(x.get_shape()) - 1)), training=training)
-            x = tf.nn.leaky_relu(x)
+            outputs = tf.nn.leaky_relu(x)
+
+            batch_size = outputs.get_shape()[0].value
+            outputs = tf.reshape(outputs, [batch_size, -1])
+            outputs = tf.layers.dense(outputs, 2)
+
+        self.d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='discriminator')
+        return outputs
