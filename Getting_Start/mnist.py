@@ -56,13 +56,17 @@ def inference(images, hidden1_units, hidden2_units):
 
     """
     # Hidden 1
-    with tf.name_scope('hidden1'):
-        weights = tf.Variable(
-            tf.truncated_normal([IMAGE_PIXELS, hidden1_units],
-                                stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
-            name='weights')
-        biases = tf.Variable(tf.zeros([hidden1_units]),
-                             name='biases')
+    with tf.variable_scope('hidden1'):
+        weights = tf.get_variable(name='weights',
+                                  shape=[IMAGE_PIXELS, hidden1_units],
+                                  initializer=tf.truncated_normal_initializer(mean=0.0,
+                                                                              stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
+                                  trainable=True)
+        biases = tf.get_variable(name='biases',
+                                 shape=[hidden1_units],
+                                 initializer=tf.zeros_initializer(),
+                                 trainable=True)
+
         hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
 
     # Hidden 2
