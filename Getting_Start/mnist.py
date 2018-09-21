@@ -70,25 +70,29 @@ def inference(images, hidden1_units, hidden2_units):
         hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
 
     # Hidden 2
-    with tf.name_scope('hidden2'):
-        weights = tf.Variable(
-            tf.truncated_normal([hidden1_units, hidden2_units],
-                                stddev=1.0 / math.sqrt(float(hidden1_units))),
-            name='weights')
-
-        biases = tf.Variable(tf.zeros([hidden2_units]),
-                             name='biases')
+    with tf.variable_scope('hidden2'):
+        weights = tf.get_variable(name='weights',
+                                  shape=[hidden1_units, hidden2_units],
+                                  initializer=tf.truncated_normal_initializer(mean=0.0,
+                                                                              stddev=1.0 / math.sqrt(float(hidden1_units))),
+                                  trainable=True)
+        biases = tf.get_variable(name='biases',
+                                 shape=[hidden2_units],
+                                 initializer=tf.zeros_initializer(),
+                                 trainable=True)
 
         hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
 
-    with tf.name_scope('softmax_linear'):
-        weights = tf.Variable(
-            tf.truncated_normal([hidden2_units, NUM_CLASSES],
-                                stddev=1.0 / math.sqrt(float(hidden2_units))),
-            name='weights')
-
-        biases = tf.Variable(tf.zeros([NUM_CLASSES]),
-                             name='biases')
+    with tf.variable_scope('softmax_linear'):
+        weights = tf.get_variable(name='weights',
+                                  shape=[hidden2_units, NUM_CLASSES],
+                                  initializer=tf.truncated_normal_initializer(mean=0.0,
+                                                                              stddev=1.0 / math.sqrt(float(hidden2_units))),
+                                  trainable=True)
+        biases = tf.get_variable(name='biases',
+                                 shape=[NUM_CLASSES],
+                                 initializer=tf.zeros_initializer(),
+                                 trainable=True)
 
         logits = tf.matmul(hidden2, weights) + biases
 
