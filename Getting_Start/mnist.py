@@ -59,8 +59,9 @@ def inference(images, hidden1_units, hidden2_units):
     with tf.variable_scope('hidden1'):
         weights = tf.get_variable(name='weights',
                                   shape=[IMAGE_PIXELS, hidden1_units],
-                                  initializer=tf.truncated_normal_initializer(mean=0.0,
-                                                                              stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
+                                  initializer=tf.truncated_normal_initializer(
+                                      mean=0.0,
+                                      stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
                                   trainable=True)
         biases = tf.get_variable(name='biases',
                                  shape=[hidden1_units],
@@ -141,7 +142,8 @@ def training(loss, learning_rate):
     # Create the gradient descent optimizer with the given learning rate.
     optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     # Create a variable to track the global step.
-    global_step = tf.Variable(0, name='global_step', trainable=False)
+    global_step = tf.get_variable(name='global_step', shape=[],
+                                  initializer=tf.zeros_initializer(), trainable=False)
     # Use the optimizer to apply the gradients that minimize the loss
     # (and also increment the global step counter) as a single training step.
     train_op = optimizer.minimize(loss, global_step=global_step)
