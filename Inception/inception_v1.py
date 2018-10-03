@@ -4,7 +4,8 @@ from __future__ import print_function
 import tensorflow as tf
 
 
-# def trunc_normal(stddev): return tf.truncated_normal_initializer(0.0, stddev)
+def trunc_normal():
+    return tf.truncated_normal_initializer(0.0, 0.01)
 
 
 def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
