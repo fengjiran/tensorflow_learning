@@ -52,12 +52,10 @@ def vgg_a(inputs,
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
                              name=end_point)
         end_points[end_point] = x
-        print(x.get_shape())
 
         end_point = 'pool1'
         x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
         end_points[end_point] = x
-        print(x.get_shape())
 
         # Block2
         end_point = 'conv2'
@@ -70,7 +68,6 @@ def vgg_a(inputs,
         end_point = 'pool2'
         x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
         end_points[end_point] = x
-        print(x.get_shape())
 
         # Block3
         end_point = 'conv3'
@@ -128,7 +125,6 @@ def vgg_a(inputs,
         end_point = 'pool5'
         x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
         end_points[end_point] = x
-        print(x.get_shape())
 
         # Use conv2d instead of fully connected layers.
         x = tf.layers.conv2d(x, 4096, 7, activation=tf.nn.relu,
