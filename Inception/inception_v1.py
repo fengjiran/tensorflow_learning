@@ -44,7 +44,7 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
 
         end_point = 'Conv2d_2b_1x1'
         net = tf.layers.conv2d(net, 64, 1, strides=1, padding='same', activation=tf.nn.relu,
-                               kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                               kernel_initializer=trunc_normal,
                                name=end_point)
         end_points[end_point] = net
         # if final_endpoint == end_point:
@@ -52,7 +52,7 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
 
         end_point = 'Conv2d_2c_3x3'
         net = tf.layers.conv2d(net, 192, 3, strides=1, padding='same', activation=tf.nn.relu,
-                               kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                               kernel_initializer=trunc_normal,
                                name=end_point)
         end_points[end_point] = net
         # if final_endpoint == end_point:
