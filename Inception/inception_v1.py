@@ -382,3 +382,16 @@ def inception_v1(inputs,
             if global_pool:
                 net = tf.reduce_mean(net, [1, 2], keepdims=True, name='global_pool')
                 end_points['global_pool'] = net
+            else:
+                net = tf.layers.average_pooling2d(net, 7, strides=1)
+                end_points['AvgPool_0a_7x7'] = net
+            if not num_classes:
+                return net, end_points
+            net = tf.layers.dropout(net, dropout_keep_prob, training=is_training, name='dropout')
+            logits = tf.layers.conv2d(net, num_classes, 1, name='conv2d_0c_1x1')
+
+            if spatial_squeeze:
+                logits = tf.squeeze(logits, [1, 2], name='SpatialSqueeze')
+            end_points['logits'] = logits
+            end_points['predictions'] = prediction_fn(logits, name='predictions')
+        return logits, end_points
