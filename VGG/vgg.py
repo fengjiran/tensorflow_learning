@@ -204,7 +204,13 @@ def vgg16(inputs,
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
                              name=end_point)
         end_points[end_point] = x
-        print(x.get_shape())
+
+        end_point = 'conv2'
+        x = tf.layers.conv2d(inputs, 64, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
 
         end_point = 'pool1'
         x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
@@ -212,7 +218,14 @@ def vgg16(inputs,
         print(x.get_shape())
 
         # Block2
-        end_point = 'conv2'
+        end_point = 'conv3'
+        x = tf.layers.conv2d(x, 128, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv4'
         x = tf.layers.conv2d(x, 128, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
@@ -225,14 +238,21 @@ def vgg16(inputs,
         print(x.get_shape())
 
         # Block3
-        end_point = 'conv3'
+        end_point = 'conv5'
         x = tf.layers.conv2d(x, 256, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
                              name=end_point)
         end_points[end_point] = x
 
-        end_point = 'conv4'
+        end_point = 'conv6'
+        x = tf.layers.conv2d(x, 256, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv7'
         x = tf.layers.conv2d(x, 256, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
@@ -244,14 +264,21 @@ def vgg16(inputs,
         end_points[end_point] = x
 
         # Block4
-        end_point = 'conv5'
+        end_point = 'conv8'
         x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
                              name=end_point)
         end_points[end_point] = x
 
-        end_point = 'conv6'
+        end_point = 'conv9'
+        x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv10'
         x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
@@ -263,14 +290,21 @@ def vgg16(inputs,
         end_points[end_point] = x
 
         # Block5
-        end_point = 'conv7'
+        end_point = 'conv11'
         x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
                              name=end_point)
         end_points[end_point] = x
 
-        end_point = 'conv8'
+        end_point = 'conv12'
+        x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv13'
         x = tf.layers.conv2d(x, 512, 3, padding='same', activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
@@ -286,13 +320,13 @@ def vgg16(inputs,
         x = tf.layers.conv2d(x, 4096, 7, activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
-                             name='fc9')
+                             name='fc14')
         x = tf.layers.dropout(x, dropout_keep_prob, training=is_training, name='dropout6')
 
         x = tf.layers.conv2d(x, 4096, 1, activation=tf.nn.relu,
                              kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                              kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
-                             name='fc10')
+                             name='fc15')
         end_points['fc'] = x
 
         if global_pool:
@@ -304,15 +338,15 @@ def vgg16(inputs,
             x = tf.layers.conv2d(x, num_classes, 1,
                                  kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
-                                 name='fc11')
+                                 name='fc16')
 
         if spatial_squeeze:
-            x = tf.squeeze(x, name='fc11/squeezed')
+            x = tf.squeeze(x, name='fc16/squeezed')
             end_points['squeezed'] = x
     return x, end_points
 
 
 if __name__ == '__main__':
     inputs = tf.placeholder(tf.float32, [10, 224, 224, 3])
-    outputs, end_points = vgg_a(inputs)
+    outputs, end_points = vgg16(inputs)
     print(outputs.get_shape())
