@@ -127,3 +127,21 @@ def vgg_a(inputs,
         end_points[end_point] = x
 
         # Use conv2d instead of fully connected layers.
+        x = tf.layers.conv2d(x, 4096, 7, activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name='fc9')
+        x = tf.layers.dropout(x, dropout_keep_prob, training=is_training, name='dropout6')
+
+        x = tf.layers.conv2d(x, 4096, 1, activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name='fc10')
+        end_points['fc'] = x
+
+        if global_pool:
+            x = tf.reduce_mean(x, [1, 2], keep_dims=True, name='global_pool')
+            end_points['global_pool'] = x
+        if num_classes:
+            x = tf.layers.dropout(x, dropout_keep_prob, training=is_training,
+                                  name='dropout7')
