@@ -9,7 +9,7 @@ def vgg_a(inputs,
           is_training=True,
           dropout_keep_prob=0.5,
           spatial_squeeze=True,
-          global_pool=False,
+          global_pool=True,
           name='vgg_a'):
     """Construct a example vgg 11-layers version network.
 
@@ -144,7 +144,7 @@ def vgg_a(inputs,
         end_points['fc'] = x
 
         if global_pool:
-            x = tf.reduce_mean(x, [1, 2], keep_dims=True, name='global_pool')
+            x = tf.reduce_mean(x, [1, 2], keepdims=True, name='global_pool')
             end_points['global_pool'] = x
         if num_classes:
             x = tf.layers.dropout(x, dropout_keep_prob, training=is_training,
