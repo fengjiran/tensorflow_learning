@@ -8,7 +8,7 @@ def trunc_normal():
     return tf.truncated_normal_initializer(0.0, 0.01)
 
 
-def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
+def inception_v1_base(inputs, scope='InceptionV1'):
     """
     Define the Inception V1 base architecture.
 
@@ -81,7 +81,7 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
                 branch_2 = tf.layers.conv2d(net, 16, 1, padding='same', activation=tf.nn.relu,
                                             kernel_initializer=trunc_normal,
                                             name='Conv2d_0a_1x1')
-                branch_2 = tf.layers.conv2d(branch_2, 32, 3, padding='same', activation=tf.nn.relu,
+                branch_2 = tf.layers.conv2d(branch_2, 32, 5, padding='same', activation=tf.nn.relu,
                                             kernel_initializer=trunc_normal,
                                             name='Conv2d_0b_3x3')
             with tf.variable_scope('Branch_3'):
@@ -98,26 +98,26 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         with tf.variable_scope(end_point):
             with tf.variable_scope('Branch_0'):
                 branch_0 = tf.layers.conv2d(net, 128, 1, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0a_1x1')
             with tf.variable_scope('Branch_1'):
                 branch_1 = tf.layers.conv2d(net, 128, 1, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0a_1x1')
                 branch_1 = tf.layers.conv2d(branch_1, 192, 3, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0b_3x3')
             with tf.variable_scope('Branch_2'):
                 branch_2 = tf.layers.conv2d(net, 32, 1, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0a_1x1')
-                branch_2 = tf.layers.conv2d(branch_2, 96, 3, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                branch_2 = tf.layers.conv2d(branch_2, 96, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0b_3x3')
             with tf.variable_scope('Branch_3'):
                 branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
                 branch_3 = tf.layers.conv2d(branch_3, 64, 1, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0b_1x1')
             net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
         end_points[end_point] = net
@@ -134,5 +134,198 @@ def inception_v1_base(inputs, final_endpoint='Mixed_5c', scope='InceptionV1'):
         with tf.variable_scope(end_point):
             with tf.variable_scope('Branch_0'):
                 branch_0 = tf.layers.conv2d(net, 192, 1, padding='same', activation=tf.nn.relu,
-                                            kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                            kernel_initializer=trunc_normal,
                                             name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 96, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 208, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 16, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 48, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 64, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_4c'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 192, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 96, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 208, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 16, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 48, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 64, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_4d'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 256, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 24, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 64, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 64, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_4e'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 112, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 144, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 288, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 32, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 64, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 64, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_4f'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 256, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 160, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 320, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 32, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 128, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'MaxPool_5a_2x2'
+        net = tf.layers.max_pooling2d(net, 2, 2, padding='same', name=end_point)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_5b'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 256, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 160, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 320, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 32, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 128, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
+
+        end_point = 'Mixed_5c'
+        with tf.variable_scope(end_point):
+            with tf.variable_scope('Branch_0'):
+                branch_0 = tf.layers.conv2d(net, 384, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+            with tf.variable_scope('Branch_1'):
+                branch_1 = tf.layers.conv2d(net, 192, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_1 = tf.layers.conv2d(branch_1, 384, 3, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_2'):
+                branch_2 = tf.layers.conv2d(net, 48, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0a_1x1')
+                branch_2 = tf.layers.conv2d(branch_2, 128, 5, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_3x3')
+            with tf.variable_scope('Branch_3'):
+                branch_3 = tf.layers.max_pooling2d(net, 3, 1, padding='same', name='MaxPool_0a_3x3')
+                branch_3 = tf.layers.conv2d(branch_3, 128, 1, padding='same', activation=tf.nn.relu,
+                                            kernel_initializer=trunc_normal,
+                                            name='Conv2d_0b_1x1')
+            net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
+        end_points[end_point] = net
