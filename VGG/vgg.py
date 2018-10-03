@@ -155,7 +155,7 @@ def vgg_a(inputs,
                                  name='fc11')
 
         if spatial_squeeze:
-            x = tf.squeeze(x, [1, 2], name='fc11/squeezed')
+            x = tf.squeeze(x, name='fc11/squeezed')
             end_points['squeezed'] = x
     return x, end_points
 
