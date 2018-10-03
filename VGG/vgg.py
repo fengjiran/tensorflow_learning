@@ -8,7 +8,7 @@ def vgg_a(inputs,
           num_classes=1000,
           is_training=True,
           dropout_keep_prob=0.5,
-          spatial_squeeze=False,
+          spatial_squeeze=True,
           global_pool=False,
           name='vgg_a'):
     """Construct a example vgg 11-layers version network.
