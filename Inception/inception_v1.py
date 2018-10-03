@@ -329,3 +329,56 @@ def inception_v1_base(inputs, scope='InceptionV1'):
                                             name='Conv2d_0b_1x1')
             net = tf.concat([branch_0, branch_1, branch_2, branch_3], axis=3)
         end_points[end_point] = net
+        return net, end_points
+
+
+def inception_v1(inputs,
+                 num_classes=1000,
+                 is_training=True,
+                 dropout_keep_prob=0.5,
+                 prediction_fn=tf.nn.softmax,
+                 spatial_squeeze=True,
+                 global_pool=True,
+                 reuse=None,
+                 name='InceptionV1'):
+    """Define the Inception V1 architecture.
+
+    This architecture is defined in:
+        Going deeper with convolutions
+        Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed,
+        Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke, Andrew Rabinovich.
+        http://arxiv.org/pdf/1409.4842v1.pdf.
+    The default image size used to train this network is 224x224.
+    Args:
+        inputs: a tensor of size [batch_size, height, width, channels].
+        num_classes: number of predicted classes. If 0 or None, the logits layer
+        is omitted and the input features to the logits layer (before dropout)
+        are returned instead.
+        is_training: whether is training or not.
+        dropout_keep_prob: the percentage of activation values that are retained.
+        prediction_fn: a function to get predictions out of logits.
+        spatial_squeeze: if True, logits is of shape [B, C], if false logits is of
+            shape [B, 1, 1, C], where B is batch_size and C is number of classes.
+        reuse: whether or not the network and its variables should be reused. To be
+        able to reuse 'scope' must be given.
+        scope: Optional variable_scope.
+        global_pool: Optional boolean flag to control the avgpooling before the
+        logits layer. If false or unset, pooling is done with a fixed window
+        that reduces default-sized inputs to 1x1, while larger inputs lead to
+        larger outputs. If true, any input size is pooled down to 1x1.
+
+    Returns
+    -------
+        net: a Tensor with the logits (pre-softmax activations) if num_classes
+        is a non-zero integer, or the non-dropped-out input to the logits layer
+        if num_classes is 0 or None.
+        end_points: a dictionary from components of the network to the corresponding
+        activation.
+
+    """
+    with tf.variable_scope(name):
+        net, end_points = inception_v1_base(inputs)
+        with tf.variable_scope('logits'):
+            if global_pool:
+                net = tf.reduce_mean(net, [1, 2], keepdims=True, name='global_pool')
+                end_points['global_pool'] = net
