@@ -43,3 +43,66 @@ def vgg_a(inputs,
     end_points: a dict of tensors with intermediate activations.
 
     """
+    end_points = {}
+    with tf.variable_scope(name):
+        # Block1
+        end_point = 'conv1'
+        x = tf.layers.conv2d(inputs, 64, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'pool1'
+        x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
+        end_points[end_point] = x
+
+        # Block2
+        end_point = 'conv2'
+        x = tf.layers.conv2d(inputs, 128, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'pool2'
+        x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
+        end_points[end_point] = x
+
+        # Block3
+        end_point = 'conv3'
+        x = tf.layers.conv2d(inputs, 256, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv4'
+        x = tf.layers.conv2d(inputs, 256, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'pool3'
+        x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
+        end_points[end_point] = x
+
+        # Block4
+        end_point = 'conv5'
+        x = tf.layers.conv2d(inputs, 512, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'conv6'
+        x = tf.layers.conv2d(inputs, 512, 3, padding='same', activation=tf.nn.relu,
+                             kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                             kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                             name=end_point)
+        end_points[end_point] = x
+
+        end_point = 'pool4'
+        x = tf.layers.max_pooling2d(x, 2, 2, padding='same', name=end_point)
+        end_points[end_point] = x
