@@ -8,7 +8,7 @@ def vgg_a(inputs,
           num_classes=1000,
           is_training=True,
           dropout_keep_prob=0.5,
-          spatial_squeeze=True,
+          spatial_squeeze=False,
           global_pool=False,
           name='vgg_a'):
     """Construct a example vgg 11-layers version network.
@@ -145,3 +145,18 @@ def vgg_a(inputs,
         if num_classes:
             x = tf.layers.dropout(x, dropout_keep_prob, training=is_training,
                                   name='dropout7')
+            x = tf.layers.conv2d(x, num_classes, 1,
+                                 kernel_initializer=tf.truncated_normal_initializer(0.0, 0.01),
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                                 name='fc11')
+
+        if spatial_squeeze:
+            x = tf.squeeze(x, [1, 2], name='fc11/squeezed')
+            end_points['squeezed'] = x
+    return x, end_points
+
+
+if __name__ == '__main__':
+    inputs = tf.placeholder(tf.float32, [10, 224, 224, 3])
+    outputs, end_points = vgg_a(inputs)
+    print(outputs.get_shape())
