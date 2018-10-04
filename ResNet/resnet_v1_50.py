@@ -65,7 +65,7 @@ class ResNet_v1_50(object):
             # h_out = n_out//4
             out = self.bottleneck(x, n_in, n_out, stride=init_stride, scope='bottleneck1')
 
-            for i in range(1, n):
+            for i in range(1, n_bottleneck):
                 out = self.bottleneck(out, n_in, n_out, scope='bottleneck' % (i + 1))
 
             return out
