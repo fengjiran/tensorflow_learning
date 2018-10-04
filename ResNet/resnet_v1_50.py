@@ -14,3 +14,9 @@ class ResNet_v1_50(object):
         self.inputs = inputs
         self.is_training = is_training
         self.num_classes = num_classes
+
+    def bottleneck(self, x, h_out, n_out, stride=None, is_training=True, scope='bottleneck'):
+        """A residual bottleneck unit."""
+        n_in = x.get_shape()[-1]
+        if stride is None:
+            stride = 1 if n_in == n_out else 2
