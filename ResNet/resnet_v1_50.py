@@ -59,3 +59,13 @@ class ResNet_v1_50(object):
             else:
                 shortcut = h
             return tf.nn.relu(shortcut + x)
+
+    def block(self, x, n_in, n_out, n_bottleneck, init_stride=2, scope='block'):
+        with tf.variable_scope(scope):
+            # h_out = n_out//4
+            out = self.bottleneck(x, n_in, n_out, stride=init_stride, scope='bottleneck1')
+
+            for i in range(1, n):
+                out = self.bottleneck(out, n_in, n_out, scope='bottleneck' % (i + 1))
+
+            return out
