@@ -28,29 +28,29 @@ class CompletionModel(object):
             conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same', activation=tf.nn.elu,
                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv1')
             conv2 = tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2_downsample')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv2_downsample')
             conv3 = tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv3')
             conv4 = tf.layers.conv2d(conv3, 4 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4_downsample')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv4_downsample')
             conv5 = tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv5')
             conv6 = tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv6')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv6')
 
             conv7 = tf.layers.conv2d(conv6, 4 * cnum, 3, padding='same', dilation_rate=2, activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv7_atrous')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv7_atrous')
             conv8 = tf.layers.conv2d(conv7, 4 * cnum, 3, padding='same', dilation_rate=4, activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv8_atrous')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv8_atrous')
             conv9 = tf.layers.conv2d(conv8, 4 * cnum, 3, padding='same', dilation_rate=8, activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv9_atrous')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv9_atrous')
             conv10 = tf.layers.conv2d(conv9, 4 * cnum, 3, padding='same', dilation_rate=16, activation=tf.nn.elu,
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv10_atrous')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv10_atrous')
 
             conv11 = tf.layers.conv2d(conv10, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv11')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv11')
             conv12 = tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv12')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv12')
 
             conv13 = tf.layers.conv2d(
                 inputs=tf.image.resize_nearest_neighbor(conv12,
@@ -60,11 +60,11 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=tf.keras.initializers.glorot_normal(),
+                kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                 name='conv13_upsample')
 
             conv14 = tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv14')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv14')
             conv15 = tf.layers.conv2d(
                 inputs=tf.image.resize_nearest_neighbor(conv14,
                                                         (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
@@ -73,13 +73,13 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=tf.keras.initializers.glorot_normal(),
+                kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                 name='conv15_upsample')
 
             conv16 = tf.layers.conv2d(conv15, int(cnum / 2), 3, strides=1, padding='same', activation=tf.nn.elu,
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv16')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv16')
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv17')
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv17')
 
             conv_output = tf.clip_by_value(conv17, -1., 1.)
 
