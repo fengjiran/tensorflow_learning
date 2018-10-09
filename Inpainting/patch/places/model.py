@@ -81,7 +81,8 @@ class CompletionModel(object):
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
                                       kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv17')
 
-            conv_output = tf.clip_by_value(conv17, -1., 1.)
+            # conv_output = tf.clip_by_value(conv17, -1., 1.)
+            conv_output = tf.nn.tanh(conv17)
 
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
