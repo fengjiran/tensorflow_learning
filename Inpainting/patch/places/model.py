@@ -76,7 +76,7 @@ class CompletionModel(object):
                 kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                 name='conv15_upsample')
 
-            conv16 = tf.layers.conv2d(conv15, int(cnum / 2), 3, strides=1, padding='same', activation=tf.nn.elu,
+            conv16 = tf.layers.conv2d(conv15, cnum // 2, 3, strides=1, padding='same', activation=tf.nn.elu,
                                       kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv16')
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
                                       kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv17')
