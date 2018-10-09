@@ -26,7 +26,7 @@ class CompletionModel(object):
 
         with tf.variable_scope('coarse', reuse=reuse):
             conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same', activation=tf.nn.elu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(), name='conv1')
             conv2 = tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2, padding='same', activation=tf.nn.elu,
                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2_downsample')
             conv3 = tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same', activation=tf.nn.elu,
