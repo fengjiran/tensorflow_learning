@@ -245,10 +245,10 @@ class CompletionModel(object):
         losses['refine_ae_loss'] /= tf.reduce_mean(1. - mask)
 
         # wgan
-        # global discriminator patch
+        # global discriminator input
         batch_pos_neg = tf.concat([batch_pos, batch_complete_refine], axis=0)
 
-        # local discriminator patch
+        # local discriminator input
         local_patch_pos_neg = tf.concat([local_patch_pos, local_patch_refine], axis=0)
 
         # wgan with gradient penalty
@@ -373,10 +373,10 @@ if __name__ == '__main__':
 
     model = CompletionModel()
     x = tf.random_uniform([10, 256, 256, 3])
-    coarse = model.coarse_network(x)
-    refine = model.refine_network(coarse)
-    print(coarse.get_shape())
-    print(refine.get_shape())
+    # coarse = model.coarse_network(x)
+    # refine = model.refine_network(coarse)
+    # print(coarse.get_shape())
+    # print(refine.get_shape())
 
-    # g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
-    # print(len(g_vars), len(d_vars))
+    g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
+    print(len(g_vars), len(d_vars))
