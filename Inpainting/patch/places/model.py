@@ -10,6 +10,7 @@ from utils import local_patch
 from utils import gan_wgan_loss
 from utils import random_interpolates
 from utils import gradient_penalty
+from utils import lipschitz_penalty
 from utils import images_summary
 from utils import gradients_summary
 
@@ -274,8 +275,12 @@ class CompletionModel(object):
                                                                 reuse=True)
 
         # apply penalty
-        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask, norm=750.)
-        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
+        # penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask, norm=750.)
+        # penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
+
+        # lipschitz penalty
+        penalty_global = lipschitz_penalty(interpolates_global, dout_global, mask=mask)
+        penalty_local = lipschitz_penalty(interpolates_local, dout_local, mask=local_patch_mask)
 
         losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
         losses['refine_d_loss'] += losses['gp_loss']
