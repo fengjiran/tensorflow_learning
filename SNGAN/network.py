@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 from ops import *
+from utils import *
 
 
 class GAN(object):
