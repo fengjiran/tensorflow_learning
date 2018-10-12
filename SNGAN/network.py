@@ -46,3 +46,10 @@ class GAN(object):
         else:
             self.c_dim = 3
             self.data_X = load_data(dataset_name=self.dataset, size=self.img_size)
+
+        # get number of batches for a single epoch
+        self.num_batches = len(self.data_X) // self.batch_size
+
+    def discriminator(self, x, is_training=True, reuse=None):
+        with tf.variable_scope("discriminator", reuse=reuse):
+            ch = 32
