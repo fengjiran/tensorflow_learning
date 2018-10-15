@@ -34,6 +34,7 @@ class GAN(object):
         self.inputs = None
         self.z = None
         self.d_loss = None
+        self.g_loss = None
 
         # train
         self.learning_rate = 0.0002
@@ -110,3 +111,11 @@ class GAN(object):
 
         # get loss for discriminator
         self.d_loss = discriminator_loss(real=D_real_logits, fake=D_fake_logits)
+
+        # get loss for generator
+        self.g_loss = generator_loss(fake=D_fake_logits)
+
+        # training
+        t_vars = tf.trainable_variables()
+        d_vars = [var for var in t_vars if 'discriminator' in var.name]
+        g_vars = [var for var in t_vars if 'generator' in var.name]
