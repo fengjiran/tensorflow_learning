@@ -87,6 +87,13 @@ def fully_conneted(x, units, use_bias=True, sn=False, scope='fully_0'):
         return x
 
 
+def batch_norm(x, is_training=True, scope='batch_norm'):
+    return tf_contrib.layers.batch_norm(x,
+                                        decay=0.9, epsilon=1e-05,
+                                        center=True, scale=True, updates_collections=None,
+                                        is_training=is_training, scope=scope)
+
+
 def flatten(x):
     return tf.layers.flatten(x)
 
