@@ -33,6 +33,7 @@ class GAN(object):
 
         self.inputs = None
         self.z = None
+        self.d_loss = None
 
         # train
         self.learning_rate = 0.0002
@@ -100,3 +101,12 @@ class GAN(object):
         self.z = tf.placeholder(tf.float32, [self.batch_size, self.z_dim], name='z')
 
         # loss functions
+        # output of D for real images
+        D_real_logits = self.discriminator(self.inputs)
+
+        # output of D for fake images
+        G = self.generator(self.z)
+        D_fake_logits = self.discriminator(G, reuse=True)
+
+        # get loss for discriminator
+        self.d_loss = discriminator_loss(real=D_real_logits, fake=D_fake_logits)
