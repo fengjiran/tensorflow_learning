@@ -53,3 +53,18 @@ class GAN(object):
     def discriminator(self, x, is_training=True, reuse=None):
         with tf.variable_scope("discriminator", reuse=reuse):
             ch = 32
+
+            for i in range(5):
+                # ch : 64 -> 128 -> 256 -> 512 -> 1024
+                # size : 32 -> 16 -> 8 -> 4 -> 2
+                x = conv(x, channels=2 * ch, kernel=5, stride=2, pad=2, sn=self.sn, scope='conv_' + str(i + 1))
+                x = batch_norm(x, is_training, scope='bn_' + str(i))
+                x = tf.nn.leaky_relu(x)
+
+                ch = ch * 2
+
+            # [bs, 4, 4, 1024]
+            x = flatten(x)
+            x = fully_conneted(x, 1, sn=self.sn)
+
+            return x
