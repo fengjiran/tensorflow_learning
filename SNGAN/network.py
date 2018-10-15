@@ -31,6 +31,9 @@ class GAN(object):
 
         self.img_size = args.img_size
 
+        self.inputs = None
+        self.z = None
+
         # train
         self.learning_rate = 0.0002
         self.beta1 = 0.5
@@ -82,3 +85,16 @@ class GAN(object):
                 x = batch_norm(x, is_training, scope='bn_' + str(i))
                 x = tf.nn.relu(x)
                 ch = ch // 2
+
+            x = deconv(x, channels=self.c_dim, kernel=5, stride=2, scope='generated_image')
+            # [bs, 64, 64, c_dim]
+
+            x = tf.nn.tanh(x)
+            return x
+
+    def build_model(self):
+        # images
+        self.inputs = tf.placeholder(tf.float32, [self.batch_size, self.img_size,
+                                                  self.img_size, self.c_dim], name='real_image')
+        # noises
+        self.z = tf.placeholder(tf.float32, [self.batch_size, self.z_dim], name='z')
