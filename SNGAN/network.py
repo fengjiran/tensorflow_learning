@@ -98,3 +98,5 @@ class GAN(object):
                                                   self.img_size, self.c_dim], name='real_image')
         # noises
         self.z = tf.placeholder(tf.float32, [self.batch_size, self.z_dim], name='z')
+
+        # loss functions
