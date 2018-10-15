@@ -68,3 +68,17 @@ class GAN(object):
             x = fully_conneted(x, 1, sn=self.sn)
 
             return x
+
+    def generator(self, z, is_training=True, reuse=None):
+        with tf.variable_scope('generator', reuse=reuse):
+            ch = 1024
+
+            x = fully_conneted(z, ch)
+            x = tf.nn.relu(x)
+            x = tf.reshape(x, [-1, 1, 1, ch])
+
+            for i in range(5):
+                x = deconv(x, channels=ch // 2, kernel=5, stride=2, scope='deconv_' + str(i + 1))
+                x = batch_norm(x, is_training, scope='bn_' + str(i))
+                x = tf.nn.relu(x)
+                ch = ch // 2
