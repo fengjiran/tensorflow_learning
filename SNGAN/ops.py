@@ -140,3 +140,15 @@ def spectral_norm(w, iteration=1):
         w_norm = tf.reshape(w_norm, w_shape)
 
     return w_norm
+
+
+def L1_loss(x, y):
+    loss = tf.reduce_mean(tf.abs(x - y))
+
+    return loss
+
+
+def L2_loss(x, y):
+    loss = tf.reduce_mean(tf.square(x - y))
+
+    return loss
