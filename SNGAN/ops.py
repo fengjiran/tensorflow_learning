@@ -87,6 +87,18 @@ def fully_conneted(x, units, use_bias=True, sn=False, scope='fully_0'):
         return x
 
 
+def discriminator_loss(real, fake):
+    real_loss = -tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real), logits=real))
+    fake_loss = -tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(fake), logits=fake))
+    loss = real_loss + fake_loss
+    return loss
+
+
+def generator_loss(fake):
+    loss = -tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(fake), logits=fake))
+    return loss
+
+
 def batch_norm(x, is_training=True, scope='batch_norm'):
     return tf_contrib.layers.batch_norm(x,
                                         decay=0.9, epsilon=1e-05,
