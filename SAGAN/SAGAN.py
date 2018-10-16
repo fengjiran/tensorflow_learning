@@ -119,7 +119,6 @@ class SAGAN(object):
                     x = conv(x, channels=ch // 2, kernel=3, stride=1, pad=1, sn=self.sn, scope='up_conv_' + str(i))
                     x = batch_norm(x, is_training, scope='batch_norm_' + str(i))
                     x = relu(x)
-
                 else:
                     x = deconv(x, channels=ch // 2, kernel=4, stride=2,
                                use_bias=False, sn=self.sn, scope='deconv_' + str(i))
@@ -137,7 +136,6 @@ class SAGAN(object):
                     x = conv(x, channels=ch // 2, kernel=3, stride=1, pad=1, sn=self.sn, scope='up_conv_' + str(i))
                     x = batch_norm(x, is_training, scope='batch_norm_' + str(i))
                     x = relu(x)
-
                 else:
                     x = deconv(x, channels=ch // 2, kernel=4, stride=2,
                                use_bias=False, sn=self.sn, scope='deconv_' + str(i))
@@ -191,7 +189,7 @@ class SAGAN(object):
 
             return x
 
-    def attention(self, x, ch, sn=False, scope='attention', reuse=False):
+    def attention(self, x, ch, sn=False, scope='attention', reuse=None):
         with tf.variable_scope(scope, reuse=reuse):
             f = conv(x, ch // 8, kernel=1, stride=1, sn=sn, scope='f_conv')  # [bs, h, w, c']
             g = conv(x, ch // 8, kernel=1, stride=1, sn=sn, scope='g_conv')  # [bs, h, w, c']
