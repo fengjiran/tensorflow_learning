@@ -51,18 +51,17 @@ def deconv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, sn=Fa
                             max(kernel - stride, 0), x_shape[2] * stride + max(kernel - stride, 0), channels]
 
         if sn:
-            w = tf.get_variable("kernel", shape=[kernel, kernel, channels, x.get_shape(
-            )[-1]], initializer=weight_init, regularizer=weight_regularizer)
+            w = tf.get_variable("kernel", shape=[kernel, kernel, channels, x.get_shape()[-1]],
+                                initializer=weight_init, regularizer=weight_regularizer)
             x = tf.nn.conv2d_transpose(x, filter=spectral_norm(w), output_shape=output_shape,
                                        strides=[1, stride, stride, 1], padding=padding)
-
             if use_bias:
                 bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
                 x = tf.nn.bias_add(x, bias)
-
         else:
             x = tf.layers.conv2d_transpose(inputs=x, filters=channels,
-                                           kernel_size=kernel, kernel_initializer=weight_init, kernel_regularizer=weight_regularizer,
+                                           kernel_size=kernel, kernel_initializer=weight_init,
+                                           kernel_regularizer=weight_regularizer,
                                            strides=stride, padding=padding, use_bias=use_bias)
 
         return x
@@ -84,7 +83,6 @@ def fully_conneted(x, units, use_bias=True, sn=False, scope='fully_0'):
                 x = tf.matmul(x, spectral_norm(w)) + bias
             else:
                 x = tf.matmul(x, spectral_norm(w))
-
         else:
             x = tf.layers.dense(x, units=units, kernel_initializer=weight_init,
                                 kernel_regularizer=weight_regularizer, use_bias=use_bias)
