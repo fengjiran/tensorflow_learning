@@ -106,7 +106,7 @@ class SAGAN(object):
     # Generator
     ##################################################################################
 
-    def generator(self, z, is_training=True, reuse=False):
+    def generator(self, z, is_training=True, reuse=None):
         with tf.variable_scope("generator", reuse=reuse):
             ch = 1024
             x = deconv(z, channels=ch, kernel=4, stride=1, padding='VALID', use_bias=False, sn=self.sn, scope='deconv')
