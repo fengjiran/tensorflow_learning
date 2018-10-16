@@ -42,6 +42,10 @@ class GAN(object):
         self.d_sum = None
         self.g_sum = None
 
+        self.sample_z = None
+        self.saver = None
+        self.writer = None
+
         # train
         self.learning_rate = 0.0002
         self.beta1 = 0.5
@@ -143,3 +147,153 @@ class GAN(object):
     def train(self):
         # initialize all variables
         tf.global_variables_initializer().run()
+
+        # graph inputs for visualize training results
+        self.sample_z = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+
+        # saver to save model
+        self.saver = tf.train.Saver()
+
+        # summary writer
+        self.writer = tf.summary.FileWriter(self.log_dir + '/' + self.model_dir, self.sess.graph)
+
+        # restore check-point if it exits
+        could_load, checkpoint_counter = self.load(self.checkpoint_dir)
+        if could_load:
+            start_epoch = (int)(checkpoint_counter / self.num_batches)
+            start_batch_id = checkpoint_counter - start_epoch * self.num_batches
+            counter = checkpoint_counter
+            print(" [*] Load SUCCESS")
+        else:
+            start_epoch = 0
+            start_batch_id = 0
+            counter = 1
+            print(" [!] Load failed...")
+
+        # loop for epoch
+        start_time = time.time()
+        for epoch in range(start_epoch, self.epoch):
+            # get batch data
+            for idx in range(start_batch_id, self.num_batches):
+                batch_images = self.data_X[idx * self.batch_size: (idx + 1) * self.batch_size]
+
+                batch_z = np.random.uniform(-1, 1, [self.batch_size, self.z_dim])
+
+                train_feed_dict = {
+                    self.inputs: batch_images,
+                    self.z: batch_z
+                }
+
+                # update D network
+                _, summary_str, d_loss = self.sess.run(
+                    [self.d_optim, self.d_sum, self.d_loss], feed_dict=train_feed_dict)
+                self.writer.add_summary(summary_str, counter)
+
+                # update G network
+                _, summary_str, g_loss = self.sess.run(
+                    [self.g_optim, self.g_sum, self.g_loss], feed_dict=train_feed_dict)
+                self.writer.add_summary(summary_str, counter)
+
+                # display training status
+                counter += 1
+                print("Epoch: [%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f"
+                      % (epoch, idx, self.num_batches, time.time() - start_time, d_loss, g_loss))
+
+                # save training results for every 300 steps
+                if np.mod(counter, self.print_freq) == 0:
+                    samples = self.sess.run(self.fake_images, feed_dict={self.z: self.sample_z})
+                    tot_num_samples = min(self.sample_num, self.batch_size)
+                    manifold_h = int(np.floor(np.sqrt(tot_num_samples)))
+                    manifold_w = int(np.floor(np.sqrt(tot_num_samples)))
+
+                    sample_dir = os.path.join(self.sample_dir, self.model_dir)
+                    check_folder(sample_dir)
+
+                    save_images(samples[:manifold_h * manifold_w, :, :, :],
+                                [manifold_h, manifold_w],
+                                './' + sample_dir + '/' + self.model_name + '_train_{:02d}_{:04d}.png'.format(epoch, idx))
+
+            # After an epoch, start_batch_id is set to zero
+            # non-zero value is only for the first epoch after loading pre-trained model
+            start_batch_id = 0
+
+            # save model
+            # self.save(self.checkpoint_dir, counter)
+
+            # show temporal results
+            # self.visualize_results(epoch)
+
+        # save model for final step
+        self.save(self.checkpoint_dir, counter)
+
+    def visualize_results(self, epoch):
+        tot_num_samples = min(self.sample_num, self.batch_size)
+        image_frame_dim = int(np.floor(np.sqrt(tot_num_samples)))
+
+        """ random condition, random noise """
+
+        z_sample = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+
+        samples = self.sess.run(self.fake_images, feed_dict={self.z: z_sample})
+
+        sample_dir = os.path.join(self.sample_dir, self.model_dir)
+        check_folder(sample_dir)
+
+        save_images(samples[:image_frame_dim * image_frame_dim, :, :, :], [image_frame_dim, image_frame_dim],
+                    sample_dir + '/' + self.model_name + '_epoch%03d' % epoch + '_test_all_classes.png')
+
+    @property
+    def model_dir(self):
+        return "{}_{}_{}_{}_{}".format(
+            self.model_name, self.dataset, self.batch_size, self.z_dim, self.sn)
+
+    def save(self, checkpoint_dir, step):
+        checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
+
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
+
+        self.saver.save(self.sess, os.path.join(checkpoint_dir, self.model_name + '.model'), global_step=step)
+
+    def load(self, checkpoint_dir):
+        import re
+        print(" [*] Reading checkpoints...")
+        checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
+
+        ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+            self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
+            counter = int(next(re.finditer("(\d+)(?!.*\d)", ckpt_name)).group(0))
+            print(" [*] Success to read {}".format(ckpt_name))
+            return True, counter
+        else:
+            print(" [*] Failed to find a checkpoint")
+            return False, 0
+
+    def test(self):
+        tf.global_variables_initializer().run()
+
+        self.saver = tf.train.Saver()
+        could_load, checkpoint_counter = self.load(self.checkpoint_dir)
+        result_dir = os.path.join(self.result_dir, self.model_dir)
+        check_folder(result_dir)
+
+        if could_load:
+            print(" [*] Load SUCCESS")
+        else:
+            print(" [!] Load failed...")
+
+        tot_num_samples = min(self.sample_num, self.batch_size)
+        image_frame_dim = int(np.floor(np.sqrt(tot_num_samples)))
+
+        """ random condition, random noise """
+
+        for i in range(self.test_num):
+            z_sample = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+
+            samples = self.sess.run(self.fake_images, feed_dict={self.z: z_sample})
+
+            save_images(samples[:image_frame_dim * image_frame_dim, :, :, :],
+                        [image_frame_dim, image_frame_dim],
+                        result_dir + '/' + self.model_name + '_test_all_classes_{}.png'.format(i))
