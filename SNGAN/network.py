@@ -139,3 +139,7 @@ class GAN(object):
         """ Summary """
         self.d_sum = tf.summary.scalar("d_loss", self.d_loss)
         self.g_sum = tf.summary.scalar("g_loss", self.g_loss)
+
+    def train(self):
+        # initialize all variables
+        tf.global_variables_initializer().run()
