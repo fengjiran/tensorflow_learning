@@ -46,7 +46,6 @@ def deconv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, sn=Fa
 
         if padding == 'SAME':
             output_shape = [x_shape[0], x_shape[1] * stride, x_shape[2] * stride, channels]
-
         else:
             output_shape = [x_shape[0], x_shape[1] * stride +
                             max(kernel - stride, 0), x_shape[2] * stride + max(kernel - stride, 0), channels]
