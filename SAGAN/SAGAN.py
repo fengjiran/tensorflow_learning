@@ -221,7 +221,6 @@ class SAGAN(object):
 
             alpha = tf.random_uniform(shape=[shape[0], 1, 1, 1], minval=-1., maxval=1.)
             interpolated = tf.clip_by_value(real + alpha * noise, -1., 1.)  # x_hat should be in the space of X
-
         else:
             alpha = tf.random_uniform(shape=[self.batch_size, 1, 1, 1], minval=0., maxval=1.)
             interpolated = alpha * real + (1. - alpha) * fake
@@ -236,7 +235,6 @@ class SAGAN(object):
         # WGAN - LP
         if self.gan_type == 'wgan-lp':
             GP = self.ld * tf.reduce_mean(tf.square(tf.maximum(0.0, grad_norm - 1.)))
-
         elif self.gan_type == 'wgan-gp' or self.gan_type == 'dragan':
             GP = self.ld * tf.reduce_mean(tf.square(grad_norm - 1.))
 
@@ -260,7 +258,6 @@ class SAGAN(object):
             inputs_iterator = inputs.make_one_shot_iterator()
 
             self.inputs = inputs_iterator.get_next()
-
         else:
             self.inputs = tf.placeholder(
                 tf.float32, [self.batch_size, self.img_size, self.img_size, self.c_dim], name='real_images')
