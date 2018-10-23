@@ -115,6 +115,14 @@ def gradient_penalty(x, y, mask=None, norm=1.):
     return tf.reduce_mean(tf.square(slopes - norm) / (norm**2))
 
 
+def lipschitz_penalty(x, y, mask=None, norm=1.):
+    gradients = tf.gradients(y, x)[0]
+    if mask is None:
+        mask = tf.ones_like(gradients)
+    slopes = tf.sqrt(tf.reduce_mean(tf.square(gradients) * mask, axis=[1, 2, 3]))
+    return tf.reduce_mean(tf.square(tf.nn.relu(slopes - norm)))
+
+
 def images_summary(images, name, max_outs):
     """Summary images.
 

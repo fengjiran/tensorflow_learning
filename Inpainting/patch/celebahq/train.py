@@ -6,7 +6,7 @@ import yaml
 # import numpy as np
 # import pandas as pd
 import tensorflow as tf
-from model import CompletionModel
+from model_in import CompletionModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -88,7 +88,7 @@ val_batch_data = val_batch_data / 127.5 - 1
 
 model = CompletionModel()
 # print(batch_data.get_shape())
-g_vars, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
+g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
 
 
 # training settings
@@ -128,7 +128,7 @@ refine_g_loss = cfg['l1_loss_alpha'] * losses['refine_l1_loss'] +\
 refine_d_loss = losses['refine_d_loss']
 
 # stage 1
-coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars)
+coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_list=g_vars_coarse)
 
 # stage 2 generator
 refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_list=g_vars)
@@ -166,8 +166,8 @@ if cfg['val']:
     #         static_image,
     #         cfg,
     #         'static_view/%d' % i)
-val_l1_loss = tf.reduce_mean(tf.abs(val_batch_data - static_inpainted_images[1]))
-val_l2_loss = tf.reduce_mean(tf.square(val_batch_data - static_inpainted_images[1]))
+    val_l1_loss = tf.reduce_mean(tf.abs(val_batch_data - static_inpainted_images[1]))
+    val_l2_loss = tf.reduce_mean(tf.square(val_batch_data - static_inpainted_images[1]))
 
 # summary
 tf.summary.scalar('learning_rate/lr_g', lr_g)

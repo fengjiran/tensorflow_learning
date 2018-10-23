@@ -10,7 +10,7 @@ from utils import bbox2mask
 from utils import local_patch
 from utils import gan_wgan_loss
 from utils import random_interpolates
-from utils import gradient_penalty
+from utils import lipschitz_penalty
 from utils import images_summary
 from utils import gradients_summary
 from utils import instance_norm
@@ -26,58 +26,58 @@ class CompletionModel(object):
     def coarse_network(self, images, reuse=None):
         conv_layers = []
         cnum = 32
-        conv_init = tf.contrib.layers.xavier_initializer_conv2d()
+        # conv_init = tf.contrib.layers.xavier_initializer_conv2d()
 
         with tf.variable_scope('coarse', reuse=reuse):
             conv1 = instance_norm(tf.layers.conv2d(images, cnum, 5, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv1'), 'in1')
             conv2 = instance_norm(tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv2_downsample'), 'in2')
             conv3 = instance_norm(tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv3'), 'in3')
             conv4 = instance_norm(tf.layers.conv2d(conv3, 4 * cnum, 3, strides=2, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv4_downsample'), 'in4')
             conv5 = instance_norm(tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv5'), 'in5')
             conv6 = instance_norm(tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv6'), 'in6')
 
             conv7 = instance_norm(tf.layers.conv2d(conv6, 4 * cnum, 3, padding='same', dilation_rate=2,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv7_atrous'), 'in7')
             conv8 = instance_norm(tf.layers.conv2d(conv7, 4 * cnum, 3, padding='same', dilation_rate=4,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv8_atrous'), 'in8')
             conv9 = instance_norm(tf.layers.conv2d(conv8, 4 * cnum, 3, padding='same', dilation_rate=8,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=conv_init,
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv9_atrous'), 'in9')
             conv10 = instance_norm(tf.layers.conv2d(conv9, 4 * cnum, 3, padding='same', dilation_rate=16,
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=conv_init,
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv10_atrous'), 'in10')
 
             conv11 = instance_norm(tf.layers.conv2d(conv10, 4 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=conv_init,
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv11'), 'in11')
             conv12 = instance_norm(tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=conv_init,
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv12'), 'in12')
 
             conv13 = instance_norm(tf.layers.conv2d(
@@ -88,12 +88,12 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=conv_init,
+                kernel_initializer=self.conv_init,
                 name='conv13_upsample'), 'in13')
 
             conv14 = instance_norm(tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=conv_init,
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv14'), 'in14')
             conv15 = instance_norm(tf.layers.conv2d(
                 inputs=tf.image.resize_nearest_neighbor(conv14,
@@ -103,15 +103,15 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=conv_init,
+                kernel_initializer=self.conv_init,
                 name='conv15_upsample'), 'in15')
 
             conv16 = instance_norm(tf.layers.conv2d(conv15, cnum // 2, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=conv_init,
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv16'), 'in16')
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
-                                      kernel_initializer=conv_init,
+                                      kernel_initializer=self.conv_init,
                                       name='conv17')
 
             # conv_output = tf.clip_by_value(conv17, -1., 1.)
@@ -133,53 +133,53 @@ class CompletionModel(object):
         with tf.variable_scope('refine', reuse=reuse):
             conv1 = instance_norm(tf.layers.conv2d(images, cnum, 5, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv1'), 'in1')
             conv2 = instance_norm(tf.layers.conv2d(conv1, cnum, 3, strides=2, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv2_downsample'), 'in2')
             conv3 = instance_norm(tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv3'), 'in3')
             conv4 = instance_norm(tf.layers.conv2d(conv3, 2 * cnum, 3, strides=2, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv4_downsample'), 'in4')
             conv5 = instance_norm(tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv5'), 'in5')
             conv6 = instance_norm(tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1, padding='same',
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv6'), 'in6')
 
             conv7 = instance_norm(tf.layers.conv2d(conv6, 4 * cnum, 3, padding='same', dilation_rate=2,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv7_atrous'), 'in7')
             conv8 = instance_norm(tf.layers.conv2d(conv7, 4 * cnum, 3, padding='same', dilation_rate=4,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv8_atrous'), 'in8')
             conv9 = instance_norm(tf.layers.conv2d(conv8, 4 * cnum, 3, padding='same', dilation_rate=8,
                                                    activation=tf.nn.elu,
-                                                   kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                   kernel_initializer=self.conv_init,
                                                    name='conv9_atrous'), 'in9')
             conv10 = instance_norm(tf.layers.conv2d(conv9, 4 * cnum, 3, padding='same', dilation_rate=16,
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv10_atrous'), 'in10')
 
             conv11 = instance_norm(tf.layers.conv2d(conv10, 4 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv11'), 'in11')
             conv12 = instance_norm(tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv12'), 'in12')
 
             conv13 = instance_norm(tf.layers.conv2d(
@@ -190,11 +190,11 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=tf.keras.initializers.glorot_normal(),
+                kernel_initializer=self.conv_init,
                 name='conv13_upsample'), 'in13')
             conv14 = instance_norm(tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv14'), 'in14')
             conv15 = instance_norm(tf.layers.conv2d(
                 inputs=tf.image.resize_nearest_neighbor(conv14,
@@ -204,14 +204,14 @@ class CompletionModel(object):
                 strides=1,
                 padding='same',
                 activation=tf.nn.elu,
-                kernel_initializer=tf.keras.initializers.glorot_normal(),
+                kernel_initializer=self.conv_init,
                 name='conv15_upsample'), 'in15')
             conv16 = instance_norm(tf.layers.conv2d(conv15, int(cnum / 2), 3, strides=1, padding='same',
                                                     activation=tf.nn.elu,
-                                                    kernel_initializer=tf.keras.initializers.glorot_normal(),
+                                                    kernel_initializer=self.conv_init,
                                                     name='conv16'), 'in16')
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
-                                      kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv17')
+                                      kernel_initializer=self.conv_init, name='conv17')
             # conv_output = tf.clip_by_value(conv17, -1., 1.)
             conv_output = tf.nn.tanh(conv17)
 
@@ -227,27 +227,32 @@ class CompletionModel(object):
         cnum = 64
         with tf.variable_scope('global_discriminator', reuse=reuse):
             conv1 = tf.layers.conv2d(x, cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
-            conv2 = tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2')
-            conv3 = tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
-            conv4 = tf.layers.conv2d(conv3, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
+                                     kernel_initializer=self.conv_init, name='conv1')
+            conv2 = tf.nn.leaky_relu(instance_norm(tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same',
+                                                                    kernel_initializer=self.conv_init,
+                                                                    name='conv2'), 'in1'))
+            conv3 = tf.nn.leaky_relu(instance_norm(tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same',
+                                                                    kernel_initializer=self.conv_init,
+                                                                    name='conv3'), 'in2'))
+            conv4 = tf.nn.leaky_relu(instance_norm(tf.layers.conv2d(conv3, 4 * cnum, 5, strides=2, padding='same',
+                                                                    kernel_initializer=self.conv_init,
+                                                                    name='conv4'), 'in3'))
 
-            return tf.contrib.layers.flatten(tf.nn.leaky_relu(conv4))
+            return tf.contrib.layers.flatten(conv4)
 
     def local_discriminator(self, x, reuse=None):
         cnum = 64
         with tf.variable_scope('local_discriminator', reuse=reuse):
             conv1 = tf.layers.conv2d(x, cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv1')
-            conv2 = tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv2')
-            conv3 = tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv3')
+                                     kernel_initializer=self.conv_init, name='conv1')
+            conv2 = tf.nn.leaky_relu(instance_norm(tf.layers.conv2d(conv1, 2 * cnum, 5, strides=2, padding='same',
+                                                                    kernel_initializer=self.conv_init,
+                                                                    name='conv2'), 'in1'))
+            conv3 = tf.nn.leaky_relu(instance_norm(tf.layers.conv2d(conv2, 4 * cnum, 5, strides=2, padding='same',
+                                                                    kernel_initializer=self.conv_init,
+                                                                    name='conv3'), 'in2'))
             conv4 = tf.layers.conv2d(conv3, 4 * cnum, 5, strides=2, padding='same', activation=tf.nn.leaky_relu,
-                                     kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv4')
+                                     kernel_initializer=self.conv_init, name='conv4')
             # conv5 = tf.layers.conv2d(conv4, 1, 1, padding='same', activation=tf.nn.leaky_relu,
             #                          kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
             return tf.reduce_mean(conv4, axis=[1, 2, 3])  # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
@@ -276,11 +281,11 @@ class CompletionModel(object):
         coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
         coarse_output = self.coarse_network(coarse_network_input, reuse)
-        batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
+        batch_complete_coarse = coarse_output * mask + batch_pos * (1. - mask)
 
         refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
         refine_output = self.refine_network(refine_network_input, reuse)
-        batch_complete_refine = refine_output * mask + batch_incomplete * (1. - mask)
+        batch_complete_refine = refine_output * mask + batch_pos * (1. - mask)
 
         losses = {}
 
@@ -334,8 +339,12 @@ class CompletionModel(object):
                                                                 reuse=True)
 
         # apply penalty
-        penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask, norm=750.)
-        penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
+        # penalty_global = gradient_penalty(interpolates_global, dout_global, mask=mask, norm=750.)
+        # penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
+
+        # lipschitz penalty
+        penalty_global = lipschitz_penalty(interpolates_global, dout_global, mask=mask)
+        penalty_local = lipschitz_penalty(interpolates_local, dout_local, mask=local_patch_mask)
 
         losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
         losses['refine_d_loss'] += losses['gp_loss']
