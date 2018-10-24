@@ -29,92 +29,99 @@ class CompletionModel(object):
     def coarse_network(self, images, reuse=None):
         conv_layers = []
         cnum = 32
-        if self.norm_type == 'instance_norm':
-            norm = instance_norm
-        else:
-            norm = tf.identity
+        # if self.norm_type == 'instance_norm':
+        #     norm = instance_norm
+        # else:
+        #     norm = tf.identity
 
         with tf.variable_scope('coarse', reuse=reuse):
-            conv1 = tf.layers.conv2d(images, cnum, 5, strides=1, padding='same',
-                                     activation=self.activation,
-                                     kernel_initializer=self.conv_init,
-                                     name='conv1')
-            conv2 = self.activation(norm(
-                tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv2_downsample'), 'in2'))
-            conv3 = self.activation(norm(
-                tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv3'), 'in3'))
-            conv4 = self.activation(norm(
-                tf.layers.conv2d(conv3, 4 * cnum, 3, strides=2, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv4_downsample'), 'in4'))
-            conv5 = self.activation(norm(
-                tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv5'), 'in5'))
-            conv6 = self.activation(norm(
-                tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv6'), 'in6'))
+            conv1 = self.activation(tf.layers.conv2d(images, cnum, 5, strides=1,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv1'))
+            conv2 = self.activation(tf.layers.conv2d(conv1, 2 * cnum, 3, strides=2,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv2_downsample'))
+            conv3 = self.activation(tf.layers.conv2d(conv2, 2 * cnum, 3, strides=1,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv3'))
+            conv4 = self.activation(tf.layers.conv2d(conv3, 4 * cnum, 3, strides=2,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv4_downsample'))
+            conv5 = self.activation(tf.layers.conv2d(conv4, 4 * cnum, 3, strides=1,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv5'))
+            conv6 = self.activation(tf.layers.conv2d(conv5, 4 * cnum, 3, strides=1,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv6'))
 
-            conv7 = self.activation(norm(
-                tf.layers.conv2d(conv6, 4 * cnum, 3, padding='same', dilation_rate=2,
-                                 kernel_initializer=self.conv_init,
-                                 name='conv7_atrous'), 'in7'))
-            conv8 = self.activation(norm(
-                tf.layers.conv2d(conv7, 4 * cnum, 3, padding='same', dilation_rate=4,
-                                 kernel_initializer=self.conv_init,
-                                 name='conv8_atrous'), 'in8'))
-            conv9 = self.activation(norm(
-                tf.layers.conv2d(conv8, 4 * cnum, 3, padding='same', dilation_rate=8,
-                                 kernel_initializer=self.conv_init,
-                                 name='conv9_atrous'), 'in9'))
-            conv10 = self.activation(norm(
-                tf.layers.conv2d(conv9, 4 * cnum, 3, padding='same', dilation_rate=16,
-                                 kernel_initializer=self.conv_init,
-                                 name='conv10_atrous'), 'in10'))
+            conv7 = self.activation(tf.layers.conv2d(conv6, 4 * cnum, 3,
+                                                     padding='same',
+                                                     dilation_rate=2,
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv7_atrous'))
+            conv8 = self.activation(tf.layers.conv2d(conv7, 4 * cnum, 3,
+                                                     padding='same',
+                                                     dilation_rate=4,
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv8_atrous'))
+            conv9 = self.activation(tf.layers.conv2d(conv8, 4 * cnum, 3,
+                                                     padding='same',
+                                                     dilation_rate=8,
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv9_atrous'))
+            conv10 = self.activation(tf.layers.conv2d(conv9, 4 * cnum, 3,
+                                                      padding='same',
+                                                      dilation_rate=16,
+                                                      kernel_initializer=self.conv_init,
+                                                      name='conv10_atrous'))
 
-            conv11 = self.activation(norm(
-                tf.layers.conv2d(conv10, 4 * cnum, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv11'), 'in11'))
-            conv12 = self.activation(tf.layers.conv2d(conv11, 4 * cnum, 3, strides=1, padding='same',
+            conv11 = self.activation(tf.layers.conv2d(conv10, 4 * cnum, 3,
+                                                      strides=1,
+                                                      padding='same',
+                                                      kernel_initializer=self.conv_init,
+                                                      name='conv11'))
+            conv12 = self.activation(tf.layers.conv2d(conv11, 4 * cnum, 3,
+                                                      strides=1,
+                                                      padding='same',
                                                       kernel_initializer=self.conv_init,
                                                       name='conv12'))
 
-            conv13 = self.activation(norm(
-                tf.layers.conv2d(
-                    inputs=tf.image.resize_nearest_neighbor(conv12,
-                                                            (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
-                    filters=2 * cnum,
-                    kernel_size=3,
-                    strides=1,
-                    padding='same',
-                    kernel_initializer=self.conv_init,
-                    name='conv13_upsample'), 'in13'))
+            conv13 = self.activation(tf.layers.conv2d(
+                inputs=tf.image.resize_nearest_neighbor(conv12,
+                                                        (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
+                filters=2 * cnum,
+                kernel_size=3,
+                strides=1,
+                padding='same',
+                kernel_initializer=self.conv_init,
+                name='conv13_upsample'))
 
-            conv14 = self.activation(norm(
-                tf.layers.conv2d(conv13, 2 * cnum, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv14'), 'in14'))
-            conv15 = self.activation(norm(
-                tf.layers.conv2d(
-                    inputs=tf.image.resize_nearest_neighbor(conv14,
-                                                            (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
-                    filters=cnum,
-                    kernel_size=3,
-                    strides=1,
-                    padding='same',
-                    kernel_initializer=self.conv_init,
-                    name='conv15_upsample'), 'in15'))
+            conv14 = self.activation(tf.layers.conv2d(conv13, 2 * cnum, 3,
+                                                      strides=1,
+                                                      padding='same',
+                                                      kernel_initializer=self.conv_init,
+                                                      name='conv14'))
+            conv15 = self.activation(tf.layers.conv2d(
+                inputs=tf.image.resize_nearest_neighbor(conv14,
+                                                        (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
+                filters=cnum,
+                kernel_size=3,
+                strides=1,
+                padding='same',
+                kernel_initializer=self.conv_init,
+                name='conv15_upsample'))
 
-            conv16 = self.activation(norm(
-                tf.layers.conv2d(conv15, cnum // 2, 3, strides=1, padding='same',
-                                 kernel_initializer=self.conv_init,
-                                 name='conv16'), 'in16'))
+            conv16 = self.activation(tf.layers.conv2d(conv15, cnum // 2, 3,
+                                                      strides=1,
+                                                      padding='same',
+                                                      kernel_initializer=self.conv_init,
+                                                      name='conv16'))
             conv17 = tf.layers.conv2d(conv16, 3, 3, strides=1, padding='same',
                                       kernel_initializer=self.conv_init,
                                       name='conv17')
@@ -136,10 +143,11 @@ class CompletionModel(object):
         cnum = 32
 
         with tf.variable_scope('refine', reuse=reuse):
-            conv1 = instance_norm(tf.layers.conv2d(images, cnum, 5, strides=1, padding='same',
-                                                   activation=tf.nn.elu,
-                                                   kernel_initializer=self.conv_init,
-                                                   name='conv1'), 'in1')
+            conv1 = self.activation(tf.layers.conv2d(images, cnum, 5,
+                                                     strides=1,
+                                                     padding='same',
+                                                     kernel_initializer=self.conv_init,
+                                                     name='conv1'))
             conv2 = instance_norm(tf.layers.conv2d(conv1, cnum, 3, strides=2, padding='same',
                                                    activation=tf.nn.elu,
                                                    kernel_initializer=self.conv_init,
