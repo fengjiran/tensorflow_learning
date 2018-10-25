@@ -192,7 +192,7 @@ with tf.Session(config=config) as sess:
                 int(step / num_batch) + 1,
                 step,
                 loss_value))
-            if (step % 200 == 0) or (step == cfg['coarse_iters'] - 1):
+            if (step % 500 == 0) or (step == cfg['coarse_iters'] - 1):
                 saver.save(sess, os.path.join(coarse_model_path, 'coarse_model'))
         else:
             # stage 2
@@ -207,10 +207,10 @@ with tf.Session(config=config) as sess:
                 g_loss,
                 d_loss,
                 gp_loss))
-            if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
+            if (step % 500 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
 
-        if (step % 500 == 0) or (step == cfg['total_iters'] - 1):
+        if (step % 1000 == 0) or (step == cfg['total_iters'] - 1):
             summary = sess.run(all_summary)
             summary_writer.add_summary(summary, step)
 

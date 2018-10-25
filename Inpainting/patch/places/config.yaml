@@ -2,8 +2,8 @@
 # parameters
 val: true
 # val: false
-# firstTimeTrain: true
-firstTimeTrain: false
+firstTimeTrain: true
+# firstTimeTrain: false
 pretrain_coarse_network: true
 gan_loss_alpha: 0.001
 wgan_gp_lambda: 10
@@ -21,12 +21,12 @@ hole_height: 128
 hole_width: 128
 static_view_num: 30
 
-init_lr_g: 1.0e-5
+init_lr_g: 2.0e-6
 # init_lr_g: 1.0e-5
-init_lr_d: 1.0e-5
-batch_size: 16
-coarse_iters: 1000000
-total_iters: 5000000
+init_lr_d: 1.0e-6
+batch_size: 8
+coarse_iters: 2000000
+total_iters: 10000000
 
 l1_loss: true
 ae_loss: true
