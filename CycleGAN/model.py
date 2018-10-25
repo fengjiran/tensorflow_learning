@@ -8,7 +8,7 @@ class CycleGAN(object):
     """Build cyclegan model."""
 
     def __init__(self):
-        pass
+        self.activation = tf.nn.leaky_relu
 
     def discriminator(self, image, options, reuse=None, name='discriminator'):
         with tf.variable_scope(name, reuse=reuse):
