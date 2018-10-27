@@ -208,8 +208,8 @@ with tf.Session(config=config) as sess:
                 saver.save(sess, os.path.join(coarse_model_path, 'coarse_model'))
         else:
             # stage 2
-            _, _, g_loss, d_loss, gp_loss = sess.run([refine_g_train,
-                                                      refine_d_train,
+            _, _, g_loss, d_loss, gp_loss = sess.run([refine_d_train,
+                                                      refine_g_train,
                                                       refine_g_loss,
                                                       refine_d_loss,
                                                       losses['gp_loss']])
