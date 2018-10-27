@@ -2,14 +2,14 @@
 # parameters
 val: true
 # val: false
-firstTimeTrain: true
-# firstTimeTrain: false
+# firstTimeTrain: true
+firstTimeTrain: false
 pretrain_coarse_network: true
-gan_loss_alpha: 0.001
+gan_loss_alpha: 0.02
 wgan_gp_lambda: 10
 coarse_l1_alpha: 1.2
-l1_loss_alpha: 1.2
-ae_loss_alpha: 1.2
+l1_loss_alpha: 1.4
+ae_loss_alpha: 1.0
 max_delta_height: 32
 max_delta_width: 32
 
@@ -23,7 +23,7 @@ test_hole_height: 8
 test_hole_width: 8
 static_view_num: 30
 
-init_lr_g: 5.0e-6
+init_lr_g: 2.0e-6
 init_lr_d: 1.0e-6
 batch_size: 8
 coarse_iters: 30000
