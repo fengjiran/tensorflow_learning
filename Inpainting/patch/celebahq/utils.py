@@ -84,8 +84,8 @@ def local_patch(x, bbox):
 
 
 def gan_wgan_loss(pos, neg):
-    d_loss = tf.reduce_mean(neg - pos)
     g_loss = -tf.reduce_mean(neg)
+    d_loss = tf.reduce_mean(neg - pos)
 
     return g_loss, d_loss
 

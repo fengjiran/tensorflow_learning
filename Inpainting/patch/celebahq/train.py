@@ -134,11 +134,11 @@ coarse_train = g_opt.minimize(coarse_rec_loss, global_step=global_step_g, var_li
 refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_list=g_vars)
 
 # stage 2 discriminator
-refine_d_train = d_opt.minimize(refine_d_loss, global_step=global_step_d, var_list=d_vars)
+refine_d_op = d_opt.minimize(refine_d_loss, global_step=global_step_d, var_list=d_vars)
 
 refine_d_train_ops = []
-for i in range(5):
-    refine_d_train_ops.append(refine_d_train)
+for i in range(cfg['iteration_d']):
+    refine_d_train_ops.append(refine_d_op)
 refine_d_train = tf.group(*refine_d_train_ops)
 
 for _, _, files in os.walk(compress_path):
