@@ -384,6 +384,9 @@ class CompletionModel(object):
         g_loss_local, d_loss_local = gan_wgan_loss(pos_local, neg_local)
 
         losses['refine_g_loss'] = cfg['global_wgan_loss_alpha'] * g_loss_global + g_loss_local
+
+        losses['refine_d_loss_global'] = d_loss_global
+        losses['refine_d_loss_local'] = d_loss_local
         losses['refine_d_loss'] = d_loss_global + d_loss_local
 
         # gradient penalty
