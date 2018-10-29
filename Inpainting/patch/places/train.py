@@ -118,7 +118,7 @@ refine_g_train = g_opt.minimize(refine_g_loss, global_step=global_step_g, var_li
 refine_d_train = d_opt.minimize(refine_d_loss, global_step=global_step_d, var_list=d_vars)
 
 refine_d_train_ops = []
-for i in range(5):
+for i in range(cfg['iteration_d']):
     refine_d_train_ops.append(refine_d_train)
 refine_d_train = tf.group(*refine_d_train_ops)
 
