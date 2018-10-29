@@ -387,7 +387,7 @@ class CompletionModel(object):
 
         losses['refine_d_loss_global'] = d_loss_global
         losses['refine_d_loss_local'] = d_loss_local
-        losses['refine_d_loss'] = losses['refine_d_loss_global'] + losses['refine_d_loss_local'] * 1.5
+        losses['refine_d_loss'] = losses['refine_d_loss_global'] + losses['refine_d_loss_local'] * 1.4
 
         # gradient penalty
         interpolates_global = random_interpolates(batch_pos, batch_complete_refine)
