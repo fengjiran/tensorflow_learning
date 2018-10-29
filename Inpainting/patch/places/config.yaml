@@ -31,7 +31,7 @@ total_iters: 10000000
 
 l1_loss: true
 ae_loss: true
-global_wgan_loss_alpha: 1.0
+global_wgan_loss_alpha: 1.5
 
 spatial_discount_gamma: 0.9
 
