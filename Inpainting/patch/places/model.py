@@ -126,8 +126,8 @@ class CompletionModel(object):
                                       kernel_initializer=self.conv_init,
                                       name='conv17')
 
-            conv_output = tf.clip_by_value(conv17, -1., 1.)
-            # conv_output = tf.nn.tanh(conv17)
+            # conv_output = tf.clip_by_value(conv17, -1., 1.)
+            conv_output = tf.nn.tanh(conv17)
 
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
@@ -238,8 +238,8 @@ class CompletionModel(object):
                                       padding='same',
                                       kernel_initializer=self.conv_init,
                                       name='conv17')
-            conv_output = tf.clip_by_value(conv17, -1., 1.)
-            # conv_output = tf.nn.tanh(conv17)
+            # conv_output = tf.clip_by_value(conv17, -1., 1.)
+            conv_output = tf.nn.tanh(conv17)
 
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
