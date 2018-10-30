@@ -23,8 +23,8 @@ class CompletionModel(object):
         print('Construct the model')
         self.conv_init = tf.contrib.layers.xavier_initializer_conv2d()
         self.fc_init = tf.contrib.layers.xavier_initializer()
-        # self.activation = tf.nn.elu
-        self.activation = tf.nn.leaky_relu
+        self.activation = tf.nn.elu
+        # self.activation = tf.nn.leaky_relu
         self.norm_type = 'none'
 
     def coarse_network(self, images, reuse=None):
@@ -135,8 +135,8 @@ class CompletionModel(object):
                                       kernel_initializer=self.conv_init,
                                       name='conv17')
 
-            conv_output = tf.clip_by_value(conv17, -1., 1.)
-            # conv_output = tf.nn.tanh(conv17)
+            # conv_output = tf.clip_by_value(conv17, -1., 1.)
+            conv_output = tf.nn.tanh(conv17)
 
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
@@ -248,8 +248,8 @@ class CompletionModel(object):
                                       padding='same',
                                       kernel_initializer=self.conv_init,
                                       name='conv17')
-            conv_output = tf.clip_by_value(conv17, -1., 1.)
-            # conv_output = tf.nn.tanh(conv17)
+            # conv_output = tf.clip_by_value(conv17, -1., 1.)
+            conv_output = tf.nn.tanh(conv17)
 
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
