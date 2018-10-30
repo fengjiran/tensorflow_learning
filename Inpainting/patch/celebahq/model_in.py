@@ -23,7 +23,8 @@ class CompletionModel(object):
         print('Construct the model')
         self.conv_init = tf.contrib.layers.xavier_initializer_conv2d()
         self.fc_init = tf.contrib.layers.xavier_initializer()
-        self.activation = tf.nn.elu
+        # self.activation = tf.nn.elu
+        self.activation = tf.nn.leaky_relu
         self.norm_type = 'none'
 
     def coarse_network(self, images, reuse=None):
