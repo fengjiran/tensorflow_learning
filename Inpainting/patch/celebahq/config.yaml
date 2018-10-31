@@ -8,8 +8,8 @@ pretrain_coarse_network: true
 gan_loss_alpha: 0.3
 wgan_gp_lambda: 10
 coarse_l1_alpha: 1.2
-l1_loss_alpha: 1.4
-ae_loss_alpha: 1.0
+l1_loss_alpha: 1.5
+ae_loss_alpha: 1.5
 max_delta_height: 32
 max_delta_width: 32
 iteration_d: 6
