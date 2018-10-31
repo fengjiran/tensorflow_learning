@@ -211,18 +211,23 @@ with tf.Session(config=config) as sess:
                 saver.save(sess, os.path.join(coarse_model_path, 'coarse_model'))
         else:
             # stage 2
-            _, _, g_loss, d_loss, gp_loss = sess.run([refine_d_train,
-                                                      refine_g_train,
-                                                      refine_g_loss,
-                                                      refine_d_loss,
-                                                      losses['gp_loss']])
+            _, _, g_loss, d_loss, d_loss_global, d_loss_local, gp_loss =\
+                sess.run([refine_d_train,
+                          refine_g_train,
+                          refine_g_loss,
+                          refine_d_loss,
+                          losses['refine_d_loss_global'],
+                          losses['refine_d_loss_local'],
+                          losses['gp_loss']])
             print('Epoch: {}, Iter: {}, refine_g_loss: {}, refine_d_loss: {}, gp_loss: {}'.format(
                 int(step / num_batch) + 1,
                 step,
                 g_loss,
                 d_loss,
                 gp_loss))
-            # print('val_l1_loss: {}, val_l2_loss: {}'.format(l1_loss, l2_loss))
+            print('---------------------refine_d_loss_global: {}, refine_d_loss_local: {}'.format(
+                d_loss_global,
+                d_loss_local))
 
             if (step % 200 == 0) or (step == cfg['total_iters'] - 1):
                 saver.save(sess, os.path.join(refine_model_path, 'refine_model'))
