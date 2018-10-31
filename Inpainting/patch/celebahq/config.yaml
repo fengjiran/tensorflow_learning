@@ -26,14 +26,14 @@ static_view_num: 30
 
 init_lr_g: 2.0e-6
 init_lr_d: 1.0e-6
-batch_size: 8
+batch_size: 16
 coarse_iters: 30000
 total_iters: 1000000
 
 l1_loss: true
 ae_loss: true
-global_wgan_loss_alpha: 3.0
-local_wgan_loss_alpha: 1.5
+global_wgan_loss_alpha: 2.5
+local_wgan_loss_alpha: 2.5
 
 spatial_discount_gamma: 0.9
 
