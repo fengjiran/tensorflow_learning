@@ -12,7 +12,7 @@ l1_loss_alpha: 1.5
 ae_loss_alpha: 1.5
 max_delta_height: 32
 max_delta_width: 32
-iteration_d: 6
+iteration_d: 5
 
 discount_mask: true
 
