@@ -33,12 +33,16 @@ def random_bbox(cfg):
     hole_height = cfg['hole_height']
     hole_width = cfg['hole_width']
 
-    top = tf.random_uniform([], minval=0, maxval=height - hole_height, dtype=tf.int32)
-    left = tf.random_uniform([], minval=0, maxval=width - hole_width, dtype=tf.int32)
-    h = tf.constant(hole_height)
-    w = tf.constant(hole_width)
+    bbox = []
 
-    return (top, left, h, w)
+    for _ in range(cfg['batch_size']):
+        top = tf.random_uniform([], minval=0, maxval=height - hole_height, dtype=tf.int32)
+        left = tf.random_uniform([], minval=0, maxval=width - hole_width, dtype=tf.int32)
+        h = tf.constant(hole_height)
+        w = tf.constant(hole_width)
+        bbox.append((top, left, h, w))
+
+    return bbox
 
 
 def bbox2mask(bbox, cfg):
@@ -51,20 +55,24 @@ def bbox2mask(bbox, cfg):
 
     Returns
     -------
-        tf.Tensor: output with shape [1, H, W, 1]
+        tf.Tensor: output with shape [bs, H, W, 1]
 
     """
     height = cfg['img_height']
     width = cfg['img_width']
-    top, left, h, w = bbox
 
-    mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
-                  paddings=[[top, height - h - top],
-                            [left, width - w - left]])
+    masks = []
+    for (top, left, h, w) in bbox:
+        mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
+                      paddings=[[top, height - h - top],
+                                [left, width - w - left]])
 
-    mask = tf.expand_dims(mask, 0)
-    mask = tf.expand_dims(mask, -1)
-    return mask
+        mask = tf.expand_dims(mask, 0)
+        mask = tf.expand_dims(mask, -1)
+
+        masks.append(mask)
+
+    return tf.concat(masks, axis=0)
 
 
 def local_patch(x, bbox):
