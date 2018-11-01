@@ -56,7 +56,7 @@ def bbox2mask(bbox, cfg):
 
     Returns
     -------
-        tf.Tensor: output with shape [1, H, W, 1]
+        tf.Tensor: output with shape [bs, H, W, 1]
 
     """
     height = cfg['img_height']
