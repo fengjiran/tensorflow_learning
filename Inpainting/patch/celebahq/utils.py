@@ -64,9 +64,7 @@ def bbox2mask(bbox, cfg):
 
     masks = []
 
-    for i in range(cfg['batch_size']):
-        top, left, h, w = bbox[i]
-
+    for (top, left, h, w) in bbox:
         mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
                       paddings=[[top, height - h - top],
                                 [left, width - w - left]])
@@ -93,6 +91,7 @@ def local_patch(x, bbox):
     """
     patches = []
     batch_size = x.get_shape().as_list()[0]
+    assert batch_size == len(bbox)
     for i in range(batch_size):
         patch = tf.image.crop_to_bounding_box(x[i], bbox[i][0], bbox[i][1], bbox[i][2], bbox[i][3])
         patch = tf.expand_dims(patch, 0)
