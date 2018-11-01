@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import yaml
 import numpy as np
 import tensorflow as tf
 # from tensorflow.python.framework import ops
@@ -60,15 +61,22 @@ def bbox2mask(bbox, cfg):
     """
     height = cfg['img_height']
     width = cfg['img_width']
-    top, left, h, w = bbox
 
-    mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
-                  paddings=[[top, height - h - top],
-                            [left, width - w - left]])
+    masks = []
 
-    mask = tf.expand_dims(mask, 0)
-    mask = tf.expand_dims(mask, -1)
-    return mask
+    for i in range(cfg['batch_size']):
+        top, left, h, w = bbox[i]
+
+        mask = tf.pad(tensor=tf.ones((h, w), dtype=tf.float32),
+                      paddings=[[top, height - h - top],
+                                [left, width - w - left]])
+
+        mask = tf.expand_dims(mask, 0)
+        mask = tf.expand_dims(mask, -1)
+
+        masks.append(mask)
+
+    return tf.concat(masks, axis=0)
 
 
 def local_patch(x, bbox):
@@ -173,3 +181,16 @@ def instance_norm(x, name="instance_norm"):
         inv = tf.rsqrt(variance + epsilon)
         normalized = (x - mean) * inv
         return scale * normalized + offset
+
+
+if __name__ == '__main__':
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
+
+    bbox = random_bbox(cfg)
+    mask = bbox2mask(bbox, cfg)
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
+        print(sess.run(bbox))
