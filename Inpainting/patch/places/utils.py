@@ -87,8 +87,16 @@ def local_patch(x, bbox):
         tf.Tensor: local patch
 
     """
-    x = tf.image.crop_to_bounding_box(x, bbox[0], bbox[1], bbox[2], bbox[3])
-    return x
+    patches = []
+    batch_size = x.get_shape().as_list()[0]
+    assert batch_size == len(bbox)
+    for i in range(batch_size):
+        patch = tf.image.crop_to_bounding_box(x[i], bbox[i][0], bbox[i][1], bbox[i][2], bbox[i][3])
+        patch = tf.expand_dims(patch, 0)
+        patches.append(patch)
+
+    # x = tf.image.crop_to_bounding_box(x, bbox[0], bbox[1], bbox[2], bbox[3])
+    return tf.concat(patches, axis=0)
 
 
 def gan_wgan_loss(pos, neg):
