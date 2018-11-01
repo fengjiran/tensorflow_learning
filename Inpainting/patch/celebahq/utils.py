@@ -33,12 +33,16 @@ def random_bbox(cfg):
     hole_height = cfg['hole_height']
     hole_width = cfg['hole_width']
 
-    top = tf.random_uniform([], minval=0, maxval=height - hole_height, dtype=tf.int32)
-    left = tf.random_uniform([], minval=0, maxval=width - hole_width, dtype=tf.int32)
-    h = tf.constant(hole_height)
-    w = tf.constant(hole_width)
+    bbox = []
 
-    return (top, left, h, w)
+    for _ in range(cfg['batch_size']):
+        top = tf.random_uniform([], minval=0, maxval=height - hole_height, dtype=tf.int32)
+        left = tf.random_uniform([], minval=0, maxval=width - hole_width, dtype=tf.int32)
+        h = tf.constant(hole_height)
+        w = tf.constant(hole_width)
+        bbox.append((top, left, h, w))
+
+    return bbox
 
 
 def bbox2mask(bbox, cfg):
