@@ -91,8 +91,15 @@ def local_patch(x, bbox):
         tf.Tensor: local patch
 
     """
-    x = tf.image.crop_to_bounding_box(x, bbox[0], bbox[1], bbox[2], bbox[3])
-    return x
+    patches = []
+    batch_size = x.get_shape().as_list()[0]
+    for i in range(batch_size):
+        patch = tf.image.crop_to_bounding_box(x[i], bbox[i][0], bbox[i][1], bbox[i][2], bbox[i][3])
+        patch = tf.expand_dims(patch, 0)
+        patches.append(patch)
+
+    # x = tf.image.crop_to_bounding_box(x, bbox[0], bbox[1], bbox[2], bbox[3])
+    return tf.concat(patches, axis=0)
 
 
 def gan_wgan_loss(pos, neg):
@@ -187,10 +194,15 @@ if __name__ == '__main__':
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
 
+    x = tf.random_uniform([cfg['batch_size'], 256, 256, 3])
     bbox = random_bbox(cfg)
+    patches = local_patch(x, bbox)
     mask = bbox2mask(bbox, cfg)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        print(sess.run(bbox))
+        bbox, mask, patches = sess.run([bbox, mask, patches])
+        print(bbox)
+        print(mask.shape)
+        print(patches.shape)
