@@ -5,14 +5,14 @@ val: true
 # firstTimeTrain: true
 firstTimeTrain: false
 pretrain_coarse_network: true
-gan_loss_alpha: 0.2
+gan_loss_alpha: 0.5
 wgan_gp_lambda: 10
 coarse_l1_alpha: 1.2
-l1_loss_alpha: 1.4
-ae_loss_alpha: 1.0
+l1_loss_alpha: 1.5
+ae_loss_alpha: 1.5
 max_delta_height: 32
 max_delta_width: 32
-iteration_d: 6
+iteration_d: 5
 
 discount_mask: true
 
@@ -25,14 +25,14 @@ static_view_num: 30
 init_lr_g: 2.0e-6
 # init_lr_g: 1.0e-5
 init_lr_d: 1.0e-6
-batch_size: 8
+batch_size: 16
 coarse_iters: 2000000
 total_iters: 10000000
 
 l1_loss: true
 ae_loss: true
-global_wgan_loss_alpha: 1.5
-local_wgan_loss_alpha: 1.2
+global_wgan_loss_alpha: 5.0
+local_wgan_loss_alpha: 5.0
 
 spatial_discount_gamma: 0.9
 
