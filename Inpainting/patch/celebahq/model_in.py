@@ -493,6 +493,7 @@ class CompletionModel(object):
     def build_static_infer_graph(self, batch_data, cfg, name):
         bbox = [(tf.constant(cfg['hole_height'] // 2), tf.constant(cfg['hole_width'] // 2),
                  tf.constant(cfg['hole_height']), tf.constant(cfg['hole_width']))]
+        bbox = bbox * cfg['batch_size']
 
         return self.build_infer_graph(batch_data, cfg, bbox, name)
 
