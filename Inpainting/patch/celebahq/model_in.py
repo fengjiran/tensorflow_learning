@@ -334,12 +334,14 @@ class CompletionModel(object):
 
         batch_incomplete = batch_pos * (1. - mask)
         ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
-        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
+        coarse_network_input = tf.concat([batch_incomplete, ones_x, mask], axis=3)
+        # coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
         coarse_output = self.coarse_network(coarse_network_input, reuse)
         batch_complete_coarse = coarse_output * mask + batch_pos * (1. - mask)
 
-        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        # refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        refine_network_input = tf.concat([batch_complete_coarse, ones_x, mask], axis=3)
         refine_output = self.refine_network(refine_network_input, reuse)
         batch_complete_refine = refine_output * mask + batch_pos * (1. - mask)
 
@@ -403,8 +405,8 @@ class CompletionModel(object):
         # penalty_local = gradient_penalty(interpolates_local, dout_local, mask=local_patch_mask, norm=750.)
 
         # lipschitz penalty
-        penalty_global = lipschitz_penalty(interpolates_global, dout_global, mask=mask)
-        penalty_local = lipschitz_penalty(interpolates_local, dout_local, mask=local_patch_mask)
+        penalty_global = lipschitz_penalty(interpolates_global, dout_global)
+        penalty_local = lipschitz_penalty(interpolates_local, dout_local)
 
         losses['gp_loss'] = cfg['wgan_gp_lambda'] * (penalty_global + penalty_local)
         losses['refine_d_loss'] += losses['gp_loss']
@@ -466,13 +468,15 @@ class CompletionModel(object):
         batch_pos = batch_data
         batch_incomplete = batch_pos * (1. - mask)
         ones_x = tf.ones_like(batch_incomplete)[:, :, :, 0:1]
-        coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
+        coarse_network_input = tf.concat([batch_incomplete, ones_x, mask], axis=3)
+        # coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
         # inpaint
         coarse_output = self.coarse_network(coarse_network_input, reuse=True)
         batch_complete_coarse = coarse_output * mask + batch_incomplete * (1. - mask)
 
-        refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        # refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
+        refine_network_input = tf.concat([batch_complete_coarse, ones_x, mask], axis=3)
         refine_output = self.refine_network(refine_network_input, reuse=True)
 
         # apply mask and reconstruct
