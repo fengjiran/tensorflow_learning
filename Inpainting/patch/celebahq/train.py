@@ -118,12 +118,12 @@ lr_d = cfg['init_lr_d']
 g_opt = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
 d_opt = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
 
-# l1_loss_alpha: 1.4
-# ae_loss_alpha: 1.0
+# l1_loss_alpha: 1.5
+# ae_loss_alpha: 1.5
 coarse_rec_loss = cfg['l1_loss_alpha'] * losses['coarse_l1_loss'] +\
     cfg['ae_loss_alpha'] * losses['coarse_ae_loss']
 
-# gan_loss_alpha: 0.04
+# gan_loss_alpha: 0.1
 refine_g_loss = cfg['l1_loss_alpha'] * losses['refine_l1_loss'] +\
     cfg['ae_loss_alpha'] * losses['refine_ae_loss'] +\
     cfg['gan_loss_alpha'] * losses['refine_g_loss']
