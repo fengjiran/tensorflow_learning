@@ -22,7 +22,8 @@ def bbox2mask_np(bbox, height, width):
 
 
 if __name__ == '__main__':
-    img = cv.imread('val.png')
+    # img = cv.imread('val.png')
+    img = cv.imread('25.jpg')
     height = img.shape[0]
     width = img.shape[1]
 
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     destroy = destroy.astype(np.uint8)
 
     # src = img * (1.0 - mask) * 255.
-    dst = cv.inpaint(destroy, mask.astype(np.uint8), 5, cv.INPAINT_TELEA)
+    dst = cv.inpaint(destroy, mask.astype(np.uint8), 4, cv.INPAINT_TELEA)
     dst = dst.astype(np.uint8)
     print(dst[0][0][2])
 
