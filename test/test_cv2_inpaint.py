@@ -37,7 +37,7 @@ if __name__ == '__main__':
     destroy = destroy.astype(np.uint8)
 
     # src = img * (1.0 - mask) * 255.
-    dst = cv.inpaint(destroy, mask.astype(np.uint8), 4, cv.INPAINT_TELEA)
+    dst = cv.inpaint(destroy, mask.astype(np.uint8), 3, cv.INPAINT_TELEA)
     dst = dst.astype(np.uint8)
     print(dst[0][0][2])
 
