@@ -5,7 +5,7 @@ val: false
 # firstTimeTrain: true
 firstTimeTrain: false
 pretrain_coarse_network: true
-gan_loss_alpha: 0.6
+gan_loss_alpha: 0.1
 wgan_gp_lambda: 10
 coarse_l1_alpha: 1.2
 l1_loss_alpha: 1.5
@@ -32,8 +32,8 @@ total_iters: 1000000
 
 l1_loss: true
 ae_loss: true
-global_wgan_loss_alpha: 5.0
-local_wgan_loss_alpha: 5.0
+global_wgan_loss_alpha: 1.5
+local_wgan_loss_alpha: 1.5
 
 spatial_discount_gamma: 0.9
 
