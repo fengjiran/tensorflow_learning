@@ -22,4 +22,4 @@ def bbox2mask_np(bbox, height, width):
 
 
 if __name__ == '__main__':
-    pass
+    img = cv.imread('val.png')
