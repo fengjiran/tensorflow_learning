@@ -6,6 +6,7 @@
 *.py~
 *.save
 *.png
+*.jpg
 
 # VSCODE settings
 .sync/
