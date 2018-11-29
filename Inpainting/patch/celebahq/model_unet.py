@@ -33,3 +33,6 @@ class CompletionModel(object):
         #     norm = instance_norm
         # else:
         #     norm = tf.identity
+
+        with tf.variable_scope('coarse', reuse=reuse):
+            pass
