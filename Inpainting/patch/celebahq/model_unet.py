@@ -44,4 +44,14 @@ class CompletionModel(object):
                                                            kernel_size=3,
                                                            strides=2,
                                                            padding='same',
-                                                           name='conv2')(conv1))
+                                                           name='conv2_downsample')(conv1))
+            conv3 = self.activation(tf.keras.layers.Conv2D(filters=2 * cnum,
+                                                           kernel_size=3,
+                                                           strides=1,
+                                                           padding='same',
+                                                           name='conv3')(conv2))
+            conv4 = self.activation(tf.keras.layers.Conv2D(filters=4 * cnum,
+                                                           kernel_size=3,
+                                                           strides=2,
+                                                           padding='same',
+                                                           name='conv4_downsample')(conv3))
