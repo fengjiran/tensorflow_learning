@@ -55,3 +55,13 @@ class CompletionModel(object):
                                                            strides=2,
                                                            padding='same',
                                                            name='conv4_downsample')(conv3))
+            conv5 = self.activation(tf.keras.layers.Conv2D(filters=4 * cnum,
+                                                           kernel_size=3,
+                                                           strides=1,
+                                                           padding='same',
+                                                           name='conv5')(conv4))
+            conv6 = self.activation(tf.keras.layers.Conv2D(filters=4 * cnum,
+                                                           kernel_size=3,
+                                                           strides=1,
+                                                           padding='same',
+                                                           name='conv6')(conv5))
