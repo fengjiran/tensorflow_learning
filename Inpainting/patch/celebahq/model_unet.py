@@ -35,4 +35,13 @@ class CompletionModel(object):
         #     norm = tf.identity
 
         with tf.variable_scope('coarse', reuse=reuse):
-            pass
+            conv1 = self.activation(tf.keras.layers.Conv2D(filters=cnum,
+                                                           kernel_size=5,
+                                                           strides=1,
+                                                           padding='same',
+                                                           name='conv1')(images))
+            conv2 = self.activation(tf.keras.layers.Conv2D(filters=2 * cnum,
+                                                           kernel_size=3,
+                                                           strides=2,
+                                                           padding='same',
+                                                           name='conv2')(conv1))
