@@ -13,3 +13,23 @@ from utils import random_interpolates
 from utils import lipschitz_penalty
 from utils import images_summary
 from utils import gradients_summary
+
+
+class CompletionModel(object):
+    """Construct model."""
+
+    def __init__(self):
+        print('Construct the model')
+        self.conv_init = tf.contrib.layers.xavier_initializer_conv2d()
+        self.fc_init = tf.contrib.layers.xavier_initializer()
+        self.activation = tf.nn.elu
+        # self.activation = tf.nn.leaky_relu
+        self.norm_type = 'none'
+
+    def coarse_network(self, images, reuse=None):
+        conv_layers = []
+        cnum = 32
+        # if self.norm_type == 'instance_norm':
+        #     norm = instance_norm
+        # else:
+        #     norm = tf.identity
