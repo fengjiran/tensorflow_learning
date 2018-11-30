@@ -296,3 +296,6 @@ if __name__ == '__main__':
     model = CompletionModel()
     x = tf.random_uniform([10, 256, 256, 3])
     coarse = model.coarse_network(x)
+
+    global_dis = model.global_discriminator(coarse)
+    print(global_dis.get_shape())
