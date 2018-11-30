@@ -71,12 +71,14 @@ class CompletionModel(object):
                                                            dilation_rate=2,
                                                            padding='same',
                                                            name='conv7_atrous')(conv6))  # 64, 64, 128
+
+            conv8_inputs = tf.concat([conv6, conv7], axis=-1)
             conv8 = self.activation(tf.keras.layers.Conv2D(filters=4 * cnum,
                                                            kernel_size=3,
                                                            strides=1,
                                                            dilation_rate=4,
                                                            padding='same',
-                                                           name='conv8_atrous')(conv7))  # 64, 64, 128
+                                                           name='conv8_atrous')(conv8_inputs))  # 64, 64, 128
             conv9 = self.activation(tf.keras.layers.Conv2D(filters=4 * cnum,
                                                            kernel_size=3,
                                                            strides=1,
@@ -99,28 +101,32 @@ class CompletionModel(object):
                                                             strides=1,
                                                             padding='same',
                                                             name='conv12')(conv11))  # 64, 64, 128
-            conv13_input = tf.image.resize_nearest_neighbor(
+
+            conv13_inputs = tf.image.resize_nearest_neighbor(
                 conv12,
                 (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2]))
+            conv13_inputs = tf.concat([conv3, conv13_inputs], axis=-1)
             conv13 = self.activation(tf.keras.layers.Conv2D(filters=2 * cnum,
                                                             kernel_size=3,
                                                             strides=1,
                                                             padding='same',
-                                                            name='conv13_upsample')(conv13_input))  # 128, 128, 64
+                                                            name='conv13_upsample')(conv13_inputs))  # 128, 128, 64
             conv14 = self.activation(tf.keras.layers.Conv2D(filters=2 * cnum,
                                                             kernel_size=3,
                                                             strides=1,
                                                             padding='same',
                                                             name='conv14')(conv13))  # 128, 128, 64
-            conv15_input = tf.image.resize_nearest_neighbor(
+            conv15_inputs = tf.image.resize_nearest_neighbor(
                 conv14,
                 (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])
             )
+
+            conv15_inputs = tf.concat([conv1, conv15_inputs], axis=-1)
             conv15 = self.activation(tf.keras.layers.Conv2D(filters=cnum,
                                                             kernel_size=3,
                                                             strides=1,
                                                             padding='same',
-                                                            name='conv15_upsampling')(conv15_input))  # 256, 256, 32
+                                                            name='conv15_upsampling')(conv15_inputs))  # 256, 256, 32
             conv16 = self.activation(tf.keras.layers.Conv2D(filters=cnum // 2,
                                                             kernel_size=3,
                                                             strides=1,
