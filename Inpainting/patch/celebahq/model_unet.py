@@ -142,6 +142,7 @@ class CompletionModel(object):
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
 
+            print('Print coarse network structure:')
             for conv in conv_layers:
                 print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
 
@@ -260,6 +261,7 @@ class CompletionModel(object):
             for i in range(1, 18):
                 conv_layers.append(eval('conv{}'.format(i)))
 
+            print('Print refine network structure:')
             for conv in conv_layers:
                 print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
 
