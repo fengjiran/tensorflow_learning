@@ -140,3 +140,9 @@ class CompletionModel(object):
                 print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
 
             return conv_output
+
+
+if __name__ == '__main__':
+    model = CompletionModel()
+    x = tf.random_uniform([10, 256, 256, 3])
+    coarse = model.coarse_network(x)
