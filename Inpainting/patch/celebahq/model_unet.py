@@ -530,7 +530,10 @@ if __name__ == '__main__':
 
     model = CompletionModel()
     x = tf.random_uniform([10, 256, 256, 3])
-    coarse = model.coarse_network(x)
+    # coarse = model.coarse_network(x)
 
-    global_dis = model.global_discriminator(coarse)
-    print(global_dis.get_shape())
+    # global_dis = model.global_discriminator(coarse)
+    # print(global_dis.get_shape())
+
+    g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
+    print(len(g_vars), len(d_vars))
