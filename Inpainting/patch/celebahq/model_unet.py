@@ -131,3 +131,12 @@ class CompletionModel(object):
                                                             strides=1,
                                                             padding='same',
                                                             name='conv17')(conv16))
+            conv_output = tf.nn.tanh(conv17)
+
+            for i in range(1, 18):
+                conv_layers.append(eval('conv{}'.format(i)))
+
+            for conv in conv_layers:
+                print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
+
+            return conv_output
