@@ -267,6 +267,29 @@ class CompletionModel(object):
 
     def global_discriminator(self, x, reuse=None):
         cnum = 64
+        with tf.variable_scope('global_discriminator', reuse=reuse):
+            conv1 = tf.nn.leaky_relu(tf.keras.layers.Conv2D(filters=cnum,
+                                                            kernel_size=5,
+                                                            strides=2,
+                                                            padding='same',
+                                                            name='conv1')(x))
+            conv2 = tf.nn.leaky_relu(tf.keras.layers.Conv2D(filters=2 * cnum,
+                                                            kernel_size=5,
+                                                            strides=2,
+                                                            padding='same',
+                                                            name='conv2')(conv1))
+            conv3 = tf.nn.leaky_relu(tf.keras.layers.Conv2D(filters=4 * cnum,
+                                                            kernel_size=5,
+                                                            strides=2,
+                                                            padding='same',
+                                                            name='conv3')(conv2))
+            conv4 = tf.nn.leaky_relu(tf.keras.layers.Conv2D(filters=4 * cnum,
+                                                            kernel_size=5,
+                                                            strides=2,
+                                                            padding='same',
+                                                            name='conv4')(conv3))
+
+            return tf.keras.layers.Flatten()(conv4)
 
 
 if __name__ == '__main__':
