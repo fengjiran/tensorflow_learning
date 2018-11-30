@@ -524,6 +524,10 @@ class CompletionModel(object):
 
 
 if __name__ == '__main__':
+    import yaml
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
+
     model = CompletionModel()
     x = tf.random_uniform([10, 256, 256, 3])
     coarse = model.coarse_network(x)
