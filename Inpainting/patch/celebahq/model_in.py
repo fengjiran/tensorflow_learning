@@ -521,7 +521,7 @@ if __name__ == '__main__':
         cfg = yaml.load(f)
 
     model = CompletionModel()
-    x = tf.random_uniform([10, 256, 256, 3])
+    x = tf.random_uniform([cfg['batch_size'], 256, 256, 3])
 
     # coarse = model.coarse_network(x)
     # refine = model.refine_network(coarse)
