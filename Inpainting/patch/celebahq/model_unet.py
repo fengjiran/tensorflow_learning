@@ -324,11 +324,11 @@ class CompletionModel(object):
             dglobal = self.global_discriminator(global_input, reuse=reuse)
             dlocal = self.local_discriminator(local_input, reuse=reuse)
 
-            dout_global = tf.keras.layers.Dense(units=1,
-                                                name='dout_global_fc')(dglobal)
+            # dout_global = tf.keras.layers.Dense(units=1,
+            #                                     name='dout_global_fc')(dglobal)
 
-            # dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
-            #                               name='dout_global_fc')
+            dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
+                                          name='dout_global_fc')
             dout_local = dlocal
             # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
             # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
