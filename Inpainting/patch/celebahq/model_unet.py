@@ -334,7 +334,8 @@ class CompletionModel(object):
             # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
             # dout_local = tf.reduce_mean(dout_local, axis=1)
             vars_ = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
-            print(len(vars_))
+            print('Number of weight matrix of d:' + len(vars_))
+            # print(len(vars_))
 
             return dout_global, dout_local
 
