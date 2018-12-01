@@ -291,9 +291,9 @@ class CompletionModel(object):
                                                             padding='same',
                                                             name='conv4')(conv3))
 
-            vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
-            print('Number of weight matrix of gd:' + str(len(vars_gd)))
-            return tf.keras.layers.Flatten()(conv4)
+        # vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
+        # print('Number of weight matrix of gd:' + str(len(vars_gd)))
+        return tf.keras.layers.Flatten()(conv4)
 
     def local_discriminator(self, x, reuse=None):
         cnum = 64
@@ -319,24 +319,24 @@ class CompletionModel(object):
                                            strides=2,
                                            padding='same',
                                            name='conv4')(conv3)
-            vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
-            print('Number of weight matrix of ld:' + str(len(vars_ld)))
-            return tf.reduce_mean(conv4, axis=[1, 2, 3])
+        # vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
+        # print('Number of weight matrix of ld:' + str(len(vars_ld)))
+        return tf.reduce_mean(conv4, axis=[1, 2, 3])
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
-        with tf.variable_scope('wgan_discriminator', reuse=reuse):
-            dglobal = self.global_discriminator(global_input, reuse=reuse)
-            dlocal = self.local_discriminator(local_input, reuse=reuse)
+        # with tf.variable_scope('wgan_discriminator', reuse=reuse):
+        dglobal = self.global_discriminator(global_input, reuse=reuse)
+        dlocal = self.local_discriminator(local_input, reuse=reuse)
 
-            dout_global = tf.keras.layers.Dense(units=1,
-                                                name='dout_global_fc')(dglobal)
+        dout_global = tf.keras.layers.Dense(units=1,
+                                            name='dout_global_fc')(dglobal)
 
-            # dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
-            #                               name='dout_global_fc')
-            dout_local = dlocal
-            # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
-            # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
-            # dout_local = tf.reduce_mean(dout_local, axis=1)
+        # dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
+        #                               name='dout_global_fc')
+        dout_local = dlocal
+        # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
+        # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
+        # dout_local = tf.reduce_mean(dout_local, axis=1)
         # vars_ = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
         # vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
         # vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
@@ -433,8 +433,13 @@ class CompletionModel(object):
 
         g_vars_coarse = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse')
         g_vars_refine = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
+        print(len(g_vars_coarse), len(g_vars_refine))
         g_vars = g_vars_coarse + g_vars_refine
-        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+        d_vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
+        d_vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
+        d_vars = d_vars_gd + d_vars_ld
+        # d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+        print(len(g_vars), len(d_vars), len(d_vars_gd), len(d_vars_ld))
 
         if summary:
             # stage1
@@ -475,7 +480,7 @@ class CompletionModel(object):
             gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_grad_to_coarse')
             gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_grad_to_refine')
 
-        return g_vars, g_vars_coarse, d_vars, losses
+        return g_vars_coarse, g_vars_refine, d_vars_gd, d_vars_ld, losses
 
     def build_infer_graph(self, batch_data, cfg, bbox=None, name='val'):
         cfg['max_delta_height'] = 0
@@ -547,5 +552,9 @@ if __name__ == '__main__':
     # global_dis = model.global_discriminator(coarse)
     # print(global_dis.get_shape())
 
-    g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
-    print(len(g_vars), len(d_vars))
+    g_vars_coarse, g_vars_refine, d_vars_gd, d_vars_ld, losses = model.build_graph_with_losses(x, cfg)
+    # print(len(g_vars), len(d_vars))
+    print(len(g_vars_coarse))
+    print(len(g_vars_refine))
+    print(len(d_vars_gd))
+    print(len(d_vars_ld))
