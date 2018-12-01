@@ -433,13 +433,13 @@ class CompletionModel(object):
 
         g_vars_coarse = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse')
         g_vars_refine = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
-        print(len(g_vars_coarse), len(g_vars_refine))
-        g_vars = g_vars_coarse + g_vars_refine
+        # print(len(g_vars_coarse), len(g_vars_refine))
+        # g_vars = g_vars_coarse + g_vars_refine
         d_vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
         d_vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
-        d_vars = d_vars_gd + d_vars_ld
+        # d_vars = d_vars_gd + d_vars_ld
         # d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
-        print(len(g_vars), len(d_vars), len(d_vars_gd), len(d_vars_ld))
+        # print(len(g_vars), len(d_vars), len(d_vars_gd), len(d_vars_ld))
 
         if summary:
             # stage1
