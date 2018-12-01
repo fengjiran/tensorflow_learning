@@ -390,7 +390,7 @@ class CompletionModel(object):
         # wgan with gradient penalty
         pos_neg_global, pos_neg_local = self.build_wgan_discriminator(batch_pos_neg,
                                                                       local_patch_pos_neg,
-                                                                      reuse)
+                                                                      reuse=None)
 
         pos_global, neg_global = tf.split(pos_neg_global, 2)
         pos_local, neg_local = tf.split(pos_neg_local, 2)
