@@ -283,7 +283,10 @@ class CompletionModel(object):
                                                       kernel_initializer=self.conv_init,
                                                       name='conv4'))
 
-            return tf.contrib.layers.flatten(conv4)
+            fc1 = tf.contrib.layers.flatten(conv4)
+            fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
+                                  name='dout_global_fc')
+            return fc2
 
     def local_discriminator(self, x, reuse=None):
         cnum = 64
@@ -313,18 +316,23 @@ class CompletionModel(object):
             return tf.reduce_mean(conv4, axis=[1, 2, 3])  # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
-        with tf.variable_scope('wgan_discriminator', reuse=reuse):
-            dglobal = self.global_discriminator(global_input, reuse=reuse)
-            dlocal = self.local_discriminator(local_input, reuse=reuse)
+        # with tf.variable_scope('wgan_discriminator', reuse=reuse):
+        dglobal = self.global_discriminator(global_input, reuse=reuse)
+        dlocal = self.local_discriminator(local_input, reuse=reuse)
 
-            dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
-                                          name='dout_global_fc')
-            dout_local = dlocal
-            # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
-            # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
-            # dout_local = tf.reduce_mean(dout_local, axis=1)
+        vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
+        vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
+        print('Number of weight matrix of gd:' + str(len(vars_gd)))
+        print('Number of weight matrix of ld:' + str(len(vars_ld)))
 
-            return dout_global, dout_local
+        # dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
+        #                               name='dout_global_fc')
+        # dout_local = dlocal
+        # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
+        # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
+        # dout_local = tf.reduce_mean(dout_local, axis=1)
+
+        return dglobal, dlocal
 
     def build_graph_with_losses(self, batch_data, cfg, summary=True, reuse=None):
         # batch_pos = batch_data / 127.5 - 1
@@ -414,7 +422,9 @@ class CompletionModel(object):
         g_vars_coarse = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse')
         g_vars_refine = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
         g_vars = g_vars_coarse + g_vars_refine
-        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+        # d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+        d_vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
+        d_vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
 
         if summary:
             # stage1
@@ -455,7 +465,7 @@ class CompletionModel(object):
             gradients_summary(losses['coarse_ae_loss'], coarse_output, name='ae_loss_grad_to_coarse')
             gradients_summary(losses['refine_ae_loss'], refine_output, name='ae_loss_grad_to_refine')
 
-        return g_vars, g_vars_coarse, d_vars, losses
+        return g_vars_coarse, g_vars_refine, d_vars_gd, d_vars_ld, losses
 
     def build_infer_graph(self, batch_data, cfg, bbox=None, name='val'):
         cfg['max_delta_height'] = 0
@@ -528,5 +538,8 @@ if __name__ == '__main__':
     # print(coarse.get_shape())
     # print(refine.get_shape())
 
-    g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(x, cfg)
-    print(len(g_vars), len(d_vars))
+    g_vars_coarse, g_vars_refine, d_vars_gd, d_vars_ld, losses = model.build_graph_with_losses(x, cfg)
+    print(len(g_vars_coarse))
+    print(len(g_vars_refine))
+    print(len(d_vars_gd))
+    print(len(d_vars_ld))
