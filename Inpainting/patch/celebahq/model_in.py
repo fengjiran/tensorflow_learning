@@ -421,7 +421,7 @@ class CompletionModel(object):
 
         g_vars_coarse = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse')
         g_vars_refine = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine')
-        g_vars = g_vars_coarse + g_vars_refine
+        # g_vars = g_vars_coarse + g_vars_refine
         # d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
         d_vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
         d_vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
