@@ -291,9 +291,13 @@ class CompletionModel(object):
                                                             padding='same',
                                                             name='conv4')(conv3))
 
+            fc1 = tf.keras.layers.Flatten()(conv4)
+            fc2 = tf.keras.layers.Dense(units=1,
+                                        name='dout_global_fc')(fc1)
+
         # vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
         # print('Number of weight matrix of gd:' + str(len(vars_gd)))
-        return tf.keras.layers.Flatten()(conv4)
+        return fc2  # tf.keras.layers.Flatten()(conv4)
 
     def local_discriminator(self, x, reuse=None):
         cnum = 64
@@ -319,6 +323,7 @@ class CompletionModel(object):
                                            strides=2,
                                            padding='same',
                                            name='conv4')(conv3)
+
         # vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
         # print('Number of weight matrix of ld:' + str(len(vars_ld)))
         return tf.reduce_mean(conv4, axis=[1, 2, 3])
@@ -328,23 +333,23 @@ class CompletionModel(object):
         dglobal = self.global_discriminator(global_input, reuse=reuse)
         dlocal = self.local_discriminator(local_input, reuse=reuse)
 
-        dout_global = tf.keras.layers.Dense(units=1,
-                                            name='dout_global_fc')(dglobal)
+        # dout_global = tf.keras.layers.Dense(units=1,
+        #                                     name='dout_global_fc')(dglobal)
 
         # dout_global = tf.layers.dense(dglobal, 1, kernel_initializer=self.fc_init,
         #                               name='dout_global_fc')
-        dout_local = dlocal
+        # dout_local = dlocal
         # dout_local = tf.layers.dense(dlocal, 1, name='dout_local_fc')
         # dout_local = tf.layers.dense(dlocal, 256, name='dout_local_fc')
         # dout_local = tf.reduce_mean(dout_local, axis=1)
         # vars_ = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
+
         # vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
         # vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
         # print('Number of weight matrix of gd:' + str(len(vars_gd)))
         # print('Number of weight matrix of ld:' + str(len(vars_ld)))
-        # print('Number of weight matrix of d:' + str(len(vars_)))
 
-        return dout_global, dout_local
+        return dglobal, dlocal
 
     def build_graph_with_losses(self, batch_data, cfg, summary=True, reuse=None):
         # batch_pos = batch_data / 127.5 - 1
