@@ -344,10 +344,10 @@ class CompletionModel(object):
         # dout_local = tf.reduce_mean(dout_local, axis=1)
         # vars_ = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'wgan_discriminator')
 
-        # vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
-        # vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
-        # print('Number of weight matrix of gd:' + str(len(vars_gd)))
-        # print('Number of weight matrix of ld:' + str(len(vars_ld)))
+        vars_gd = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global_discriminator')
+        vars_ld = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'local_discriminator')
+        print('Number of weight matrix of gd:' + str(len(vars_gd)))
+        print('Number of weight matrix of ld:' + str(len(vars_ld)))
 
         return dglobal, dlocal
 
@@ -401,8 +401,7 @@ class CompletionModel(object):
 
         # wgan with gradient penalty
         pos_neg_global, pos_neg_local = self.build_wgan_discriminator(batch_pos_neg,
-                                                                      local_patch_pos_neg,
-                                                                      reuse=None)
+                                                                      local_patch_pos_neg)
 
         pos_global, neg_global = tf.split(pos_neg_global, 2)
         pos_local, neg_local = tf.split(pos_neg_local, 2)
