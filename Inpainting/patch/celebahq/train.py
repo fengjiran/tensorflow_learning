@@ -88,9 +88,10 @@ val_batch_data = val_batch_data / 127.5 - 1
 
 model = CompletionModel()
 # print(batch_data.get_shape())
-g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
-
-
+# g_vars, g_vars_coarse, d_vars, losses = model.build_graph_with_losses(batch_data, cfg)
+g_vars_coarse, g_vars_refine, d_vars_gd, d_vars_ld, losses = model.build_graph_with_losses(batch_data, cfg)
+g_vars = g_vars_coarse + g_vars_refine
+d_vars = d_vars_gd + d_vars_ld
 # training settings
 # initialize primary trainer
 global_step_g = tf.get_variable('global_step_g',
