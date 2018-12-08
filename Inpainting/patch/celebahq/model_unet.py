@@ -286,10 +286,10 @@ class CompletionModel(object):
                                      padding='same',
                                      kernel_initializer=self.conv_init,
                                      name='conv5')
-            fc1 = tf.contrib.layers.flatten(conv4)
-            fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
-                                  name='dout_global_fc')
-            return fc2
+            # fc1 = tf.contrib.layers.flatten(conv4)
+            # fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
+            #                       name='dout_global_fc')
+            return conv5
 
     def local_discriminator(self, x, reuse=None):
         cnum = 64
