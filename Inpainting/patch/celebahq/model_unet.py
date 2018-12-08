@@ -282,6 +282,10 @@ class CompletionModel(object):
                                                       kernel_initializer=self.conv_init,
                                                       name='conv4'))
 
+            conv5 = tf.layers.conv2d(conv4, 1, 1,
+                                     padding='same',
+                                     kernel_initializer=self.conv_init,
+                                     name='conv5')
             fc1 = tf.contrib.layers.flatten(conv4)
             fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
                                   name='dout_global_fc')
