@@ -147,9 +147,8 @@ class Colorize(object):
             fusion_inputs = tf.concat([global_inputs, mid_inputs], axis=-1)  # (N, h, w, 512)
             fusion_inputs = tf.reshape(fusion_inputs, [-1, 512])  # (Nhw, 512)
             fusion_output = tf.transpose(tf.matmul(fusion_w, tf.transpose(fusion_inputs))) + fusion_b
-            a = fusion_output.get_shape().as_list()
-            print(a)
-
+            # a = fusion_output.get_shape().as_list()
+            # print(a)
             fusion_output = self.activation(tf.reshape(fusion_output, [mid_shape[0], h, w, 256]))
             return fusion_output
 
@@ -161,6 +160,43 @@ class Colorize(object):
                                        kernel_initializer=self.conv_init,
                                        padding='same',
                                        name='conv1'))
+        conv1_shape = conv1.get_shape().as_list()
+        h = conv1_shape[1]
+        w = conv1_shape[2]
+        conv1_upsample = tf.image.resize_nearest_neighbor(conv1, [h * 2, w * 2])
+        conv2 = self.activation(conv2d(inputs=conv1_upsample,
+                                       filters=64,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv2'))
+        conv3 = self.activation(conv2d(inputs=conv2,
+                                       filters=64,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv3'))
+        conv3_shape = conv3.get_shape().as_list()
+        h = conv3_shape[1]
+        w = conv3_shape[2]
+        conv3_upsample = tf.image.resize_nearest_neighbor(conv3, [h * 2, w * 2])
+        conv4 = self.activation(conv2d(inputs=conv3_upsample,
+                                       filters=32,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv4'))
+        conv5 = tf.nn.sigmoid(conv2d(inputs=conv4,
+                                     filters=2,
+                                     kernel_size=3,
+                                     strides=1,
+                                     kernel_initializer=self.conv_init,
+                                     padding='same',
+                                     name='conv5'))
+        return conv5
 
 
 if __name__ == '__main__':
@@ -174,3 +210,5 @@ if __name__ == '__main__':
     global_feature = model.global_level_network(low_level_feature_for_global)
 
     fusion = model.fusion(global_feature, mid_feature)
+    output = model.colorize_network(fusion)
+    print(output.get_shape().as_list())
