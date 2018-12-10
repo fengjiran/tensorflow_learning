@@ -147,13 +147,20 @@ class Colorize(object):
             fusion_inputs = tf.concat([global_inputs, mid_inputs], axis=-1)  # (N, h, w, 512)
             fusion_inputs = tf.reshape(fusion_inputs, [-1, 512])  # (Nhw, 512)
             fusion_output = tf.transpose(tf.matmul(fusion_w, tf.transpose(fusion_inputs))) + fusion_b
-            print('hello')
+            a = fusion_output.get_shape().as_list()
+            print(a)
 
-            fusion_output = self.activation(tf.reshape(fusion_inputs, [mid_shape[0], h, w, 256]))
+            fusion_output = self.activation(tf.reshape(fusion_output, [mid_shape[0], h, w, 256]))
             return fusion_output
 
     def colorize_network(self, inputs):
-        pass
+        conv1 = self.activation(conv2d(inputs=inputs,
+                                       filters=128,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv1'))
 
 
 if __name__ == '__main__':
