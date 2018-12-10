@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.layers import conv2d
 
 
 class Colorize(object):
@@ -16,46 +17,47 @@ class Colorize(object):
     def low_level_network(self, inputs, reuse=None):
         cnum = 64
         with tf.variable_scope('shared_network', reuse=reuse):
-            conv1 = self.activation(tf.layers.conv2d(inputs=inputs,
-                                                     filters=cnum,
-                                                     kernel_size=3,
-                                                     strides=2,
-                                                     padding='same',
-                                                     name='conv1'))
-            conv2 = self.activation(tf.layers.conv2d(inputs=conv1,
-                                                     filters=2 * cnum,
-                                                     kernel_size=3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     name='conv2'))
-            conv3 = self.activation(tf.layers.conv2d(inputs=conv2,
-                                                     filters=2 * cnum,
-                                                     kernel_size=3,
-                                                     strides=2,
-                                                     padding='same',
-                                                     name='conv3'))
-            conv4 = self.activation(tf.layers.conv2d(inputs=conv3,
-                                                     filters=4 * cnum,
-                                                     kernel_size=3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     name='conv4'))
-            conv5 = self.activation(tf.layers.conv2d(inputs=conv4,
-                                                     filters=4 * cnum,
-                                                     kernel_size=3,
-                                                     strides=2,
-                                                     padding='same',
-                                                     name='conv5'))
-            conv6 = self.activation(tf.layers.conv2d(inputs=conv5,
-                                                     filters=8 * cnum,
-                                                     kernel_size=3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     name='conv6'))
+            conv1 = self.activation(conv2d(inputs=inputs,
+                                           filters=cnum,
+                                           kernel_size=3,
+                                           strides=2,
+                                           padding='same',
+                                           name='conv1'))
+            conv2 = self.activation(conv2d(inputs=conv1,
+                                           filters=2 * cnum,
+                                           kernel_size=3,
+                                           strides=1,
+                                           padding='same',
+                                           name='conv2'))
+            conv3 = self.activation(conv2d(inputs=conv2,
+                                           filters=2 * cnum,
+                                           kernel_size=3,
+                                           strides=2,
+                                           padding='same',
+                                           name='conv3'))
+            conv4 = self.activation(conv2d(inputs=conv3,
+                                           filters=4 * cnum,
+                                           kernel_size=3,
+                                           strides=1,
+                                           padding='same',
+                                           name='conv4'))
+            conv5 = self.activation(conv2d(inputs=conv4,
+                                           filters=4 * cnum,
+                                           kernel_size=3,
+                                           strides=2,
+                                           padding='same',
+                                           name='conv5'))
+            conv6 = self.activation(conv2d(inputs=conv5,
+                                           filters=8 * cnum,
+                                           kernel_size=3,
+                                           strides=1,
+                                           padding='same',
+                                           name='conv6'))
             return conv6
 
     def mid_level_network(self, inputs, reuse=None):
-        low_level_feature = self.low_level_network(inputs, reuse)
+        low_level_feature = self.low_level_network(inputs, reuse=reuse)
+        # conv1 = self.activation(tf.layers.)
 
     def global_level_network(self, inputs, reuse=None):
         pass
