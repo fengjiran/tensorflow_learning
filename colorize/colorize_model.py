@@ -5,6 +5,8 @@ import tensorflow as tf
 
 
 class Colorize(object):
+    """Construct colorize model."""
+
     def __init__(self):
         pass
 
