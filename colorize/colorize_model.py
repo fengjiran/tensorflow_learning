@@ -8,7 +8,10 @@ class Colorize(object):
     """Construct colorize model."""
 
     def __init__(self):
-        pass
+        print('constructing the model')
+        self.conv_init = tf.contrib.layers.xavier_initializer_conv2d()
+        self.fc_init = tf.contrib.layers.xavier_initializer()
+        self.activation = tf.nn.elu
 
     def low_level_network(self, inputs, reuse=None):
         cnum = 64
