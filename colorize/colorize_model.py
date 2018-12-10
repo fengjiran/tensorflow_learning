@@ -136,5 +136,13 @@ class Colorize(object):
                                        shape=[256],
                                        trainable=True)
 
+            global_shape = global_inputs.get_shape().as_list()
+            mid_shape = mid_inputs.get_shape().as_list()
+            h = mid_shape[1]
+            w = mid_shape[2]
+
+            global_inputs = tf.reshape(global_inputs, [global_shape[0], 1, 1, global_inputs[1]])
+            global_inputs = tf.tile(global_inputs, [1, h, w, 1])
+
     def colorize_network(self, inputs):
         pass
