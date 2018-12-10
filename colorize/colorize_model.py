@@ -146,7 +146,10 @@ class Colorize(object):
 
             fusion_inputs = tf.concat([global_inputs, mid_inputs], axis=-1)  # (N, h, w, 512)
             fusion_inputs = tf.reshape(fusion_inputs, [-1, 512])  # (Nhw, 512)
-            # fusion_output =
+            fusion_output = tf.transpose(tf.matmul(fusion_w, tf.transpose(fusion_inputs))) + fusion_b
+
+            fusion_output = self.activation(tf.reshape(fusion_inputs, [mid_shape[0], h, w, 256]))
+            return fusion_output
 
     def colorize_network(self, inputs):
         pass
