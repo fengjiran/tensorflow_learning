@@ -3,6 +3,8 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 from tensorflow.layers import conv2d
+from tensorflow.layers import dense
+from tensorflow.layers import flatten
 
 
 class Colorize(object):
@@ -21,46 +23,109 @@ class Colorize(object):
                                            filters=cnum,
                                            kernel_size=3,
                                            strides=2,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv1'))
             conv2 = self.activation(conv2d(inputs=conv1,
                                            filters=2 * cnum,
                                            kernel_size=3,
                                            strides=1,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv2'))
             conv3 = self.activation(conv2d(inputs=conv2,
                                            filters=2 * cnum,
                                            kernel_size=3,
                                            strides=2,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv3'))
             conv4 = self.activation(conv2d(inputs=conv3,
                                            filters=4 * cnum,
                                            kernel_size=3,
                                            strides=1,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv4'))
             conv5 = self.activation(conv2d(inputs=conv4,
                                            filters=4 * cnum,
                                            kernel_size=3,
                                            strides=2,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv5'))
             conv6 = self.activation(conv2d(inputs=conv5,
                                            filters=8 * cnum,
                                            kernel_size=3,
                                            strides=1,
+                                           kernel_initializer=self.conv_init,
                                            padding='same',
                                            name='conv6'))
             return conv6
 
     def mid_level_network(self, inputs, reuse=None):
+        # with tf.variable_scope('mid_level_network', reues=reuse):
         low_level_feature = self.low_level_network(inputs, reuse=reuse)
-        # conv1 = self.activation(tf.layers.)
+        conv1 = self.activation(conv2d(inputs=low_level_feature,
+                                       filters=512,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv1'))
+        conv2 = self.activation(conv2d(inputs=conv1,
+                                       filters=256,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv2'))
+        return conv2
 
     def global_level_network(self, inputs, reuse=None):
-        pass
+        low_level_feature = self.low_level_network(inputs, reuse=reuse)
+        conv1 = self.activation(conv2d(inputs=low_level_feature,
+                                       filters=512,
+                                       kernel_size=3,
+                                       strides=2,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv1'))
+        conv2 = self.activation(conv2d(inputs=conv1,
+                                       filters=512,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv2'))
+        conv3 = self.activation(conv2d(inputs=conv2,
+                                       filters=512,
+                                       kernel_size=3,
+                                       strides=2,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv3'))
+        conv4 = self.activation(conv2d(inputs=conv3,
+                                       filters=512,
+                                       kernel_size=3,
+                                       strides=1,
+                                       kernel_initializer=self.conv_init,
+                                       padding='same',
+                                       name='conv4'))
+        flatted = flatten(conv4)
+        fc1 = self.activation(dense(inputs=flatted,
+                                    units=1024,
+                                    kernel_initializer=self.fc_init,
+                                    name='fc1'))
+        fc2 = self.activation(dense(inputs=fc1,
+                                    units=512,
+                                    kernel_initializer=self.fc_init,
+                                    name='fc2'))
+        fc3 = self.activation(dense(inputs=fc2,
+                                    units=256,
+                                    kernel_initializer=self.fc_init,
+                                    name='fc3'))
+        return fc3
 
     def colorize_network(self, inputs):
         pass
