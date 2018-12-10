@@ -64,23 +64,22 @@ class Colorize(object):
             return conv6
 
     def mid_level_network(self, inputs, reuse=None):
-        # with tf.variable_scope('mid_level_network', reues=reuse):
-        low_level_feature = self.low_level_network(inputs, reuse=reuse)
-        conv1 = self.activation(conv2d(inputs=low_level_feature,
-                                       filters=512,
-                                       kernel_size=3,
-                                       strides=1,
-                                       kernel_initializer=self.conv_init,
-                                       padding='same',
-                                       name='conv1'))
-        conv2 = self.activation(conv2d(inputs=conv1,
-                                       filters=256,
-                                       kernel_size=3,
-                                       strides=1,
-                                       kernel_initializer=self.conv_init,
-                                       padding='same',
-                                       name='conv2'))
-        return conv2
+        with tf.variable_scope('mid_level_network', reues=reuse):
+            conv1 = self.activation(conv2d(inputs=inputs,
+                                           filters=512,
+                                           kernel_size=3,
+                                           strides=1,
+                                           kernel_initializer=self.conv_init,
+                                           padding='same',
+                                           name='conv1'))
+            conv2 = self.activation(conv2d(inputs=conv1,
+                                           filters=256,
+                                           kernel_size=3,
+                                           strides=1,
+                                           kernel_initializer=self.conv_init,
+                                           padding='same',
+                                           name='conv2'))
+            return conv2
 
     def global_level_network(self, inputs, reuse=None):
         low_level_feature = self.low_level_network(inputs, reuse=reuse)
