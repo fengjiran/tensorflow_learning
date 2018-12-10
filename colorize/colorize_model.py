@@ -10,8 +10,12 @@ class Colorize(object):
     def __init__(self):
         pass
 
-    def low_level_network(self, inputs):
-        pass
+    def low_level_network(self, inputs, reuse=None):
+        cnum = 64
+        conv1 = tf.layers.conv2d(inputs, cnum, 3,
+                                 strides=2,
+                                 padding='same',
+                                 name='conv1')
 
     def mid_level_network(self, inputs):
         pass
