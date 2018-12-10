@@ -54,10 +54,10 @@ class Colorize(object):
                                                      name='conv6'))
             return conv6
 
-    def mid_level_network(self, inputs):
-        pass
+    def mid_level_network(self, inputs, reuse=None):
+        low_level_feature = self.low_level_network(inputs, reuse)
 
-    def global_level_network(self, inputs):
+    def global_level_network(self, inputs, reuse=None):
         pass
 
     def colorize_network(self, inputs):
