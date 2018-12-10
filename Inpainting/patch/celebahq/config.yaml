@@ -2,8 +2,8 @@
 # parameters
 val: false
 # val: false
-firstTimeTrain: true
-# firstTimeTrain: false
+# firstTimeTrain: true
+firstTimeTrain: false
 pretrain_coarse_network: true
 gan_loss_alpha: 1.0
 wgan_gp_lambda: 10
