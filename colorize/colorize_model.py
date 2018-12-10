@@ -28,6 +28,31 @@ class Colorize(object):
                                                      strides=1,
                                                      padding='same',
                                                      name='conv2'))
+            conv3 = self.activation(tf.layers.conv2d(inputs=conv2,
+                                                     filters=2 * cnum,
+                                                     kernel_size=3,
+                                                     strides=2,
+                                                     padding='same',
+                                                     name='conv3'))
+            conv4 = self.activation(tf.layers.conv2d(inputs=conv3,
+                                                     filters=4 * cnum,
+                                                     kernel_size=3,
+                                                     strides=1,
+                                                     padding='same',
+                                                     name='conv4'))
+            conv5 = self.activation(tf.layers.conv2d(inputs=conv4,
+                                                     filters=4 * cnum,
+                                                     kernel_size=3,
+                                                     strides=2,
+                                                     padding='same',
+                                                     name='conv5'))
+            conv6 = self.activation(tf.layers.conv2d(inputs=conv5,
+                                                     filters=8 * cnum,
+                                                     kernel_size=3,
+                                                     strides=1,
+                                                     padding='same',
+                                                     name='conv6'))
+            return conv6
 
     def mid_level_network(self, inputs):
         pass
