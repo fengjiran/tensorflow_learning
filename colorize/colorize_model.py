@@ -16,10 +16,18 @@ class Colorize(object):
     def low_level_network(self, inputs, reuse=None):
         cnum = 64
         with tf.variable_scope('shared_network', reuse=reuse):
-            conv1 = tf.layers.conv2d(inputs, cnum, 3,
-                                     strides=2,
-                                     padding='same',
-                                     name='conv1')
+            conv1 = self.activation(tf.layers.conv2d(inputs=inputs,
+                                                     filters=cnum,
+                                                     kernel_size=3,
+                                                     strides=2,
+                                                     padding='same',
+                                                     name='conv1'))
+            conv2 = self.activation(tf.layers.conv2d(inputs=conv1,
+                                                     filters=2 * cnum,
+                                                     kernel_size=3,
+                                                     strides=1,
+                                                     padding='same',
+                                                     name='conv2'))
 
     def mid_level_network(self, inputs):
         pass
