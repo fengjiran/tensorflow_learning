@@ -64,7 +64,7 @@ class Colorize(object):
             return conv6
 
     def mid_level_network(self, inputs, reuse=None):
-        with tf.variable_scope('mid_level_network', reues=reuse):
+        with tf.variable_scope('mid_level_network', reuse=reuse):
             conv1 = self.activation(conv2d(inputs=inputs,
                                            filters=512,
                                            kernel_size=3,
@@ -82,7 +82,7 @@ class Colorize(object):
             return conv2
 
     def global_level_network(self, inputs, reuse=None):
-        with tf.variable_scope('global_level_network', reues=reuse):
+        with tf.variable_scope('global_level_network', reuse=reuse):
             conv1 = self.activation(conv2d(inputs=inputs,
                                            filters=512,
                                            kernel_size=3,
@@ -141,15 +141,29 @@ class Colorize(object):
             h = mid_shape[1]
             w = mid_shape[2]
 
-            global_inputs = tf.reshape(global_inputs, [global_shape[0], 1, 1, global_inputs[1]])  # (N, 1, 1, 256)
+            global_inputs = tf.reshape(global_inputs, [global_shape[0], 1, 1, global_shape[1]])  # (N, 1, 1, 256)
             global_inputs = tf.tile(global_inputs, [1, h, w, 1])  # (N, h, w, 256)
 
             fusion_inputs = tf.concat([global_inputs, mid_inputs], axis=-1)  # (N, h, w, 512)
             fusion_inputs = tf.reshape(fusion_inputs, [-1, 512])  # (Nhw, 512)
             fusion_output = tf.transpose(tf.matmul(fusion_w, tf.transpose(fusion_inputs))) + fusion_b
+            print('hello')
 
             fusion_output = self.activation(tf.reshape(fusion_inputs, [mid_shape[0], h, w, 256]))
             return fusion_output
 
     def colorize_network(self, inputs):
         pass
+
+
+if __name__ == '__main__':
+    model = Colorize()
+
+    x = tf.random_uniform([10, 224, 224, 3])
+    low_level_feature_for_mid = model.low_level_network(x)
+    low_level_feature_for_global = model.low_level_network(x, reuse=True)
+
+    mid_feature = model.mid_level_network(low_level_feature_for_mid)
+    global_feature = model.global_level_network(low_level_feature_for_global)
+
+    fusion = model.fusion(global_feature, mid_feature)
