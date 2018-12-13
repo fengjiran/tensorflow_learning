@@ -314,11 +314,14 @@ class CompletionModel(object):
                                                       padding='same',
                                                       kernel_initializer=self.conv_init,
                                                       name='conv4'))
-            conv5 = tf.layers.conv2d(conv4, 1, 1,
-                                     padding='same',
-                                     kernel_initializer=self.conv_init,
-                                     name='conv5')
-            return conv5
+            # conv5 = tf.layers.conv2d(conv4, 1, 1,
+            #                          padding='same',
+            #                          kernel_initializer=self.conv_init,
+            #                          name='conv5')
+            fc1 = tf.layers.flatten(conv4)
+            fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
+                                  name='dout_local_fc')
+            return fc2
             # return tf.reduce_mean(conv4, axis=[1, 2, 3])  # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
