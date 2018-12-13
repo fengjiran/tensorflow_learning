@@ -8,8 +8,8 @@ pretrain_coarse_network: true
 gan_loss_alpha: 1.0
 wgan_gp_lambda: 10
 coarse_l1_alpha: 1.2
-l1_loss_alpha: 1.5
-ae_loss_alpha: 1.5
+l1_loss_alpha: 1.0
+ae_loss_alpha: 1.0
 max_delta_height: 32
 max_delta_width: 32
 iteration_d: 5
@@ -32,8 +32,8 @@ total_iters: 1000000
 
 l1_loss: true
 ae_loss: true
-global_wgan_loss_alpha: 0.005
-local_wgan_loss_alpha: 0.005
+global_wgan_loss_alpha: 0.001
+local_wgan_loss_alpha: 0.001
 
 spatial_discount_gamma: 0.9
 
