@@ -45,6 +45,12 @@ def rgb2lab(srgb):
 
     xyz_normalized_pixels = tf.multiply(xyz_pixels, [1.0 / 0.950456, 1.0, 1.0 / 1.088754])
 
+    epsilon = 6.0 / 29.0
+    linear_mask = tf.cast(xyz_normalized_pixels <= (epsilon**3), dtype=tf.float32)
+    exponential_mask = tf.cast(xyz_normalized_pixels > (epsilon**3), dtype=tf.float32)
+    fxfyfz_pixels = (xyz_normalized_pixels / (3.0 * epsilon**2) + 4.0 / 29.0) * \
+        linear_mask + (xyz_normalized_pixels ** (1.0 / 3.0)) * exponential_mask
+
 
 def spatial_discounting_mask(cfg):
     gamma = cfg['spatial_discount_gamma']
