@@ -27,7 +27,23 @@ def deprocess(image):
 
 
 def rgb2lab(srgb):
-    pass
+    srgb = check_image(srgb)
+    srgb_pixels = tf.reshape(srgb, [-1, 3])
+
+    # srgb to xyz
+    linear_mask = tf.cast(srgb_pixels <= 0.04045, dtype=tf.float32)
+    exponential_mask = tf.cast(srgb_pixels > 0.04045, dtype=tf.float32)
+    rgb_pixels = (srgb_pixels / 12.92 * linear_mask) + (((srgb_pixels + 0.055) / 1.055)**2.4) * exponential_mask
+
+    rgb2xyz = tf.constant([
+        [0.412453, 0.212671, 0.019334],
+        [0.357580, 0.715160, 0.119193],
+        [0.180423, 0.072169, 0.950227]
+    ])
+
+    xyz_pixels = tf.matmul(rgb_pixels, rgb2xyz)
+
+    xyz_normalized_pixels = tf.multiply(xyz_pixels, [1.0 / 0.950456, 1.0, 1.0 / 1.088754])
 
 
 def spatial_discounting_mask(cfg):
