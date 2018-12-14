@@ -6,6 +6,11 @@ import tensorflow as tf
 # from tensorflow.python.framework import ops
 
 
+def deprocess(image):
+    # [-1, 1] => [0, 1]
+    return (image + 1.0) / 2.0
+
+
 def spatial_discounting_mask(cfg):
     gamma = cfg['spatial_discount_gamma']
     height = cfg['hole_height']
