@@ -7,7 +7,9 @@ import tensorflow as tf
 
 
 def check_image(image):
-    pass
+    assertion = tf.assert_equal(tf.shape(image)[-1], 3, message='image must have 3 color channels')
+    with tf.control_dependencies([assertion]):
+        image = tf.identity(image)
 
 
 def deprocess(image):
