@@ -26,6 +26,10 @@ def deprocess(image):
     return (image + 1.0) / 2.0
 
 
+def rgb2lab(srgb):
+    pass
+
+
 def spatial_discounting_mask(cfg):
     gamma = cfg['spatial_discount_gamma']
     height = cfg['hole_height']
