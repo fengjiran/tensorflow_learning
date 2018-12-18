@@ -197,7 +197,8 @@ class CompletionModel(object):
                                                      dilation_rate=2,
                                                      kernel_initializer=self.conv_init,
                                                      name='conv7_atrous'))
-            conv8 = self.activation(tf.layers.conv2d(conv7, 4 * cnum, 3,
+            conv8_inputs = tf.concat([conv6, conv7], axis=-1)
+            conv8 = self.activation(tf.layers.conv2d(conv8_inputs, 4 * cnum, 3,
                                                      padding='same',
                                                      dilation_rate=4,
                                                      kernel_initializer=self.conv_init,
@@ -224,9 +225,13 @@ class CompletionModel(object):
                                                       kernel_initializer=self.conv_init,
                                                       name='conv12'))
 
+            conv13_inputs = tf.image.resize_nearest_neighbor(
+                conv12,
+                (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])
+            )
+            conv13_inputs = tf.concat([conv3,conv13_inputs],axis=-1)
             conv13 = self.activation(tf.layers.conv2d(
-                inputs=tf.image.resize_nearest_neighbor(conv12,
-                                                        (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
+                inputs=conv13_inputs,
                 filters=2 * cnum,
                 kernel_size=3,
                 strides=1,
@@ -238,9 +243,13 @@ class CompletionModel(object):
                                                       padding='same',
                                                       kernel_initializer=self.conv_init,
                                                       name='conv14'))
+            conv15_inputs = tf.image.resize_nearest_neighbor(
+                conv14,
+                (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])
+            )
+            conv15_inputs = tf.concat([conv1, conv15_inputs], axis=-1)
             conv15 = self.activation(tf.layers.conv2d(
-                inputs=tf.image.resize_nearest_neighbor(conv14,
-                                                        (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
+                inputs=conv15_inputs,
                 filters=cnum,
                 kernel_size=3,
                 strides=1,
