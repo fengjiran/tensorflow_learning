@@ -99,9 +99,14 @@ class CompletionModel(object):
                                                       kernel_initializer=self.conv_init,
                                                       name='conv12'))
 
+            conv13_inputs = tf.image.resize_nearest_neighbor(
+                conv12,
+                (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])
+            )
+            conv13_inputs = tf.concat([conv3, conv13_inputs], axis=-1)
+
             conv13 = self.activation(tf.layers.conv2d(
-                inputs=tf.image.resize_nearest_neighbor(conv12,
-                                                        (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
+                inputs=conv13_inputs,
                 filters=2 * cnum,
                 kernel_size=3,
                 strides=1,
