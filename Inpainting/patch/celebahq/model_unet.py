@@ -71,7 +71,8 @@ class CompletionModel(object):
                                                      dilation_rate=2,
                                                      kernel_initializer=self.conv_init,
                                                      name='conv7_atrous'))
-            conv8 = self.activation(tf.layers.conv2d(conv7, 4 * cnum, 3,
+            conv8_inputs = tf.concat([conv6, conv7],axis=-1)
+            conv8 = self.activation(tf.layers.conv2d(conv8_inputs, 4 * cnum, 3,
                                                      padding='same',
                                                      dilation_rate=4,
                                                      kernel_initializer=self.conv_init,
