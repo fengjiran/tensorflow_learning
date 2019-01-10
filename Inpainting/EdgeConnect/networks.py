@@ -1,6 +1,9 @@
 from __future__ import print_function
 import tensorflow as tf
 
+from ops import conv
+from ops import deconv
+
 
 class InpaintingModel(object):
     """Construct model."""
