@@ -2,6 +2,10 @@ from __future__ import print_function
 import tensorflow as tf
 
 
+def residual_block(x, in_channels, out_channels, dilation=1):
+    pass
+
+
 def instance_norm(x, name="instance_norm"):
     with tf.variable_scope(name):
         depth = x.get_shape()[3]
