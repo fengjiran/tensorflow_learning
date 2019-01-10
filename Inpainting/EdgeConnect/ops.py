@@ -5,7 +5,7 @@ weight_regularizer = None
 
 
 def conv(x, channels, kernel=4, stride=2, dilation=1,
-         pad=0, pad_type='zero', use_bias=True, sn=False, scope='conv_0'):
+         pad=0, pad_type='zero', use_bias=True, sn=True, scope='conv_0'):
     with tf.variable_scope(scope):
         if pad_type == 'zero':
             x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
