@@ -35,7 +35,7 @@ def conv(x, channels, kernel=4, stride=2, dilation=1,
         return x
 
 
-def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=False, scope='deconv_0'):
+def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='deconv_0'):
     with tf.variable_scope(scope):
         x_shape = x.get_shape().as_list()
         output_shape = [x_shape[0], x_shape[1] * stride, x_shape[2] * stride, channels]
