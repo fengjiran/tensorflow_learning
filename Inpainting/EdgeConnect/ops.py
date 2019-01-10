@@ -4,7 +4,8 @@ weight_init = tf.truncated_normal_initializer(mean=0.0, stddev=0.02)
 weight_regularizer = None
 
 
-def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True, sn=False, scope='conv_0'):
+def conv(x, channels, kernel=4, stride=2, dilation=1,
+         pad=0, pad_type='zero', use_bias=True, sn=False, scope='conv_0'):
     with tf.variable_scope(scope):
         if pad_type == 'zero':
             x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
@@ -16,8 +17,11 @@ def conv(x, channels, kernel=4, stride=2, pad=0, pad_type='zero', use_bias=True,
                                 initializer=weight_init,
                                 regularizer=weight_regularizer)
             bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
-            x = tf.nn.conv2d(input=x, filter=spectral_norm(w),
-                             strides=[1, stride, stride, 1], padding='VALID')
+            x = tf.nn.conv2d(input=x,
+                             filter=spectral_norm(w),
+                             strides=[1, stride, stride, 1],
+                             dilations=[1, dilation, dilation, 1],
+                             padding='VALID')
 
             if use_bias:
                 x = tf.nn.bias_add(x, bias)
