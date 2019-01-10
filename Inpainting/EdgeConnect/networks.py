@@ -2,7 +2,20 @@ from __future__ import print_function
 import tensorflow as tf
 
 
-def residual_block(x, in_channels, out_channels, dilation=1):
+class InpaintingModel(object):
+    """Construct model."""
+
+    def __init__(self):
+        print('Construct the inpainting model.')
+
+    def edge_generator(self, x):
+        pass
+
+    def inpaint_generator(self, x):
+        pass
+
+
+def residual_block(x, in_channels, out_channels, dilation=1, name='residual_block'):
     pass
 
 
