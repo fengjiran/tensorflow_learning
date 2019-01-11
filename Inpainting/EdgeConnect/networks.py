@@ -32,3 +32,13 @@ class InpaintingModel(object):
 
     def inpaint_generator(self, x):
         pass
+
+
+if __name__ == '__main__':
+    model = InpaintingModel()
+
+    bs = 10
+    x = tf.random_uniform([bs, 256, 256, 3])
+
+    out = model.edge_generator(x)
+    print(out.get_shape())
