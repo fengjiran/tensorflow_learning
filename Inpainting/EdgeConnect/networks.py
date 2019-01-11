@@ -29,6 +29,7 @@ class InpaintingModel(object):
             x = tf.nn.relu(x)
 
             # resnet block
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block1')
 
             return x
 
