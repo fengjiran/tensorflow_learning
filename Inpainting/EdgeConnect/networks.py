@@ -73,7 +73,9 @@ class InpaintingModel(object):
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
     def inpaint_generator(self, x):
-        pass
+        with tf.variable_scope('inpaint_generator'):
+            # encoder
+            x = conv(x, channels=64, kernel=7, stride=1, pad=3, pad_type='reflect', sn=False, name='conv1')
 
 
 if __name__ == '__main__':
