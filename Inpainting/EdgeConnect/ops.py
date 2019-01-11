@@ -66,8 +66,16 @@ def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, name='deconv
 
 def resnet_block(x, out_channels, dilation=1, name='resnet_block'):
     with tf.variable_scope(name):
-        x = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
+        y = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
                  pad=dilation, pad_type='reflect', name='conv1')
+        y = instance_norm(y, name='in1')
+        y = tf.nn.relu(y)
+
+        y = conv(y, out_channels, kernel=3, stride=1, dilation=1,
+                 pad=1, pad_type='reflect', name='conv2')
+        y = instance_norm(y, name='in2')
+
+        return x + y
 
 
 def spectral_norm(w, iteration=1):
