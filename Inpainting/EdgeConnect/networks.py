@@ -28,6 +28,8 @@ class InpaintingModel(object):
             x = instance_norm(x, name='in3')
             x = tf.nn.relu(x)
 
+            # resnet block
+
             return x
 
     def inpaint_generator(self, x):
