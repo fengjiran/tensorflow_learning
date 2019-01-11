@@ -53,7 +53,15 @@ class InpaintingModel(object):
             return x
 
     def edge_discriminator(self, x, reuse=None):
-        pass
+        with tf.variable_scope('edge_discriminator', reuse=reuse):
+            x = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero', name='conv1')
+            x = tf.nn.leaky_relu(x)
+
+            x = conv(x, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', name='conv2')
+            x = tf.nn.leaky_relu(x)
+
+            x = conv(x, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', name='conv3')
+            x = tf.nn.leaky_relu(x)
 
     def inpaint_generator(self, x):
         pass
