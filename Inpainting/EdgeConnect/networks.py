@@ -30,6 +30,15 @@ class InpaintingModel(object):
 
             # resnet block
             x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block1')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block2')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block3')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block4')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block5')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block6')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block7')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block8')
+
+            # decoder
 
             return x
 
