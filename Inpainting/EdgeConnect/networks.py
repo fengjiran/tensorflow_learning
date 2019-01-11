@@ -76,6 +76,16 @@ class InpaintingModel(object):
         with tf.variable_scope('inpaint_generator'):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3, pad_type='reflect', sn=False, name='conv1')
+            x = instance_norm(x, name='in1')
+            x = tf.nn.relu(x)
+
+            x = conv(x, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', sn=False, name='conv2')
+            x = instance_norm(x, name='in2')
+            x = tf.nn.relu(x)
+
+            x = conv(x, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', sn=False, name='conv3')
+            x = instance_norm(x, name='in3')
+            x = tf.nn.relu(x)
 
 
 if __name__ == '__main__':
