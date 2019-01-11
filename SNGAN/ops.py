@@ -125,7 +125,7 @@ def global_avg_pooling(x):
 
 
 def spectral_norm(w, iteration=1):
-    w_shape = w.shape().as_list()
+    w_shape = w.shape.as_list()
     w = tf.reshape(w, [-1, w_shape[-1]])
 
     u = tf.get_variable('u', [1, w_shape[-1]],
