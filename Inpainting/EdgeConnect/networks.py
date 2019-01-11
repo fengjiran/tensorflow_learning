@@ -47,7 +47,13 @@ class InpaintingModel(object):
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
 
+            x = conv(x, channels=1, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv4')
+            x = tf.nn.sigmoid(x)
+
             return x
+
+    def edge_discriminator(self, x, reuse=None):
+        pass
 
     def inpaint_generator(self, x):
         pass
