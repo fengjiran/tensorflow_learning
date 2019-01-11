@@ -18,10 +18,6 @@ class InpaintingModel(object):
         pass
 
 
-def residual_block(x, in_channels, out_channels, dilation=1, name='residual_block'):
-    pass
-
-
 def instance_norm(x, name="instance_norm"):
     with tf.variable_scope(name):
         depth = x.get_shape()[3]
