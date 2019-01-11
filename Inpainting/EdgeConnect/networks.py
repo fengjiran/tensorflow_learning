@@ -83,4 +83,6 @@ if __name__ == '__main__':
     x = tf.random_uniform([bs, 256, 256, 3])
 
     out = model.edge_generator(x)
+    dis_out, dis_mid = model.edge_discriminator(x)
     print(out.get_shape())
+    print(dis_out.get_shape())
