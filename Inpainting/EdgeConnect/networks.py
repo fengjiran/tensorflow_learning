@@ -54,14 +54,23 @@ class InpaintingModel(object):
 
     def edge_discriminator(self, x, reuse=None):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
-            x = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero', name='conv1')
-            x = tf.nn.leaky_relu(x)
+            conv1 = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv1')
+            conv1 = tf.nn.leaky_relu(conv1)
 
-            x = conv(x, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', name='conv2')
-            x = tf.nn.leaky_relu(x)
+            conv2 = conv(conv1, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv2')
+            conv2 = tf.nn.leaky_relu(conv2)
 
-            x = conv(x, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', name='conv3')
-            x = tf.nn.leaky_relu(x)
+            conv3 = conv(conv2, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv3')
+            conv3 = tf.nn.leaky_relu(conv3)
+
+            conv4 = conv(conv3, channels=512, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv4')
+            conv4 = tf.nn.leaky_relu(conv4)
+
+            conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv5')
+
+            outputs = tf.nn.sigmoid(conv5)
+
+            return outputs, [conv1, conv2, conv3, conv4, conv5]
 
     def inpaint_generator(self, x):
         pass
