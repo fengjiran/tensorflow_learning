@@ -39,6 +39,7 @@ def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='decon
     with tf.variable_scope(scope):
         x_shape = x.get_shape().as_list()
         output_shape = [x_shape[0], x_shape[1] * stride, x_shape[2] * stride, channels]
+
         if sn:
             w = tf.get_variable("kernel", shape=[kernel, kernel, channels, x.get_shape()[-1]],
                                 initializer=weight_init,
@@ -51,7 +52,6 @@ def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='decon
             if use_bias:
                 bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
                 x = tf.nn.bias_add(x, bias)
-
         else:
             x = tf.layers.conv2d_transpose(inputs=x, filters=channels,
                                            kernel_size=kernel,
@@ -62,6 +62,11 @@ def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='decon
                                            use_bias=use_bias)
 
         return x
+
+
+def resnet_block(x, out_channels, dilation=1, name='resnet_block'):
+    with tf.variable_scope(name):
+        pass
 
 
 def spectral_norm(w, iteration=1):
