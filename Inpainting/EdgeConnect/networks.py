@@ -39,6 +39,13 @@ class InpaintingModel(object):
             x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block8')
 
             # decoder
+            x = deconv(x, channels=128, kernel=4, stride=2, name='deconv1')
+            x = instance_norm(x, name='in4')
+            x = tf.nn.relu(x)
+
+            x = deconv(x, channels=64, kernel=4, stride=2, name='deconv2')
+            x = instance_norm(x, name='in5')
+            x = tf.nn.relu(x)
 
             return x
 
