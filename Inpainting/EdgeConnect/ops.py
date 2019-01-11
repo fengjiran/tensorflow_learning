@@ -4,9 +4,9 @@ weight_init = tf.truncated_normal_initializer(mean=0.0, stddev=0.02)
 weight_regularizer = None
 
 
-def conv(x, channels, kernel=4, stride=2, dilation=1,
-         pad=0, pad_type='zero', use_bias=True, sn=True, scope='conv_0'):
-    with tf.variable_scope(scope):
+def conv(x, channels, kernel=4, stride=1, dilation=1,
+         pad=0, pad_type='zero', use_bias=True, sn=True, name='conv_0'):
+    with tf.variable_scope(name):
         if pad_type == 'zero':
             x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]])
         if pad_type == 'reflect':
@@ -35,8 +35,8 @@ def conv(x, channels, kernel=4, stride=2, dilation=1,
         return x
 
 
-def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='deconv_0'):
-    with tf.variable_scope(scope):
+def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, name='deconv_0'):
+    with tf.variable_scope(name):
         x_shape = x.get_shape().as_list()
         output_shape = [x_shape[0], x_shape[1] * stride, x_shape[2] * stride, channels]
 
@@ -66,7 +66,8 @@ def deconv(x, channels, kernel=4, stride=2, use_bias=True, sn=True, scope='decon
 
 def resnet_block(x, out_channels, dilation=1, name='resnet_block'):
     with tf.variable_scope(name):
-        pass
+        x = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
+                 pad=dilation, pad_type='reflect', name='conv1')
 
 
 def spectral_norm(w, iteration=1):
