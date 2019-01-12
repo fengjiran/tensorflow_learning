@@ -23,6 +23,7 @@ class Vgg19(object):
     def build(self, rgb):
         """
         Load variables from npy file to build VGG.
+
         rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
         """
         print('Build model started.')
