@@ -29,6 +29,9 @@ class Vgg19(object):
         print('Build model started.')
         rgb_scaled = rgb * 255.0
 
+        # Convert RGB to BGR
+        red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=rgb_scaled)
+
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
