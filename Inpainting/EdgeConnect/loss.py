@@ -11,7 +11,13 @@ class Vgg19(object):
 
     def __init__(self, vgg19_npy_path=None):
         if vgg19_npy_path is None:
-            pass
+            path = inspect.getfile(Vgg19)
+            path = os.path.abspath(os.path.join(path, os.pardir))
+            path = os.path.join(path, 'vgg19.npy')
+            vgg19_npy_path = path
+            print(vgg19_npy_path)
+
+        self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
 
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
