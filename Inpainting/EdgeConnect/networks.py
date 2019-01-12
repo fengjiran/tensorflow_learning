@@ -145,3 +145,4 @@ if __name__ == '__main__':
     print(out.get_shape())
     print(dis_out.get_shape())
     print(inpaint_out.get_shape())
+    # tf.keras.applications.vgg19()
