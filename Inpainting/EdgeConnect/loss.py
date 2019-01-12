@@ -38,6 +38,23 @@ class Vgg19(object):
             relu = tf.nn.relu(bias)
             return relu
 
+    def fc_layer(self, bottom, name):
+        with tf.variable_scope(name):
+            shape = bottom.get_shape().as_list()
+            dim = 1
+
+            for d in shape[1:]:
+                dim *= d
+
+            x = tf.reshape(bottom, [-1, dim])
+
+            weights = self.get_fc_weight(name)
+            biases = self.get_bias(name)
+
+            fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
+
+            return fc
+
     def get_conv_filter(self, name):
         return tf.constant(self.data_dict[name][0], name='filters')
 
