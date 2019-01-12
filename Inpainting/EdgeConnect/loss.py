@@ -20,6 +20,14 @@ class Vgg19(object):
         self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
         print('npy file loaded')
 
+    def build(self, rgb):
+        """
+        Load variables from npy file to build VGG.
+        rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
+        """
+        print('Build model started.')
+        rgb_scaled = rgb * 255.0
+
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
