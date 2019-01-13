@@ -6,7 +6,7 @@ import yaml
 # import numpy as np
 # import pandas as pd
 import tensorflow as tf
-from model_unet import CompletionModel
+from model_in import CompletionModel
 # from model_in import CompletionModel
 
 with open('config.yaml', 'r') as f:
