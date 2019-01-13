@@ -132,6 +132,9 @@ class InpaintingModel(object):
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
+    def build_graph_with_losses(self, batch_data, cfg):
+        pass
+
 
 if __name__ == '__main__':
     model = InpaintingModel()
