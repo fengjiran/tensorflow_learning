@@ -4,8 +4,19 @@ import numpy as np
 import tensorflow as tf
 
 
-def perceptual_loss(x, y, weights=[1.0, 1.0, 1.0, 1.0, 1.0]):
-    pass
+def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
+    x_vgg_out = Vgg19().build(x)
+    y_vgg_out = Vgg19().build(y)
+
+    content_loss = 0.0
+
+    content_loss += weights[0] * tf.losses.absolute_difference(x_vgg_out['relu1_1'], y_vgg_out['relu1_1'])
+    content_loss += weights[1] * tf.losses.absolute_difference(x_vgg_out['relu2_1'], y_vgg_out['relu2_1'])
+    content_loss += weights[2] * tf.losses.absolute_difference(x_vgg_out['relu3_1'], y_vgg_out['relu3_1'])
+    content_loss += weights[3] * tf.losses.absolute_difference(x_vgg_out['relu4_1'], y_vgg_out['relu4_1'])
+    content_loss += weights[4] * tf.losses.absolute_difference(x_vgg_out['relu5_1'], y_vgg_out['relu5_1'])
+
+    return content_loss
 
 
 class Vgg19(object):
