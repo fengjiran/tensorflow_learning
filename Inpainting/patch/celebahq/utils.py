@@ -257,7 +257,8 @@ def conv(x, channels, kernel=4, stride=1, dilation=1,
                              filter=spectral_norm(w),
                              strides=[1, stride, stride, 1],
                              dilations=[1, dilation, dilation, 1],
-                             padding='VALID')
+                             padding='VALID',
+                             data_format='NHWC')
 
             if use_bias:
                 x = tf.nn.bias_add(x, bias)
