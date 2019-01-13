@@ -71,8 +71,7 @@ class Vgg19(object):
         bgr = tf.concat(axis=3,
                         values=[blue - VGG_MEAN[0],
                                 green - VGG_MEAN[1],
-                                red - VGG_MEAN[2]]
-                        )
+                                red - VGG_MEAN[2]])
 
         assert bgr.get_shape().as_list() == [224, 224, 3]
 
@@ -116,6 +115,31 @@ class Vgg19(object):
         self.data_dict = None
 
         print('build model finished!')
+
+        out = {
+            'relu1_1': self.conv1_1,
+            'relu1_2': self.conv1_2,
+
+            'relu2_1': self.conv2_1,
+            'relu2_2': self.conv2_2,
+
+            'relu3_1': self.conv3_1,
+            'relu3_2': self.conv3_2,
+            'relu3_3': self.conv3_3,
+            'relu3_4': self.conv3_4,
+
+            'relu4_1': self.conv4_1,
+            'relu4_2': self.conv4_2,
+            'relu4_3': self.conv4_3,
+            'relu4_4': self.conv4_4,
+
+            'relu5_1': self.conv5_1,
+            'relu5_2': self.conv5_2,
+            'relu5_3': self.conv5_3,
+            'relu5_4': self.conv5_4
+        }
+
+        return out
 
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
