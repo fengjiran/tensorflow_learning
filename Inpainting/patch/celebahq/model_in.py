@@ -30,7 +30,7 @@ class CompletionModel(object):
         # self.activation = tf.nn.leaky_relu
         self.norm_type = 'none'
 
-    def coarse_network(self, x):
+    def coarse_network(self, x, reuse=None):
         # conv_layers = []
         # cnum = 32
         # if self.norm_type == 'instance_norm':
@@ -38,7 +38,7 @@ class CompletionModel(object):
         # else:
         #     norm = tf.identity
 
-        with tf.variable_scope('coarse'):
+        with tf.variable_scope('coarse', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv1')
             x = instance_norm(x, name='in1')
@@ -76,12 +76,12 @@ class CompletionModel(object):
 
             return x
 
-    def refine_network(self, x):
+    def refine_network(self, x, reuse=None):
         """Construct refine network."""
         # conv_layers = []
         # cnum = 32
 
-        with tf.variable_scope('refine'):
+        with tf.variable_scope('refine', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv1')
             x = instance_norm(x, name='in1')
@@ -171,9 +171,13 @@ class CompletionModel(object):
                                      padding='same',
                                      kernel_initializer=self.conv_init,
                                      name='conv4')
+
+            fc1 = tf.layers.flatten(conv4)
+            fc2 = tf.layers.dense(fc1, 1, kernel_initializer=self.fc_init,
+                                  name='dout_local_fc')
             # conv5 = tf.layers.conv2d(conv4, 1, 1, padding='same', activation=tf.nn.leaky_relu,
             #                          kernel_initializer=tf.keras.initializers.glorot_normal(), name='conv5')
-            return tf.reduce_mean(conv4, axis=[1, 2, 3])  # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
+            return fc2  # tf.contrib.layers.flatten(tf.nn.leaky_relu(conv5))
 
     def build_wgan_discriminator(self, global_input, local_input, reuse=None):
         # with tf.variable_scope('wgan_discriminator', reuse=reuse):
@@ -205,12 +209,12 @@ class CompletionModel(object):
         coarse_network_input = tf.concat([batch_incomplete, ones_x, mask], axis=3)
         # coarse_network_input = tf.concat([batch_incomplete, ones_x, ones_x * mask], axis=3)
 
-        coarse_output = self.coarse_network(coarse_network_input)
+        coarse_output = self.coarse_network(coarse_network_input, reuse)
         batch_complete_coarse = coarse_output * mask + batch_pos * (1. - mask)
 
         # refine_network_input = tf.concat([batch_complete_coarse, ones_x, ones_x * mask], axis=3)
         refine_network_input = tf.concat([batch_complete_coarse, ones_x, mask], axis=3)
-        refine_output = self.refine_network(refine_network_input)
+        refine_output = self.refine_network(refine_network_input, reuse)
         batch_complete_refine = refine_output * mask + batch_pos * (1. - mask)
 
         losses = {}
@@ -259,7 +263,7 @@ class CompletionModel(object):
 
         losses['refine_d_loss_global'] = d_loss_global
         losses['refine_d_loss_local'] = d_loss_local
-        losses['refine_d_loss'] = losses['refine_d_loss_global'] * 1.4 + losses['refine_d_loss_local'] * 1.4
+        losses['refine_d_loss'] = losses['refine_d_loss_global'] * 1.0 + losses['refine_d_loss_local'] * 1.0
 
         # gradient penalty
         interpolates_global = random_interpolates(batch_pos, batch_complete_refine)
