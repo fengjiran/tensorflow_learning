@@ -4,6 +4,10 @@ import numpy as np
 import tensorflow as tf
 
 
+def perceptual_loss(x, y, weights=[1.0, 1.0, 1.0, 1.0, 1.0]):
+    pass
+
+
 class Vgg19(object):
     """Construct VGG19 model."""
 
