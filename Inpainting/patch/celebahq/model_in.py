@@ -13,7 +13,10 @@ from utils import random_interpolates
 from utils import lipschitz_penalty
 from utils import images_summary
 from utils import gradients_summary
-# from utils import instance_norm
+from utils import instance_norm
+from utils import conv
+from utils import deconv
+from utils import resnet_block
 
 
 class CompletionModel(object):
@@ -27,124 +30,51 @@ class CompletionModel(object):
         # self.activation = tf.nn.leaky_relu
         self.norm_type = 'none'
 
-    def coarse_network(self, images, reuse=None):
-        conv_layers = []
-        cnum = 32
+    def coarse_network(self, x):
+        # conv_layers = []
+        # cnum = 32
         # if self.norm_type == 'instance_norm':
         #     norm = instance_norm
         # else:
         #     norm = tf.identity
 
-        with tf.variable_scope('coarse', reuse=reuse):
-            conv1 = self.activation(tf.layers.conv2d(images, cnum, 5,
-                                                     strides=1,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv1'))
-            conv2 = self.activation(tf.layers.conv2d(conv1, 2 * cnum, 3,
-                                                     strides=2,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv2_downsample'))
-            conv3 = self.activation(tf.layers.conv2d(conv2, 2 * cnum, 3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv3'))
-            conv4 = self.activation(tf.layers.conv2d(conv3, 4 * cnum, 3,
-                                                     strides=2,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv4_downsample'))
-            conv5 = self.activation(tf.layers.conv2d(conv4, 4 * cnum, 3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv5'))
-            conv6 = self.activation(tf.layers.conv2d(conv5, 4 * cnum, 3,
-                                                     strides=1,
-                                                     padding='same',
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv6'))
+        with tf.variable_scope('coarse'):
+            # encoder
+            x = conv(x, channels=64, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv1')
+            x = instance_norm(x, name='in1')
+            x = tf.nn.relu(x)
 
-            conv7 = self.activation(tf.layers.conv2d(conv6, 4 * cnum, 3,
-                                                     padding='same',
-                                                     dilation_rate=2,
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv7_atrous'))
-            conv8 = self.activation(tf.layers.conv2d(conv7, 4 * cnum, 3,
-                                                     padding='same',
-                                                     dilation_rate=4,
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv8_atrous'))
-            conv9 = self.activation(tf.layers.conv2d(conv8, 4 * cnum, 3,
-                                                     padding='same',
-                                                     dilation_rate=8,
-                                                     kernel_initializer=self.conv_init,
-                                                     name='conv9_atrous'))
-            conv10 = self.activation(tf.layers.conv2d(conv9, 4 * cnum, 3,
-                                                      padding='same',
-                                                      dilation_rate=16,
-                                                      kernel_initializer=self.conv_init,
-                                                      name='conv10_atrous'))
+            x = conv(x, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', name='conv2')
+            x = instance_norm(x, name='in2')
+            x = tf.nn.relu(x)
 
-            conv11 = self.activation(tf.layers.conv2d(conv10, 4 * cnum, 3,
-                                                      strides=1,
-                                                      padding='same',
-                                                      kernel_initializer=self.conv_init,
-                                                      name='conv11'))
-            conv12 = self.activation(tf.layers.conv2d(conv11, 4 * cnum, 3,
-                                                      strides=1,
-                                                      padding='same',
-                                                      kernel_initializer=self.conv_init,
-                                                      name='conv12'))
+            x = conv(x, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', name='conv3')
+            x = instance_norm(x, name='in3')
+            x = tf.nn.relu(x)
 
-            conv13 = self.activation(tf.layers.conv2d(
-                inputs=tf.image.resize_nearest_neighbor(conv12,
-                                                        (conv3.get_shape().as_list()[1], conv3.get_shape().as_list()[2])),
-                filters=2 * cnum,
-                kernel_size=3,
-                strides=1,
-                padding='same',
-                kernel_initializer=self.conv_init,
-                name='conv13_upsample'))
+            # resnet block
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block1')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block2')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block3')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block4')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block5')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block6')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block7')
+            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block8')
 
-            conv14 = self.activation(tf.layers.conv2d(conv13, 2 * cnum, 3,
-                                                      strides=1,
-                                                      padding='same',
-                                                      kernel_initializer=self.conv_init,
-                                                      name='conv14'))
-            conv15 = self.activation(tf.layers.conv2d(
-                inputs=tf.image.resize_nearest_neighbor(conv14,
-                                                        (conv1.get_shape().as_list()[1], conv1.get_shape().as_list()[2])),
-                filters=cnum,
-                kernel_size=3,
-                strides=1,
-                padding='same',
-                kernel_initializer=self.conv_init,
-                name='conv15_upsample'))
+            # decoder
+            x = deconv(x, channels=128, kernel=4, stride=2, name='deconv1')
+            x = instance_norm(x, name='in4')
+            x = tf.nn.relu(x)
 
-            conv16 = self.activation(tf.layers.conv2d(conv15, cnum // 2, 3,
-                                                      strides=1,
-                                                      padding='same',
-                                                      kernel_initializer=self.conv_init,
-                                                      name='conv16'))
-            conv17 = tf.layers.conv2d(conv16, 3, 3,
-                                      strides=1,
-                                      padding='same',
-                                      kernel_initializer=self.conv_init,
-                                      name='conv17')
+            x = deconv(x, channels=64, kernel=4, stride=2, name='deconv2')
+            x = instance_norm(x, name='in5')
+            x = tf.nn.relu(x)
 
-            # conv_output = tf.clip_by_value(conv17, -1., 1.)
-            conv_output = tf.nn.tanh(conv17)
+            x = conv(x, channels=3, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv4')
+            x = tf.nn.tanh(x)
 
-            for i in range(1, 18):
-                conv_layers.append(eval('conv{}'.format(i)))
-
-            for conv in conv_layers:
-                print('conv:{}, output_shape:{}'.format(conv_layers.index(conv) + 1, conv.get_shape().as_list()))
-
-            return conv_output
+            return x
 
     def refine_network(self, images, reuse=None):
         """Construct refine network."""
