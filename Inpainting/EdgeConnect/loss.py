@@ -20,6 +20,38 @@ class Vgg19(object):
         self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
         print('npy file loaded')
 
+        self.conv1_1 = None
+        self.conv1_2 = None
+        self.pool1 = None
+
+        self.conv2_1 = None
+        self.conv2_2 = None
+        self.pool2 = None
+
+        self.conv3_1 = None
+        self.conv3_2 = None
+        self.conv3_3 = None
+        self.conv3_4 = None
+        self.pool3 = None
+
+        self.conv4_1 = None
+        self.conv4_2 = None
+        self.conv4_3 = None
+        self.conv4_4 = None
+        self.pool4 = None
+
+        self.conv5_1 = None
+        self.conv5_2 = None
+        self.conv5_3 = None
+        self.conv5_4 = None
+        self.pool5 = None
+
+        self.fc6 = None
+        self.fc7 = None
+        self.relu7 = None
+        self.fc8 = None
+        self.prob = None
+
     def build(self, rgb):
         """
         Load variables from npy file to build VGG.
@@ -35,11 +67,15 @@ class Vgg19(object):
         assert green.get_shape().as_list()[1:] == [224, 224, 1]
         assert blue.get_shape().as_list()[1:] == [224, 224, 1]
 
-        bgr = tf.concat(axis=3, values=[
-            blue - VGG_MEAN[0],
-            green - VGG_MEAN[1],
-            red - VGG_MEAN[2],
-        ])
+        bgr = tf.concat(axis=3, values=[blue - VGG_MEAN[0],
+                                        green - VGG_MEAN[1],
+                                        red - VGG_MEAN[2]])
+
+        assert bgr.get_shape().as_list() == [224, 224, 3]
+
+        self.conv1_1 = self.conv_layer(bgr, 'conv1_1')
+        self.conv1_2 = self.conv_layer(self.conv1_1, 'conv1_2')
+        self.pool1 = self.max_pool(self.conv1_2, 'pool1')
 
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
