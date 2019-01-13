@@ -3,8 +3,6 @@ import inspect
 import numpy as np
 import tensorflow as tf
 
-VGG_MEAN = [103.939, 116.779, 123.68]
-
 
 class Vgg19(object):
     """Construct VGG19 model."""
@@ -60,6 +58,7 @@ class Vgg19(object):
         rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
         """
         print('Build model started.')
+        VGG_MEAN = [103.939, 116.779, 123.68]
         rgb_scaled = rgb * 255.0
 
         # Convert RGB to BGR
