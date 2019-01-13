@@ -4,7 +4,12 @@ import numpy as np
 import tensorflow as tf
 
 
+def style_loss(x):
+    pass
+
+
 def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
+    """Compute perceptual loss, vgg-based."""
     x_vgg_out = Vgg19().build(x)
     y_vgg_out = Vgg19().build(y)
 
