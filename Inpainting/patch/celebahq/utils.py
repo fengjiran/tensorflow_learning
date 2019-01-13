@@ -240,6 +240,30 @@ weight_init = tf.contrib.layers.xavier_initializer_conv2d()
 weight_regularizer = None
 
 
+def atrous_conv(x, channels, kernel=3, dilation=1, use_bias=True, sn=True, name='conv_0'):
+    with tf.variable_scope(name):
+        if sn:
+            w = tf.get_variable("kernel", shape=[kernel, kernel, x.get_shape()[-1], channels],
+                                initializer=weight_init,
+                                regularizer=weight_regularizer)
+            bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
+
+            x = tf.nn.atrous_conv2d(value=x,
+                                    filters=spectral_norm(w),
+                                    rate=dilation,
+                                    padding='SAME')
+            if use_bias:
+                x = tf.nn.bias_add(x, bias)
+
+        else:
+            x = tf.layers.conv2d(inputs=x, filters=channels,
+                                 kernel_size=kernel, kernel_initializer=weight_init,
+                                 kernel_regularizer=weight_regularizer,
+                                 use_bias=use_bias, dilation_rate=dilation)
+
+        return x
+
+
 def conv(x, channels, kernel=4, stride=1, dilation=1,
          pad=0, pad_type='zero', use_bias=True, sn=True, name='conv_0'):
     with tf.variable_scope(name):
