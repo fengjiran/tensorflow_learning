@@ -20,20 +20,20 @@ def style_loss(x, y):
     y_vgg_out = vgg.build(y)
 
     # compute style loss
-    style_loss = 0.0
-    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu2_2']),
-                                                compute_gram(y_vgg_out['relu2_2']))
+    style_loss1 = 0.0
+    style_loss1 += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu2_2']),
+                                                 compute_gram(y_vgg_out['relu2_2']))
 
-    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu3_4']),
-                                                compute_gram(y_vgg_out['relu3_4']))
+    style_loss1 += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu3_4']),
+                                                 compute_gram(y_vgg_out['relu3_4']))
 
-    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu4_4']),
-                                                compute_gram(y_vgg_out['relu4_4']))
+    style_loss1 += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu4_4']),
+                                                 compute_gram(y_vgg_out['relu4_4']))
 
-    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu5_2']),
-                                                compute_gram(y_vgg_out['relu5_2']))
+    style_loss1 += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu5_2']),
+                                                 compute_gram(y_vgg_out['relu5_2']))
 
-    return style_loss
+    return style_loss1
 
 
 def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
