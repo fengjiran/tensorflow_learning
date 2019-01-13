@@ -35,6 +35,12 @@ class Vgg19(object):
         assert green.get_shape().as_list()[1:] == [224, 224, 1]
         assert blue.get_shape().as_list()[1:] == [224, 224, 1]
 
+        bgr = tf.concat(axis=3, values=[
+            blue - VGG_MEAN[0],
+            green - VGG_MEAN[1],
+            red - VGG_MEAN[2],
+        ])
+
     def avg_pool(self, bottom, name):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
