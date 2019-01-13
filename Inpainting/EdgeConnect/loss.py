@@ -15,13 +15,32 @@ def compute_gram(x):
 
 def style_loss(x, y):
     """Compute style loss, vgg-based."""
-    pass
+    vgg = Vgg19()
+    x_vgg_out = vgg.build(x)
+    y_vgg_out = vgg.build(y)
+
+    # compute style loss
+    style_loss = 0.0
+    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu2_2']),
+                                                compute_gram(y_vgg_out['relu2_2']))
+
+    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu3_4']),
+                                                compute_gram(y_vgg_out['relu3_4']))
+
+    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu4_4']),
+                                                compute_gram(y_vgg_out['relu4_4']))
+
+    style_loss += tf.losses.absolute_difference(compute_gram(x_vgg_out['relu5_2']),
+                                                compute_gram(y_vgg_out['relu5_2']))
+
+    return style_loss
 
 
 def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
     """Compute perceptual loss, vgg-based."""
-    x_vgg_out = Vgg19().build(x)
-    y_vgg_out = Vgg19().build(y)
+    vgg = Vgg19()
+    x_vgg_out = vgg.build(x)
+    y_vgg_out = vgg.build(y)
 
     content_loss = 0.0
 
