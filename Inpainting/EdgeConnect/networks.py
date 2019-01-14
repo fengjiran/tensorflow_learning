@@ -182,7 +182,12 @@ class InpaintingModel(object):
         # generator features matching loss
         gen_fm_loss = 0.0
         for i in range(len(dis_real_features)):
-            pass
+            gen_fm_loss += tf.losses.absolute_difference(gen_fake_features[i], dis_real_features[i])
+
+        gen_fm_loss = gen_fake * self.cfg['FM_LOSS_WEIGHT']
+        gen_loss += gen_fm_loss
+
+        return outputs, gen_loss, dis_loss
 
 
 if __name__ == '__main__':
