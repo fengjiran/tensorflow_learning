@@ -136,6 +136,19 @@ class InpaintingModel(object):
         # generator input: [grayscale(1) + edge(1) + mask(1)]
         # discriminator input: [grayscale(1) + edge(1)]
         edges_masked = edges * (1 - masks)
+        images_masked = images * (1 - masks) + masks
+
+        # in: [grayscale(1)+edge(1)+mask(1)]
+        inputs = tf.concat([images_masked, edges_masked, masks], axis=3)
+
+        outputs = self.edge_generator(inputs)
+
+        # discriminator loss
+        dis_input_real = tf.concat([images, edges], axis=3)
+        dis_input_fake = tf.concat([images, outputs], axis=3)
+
+        dis_real, dis_real_features = self.edge_discriminator(dis_input_real)
+        dis_fake, dis_fake_features = self.edge_discriminator(dis_input_fake, reuse=True)
 
 
 if __name__ == '__main__':
