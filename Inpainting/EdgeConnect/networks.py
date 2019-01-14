@@ -162,13 +162,27 @@ class InpaintingModel(object):
         else:
             use_sigmoid = False
 
+        # in: [grayscale(1) + edge(1)]
         dis_real, dis_real_features = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+
+        # in: [grayscale(1) + edge(1)]
         dis_fake, dis_fake_features = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
 
         dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
 
         dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
+
+        # generator adversarial loss
+        gen_input_fake = tf.concat([images, outputs], axis=3)
+        gen_fake, gen_fake_features = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True, is_disc=False)
+        gen_loss += gen_gan_loss
+
+        # generator features matching loss
+        gen_fm_loss = 0.0
+        for i in range(len(dis_real_features)):
+            pass
 
 
 if __name__ == '__main__':
