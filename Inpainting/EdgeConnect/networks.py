@@ -6,11 +6,13 @@ from ops import deconv
 from ops import resnet_block
 from ops import instance_norm
 
+from loss import adversarial_loss
+
 
 class InpaintingModel(object):
     """Construct model."""
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         print('Construct the inpainting model.')
         self.cfg = config
 
@@ -152,8 +154,18 @@ class InpaintingModel(object):
         dis_input_real = tf.concat([images, edges], axis=3)
         dis_input_fake = tf.concat([images, outputs], axis=3)
 
-        dis_real, dis_real_features = self.edge_discriminator(dis_input_real)
-        dis_fake, dis_fake_features = self.edge_discriminator(dis_input_fake, reuse=True)
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        dis_real, dis_real_features = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, dis_fake_features = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+
+        dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+
+        dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
 
 
 if __name__ == '__main__':
