@@ -4,6 +4,16 @@ import numpy as np
 import tensorflow as tf
 
 
+def adversarial_loss(inputs, gan_type='nsgan', target_real_label=1.0, target_fake_label=0.0):
+    """type: nsgan | lsgan | hinge."""
+    if gan_type == 'nsgan':
+        pass
+    elif gan_type == 'lsgan':
+        pass
+    elif gan_type == 'hinge':
+        pass
+
+
 def compute_gram(x):
     b, ch, h, w = x.size()
     f = x.view(b, ch, w * h)
