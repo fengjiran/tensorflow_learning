@@ -10,8 +10,9 @@ from ops import instance_norm
 class InpaintingModel(object):
     """Construct model."""
 
-    def __init__(self):
+    def __init__(self, config):
         print('Construct the inpainting model.')
+        self.cfg = config
 
     def edge_generator(self, x):
         with tf.variable_scope('edge_generator'):
