@@ -132,8 +132,10 @@ class InpaintingModel(object):
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
-    def build_graph_with_losses(self, batch_data, cfg):
-        pass
+    def build_edge_model(self, images, edges, masks):
+        # generator input: [grayscale(1) + edge(1) + mask(1)]
+        # discriminator input: [grayscale(1) + edge(1)]
+        edges_masked = edges * (1 - masks)
 
 
 if __name__ == '__main__':
