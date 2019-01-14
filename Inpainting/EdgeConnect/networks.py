@@ -68,7 +68,8 @@ class InpaintingModel(object):
 
             conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv5')
 
-            outputs = tf.nn.sigmoid(conv5)
+            # outputs = tf.nn.sigmoid(conv5)
+            outputs = conv5
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
@@ -128,7 +129,8 @@ class InpaintingModel(object):
 
             conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv5')
 
-            outputs = tf.nn.sigmoid(conv5)
+            # outputs = tf.nn.sigmoid(conv5)
+            outputs = conv5
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
