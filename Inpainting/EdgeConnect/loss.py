@@ -4,10 +4,11 @@ import numpy as np
 import tensorflow as tf
 
 
-def adversarial_loss(inputs, gan_type='nsgan', target_real_label=1.0, target_fake_label=0.0):
+def adversarial_loss(inputs, is_real, gan_type='nsgan'):
     """type: nsgan | lsgan | hinge."""
     if gan_type == 'nsgan':
-        pass
+        labels = tf.ones_like(inputs) if is_real else tf.zeros_like(inputs)
+        loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=inputs, labels=labels)
     elif gan_type == 'lsgan':
         pass
     elif gan_type == 'hinge':
