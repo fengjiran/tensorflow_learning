@@ -327,8 +327,9 @@ def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, name='deconv
 
 def resnet_block(x, out_channels, dilation=1, name='resnet_block'):
     with tf.variable_scope(name):
-        y = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
-                 pad=dilation, pad_type='reflect', name='conv1')
+        y = atrous_conv(x, out_channels, kernel=3, dilation=dilation, name='conv1')
+        # y = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
+        #          pad=dilation, pad_type='reflect', name='conv1')
         y = instance_norm(y, name='in1')
         y = tf.nn.relu(y)
 
