@@ -150,6 +150,9 @@ class InpaintingModel(object):
 
         outputs = self.edge_generator(inputs)
 
+        dis_loss = 0.0
+        gen_loss = 0.0
+
         # discriminator loss
         dis_input_real = tf.concat([images, edges], axis=3)
         dis_input_fake = tf.concat([images, outputs], axis=3)
