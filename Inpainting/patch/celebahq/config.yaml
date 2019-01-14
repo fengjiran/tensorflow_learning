@@ -2,8 +2,8 @@
 # parameters
 val: false
 # val: false
-firstTimeTrain: true
-# firstTimeTrain: false
+# firstTimeTrain: true
+firstTimeTrain: false
 pretrain_coarse_network: true
 gan_loss_alpha: 1.0
 wgan_gp_lambda: 10
@@ -26,7 +26,7 @@ static_view_num: 30
 
 init_lr_g: 2.0e-6
 init_lr_d: 1.0e-6
-batch_size: 16
+batch_size: 8
 coarse_iters: 30000
 total_iters: 1000000
 
