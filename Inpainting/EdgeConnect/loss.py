@@ -4,15 +4,23 @@ import numpy as np
 import tensorflow as tf
 
 
-def adversarial_loss(inputs, is_real, gan_type='nsgan'):
+def adversarial_loss(inputs, is_real, gan_type='nsgan', is_disc=None):
     """type: nsgan | lsgan | hinge."""
     if gan_type == 'nsgan':
         labels = tf.ones_like(inputs) if is_real else tf.zeros_like(inputs)
-        loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=inputs, labels=labels)
+        loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=inputs, labels=labels))
     elif gan_type == 'lsgan':
-        pass
+        labels = tf.ones_like(inputs) if is_real else tf.zeros_like(inputs)
+        loss = tf.losses.mean_squared_error(predictions=inputs, labels=labels)
     elif gan_type == 'hinge':
-        pass
+        if is_disc:
+            if is_real:
+                inputs = -inputs
+            loss = tf.reduce_mean(tf.nn.relu(1 + inputs))
+        else:
+            loss = tf.reduce_mean(-inputs)
+
+    return loss
 
 
 def compute_gram(x):
