@@ -7,6 +7,8 @@ from ops import resnet_block
 from ops import instance_norm
 
 from loss import adversarial_loss
+from loss import perceptual_loss
+from loss import style_loss
 
 
 class InpaintingModel(object):
@@ -15,6 +17,10 @@ class InpaintingModel(object):
     def __init__(self, config=None):
         print('Construct the inpainting model.')
         self.cfg = config
+        self.edge_gen_optimizer = None
+        self.edge_dis_optimizer = None
+        self.inpaint_gen_optimizer = None
+        self.inpaint_dis_optimizer = None
 
     def edge_generator(self, x):
         with tf.variable_scope('edge_generator'):
@@ -142,35 +148,30 @@ class InpaintingModel(object):
     def build_edge_model(self, images, edges, masks):
         # generator input: [grayscale(1) + edge(1) + mask(1)]
         # discriminator input: [grayscale(1) + edge(1)]
-        edges_masked = edges * (1 - masks)
-        images_masked = images * (1 - masks) + masks
+        edges_masked = edges * (1.0 - masks)
+        images_masked = images * (1.0 - masks) + masks
 
         # in: [grayscale(1)+edge(1)+mask(1)]
         inputs = tf.concat([images_masked, edges_masked, masks], axis=3)
-
         outputs = self.edge_generator(inputs)
 
         dis_loss = 0.0
         gen_loss = 0.0
-
-        # discriminator loss
-        dis_input_real = tf.concat([images, edges], axis=3)
-        dis_input_fake = tf.concat([images, outputs], axis=3)
 
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
         else:
             use_sigmoid = False
 
+        # discriminator loss
+        dis_input_real = tf.concat([images, edges], axis=3)
+        dis_input_fake = tf.concat([images, tf.stop_gradient(outputs)], axis=3)
         # in: [grayscale(1) + edge(1)]
         dis_real, dis_real_features = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
-
         # in: [grayscale(1) + edge(1)]
         dis_fake, dis_fake_features = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
-
         dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
-
         dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
 
         # generator adversarial loss
@@ -181,13 +182,88 @@ class InpaintingModel(object):
 
         # generator features matching loss
         gen_fm_loss = 0.0
-        for i in range(len(dis_real_features)):
-            gen_fm_loss += tf.losses.absolute_difference(gen_fake_features[i], dis_real_features[i])
+        for (a, b) in zip(gen_fake_features, dis_real_features):
+            gen_fm_loss += tf.losses.absolute_difference(a, tf.stop_gradient(b))
+        # for i in range(len(dis_real_features)):
+        #     gen_fm_loss += tf.losses.absolute_difference(gen_fake_features[i], dis_real_features[i])
 
-        gen_fm_loss = gen_fake * self.cfg['FM_LOSS_WEIGHT']
+        gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
         gen_loss += gen_fm_loss
 
-        return outputs, gen_loss, dis_loss
+        edge_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
+        edge_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_discriminator')
+
+        self.edge_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                         beta1=self.cfg['BETA1'],
+                                                         beta2=self.cfg['BETA2'])
+        self.edge_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                         beta1=self.cfg['BETA1'],
+                                                         beta2=self.cfg['BETA2'])
+
+        edge_gen_global_step = tf.get_variable('edge_gen_global_step',
+                                               [],
+                                               tf.int32,
+                                               initializer=tf.zeros_initializer(),
+                                               trainable=False)
+        edge_dis_global_step = tf.get_variable('edge_dis_global_step',
+                                               [],
+                                               tf.int32,
+                                               initializer=tf.zeros_initializer(),
+                                               trainable=False)
+
+        edge_gen_train = self.edge_gen_optimizer.minimize(gen_loss,
+                                                          global_step=edge_gen_global_step,
+                                                          var_list=edge_gen_vars)
+
+        edge_dis_train = self.edge_dis_optimizer.minimize(dis_loss,
+                                                          global_step=edge_dis_global_step,
+                                                          var_list=edge_dis_vars)
+
+        return outputs, gen_loss, dis_loss, edge_gen_train, edge_dis_train
+
+    def build_inpaint_model(self, images, edges, masks):
+        # generator input: [rgb(3)+edge(1)]
+        # discriminator input: [rgb(3)]
+        images_masked = images * (1.0 - masks) + masks
+        inputs = tf.concat([images_masked, edges], axis=3)
+
+        outputs = self.inpaint_generator(inputs)
+
+        dis_loss = 0.0
+        gen_loss = 0.0
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        # discriminator loss
+        dis_input_real = images
+        dis_input_fake = tf.stop_gradient(outputs)
+        dis_real, _ = self.inpaint_discriminator(dis_input_real, use_sigmoid=use_sigmoid)  # in: [rgb(3)]
+        dis_fake, _ = self.inpaint_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)  # in: [rgb(3)]
+        dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
+
+        # generator adversarial loss
+        gen_input_fake = outputs
+        gen_fake, _ = self.inpaint_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)  # in: [rgb(3)]
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True, is_disc=False) * self.cfg['INPAINT_ADV_LOSS_WEIGHT']
+        gen_loss += gen_gan_loss
+
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(
+            images, outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        gen_loss += gen_l1_loss
+
+        # generator perceptual loss
+        gen_content_loss = perceptual_loss(outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_loss += gen_content_loss
+
+        # generator style loss
+        gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_loss += gen_style_loss
 
 
 if __name__ == '__main__':
