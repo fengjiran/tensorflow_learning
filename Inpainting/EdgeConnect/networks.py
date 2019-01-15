@@ -11,7 +11,7 @@ from loss import perceptual_loss
 from loss import style_loss
 
 
-class InpaintingModel(object):
+class InpaintingModel():
     """Construct model."""
 
     def __init__(self, config=None):
