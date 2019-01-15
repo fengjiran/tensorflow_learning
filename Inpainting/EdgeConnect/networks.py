@@ -265,6 +265,36 @@ class InpaintingModel(object):
         gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
+        inpaint_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
+        inpaint_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_discriminator')
+
+        self.inpaint_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                            beta1=self.cfg['BETA1'],
+                                                            beta2=self.cfg['BETA2'])
+        self.inpaint_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                            beta1=self.cfg['BETA1'],
+                                                            beta2=self.cfg['BETA2'])
+
+        inpaint_gen_global_step = tf.get_variable('edge_gen_global_step',
+                                                  [],
+                                                  tf.int32,
+                                                  initializer=tf.zeros_initializer(),
+                                                  trainable=False)
+        inpaint_dis_global_step = tf.get_variable('edge_dis_global_step',
+                                                  [],
+                                                  tf.int32,
+                                                  initializer=tf.zeros_initializer(),
+                                                  trainable=False)
+
+        inpaint_gen_train = self.inpaint_gen_optimizer.minimize(gen_loss,
+                                                                global_step=inpaint_gen_global_step,
+                                                                var_list=inpaint_gen_vars)
+        inpaint_dis_train = self.inpaint_dis_optimizer.minimize(dis_loss,
+                                                                global_step=inpaint_dis_global_step,
+                                                                var_list=inpaint_dis_vars)
+
+        return outputs, gen_loss, dis_loss, inpaint_gen_train, inpaint_dis_train
+
 
 if __name__ == '__main__':
     model = InpaintingModel()
