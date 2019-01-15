@@ -113,25 +113,26 @@ class InpaintingModel(object):
             x = tf.nn.relu(x)
 
             # resnet block
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block1')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block2')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block3')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block4')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block5')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block6')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block7')
-            x = resnet_block(x, out_channels=256, dilation=2, name='resnet_block8')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block1')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block2')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block3')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block4')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block5')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block6')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block7')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, sn=False, name='resnet_block8')
 
             # decoder
-            x = deconv(x, channels=128, kernel=4, stride=2, sn=False, name='deconv1')
+            x = deconv(x, channels=128, kernel=4, stride=2, init_type=self.init_type, sn=False, name='deconv1')
             x = instance_norm(x, name='in4')
             x = tf.nn.relu(x)
 
-            x = deconv(x, channels=64, kernel=4, stride=2, sn=False, name='deconv2')
+            x = deconv(x, channels=64, kernel=4, stride=2, init_type=self.init_type, sn=False, name='deconv2')
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
 
-            x = conv(x, channels=3, kernel=7, stride=1, pad=3, pad_type='reflect', name='conv4')
+            x = conv(x, channels=3, kernel=7, stride=1, sn=False, pad=3,
+                     pad_type='reflect', init_type=self.init_type, name='conv4')
 
             x = (tf.nn.tanh(x) + 1.) / 2.
 
@@ -139,19 +140,24 @@ class InpaintingModel(object):
 
     def inpaint_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('inpaint_discriminator', reuse=reuse):
-            conv1 = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv1')
+            conv1 = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero',
+                         use_bias=False, init_type=self.init_type, name='conv1')
             conv1 = tf.nn.leaky_relu(conv1)
 
-            conv2 = conv(conv1, channels=128, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv2')
+            conv2 = conv(conv1, channels=128, kernel=4, stride=2, pad=1, pad_type='zero',
+                         use_bias=False, init_type=self.init_type, name='conv2')
             conv2 = tf.nn.leaky_relu(conv2)
 
-            conv3 = conv(conv2, channels=256, kernel=4, stride=2, pad=1, pad_type='zero', use_bias=False, name='conv3')
+            conv3 = conv(conv2, channels=256, kernel=4, stride=2, pad=1, pad_type='zero',
+                         use_bias=False, init_type=self.init_type, name='conv3')
             conv3 = tf.nn.leaky_relu(conv3)
 
-            conv4 = conv(conv3, channels=512, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv4')
+            conv4 = conv(conv3, channels=512, kernel=4, stride=1, pad=1, pad_type='zero',
+                         use_bias=False, init_type=self.init_type, name='conv4')
             conv4 = tf.nn.leaky_relu(conv4)
 
-            conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero', use_bias=False, name='conv5')
+            conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero',
+                         use_bias=False, init_type=self.init_type, name='conv5')
 
             outputs = conv5
             if use_sigmoid:
