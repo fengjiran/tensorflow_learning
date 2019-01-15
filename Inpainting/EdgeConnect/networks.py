@@ -227,7 +227,7 @@ class InpaintingModel(object):
         images_masked = images * (1.0 - masks) + masks
         inputs = tf.concat([images_masked, edges], axis=3)
 
-        outputs = self.inpaint_generator(inputs)
+        outputs = self.inpaint_generator(inputs)  # in: [rgb(3)+edge(1)]
 
         dis_loss = 0.0
         gen_loss = 0.0
@@ -275,12 +275,12 @@ class InpaintingModel(object):
                                                             beta1=self.cfg['BETA1'],
                                                             beta2=self.cfg['BETA2'])
 
-        inpaint_gen_global_step = tf.get_variable('edge_gen_global_step',
+        inpaint_gen_global_step = tf.get_variable('inpaint_gen_global_step',
                                                   [],
                                                   tf.int32,
                                                   initializer=tf.zeros_initializer(),
                                                   trainable=False)
-        inpaint_dis_global_step = tf.get_variable('edge_dis_global_step',
+        inpaint_dis_global_step = tf.get_variable('inpaint_dis_global_step',
                                                   [],
                                                   tf.int32,
                                                   initializer=tf.zeros_initializer(),
