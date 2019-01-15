@@ -64,10 +64,35 @@ def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, name='deconv
         return x
 
 
+def atrous_conv(x, channels, kernel=3, dilation=1, use_bias=True, sn=True, name='conv_0'):
+    with tf.variable_scope(name):
+        if sn:
+            w = tf.get_variable("kernel", shape=[kernel, kernel, x.get_shape()[-1], channels],
+                                initializer=weight_init,
+                                regularizer=weight_regularizer)
+            bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
+
+            x = tf.nn.atrous_conv2d(value=x,
+                                    filters=spectral_norm(w),
+                                    rate=dilation,
+                                    padding='SAME')
+            if use_bias:
+                x = tf.nn.bias_add(x, bias)
+
+        else:
+            x = tf.layers.conv2d(inputs=x, filters=channels,
+                                 kernel_size=kernel, kernel_initializer=weight_init,
+                                 kernel_regularizer=weight_regularizer,
+                                 use_bias=use_bias, dilation_rate=dilation)
+
+        return x
+
+
 def resnet_block(x, out_channels, dilation=1, name='resnet_block'):
     with tf.variable_scope(name):
-        y = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
-                 pad=dilation, pad_type='reflect', name='conv1')
+        y = atrous_conv(x, out_channels, kernel=3, dilation=dilation, name='conv1')
+        # y = conv(x, out_channels, kernel=3, stride=1, dilation=dilation,
+        #          pad=dilation, pad_type='reflect', name='conv1')
         y = instance_norm(y, name='in1')
         y = tf.nn.relu(y)
 
