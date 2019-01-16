@@ -1,14 +1,52 @@
 import os
 import glob
+import scipy
 import numpy as np
+
+from scipy.misc import imread
 
 
 class Dataset():
     """Construct dataset class."""
 
+    def __init__(self, config, flist, augment=True):
+        self.augment = augment
+
+
+class Dataset_():
+    """Construct dataset class."""
+
     def __init__(self, config, flist, edge_flist, mask_flist, augment=True, training=True):
         self.augment = augment
         self.training = training
+        self.data = self.load_flist(flist)
+        self.edge_data = self.load_flist(edge_flist)
+        self.mask_data = self.load_flist(mask_flist)
+
+        self.input_size = config['INPUT_SIZE']
+        self.sigma = config['SIGMA']
+        self.edge = config['EDGE']
+        self.mask = config['MASK']
+        self.nms = config['NMS']
+
+        # in test mode, there's a one-to-one relationship between mask and image
+        # masks are loaded non random
+        if config['MODE'] == 2:
+            self.mask = 6
+
+    def load_name(self, index):
+        name = self.data[index]
+        return os.path.basename(name)
+
+    def load_item(self, index):
+        size = self.input_size
+
+        # load image
+        img = imread(self.data[index])
+
+        # resize or crop if needed
+        if size != 0:
+            img = self.resize(img, size, size)
 
     def load_flist(self, flist):
         if isinstance(flist, list):
@@ -30,6 +68,20 @@ class Dataset():
                     return [flist]
 
         return []
+
+    def resize(self, img, height, width, centerCrop=True):
+        imgh, imgw = img.shape[0:2]
+
+        if centerCrop and imgh != imgw:
+            # center crop
+            side = np.minimum(imgh, imgw)
+            j = (imgh - side) // 2
+            i = (imgw - side) // 2
+            img = img[j:j + side, i:i + side, ...]
+
+        img = scipy.misc.imresize(img, [height, width])
+
+        return img
 
 
 if __name__ == '__main__':
