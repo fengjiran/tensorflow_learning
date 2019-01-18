@@ -2,6 +2,7 @@ import os
 import glob
 import scipy
 import numpy as np
+from skimage.feature import canny
 
 from scipy.misc import imread
 
