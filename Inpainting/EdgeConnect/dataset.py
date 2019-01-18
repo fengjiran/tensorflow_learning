@@ -19,7 +19,7 @@ class Dataset():
     def __init__(self, config, image_flist, edge_flist, mask_flist, augment=True, training=True):
         self.augment = augment
         self.training = training
-        self.data = self.load_flist(flist)
+        self.image_data = self.load_flist(image_flist)
         self.edge_data = self.load_flist(edge_flist)
         self.mask_data = self.load_flist(mask_flist)
 
