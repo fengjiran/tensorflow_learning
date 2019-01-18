@@ -6,17 +6,17 @@ import numpy as np
 from scipy.misc import imread
 
 
-class Dataset():
+class Dataset_():
     """Construct dataset class."""
 
     def __init__(self, config, flist, augment=True):
         self.augment = augment
 
 
-class Dataset_():
+class Dataset():
     """Construct dataset class."""
 
-    def __init__(self, config, flist, edge_flist, mask_flist, augment=True, training=True):
+    def __init__(self, config, image_flist, edge_flist, mask_flist, augment=True, training=True):
         self.augment = augment
         self.training = training
         self.data = self.load_flist(flist)
