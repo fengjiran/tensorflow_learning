@@ -5,6 +5,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import tensorflow as tf
 
 
 def create_dir(path):
@@ -13,6 +14,9 @@ def create_dir(path):
 
 
 def create_mask(height, width, mask_height, mask_width, x=None, y=None):
+    top = tf.random_uniform([], minval=0, maxval=height - mask_height, dtype=tf.int32)
+    left = tf.random_uniform([], minval=0, maxval=width - mask_width, dtype=tf.int32)
+
     mask = np.zeros([height, width])
     mask_x = x if x is not None else random.randint(0, width - mask_width)
     mask_y = y if y is not None else random.randint(0, height - mask_height)
