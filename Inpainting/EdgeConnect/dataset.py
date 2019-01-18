@@ -35,6 +35,9 @@ class Dataset():
         if config['MODE'] == 2:
             self.mask = 6
 
+    def load_edge(self, img, index, mask):
+        pass
+
     def load_name(self, index):
         name = self.data[index]
         return os.path.basename(name)
