@@ -1,10 +1,13 @@
 import os
 import glob
+import random
 import scipy
 import numpy as np
 from skimage.feature import canny
-
 from scipy.misc import imread
+import tensorflow as tf
+
+from utils import create_mask
 
 
 class Dataset_():
@@ -36,7 +39,21 @@ class Dataset():
             self.mask = 6
 
     def load_edge(self, img, index, mask):
-        pass
+        sigma = self.sigma
+
+        # in the test mode images are masked (with masked regions),
+        # using 'mask' parameter prevents canny to detect edges for the masked regions
+        mask = None if self.training else tf.cast(1. - mask, tf.bool)
+
+        # canny
+        if self.edge == 1:
+            # no edge
+            if sigma == -1:
+                return tf.zeros_like(img)
+
+            # random sigma
+            if sigma == 0:
+                sigma = tf.random_uniform([], minval=1, maxval=5, dtype=tf.int32)
 
     def load_name(self, index):
         name = self.data[index]
@@ -86,6 +103,9 @@ class Dataset():
         img = scipy.misc.imresize(img, [height, width])
 
         return img
+
+    def canny_func(self, img, sigma, mask):
+        return canny(img, sigma=sigma, mask=mask)
 
 
 if __name__ == '__main__':
