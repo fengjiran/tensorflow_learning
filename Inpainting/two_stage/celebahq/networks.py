@@ -92,3 +92,14 @@ class InpaintingModel():
     def build_coarse_model(self, images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
+        images_masked = images * (1.0 - masks) + masks
+        inputs = tf.concat([images_masked, masks], axis=3)
+        outputs = self.coarse_generator(inputs)
+
+        dis_loss = 0.0
+        gen_loss = 0.0
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
