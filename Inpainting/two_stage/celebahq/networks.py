@@ -56,7 +56,7 @@ class InpaintingModel():
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
 
-            x = conv(x, channels=1, kernel=7, stride=1, pad=3,
+            x = conv(x, channels=3, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
             x = tf.nn.tanh(x)
 
@@ -80,7 +80,7 @@ class InpaintingModel():
                          use_bias=False, init_type=self.init_type, name='conv4')
             conv4 = tf.nn.leaky_relu(conv4)
 
-            conv5 = conv(conv4, channels=3, kernel=4, stride=1, pad=1, pad_type='zero',
+            conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero',
                          use_bias=False, init_type=self.init_type, name='conv5')
 
             outputs = conv5
@@ -124,3 +124,42 @@ class InpaintingModel():
         # generator l1 loss
         gen_l1_loss = tf.losses.absolute_difference(
             images, outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        gen_loss += gen_l1_loss
+
+        # generator perceptual loss
+        gen_content_loss = perceptual_loss(outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_loss += gen_content_loss
+
+        # generator style loss
+        gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_loss += gen_style_loss
+
+        coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+
+        coarse_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+        coarse_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+
+        coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+        coarse_dis_global_step = tf.get_variable('coarse_dis_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+
+        coarse_gen_train = coarse_gen_optimizer.minimize(gen_loss,
+                                                         global_step=coarse_gen_global_step,
+                                                         var_list=coarse_gen_vars)
+        coarse_dis_train = coarse_dis_optimizer.minimize(dis_loss,
+                                                         global_step=coarse_dis_global_step,
+                                                         var_list=coarse_dis_vars)
+
+        return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train
