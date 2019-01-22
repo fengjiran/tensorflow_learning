@@ -58,6 +58,6 @@ class InpaintingModel():
 
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
-            x = tf.nn.sigmoid(x)
+            x = tf.nn.tanh(x)
 
             return x
