@@ -24,12 +24,31 @@ def adversarial_loss(inputs, is_real, gan_type='nsgan', is_disc=None):
 
 
 def compute_gram(x):
-    b, ch, h, w = x.size()
-    f = x.view(b, ch, w * h)
-    f_T = f.transpose(1, 2)
-    G = f.bmm(f_T) / (h * w * ch)
+    shape = x.get_shape()
 
-    return G
+    # Get the number of feature channels for the input tensor,
+    # which is assumed to be from a convolutional layer with 4-dim.
+    num_channels = int(shape[3])
+
+    # Reshape the tensor so it is a 2-dim matrix. This essentially
+    # flattens the contents of each feature-channel.
+    matrix = tf.reshape(x, shape=[-1, num_channels])
+
+    # Calculate the Gram-matrix as the matrix-product of
+    # the 2-dim matrix with itself. This calculates the
+    # dot-products of all combinations of the feature-channels.
+    gram = tf.matmul(tf.transpose(matrix), matrix)
+
+    return gram
+
+
+# def compute_gram(x):
+#     b, ch, h, w = x.size()
+#     f = x.view(b, ch, w * h)
+#     f_T = f.transpose(1, 2)
+#     G = f.bmm(f_T) / (h * w * ch)
+
+#     return G
 
 
 def style_loss(x, y):
