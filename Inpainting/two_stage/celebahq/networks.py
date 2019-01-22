@@ -88,3 +88,7 @@ class InpaintingModel():
                 outputs = tf.nn.sigmoid(conv5)
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
+
+    def build_coarse_model(self, images, masks):
+        # generator input: [rgb(3) + mask(1)]
+        # discriminator input: [rgb(3)]
