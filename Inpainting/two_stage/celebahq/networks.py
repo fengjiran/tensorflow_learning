@@ -80,7 +80,7 @@ class InpaintingModel():
                          use_bias=False, init_type=self.init_type, name='conv4')
             conv4 = tf.nn.leaky_relu(conv4)
 
-            conv5 = conv(conv4, channels=1, kernel=4, stride=1, pad=1, pad_type='zero',
+            conv5 = conv(conv4, channels=3, kernel=4, stride=1, pad=1, pad_type='zero',
                          use_bias=False, init_type=self.init_type, name='conv5')
 
             outputs = conv5
@@ -95,6 +95,7 @@ class InpaintingModel():
         images_masked = images * (1.0 - masks) + masks
         inputs = tf.concat([images_masked, masks], axis=3)
         outputs = self.coarse_generator(inputs)
+        outputs_merged = outputs * masks + images * (1.0 - masks)
 
         dis_loss = 0.0
         gen_loss = 0.0
@@ -103,3 +104,23 @@ class InpaintingModel():
             use_sigmoid = True
         else:
             use_sigmoid = False
+
+        # discriminator loss
+        dis_input_real = images
+        dis_input_fake = tf.stop_gradient(outputs)
+        dis_real, _ = self.coarse_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, _ = self.coarse_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        gen_input_fake = outputs
+        gen_fake, _ = self.coarse_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(
+            gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False) * self.cfg['COARSE_ADV_LOSS_WEIGHT']
+        gen_loss += gen_gan_loss
+
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(
+            images, outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
