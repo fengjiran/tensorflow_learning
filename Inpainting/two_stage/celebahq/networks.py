@@ -1,14 +1,14 @@
 from __future__ import print_function
 import tensorflow as tf
 
-from ops import conv
-from ops import deconv
-from ops import resnet_block
-from ops import instance_norm
+from .ops import conv
+from .ops import deconv
+from .ops import resnet_block
+from .ops import instance_norm
 
-from loss import adversarial_loss
-from loss import perceptual_loss
-from loss import style_loss
+from .loss import adversarial_loss
+from .loss import perceptual_loss
+from .loss import style_loss
 
 
 class InpaintingModel():
@@ -161,5 +161,7 @@ class InpaintingModel():
         coarse_dis_train = coarse_dis_optimizer.minimize(dis_loss,
                                                          global_step=coarse_dis_global_step,
                                                          var_list=coarse_dis_vars)
+
+        visual_img = [images, images_masked, outputs_merged]
 
         return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train
