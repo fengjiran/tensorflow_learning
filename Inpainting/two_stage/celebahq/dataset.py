@@ -23,8 +23,10 @@ class Dataset():
         train_dataset = train_dataset.repeat()
         train_iterator = train_dataset.make_initializable_iterator()
         images = train_iterator.get_next()
+        masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+                            self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
-        return images
+        return images, masks
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
