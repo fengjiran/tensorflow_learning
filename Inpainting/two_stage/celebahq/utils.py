@@ -16,4 +16,6 @@ def create_mask(height, width, mask_height, mask_width, x=None, y=None):
                   paddings=[[top, height - mask_height - top],
                             [left, width - mask_width - left]])
 
-    return mask
+    mask = tf.expand_dims(mask, 0)
+    mask = tf.expand_dims(mask, -1)
+    return mask  # [1, height, width, 1]
