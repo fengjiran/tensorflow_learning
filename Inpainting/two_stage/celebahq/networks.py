@@ -21,8 +21,8 @@ class InpaintingModel():
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
 
-    def coarse_generator(self, x):
-        with tf.variable_scope('coarse_generator'):
+    def coarse_generator(self, x, reuse=None):
+        with tf.variable_scope('coarse_generator', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
@@ -170,8 +170,8 @@ class InpaintingModel():
 
         return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train
 
-    def refine_generator(self, x):
-        with tf.variable_scope('refine_generator'):
+    def refine_generator(self, x, reuse=None):
+        with tf.variable_scope('refine_generator', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
@@ -240,8 +240,22 @@ class InpaintingModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
-    def build_refine_model(self, images, masks):
+    def build_refine_model(self, coarse_images, gt_images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
-        images_masked = images * (1.0 - masks) + masks
-        inputs = tf.concat([images_masked, masks], axis=3)
+        # images_masked = images * (1.0 - masks) + masks
+        inputs = tf.concat([coarse_images, masks], axis=3)
+        outputs = self.refine_generator(inputs)
+        outputs_merged = outputs * masks + coarse_images * (1.0 - masks)
+
+        dis_loss = 0.0
+        gen_loss = 0.0
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        # discriminator loss
+        dis_input_real = gt_images
+        dis_input_fake = tf.stop_gradient(outputs)
