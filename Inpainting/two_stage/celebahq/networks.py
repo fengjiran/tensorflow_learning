@@ -289,3 +289,37 @@ class InpaintingModel():
         # generator style loss
         gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
+
+        refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
+        refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
+
+        refine_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+        refine_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+
+        refine_gen_global_step = tf.get_variable('refine_gen_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+        refine_dis_global_step = tf.get_variable('refine_dis_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+
+        refine_gen_train = refine_gen_optimizer.minimize(gen_loss,
+                                                         global_step=refine_gen_global_step,
+                                                         var_list=refine_gen_vars)
+        refine_dis_train = refine_dis_optimizer.minimize(dis_loss,
+                                                         global_step=refine_dis_global_step,
+                                                         var_list=refine_dis_vars)
+
+        visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        images_summary(visual_img, 'gt_masked_coarse_refine', 4)
+
+        return refine_outputs, refine_outputs_merged, gen_loss, dis_loss, refine_gen_train, refine_dis_train
