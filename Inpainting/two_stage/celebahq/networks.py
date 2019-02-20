@@ -239,3 +239,9 @@ class InpaintingModel():
                 outputs = tf.nn.sigmoid(conv5)
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
+
+    def build_refine_model(self, images, masks):
+        # generator input: [rgb(3) + mask(1)]
+        # discriminator input: [rgb(3)]
+        images_masked = images * (1.0 - masks) + masks
+        inputs = tf.concat([images_masked, masks], axis=3)
