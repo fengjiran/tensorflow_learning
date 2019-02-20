@@ -137,7 +137,7 @@ class InpaintingModel():
         gen_loss += gen_style_loss
 
         coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
-        coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
 
         coarse_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
                                                       beta1=self.cfg['BETA1'],
