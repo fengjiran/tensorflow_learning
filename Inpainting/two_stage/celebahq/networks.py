@@ -240,13 +240,18 @@ class InpaintingModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
-    def build_refine_model(self, coarse_images, gt_images, masks):
+    def build_refine_model(self, images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
-        # images_masked = images * (1.0 - masks) + masks
-        inputs = tf.concat([coarse_images, masks], axis=3)
-        outputs = self.refine_generator(inputs)
-        outputs_merged = outputs * masks + coarse_images * (1.0 - masks)
+        images_masked = images * (1.0 - masks) + masks
+        coarse_inputs = tf.concat([images_masked, masks], axis=3)
+        coarse_outputs = self.coarse_generator(coarse_inputs, reuse=True)
+        coarse_outputs = tf.stop_gradient(coarse_outputs)
+        coarse_outputs_merged = coarse_outputs * masks + images * (1.0 - masks)
+
+        refine_inputs = tf.concat([coarse_outputs_merged, masks], axis=3)
+        refine_outputs = self.refine_generator(refine_inputs)
+        refine_outputs_merged = refine_outputs * masks + images * (1.0 - masks)
 
         dis_loss = 0.0
         gen_loss = 0.0
@@ -257,5 +262,30 @@ class InpaintingModel():
             use_sigmoid = False
 
         # discriminator loss
-        dis_input_real = gt_images
-        dis_input_fake = tf.stop_gradient(outputs)
+        dis_input_real = images
+        dis_input_fake = tf.stop_gradient(refine_outputs)
+        dis_real, _ = self.refine_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, _ = self.refine_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        gen_input_fake = refine_outputs
+        gen_fake, _ = self.refine_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        gen_gan_loss *= self.cfg['COARSE_ADV_LOSS_WEIGHT']
+        gen_loss += gen_gan_loss
+
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(
+            images, refine_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        gen_loss += gen_l1_loss
+
+        # generator perceptual loss
+        gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_loss += gen_content_loss
+
+        # generator style loss
+        gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_loss += gen_style_loss
