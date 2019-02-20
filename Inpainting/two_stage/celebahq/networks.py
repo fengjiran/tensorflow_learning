@@ -62,7 +62,7 @@ class InpaintingModel():
                      pad_type='reflect', init_type=self.init_type, name='conv4')
             x = tf.nn.tanh(x)
 
-            return x
+            return x  # [-1, 1]
 
     def coarse_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('coarse_discriminator', reuse=reuse):
