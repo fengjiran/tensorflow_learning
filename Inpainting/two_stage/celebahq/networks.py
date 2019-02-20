@@ -10,6 +10,8 @@ from .loss import adversarial_loss
 from .loss import perceptual_loss
 from .loss import style_loss
 
+from .utils import images_summary
+
 
 class InpaintingModel():
     """Construct model."""
@@ -163,5 +165,7 @@ class InpaintingModel():
                                                          var_list=coarse_dis_vars)
 
         visual_img = [images, images_masked, outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        images_summary(visual_img, 'groundtruth_masked_inpainted', 4)
 
         return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train
