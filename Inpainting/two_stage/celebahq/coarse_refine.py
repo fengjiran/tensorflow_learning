@@ -26,10 +26,14 @@ class CoarseRefine():
             coarse_dis_train_ops.append(coarse_dis_train)
         coarse_dis_train = tf.group(*coarse_dis_train_ops)
 
+        all_summary = tf.summary.merge_all()
+
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             sess.run(train_iterator.initializer, feed_dict={self.train_dataset.train_filenames: flist})
+
+            summary_writer = tf.summary.FileWriter(logdir, sess.graph)
 
             step = 0
             while True:
@@ -43,5 +47,9 @@ class CoarseRefine():
                     gen_loss,
                     dis_loss
                 ))
+
+                if step % 200 == 0:
+                    summary = sess.run(all_summary)
+                    summary_writer.add_summary(summary, step)
 
                 step += 1
