@@ -2,9 +2,10 @@ import os
 import glob
 import random
 import scipy
+from scipy.misc import imread
 import numpy as np
 from skimage.feature import canny
-from scipy.misc import imread
+# from scipy.misc import imread
 import tensorflow as tf
 
 from utils import create_mask
