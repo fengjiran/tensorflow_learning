@@ -330,3 +330,23 @@ class InpaintingModel():
         images_masked = images * (1.0 - masks) + masks
         coarse_inputs = tf.concat([images_masked, masks], axis=3)
         coarse_outputs = self.coarse_generator(coarse_inputs, reuse=True)
+        coarse_outputs_merged = coarse_outputs * masks + images * (1.0 - masks)
+
+        refine_inputs = tf.concat([coarse_outputs_merged, masks], axis=3)
+        refine_outputs = self.refine_generator(refine_inputs, reuse=True)
+        refine_outputs_merged = refine_outputs * masks + images * (1.0 - masks)
+
+        dis_loss = 0.0
+        gen_loss = 0.0
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        # discriminator loss
+        dis_input_real = images
+        dis_input_fake = tf.stop_gradient(refine_outputs)
+        dis_real, _ = self.refine_discriminator(dis_input_real, reuse=True, use_sigmoid=use_sigmoid)
+        dis_fake, _ = self.refine_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
