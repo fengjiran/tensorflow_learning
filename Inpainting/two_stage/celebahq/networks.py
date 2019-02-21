@@ -350,3 +350,64 @@ class InpaintingModel():
         dis_real, _ = self.refine_discriminator(dis_input_real, reuse=True, use_sigmoid=use_sigmoid)
         dis_fake, _ = self.refine_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         dis_real_loss = adversarial_loss(dis_real, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False, gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_real_loss + dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        gen_input_fake = refine_outputs
+        gen_fake, _ = self.refine_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        gen_gan_loss *= self.cfg['COARSE_ADV_LOSS_WEIGHT']
+        gen_loss += gen_gan_loss
+
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(
+            images, refine_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        gen_loss += gen_l1_loss
+
+        # generator perceptual loss
+        gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_loss += gen_content_loss
+
+        # generator style loss
+        gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_loss += gen_style_loss
+
+        coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        # coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
+        refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
+        refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
+
+        joint_gen_vars = coarse_gen_vars + refine_gen_vars
+        joint_dis_vars = refine_dis_vars
+
+        joint_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                     beta1=self.cfg['BETA1'],
+                                                     beta2=self.cfg['BETA2'])
+        joint_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                     beta1=self.cfg['BETA1'],
+                                                     beta2=self.cfg['BETA2'])
+
+        joint_gen_global_step = tf.get_variable('joint_gen_global_step',
+                                                [],
+                                                tf.int32,
+                                                initializer=tf.zeros_initializer(),
+                                                trainable=False)
+        joint_dis_global_step = tf.get_variable('joint_dis_global_step',
+                                                [],
+                                                tf.int32,
+                                                initializer=tf.zeros_initializer(),
+                                                trainable=False)
+
+        joint_gen_train = joint_gen_optimizer.minimize(gen_loss,
+                                                       global_step=joint_gen_global_step,
+                                                       var_list=joint_gen_vars)
+        joint_dis_train = joint_dis_optimizer.minimize(dis_loss,
+                                                       global_step=joint_dis_global_step,
+                                                       var_list=joint_dis_vars)
+
+        visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        images_summary(visual_img, 'gt_masked_coarse_refine', 4)
+
+        return refine_outputs, refine_outputs_merged, gen_loss, dis_loss, joint_gen_train, joint_dis_train
