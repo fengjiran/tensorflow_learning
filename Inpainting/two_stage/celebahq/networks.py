@@ -323,3 +323,10 @@ class InpaintingModel():
         images_summary(visual_img, 'gt_masked_coarse_refine', 4)
 
         return refine_outputs, refine_outputs_merged, gen_loss, dis_loss, refine_gen_train, refine_dis_train
+
+    def build_joint_model(self, images, masks):
+        # generator input: [rgb(3) + mask(1)]
+        # discriminator input: [rgb(3)]
+        images_masked = images * (1.0 - masks) + masks
+        coarse_inputs = tf.concat([images_masked, masks], axis=3)
+        coarse_outputs = self.coarse_generator(coarse_inputs, reuse=True)
