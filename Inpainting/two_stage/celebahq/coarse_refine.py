@@ -33,12 +33,14 @@ class CoarseRefine():
         with tf.Session(config=config) as sess:
             sess.run(train_iterator.initializer, feed_dict={self.train_dataset.train_filenames: flist})
 
-            summary_writer = tf.summary.FileWriter(logdir, sess.graph)
+            summary_writer = tf.summary.FileWriter(self.cfg['LOGDIR'], sess.graph)
+
+            sess.run(tf.global_variables_initializer())
 
             step = 0
             while True:
-                _, _, gen_loss, dis_loss = sess.run([coarse_gen_train,
-                                                     coarse_dis_loss,
+                _, _, gen_loss, dis_loss = sess.run([coarse_dis_train,
+                                                     coarse_gen_train,
                                                      coarse_gen_loss,
                                                      coarse_dis_loss])
                 print('Epoch: {}, Iter: {}, coarse_gen_loss: {}, coarse_dis_loss: {}'.format(
@@ -53,3 +55,7 @@ class CoarseRefine():
                     summary_writer.add_summary(summary, step)
 
                 step += 1
+
+
+if __name__ == '__main__':
+    pass
