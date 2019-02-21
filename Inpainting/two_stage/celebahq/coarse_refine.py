@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import tensorflow as tf
-from .networks import InpaintingModel
-from .dataset import Dataset
+from networks import InpaintingModel
+from dataset import Dataset
 
 
 class CoarseRefine():
