@@ -3,7 +3,7 @@ import glob
 import numpy as np
 import tensorflow as tf
 
-from .utils import create_mask
+from utils import create_mask
 
 
 class Dataset():
