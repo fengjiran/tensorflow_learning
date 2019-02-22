@@ -12,7 +12,7 @@ class Dataset():
     def __init__(self, config, training=True):
         self.cfg = config
         self.training = training
-        self.flist = self.cfg['FLIST']
+        # self.flist = self.cfg['FLIST']
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
 
     def load_item(self):
