@@ -120,7 +120,7 @@ class InpaintingModel():
         gen_input_fake = outputs
         gen_fake, _ = self.coarse_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(
-            gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False) * self.cfg['COARSE_ADV_LOSS_WEIGHT']
+            gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False) * self.cfg['ADV_LOSS_WEIGHT']
         gen_loss += gen_gan_loss
 
         # generator l1 loss
@@ -166,7 +166,7 @@ class InpaintingModel():
 
         visual_img = [images, images_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
-        images_summary(visual_img, 'groundtruth_masked_inpainted', 4)
+        images_summary(visual_img, 'gt_masked_inpainted', 4)
 
         return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train
 
@@ -274,7 +274,7 @@ class InpaintingModel():
         gen_input_fake = refine_outputs
         gen_fake, _ = self.refine_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        gen_gan_loss *= self.cfg['COARSE_ADV_LOSS_WEIGHT']
+        gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
         gen_loss += gen_gan_loss
 
         # generator l1 loss
@@ -357,7 +357,7 @@ class InpaintingModel():
         gen_input_fake = refine_outputs
         gen_fake, _ = self.refine_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True, gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        gen_gan_loss *= self.cfg['COARSE_ADV_LOSS_WEIGHT']
+        gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
         gen_loss += gen_gan_loss
 
         # generator l1 loss
