@@ -95,7 +95,8 @@ class InpaintingModel():
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
         images_masked = images * (1.0 - masks) + masks
-        inputs = tf.concat([images_masked, masks], axis=3)
+
+        inputs = tf.concat([images_masked, masks * (tf.ones_like(images)[:, :, :, 0:1])], axis=3)
         outputs = self.coarse_generator(inputs)
         outputs_merged = outputs * masks + images * (1.0 - masks)
 
