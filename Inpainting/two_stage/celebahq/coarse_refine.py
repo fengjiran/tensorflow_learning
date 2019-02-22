@@ -72,6 +72,6 @@ class CoarseRefine():
 
 
 if __name__ == '__main__':
-    # model = CoarseRefine(cfg)
-    # model.train()
-    print(cfg['GAN_LOSS'] == 'nsgan')
+    model = CoarseRefine(cfg)
+    model.train()
+    # print(cfg['GAN_LOSS'] == 'nsgan')
