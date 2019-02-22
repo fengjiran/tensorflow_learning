@@ -4,6 +4,14 @@ import platform as pf
 import numpy as np
 import tensorflow as tf
 
+if pf.system() == 'Windows':
+    pass
+elif pf.system() == 'Linux':
+    if pf.node() == 'icie-Precision-Tower-7810':
+        vgg19_npy_path = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/vgg19.npy'
+    elif pf.node() == 'icie-Precision-T7610':
+        pass
+
 
 def adversarial_loss(inputs, is_real, gan_type='nsgan', is_disc=None):
     """type: nsgan | lsgan | hinge."""
@@ -95,7 +103,7 @@ def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
 class Vgg19(object):
     """Construct VGG19 model."""
 
-    def __init__(self, vgg19_npy_path=None):
+    def __init__(self, vgg19_npy_path=vgg19_npy_path):
         if vgg19_npy_path is None:
             path = inspect.getfile(Vgg19)
             path = os.path.abspath(os.path.join(path, os.pardir))
