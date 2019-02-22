@@ -154,6 +154,8 @@ class Vgg19(object):
         rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
         """
         print('Build model started.')
+        rgb = (rgb + 1.0) / 2.0  # [0, 1]
+        rgb = tf.image.central_crop(rgb, 224 / 256)
         VGG_MEAN = [103.939, 116.779, 123.68]
         rgb_scaled = rgb * 255.0
 
