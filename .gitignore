@@ -55,5 +55,6 @@ Inpainting/patch/test_generative_inpainting/model_logs
 Inpainting/patch/test_generative_inpainting/neuralgym_logs
 Inpainting/comparison/generative_inpainting/model_logs
 Inpainting/comparison/generative_inpainting/neuralgym_logs
+Inpainting/two_stage/celebahq/log
 
 *.pickle
