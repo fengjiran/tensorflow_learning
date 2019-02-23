@@ -47,7 +47,7 @@ class CoarseRefine():
         with tf.Session(config=config) as sess:
             sess.run(train_iterator.initializer, feed_dict={self.train_dataset.train_filenames: flist})
 
-            summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
+            summary_writer = tf.summary.FileWriter(log_dir)
 
             sess.run(tf.global_variables_initializer())
 
