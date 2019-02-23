@@ -1,5 +1,6 @@
 import os
 import glob
+import yaml
 import numpy as np
 import tensorflow as tf
 
@@ -18,7 +19,7 @@ class Dataset():
     def load_item(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=2000)
+        train_dataset = train_dataset.shuffle(buffer_size=1000)
         # train_dataset = train_dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.cfg['BATCH_SIZE']))
         train_dataset = train_dataset.repeat()
         train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
@@ -32,7 +33,7 @@ class Dataset():
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
             img_file = tf.read_file(img_path)
-            img_decoded = tf.image.decode_jpeg(img_file, channels=3)
+            img_decoded = tf.image.decode_png(img_file, channels=3)
             img = tf.cast(img_decoded, tf.float32)
             img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
             img = img / 127.5 - 1
@@ -51,6 +52,7 @@ class Dataset():
                 return flist
 
             if os.path.isfile(flist):
+                # return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
                 try:
                     print('is a file')
                     return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
@@ -58,3 +60,14 @@ class Dataset():
                     return [flist]
 
         return []
+
+
+if __name__ == '__main__':
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
+
+    train_dataset = Dataset(cfg)
+    train_flist = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_linux_7810.flist'
+    flist = train_dataset.load_flist(train_flist)
+    # print(flist)
+    print(len(flist))
