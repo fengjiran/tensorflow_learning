@@ -3,8 +3,9 @@ import tensorflow as tf
 x = tf.placeholder(tf.float32, [2])
 y = tf.placeholder(tf.float32, [2])
 
-# l1_loss = tf.losses.absolute_difference(x, y)
-l1_loss = tf.reduce_mean(tf.abs(x - y))
+l1_loss = tf.losses.absolute_difference(x, y)
+# l1_loss = tf.reduce_mean(tf.abs(x - y))
+# l1_loss = tf.reduce_mean(l1_loss)
 
 a = [2.0, 2.0]
 b = [1.0, 3.0]
