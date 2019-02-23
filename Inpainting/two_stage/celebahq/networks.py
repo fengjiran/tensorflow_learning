@@ -137,6 +137,15 @@ class InpaintingModel():
         gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
+        # create logs
+        logs = [
+            ('coarse_dis_loss', dis_loss),
+            ('coarse_gen_gan_loss', gen_gan_loss),
+            ('coarse_gen_l1_loss', gen_l1_loss),
+            ('coarse_gen_style_loss', gen_style_loss),
+            ('coarse_gen_content_loss', gen_content_loss)
+        ]
+
         coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
         coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
 
