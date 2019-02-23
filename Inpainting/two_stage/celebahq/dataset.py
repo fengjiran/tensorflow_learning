@@ -34,8 +34,10 @@ class Dataset():
         with tf.device('/cpu:0'):
             img_file = tf.read_file(img_path)
             img_decoded = tf.image.decode_png(img_file, channels=3)
-            img = tf.cast(img_decoded, tf.float32)
-            img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
+            img = tf.cast(img_decoded, tf.float32)  # [1024, 1024, 3]
+            img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
+            img = tf.clip_by_value(img, 0., 255.)
+            # img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
             img = img / 127.5 - 1
             return img  # [-1, 1]
 
