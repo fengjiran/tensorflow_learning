@@ -25,6 +25,9 @@ class Dataset():
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
         train_iterator = train_dataset.make_initializable_iterator()
         images = train_iterator.get_next()
+        images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
+        images = tf.clip_by_value(images, 0., 255.)
+        images = images / 127.5 - 1  # [-1, 1]
         masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
                             self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
@@ -35,10 +38,10 @@ class Dataset():
             img_file = tf.read_file(img_path)
             img_decoded = tf.image.decode_png(img_file, channels=3)
             img = tf.cast(img_decoded, tf.float32)  # [1024, 1024, 3]
-            img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
-            img = tf.clip_by_value(img, 0., 255.)
+            # img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
+            # img = tf.clip_by_value(img, 0., 255.)
             # img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
-            img = img / 127.5 - 1
+            # img = img / 127.5 - 1
             return img  # [-1, 1]
 
     def load_flist(self, flist):
