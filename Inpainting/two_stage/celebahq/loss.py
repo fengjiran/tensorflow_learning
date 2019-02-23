@@ -155,7 +155,8 @@ class Vgg19(object):
         """
         print('Build model started.')
         rgb = (rgb + 1.0) / 2.0  # [0, 1]
-        rgb = tf.image.central_crop(rgb, 224 / 256)
+        rgb = tf.image.resize_image_with_crop_or_pad(rgb, 224, 224)
+        # rgb = tf.image.central_crop(rgb, 224 / 256)
         VGG_MEAN = [103.939, 116.779, 123.68]
         rgb_scaled = rgb * 255.0
 
@@ -165,12 +166,12 @@ class Vgg19(object):
         assert green.get_shape().as_list()[1:] == [224, 224, 1]
         assert blue.get_shape().as_list()[1:] == [224, 224, 1]
 
-        bgr = tf.concat(axis=2,
+        bgr = tf.concat(axis=3,
                         values=[blue - VGG_MEAN[0],
                                 green - VGG_MEAN[1],
                                 red - VGG_MEAN[2]])
 
-        assert bgr.get_shape().as_list() == [224, 224, 3]
+        assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
 
         self.conv1_1 = self.conv_layer(bgr, 'conv1_1')
         self.conv1_2 = self.conv_layer(self.conv1_1, 'conv1_2')
@@ -209,7 +210,7 @@ class Vgg19(object):
 
         self.prob = tf.nn.softmax(self.fc8, name="prob")
 
-        self.data_dict = None
+        # self.data_dict = None
 
         print('build model finished!')
 
