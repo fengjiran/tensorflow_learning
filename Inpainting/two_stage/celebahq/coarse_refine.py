@@ -92,6 +92,11 @@ class CoarseRefine():
                             keep_training = False
                             break
 
+                        logs = [('epoch', epoch), ('iter', step)] + logs
+
+                        progbar.add(images.get_shape().as_list()[0],
+                                    values=logs if self.cfg['VERBOSE'] else [x for x in logs if not x[0].startwith('l_')])
+
 
 if __name__ == '__main__':
     model = CoarseRefine(cfg)
