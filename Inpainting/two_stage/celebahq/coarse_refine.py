@@ -34,6 +34,10 @@ class CoarseRefine():
         total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
 
+        epoch = 0
+        keep_training = True
+        step = 0
+
         # coarse model
         if self.cfg['MODEL'] == 1:
             # train
@@ -56,9 +60,9 @@ class CoarseRefine():
 
                 sess.run(tf.global_variables_initializer())
 
-                epoch = 0
-                keep_training = True
-                step = 0
+                # epoch = 0
+                # keep_training = True
+                # step = 0
                 while keep_training:
                     epoch += 1
                     print('\n\nTraining epoch: %d' % epoch)
