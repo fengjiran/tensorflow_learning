@@ -1,6 +1,7 @@
 import os
 import glob
 import yaml
+import platform as pf
 import numpy as np
 import tensorflow as tf
 
@@ -11,10 +12,23 @@ class Dataset():
     """Construct dataset class."""
 
     def __init__(self, config, training=True):
+        if pf.system() == 'Windows':
+            pass
+        elif pf.system() == 'Linux':
+            if pf.node() == 'icie-Precision-Tower-7810':
+                flist = config['FLIST_LINUX_7810']
+                # log_dir = cfg['LOG_DIR_LINUX_7810']
+            elif pf.node() == 'icie-Precision-T7610':
+                pass
+
         self.cfg = config
         self.training = training
-        # self.flist = self.cfg['FLIST']
+        self.flist = self.load_flist(flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
+
+    def __len__(self):
+        """Get the length of dataset."""
+        return len(self.flist)
 
     def load_item(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
