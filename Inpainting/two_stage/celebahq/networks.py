@@ -439,3 +439,9 @@ class InpaintingModel():
         images_summary(visual_img, 'gt_masked_coarse_refine', 4)
 
         return refine_outputs, refine_outputs_merged, gen_loss, dis_loss, joint_gen_train, joint_dis_train, logs
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
