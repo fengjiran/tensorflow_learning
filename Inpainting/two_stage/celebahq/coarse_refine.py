@@ -33,6 +33,7 @@ class CoarseRefine():
         flist = self.train_dataset.flist
         total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
+        max_iteration = self.cfg['MAX_ITERS']
 
         epoch = 0
         keep_training = True
@@ -86,6 +87,10 @@ class CoarseRefine():
                             summary_writer.add_summary(summary, step)
 
                         step += 1
+
+                        if step >= max_iteration:
+                            keep_training = False
+                            break
 
 
 if __name__ == '__main__':
