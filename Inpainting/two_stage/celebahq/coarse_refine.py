@@ -32,7 +32,7 @@ class CoarseRefine():
         flist = self.train_dataset.load_flist(train_flist)
         num_batch = len(flist) // self.cfg['BATCH_SIZE']
 
-        coarse_outputs, coarse_outputs_merged, coarse_gen_loss, coarse_dis_loss, coarse_gen_train, coarse_dis_train =\
+        coarse_outputs, coarse_outputs_merged, coarse_gen_loss, coarse_dis_loss, coarse_gen_train, coarse_dis_train, logs =\
             self.model.build_coarse_model(images, masks)
 
         coarse_dis_train_ops = []
