@@ -418,6 +418,7 @@ class InpaintingModel():
                                                      beta1=self.cfg['BETA1'],
                                                      beta2=self.cfg['BETA2'])
 
+        # get the global steps
         joint_gen_global_step = tf.get_variable('joint_gen_global_step',
                                                 [],
                                                 tf.int32,
