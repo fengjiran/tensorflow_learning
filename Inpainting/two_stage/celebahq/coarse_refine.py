@@ -43,7 +43,7 @@ class CoarseRefine():
         # coarse model
         if self.cfg['MODEL'] == 1:
             # train
-            coarse_outputs, coarse_outputs_merged, coarse_gen_loss, coarse_dis_loss, coarse_gen_train, coarse_dis_train, logs =\
+            coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
                 self.model.build_coarse_model(images, masks)
 
             coarse_dis_train_ops = []
@@ -72,16 +72,22 @@ class CoarseRefine():
                     # progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
 
                     for i in range(num_batch):
-                        _, _, gen_loss, dis_loss = sess.run([coarse_dis_train,
-                                                             coarse_gen_train,
-                                                             coarse_gen_loss,
-                                                             coarse_dis_loss])
-                        print('Epoch: {}, Iter: {}, coarse_gen_loss: {}, coarse_dis_loss: {}'.format(
-                            step // num_batch + 1,
-                            step,
-                            gen_loss,
-                            dis_loss
-                        ))
+                        _, _, coarse_logs_ = sess.run([coarse_dis_train,
+                                                       coarse_gen_train,
+                                                       coarse_logs])
+                        print('Epoch: {}, Iter: {}'.format(epoch, step))
+                        print('-----------dis_loss: {}'.format(coarse_logs_[0]))
+                        print('-----------gen_loss: {}'.format(coarse_logs_[1]))
+                        print('-----------gen_gan_loss: {}'.format(coarse_logs_[2]))
+                        print('-----------gen_l1_loss: {}'.format(coarse_logs_[3]))
+                        print('-----------gen_style_loss: {}'.format(coarse_logs_[4]))
+                        print('-----------gen_content_loss: {}'.format(coarse_logs_[5]))
+                        # print('Epoch: {}, Iter: {}, coarse_gen_loss: {}, coarse_dis_loss: {}'.format(
+                        #     epoch,
+                        #     step,
+                        #     gen_loss,
+                        #     dis_loss
+                        # ))
 
                         if step % 200 == 0:
                             summary = sess.run(all_summary)
