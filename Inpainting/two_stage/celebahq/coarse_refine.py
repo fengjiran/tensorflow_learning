@@ -100,13 +100,6 @@ class CoarseRefine():
 
 
 if __name__ == '__main__':
-    # model = CoarseRefine(cfg)
-    # model.train()
+    model = CoarseRefine(cfg)
+    model.train()
     # print(cfg['GAN_LOSS'] == 'nsgan')
-    with open('log.csv', 'a+') as f:
-        mywrite = csv.writer(f)
-        mywrite.writerow(['dis_loss',
-                          'gen_gan_loss',
-                          'gen_l1_loss',
-                          'gen_style_loss',
-                          'gen_content_loss'])
