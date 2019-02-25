@@ -145,7 +145,7 @@ class InpaintingModel():
         #     ('coarse_gen_style_loss', gen_style_loss),
         #     ('coarse_gen_content_loss', gen_content_loss)
         # ]
-        logs = [dis_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
 
         coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
         coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
@@ -175,11 +175,17 @@ class InpaintingModel():
                                                          global_step=coarse_dis_global_step,
                                                          var_list=coarse_dis_vars)
 
+        tf.summary.scalar('coarse_dis_loss', dis_loss)
+        tf.summary.scalar('coarse_gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('coarse_gen_l1_loss', gen_l1_loss)
+        tf.summary.scalar('coarse_gen_style_loss', gen_style_loss)
+        tf.summary.scalar('coarse_gen_content_loss', gen_content_loss)
+
         visual_img = [images, images_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         images_summary(visual_img, 'gt_masked_inpainted', 4)
 
-        return outputs, outputs_merged, gen_loss, dis_loss, coarse_gen_train, coarse_dis_train, logs
+        return outputs, outputs_merged, coarse_gen_train, coarse_dis_train, logs
 
     def refine_generator(self, x, reuse=None):
         with tf.variable_scope('refine_generator', reuse=reuse):
