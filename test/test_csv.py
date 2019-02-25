@@ -1,6 +1,6 @@
 import csv
 
-with open('test.csv', 'a+') as f:
+with open('log.csv', 'a+') as f:
     mywrite = csv.writer(f)
     mywrite.writerow(['dis_loss',
                       'gen_gan_loss',
