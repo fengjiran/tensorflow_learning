@@ -174,6 +174,7 @@ class InpaintingModel():
 
         # add summary for monitor
         tf.summary.scalar('coarse_dis_loss', dis_loss)
+        tf.summary.scalar('coarse_gen_loss', gen_loss)
         tf.summary.scalar('coarse_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('coarse_gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('coarse_gen_style_loss', gen_style_loss)
@@ -342,6 +343,7 @@ class InpaintingModel():
 
         # add summary for monitor
         tf.summary.scalar('refine_dis_loss', dis_loss)
+        tf.summary.scalar('refine_gen_loss', gen_loss)
         tf.summary.scalar('refine_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('refine_gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('refine_gen_style_loss', gen_style_loss)
@@ -442,6 +444,7 @@ class InpaintingModel():
 
         # add summary for monitor
         tf.summary.scalar('joint_dis_loss', dis_loss)
+        tf.summary.scalar('joint_gen_loss', gen_loss)
         tf.summary.scalar('joint_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('joint_gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('joint_gen_style_loss', gen_style_loss)
