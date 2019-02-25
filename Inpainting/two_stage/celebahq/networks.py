@@ -308,17 +308,6 @@ class InpaintingModel():
         gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
-        # create logs
-        # logs = [
-        #     ('refine_dis_loss', dis_loss),
-        #     ('refine_gen_gan_loss', gen_gan_loss),
-        #     ('refine_gen_l1_loss', gen_l1_loss),
-        #     ('refine_gen_style_loss', gen_style_loss),
-        #     ('refine_gen_content_loss', gen_content_loss)
-        # ]
-
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
-
         refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
         refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
 
@@ -346,6 +335,9 @@ class InpaintingModel():
         refine_dis_train = refine_dis_optimizer.minimize(dis_loss,
                                                          global_step=refine_dis_global_step,
                                                          var_list=refine_dis_vars)
+
+        # create logs
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
 
         # add summary for monitor
         tf.summary.scalar('refine_dis_loss', dis_loss)
