@@ -137,19 +137,11 @@ class InpaintingModel():
         gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
-        # create logs
-        # logs = [
-        #     ('coarse_dis_loss', dis_loss),
-        #     ('coarse_gen_gan_loss', gen_gan_loss),
-        #     ('coarse_gen_l1_loss', gen_l1_loss),
-        #     ('coarse_gen_style_loss', gen_style_loss),
-        #     ('coarse_gen_content_loss', gen_content_loss)
-        # ]
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
-
+        # get coarse model variables
         coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
         coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
 
+        # get the optimizer for training
         coarse_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
                                                       beta1=self.cfg['BETA1'],
                                                       beta2=self.cfg['BETA2'])
@@ -157,6 +149,7 @@ class InpaintingModel():
                                                       beta1=self.cfg['BETA1'],
                                                       beta2=self.cfg['BETA2'])
 
+        # global step for training
         coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
                                                  [],
                                                  tf.int32,
@@ -168,12 +161,16 @@ class InpaintingModel():
                                                  initializer=tf.zeros_initializer(),
                                                  trainable=False)
 
+        # optimize the model
         coarse_gen_train = coarse_gen_optimizer.minimize(gen_loss,
                                                          global_step=coarse_gen_global_step,
                                                          var_list=coarse_gen_vars)
         coarse_dis_train = coarse_dis_optimizer.minimize(dis_loss,
                                                          global_step=coarse_dis_global_step,
                                                          var_list=coarse_dis_vars)
+
+        # create logs
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
 
         # add summary for monitor
         tf.summary.scalar('coarse_dis_loss', dis_loss)
@@ -308,9 +305,11 @@ class InpaintingModel():
         gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
+        # get the refine model variables
         refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
         refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
 
+        # get the refine optimizers
         refine_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
                                                       beta1=self.cfg['BETA1'],
                                                       beta2=self.cfg['BETA2'])
@@ -318,6 +317,7 @@ class InpaintingModel():
                                                       beta1=self.cfg['BETA1'],
                                                       beta2=self.cfg['BETA2'])
 
+        # get the global steps
         refine_gen_global_step = tf.get_variable('refine_gen_global_step',
                                                  [],
                                                  tf.int32,
@@ -329,6 +329,7 @@ class InpaintingModel():
                                                  initializer=tf.zeros_initializer(),
                                                  trainable=False)
 
+        # optimize the refine models
         refine_gen_train = refine_gen_optimizer.minimize(gen_loss,
                                                          global_step=refine_gen_global_step,
                                                          var_list=refine_gen_vars)
@@ -401,15 +402,7 @@ class InpaintingModel():
         gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
-        # create logs
-        logs = [
-            ('joint_dis_loss', dis_loss),
-            ('joint_gen_gan_loss', gen_gan_loss),
-            ('joint_gen_l1_loss', gen_l1_loss),
-            ('joint_gen_style_loss', gen_style_loss),
-            ('joint_gen_content_loss', gen_content_loss)
-        ]
-
+        # get the joint model variables
         coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
         # coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
         refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
@@ -443,11 +436,22 @@ class InpaintingModel():
                                                        global_step=joint_dis_global_step,
                                                        var_list=joint_dis_vars)
 
+        # create logs
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
+
+        # add summary for monitor
+        tf.summary.scalar('joint_dis_loss', dis_loss)
+        tf.summary.scalar('joint_gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('joint_gen_l1_loss', gen_l1_loss)
+        tf.summary.scalar('joint_gen_style_loss', gen_style_loss)
+        tf.summary.scalar('joint_gen_content_loss', gen_content_loss)
+
+        # add summaries for image visual
         visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         images_summary(visual_img, 'gt_masked_coarse_refine', 4)
 
-        return refine_outputs, refine_outputs_merged, gen_loss, dis_loss, joint_gen_train, joint_dis_train, logs
+        return refine_outputs, refine_outputs_merged, joint_gen_train, joint_dis_train, logs
 
     def save(self):
         pass
