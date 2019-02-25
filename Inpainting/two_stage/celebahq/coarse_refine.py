@@ -1,11 +1,12 @@
 import os
+import csv
 import platform as pf
 import yaml
 import numpy as np
 import tensorflow as tf
 from networks import InpaintingModel
 from dataset import Dataset
-from utils import Progbar
+# from utils import Progbar
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -68,7 +69,7 @@ class CoarseRefine():
                     epoch += 1
                     print('\n\nTraining epoch: %d' % epoch)
 
-                    progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
+                    # progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
 
                     for i in range(num_batch):
                         _, _, gen_loss, dis_loss = sess.run([coarse_dis_train,
