@@ -100,7 +100,7 @@ class CoarseRefine():
 
 
 if __name__ == '__main__':
-    model = CoarseRefine(cfg)
+    # model = CoarseRefine(cfg)
     # model.train()
     # print(cfg['GAN_LOSS'] == 'nsgan')
     with open('log.csv', 'a+') as f:
