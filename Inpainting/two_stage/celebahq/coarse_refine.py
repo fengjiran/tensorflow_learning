@@ -93,13 +93,20 @@ class CoarseRefine():
                             keep_training = False
                             break
 
-                        logs = [('epoch', epoch), ('iter', step)] + logs
+                        # logs = [('epoch', epoch), ('iter', step)] + logs
 
-                        progbar.add(images.get_shape().as_list()[0],
-                                    values=logs if self.cfg['VERBOSE'] else [x for x in logs if not x[0].startwith('l_')])
+                        # progbar.add(images.get_shape().as_list()[0],
+                        #             values=logs if self.cfg['VERBOSE'] else [x for x in logs if not x[0].startwith('l_')])
 
 
 if __name__ == '__main__':
     model = CoarseRefine(cfg)
-    model.train()
+    # model.train()
     # print(cfg['GAN_LOSS'] == 'nsgan')
+    with open('log.csv', 'a+') as f:
+        mywrite = csv.writer(f)
+        mywrite.writerow(['dis_loss',
+                          'gen_gan_loss',
+                          'gen_l1_loss',
+                          'gen_style_loss',
+                          'gen_content_loss'])
