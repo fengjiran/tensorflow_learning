@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 import tensorflow as tf
 
 from ops import conv
@@ -457,8 +458,10 @@ class InpaintingModel():
 
         return refine_outputs, refine_outputs_merged, joint_gen_train, joint_dis_train, logs
 
-    def save(self):
-        pass
+    def save(self, sess, saver, path, model_name):
+        print('\nsaving the model ...\n')
+        saver.save(sess, os.path.join(path, model_name))
 
-    def load(self):
+    def load(self, sess, saver, path):
+        print('\nloading the model ...\n')
         pass
