@@ -1,6 +1,7 @@
 # Ignore all the .h5 files since they are model files produced by keras
 *.h5
 *.log
+*.csv
 
 # Python
 *.pyc
