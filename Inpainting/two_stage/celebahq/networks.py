@@ -462,6 +462,6 @@ class InpaintingModel():
         print('\nsaving the model ...\n')
         saver.save(sess, os.path.join(path, model_name))
 
-    def load(self, sess, saver, path):
+    def load(self, sess, saver, path, model_name):
         print('\nloading the model ...\n')
-        pass
+        saver.restore(sess, os.path.join(path, model_name))
