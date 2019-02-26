@@ -51,6 +51,15 @@ class CoarseRefine():
                 coarse_dis_train_ops.append(coarse_dis_train)
             coarse_dis_train = tf.group(*coarse_dis_train_ops)
 
+            with open('coarse_logs.csv', 'a+') as f:
+                mywrite = csv.writer(f)
+                mywrite.writerow(['dis_loss',
+                                  'gen_loss',
+                                  'gen_gan_loss',
+                                  'gen_l1_loss',
+                                  'gen_style_loss',
+                                  'gen_content_loss'])
+
             all_summary = tf.summary.merge_all()
 
             config = tf.ConfigProto()
@@ -82,6 +91,10 @@ class CoarseRefine():
                         print('-----------gen_l1_loss: {}'.format(coarse_logs_[3]))
                         print('-----------gen_style_loss: {}'.format(coarse_logs_[4]))
                         print('-----------gen_content_loss: {}'.format(coarse_logs_[5]))
+
+                        with open('coarse_logs.csv', 'a+') as f:
+                            mywrite = csv.writer(f)
+                            mywrite.writerow(coarse_logs_)
                         # print('Epoch: {}, Iter: {}, coarse_gen_loss: {}, coarse_dis_loss: {}'.format(
                         #     epoch,
                         #     step,
