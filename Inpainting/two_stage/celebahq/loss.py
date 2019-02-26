@@ -171,7 +171,7 @@ class Vgg19(object):
                                 green - VGG_MEAN[1],
                                 red - VGG_MEAN[2]])
 
-        bgr = (bgr + 1.0) / 2.0
+        bgr = bgr / 255.
         assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
 
         self.conv1_1 = self.conv_layer(bgr, 'conv1_1')
