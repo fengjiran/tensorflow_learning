@@ -5,7 +5,7 @@ import yaml
 import numpy as np
 import tensorflow as tf
 
-from utils import create_mask
+# from utils import create_mask
 
 
 class Dataset():
@@ -24,14 +24,13 @@ class Dataset():
         self.cfg = config
         self.training = training
         self.flist = self.load_flist(flist)
-        self.train_filenames = None
+        self.train_filenames = tf.placeholder(tf.string, shape=[None])
 
     def __len__(self):
         """Get the length of dataset."""
         return len(self.flist)
 
     def load_item(self):
-        self.train_filenames = tf.placeholder(tf.string, shape=[None])
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
         train_dataset = train_dataset.shuffle(buffer_size=1000)
@@ -43,10 +42,10 @@ class Dataset():
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
-        masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
-                            self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
+        # masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+        #                     self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
-        return images, masks, train_iterator
+        return images, train_iterator
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
