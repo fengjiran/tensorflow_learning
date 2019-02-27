@@ -24,13 +24,14 @@ class Dataset():
         self.cfg = config
         self.training = training
         self.flist = self.load_flist(flist)
-        self.train_filenames = tf.placeholder(tf.string, shape=[None])
+        self.train_filenames = None
 
     def __len__(self):
         """Get the length of dataset."""
         return len(self.flist)
 
     def load_item(self):
+        self.train_filenames = tf.placeholder(tf.string, shape=[None])
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
         train_dataset = train_dataset.shuffle(buffer_size=1000)
