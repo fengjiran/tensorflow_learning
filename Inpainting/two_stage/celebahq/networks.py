@@ -475,6 +475,27 @@ class InpaintingModel():
 
         return refine_outputs, refine_outputs_merged, joint_gen_train, joint_dis_train, logs
 
+    def build_model(self, images, masks):
+        # generator input: [rgb(3)+mask(1)]
+        # discriminator input: [rgb(3)]
+        images_masked = images * (1.0 - masks) + masks
+        coarse_inputs = tf.concat([images_masked, masks * (tf.ones_like(images)[:, :, :, 0:1])], axis=3)
+        coarse_outputs = self.coarse_generator(coarse_inputs)
+        coarse_outputs_merged = coarse_outputs * masks + images * (1.0 - masks)
+
+        refine_inputs = tf.concat([coarse_outputs_merged, masks * (tf.ones_like(images)[:, :, :, 0:1])], axis=3)
+        refine_outputs = self.refine_generator(refine_inputs)
+        refine_outputs_merged = refine_outputs * masks + images * (1.0 - masks)
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        ######################### Build coarse loss function #########################
+        coarse_gen_loss = 0.0
+        coarse_dis_loss = 0.0
+
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model ...\n')
         saver.save(sess, os.path.join(path, model_name))
