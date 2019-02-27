@@ -33,7 +33,7 @@ class Dataset():
     def load_item(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=1000)
+        train_dataset = train_dataset.shuffle(buffer_size=500)
         train_dataset = train_dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.cfg['BATCH_SIZE']))
         train_dataset = train_dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
