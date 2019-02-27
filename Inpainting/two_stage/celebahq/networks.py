@@ -22,6 +22,18 @@ class InpaintingModel():
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
 
+        # global step for training
+        self.gen_global_step = tf.get_variable('gen_global_step',
+                                               [],
+                                               tf.int32,
+                                               initializer=tf.zeros_initializer(),
+                                               trainable=False)
+        self.dis_global_step = tf.get_variable('dis_global_step',
+                                               [],
+                                               tf.int32,
+                                               initializer=tf.zeros_initializer(),
+                                               trainable=False)
+
     def coarse_generator(self, x, reuse=None):
         with tf.variable_scope('coarse_generator', reuse=reuse):
             # encoder
@@ -151,23 +163,23 @@ class InpaintingModel():
                                                       beta2=self.cfg['BETA2'])
 
         # global step for training
-        coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
-                                                 [],
-                                                 tf.int32,
-                                                 initializer=tf.zeros_initializer(),
-                                                 trainable=False)
-        coarse_dis_global_step = tf.get_variable('coarse_dis_global_step',
-                                                 [],
-                                                 tf.int32,
-                                                 initializer=tf.zeros_initializer(),
-                                                 trainable=False)
+        # coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
+        #                                          [],
+        #                                          tf.int32,
+        #                                          initializer=tf.zeros_initializer(),
+        #                                          trainable=False)
+        # coarse_dis_global_step = tf.get_variable('coarse_dis_global_step',
+        #                                          [],
+        #                                          tf.int32,
+        #                                          initializer=tf.zeros_initializer(),
+        #                                          trainable=False)
 
         # optimize the model
         coarse_gen_train = coarse_gen_optimizer.minimize(gen_loss,
-                                                         global_step=coarse_gen_global_step,
+                                                         global_step=self.gen_global_step,
                                                          var_list=coarse_gen_vars)
         coarse_dis_train = coarse_dis_optimizer.minimize(dis_loss,
-                                                         global_step=coarse_dis_global_step,
+                                                         global_step=self.dis_global_step,
                                                          var_list=coarse_dis_vars)
 
         # create logs
