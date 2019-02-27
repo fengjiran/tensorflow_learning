@@ -17,6 +17,7 @@ elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         # train_flist = cfg['FLIST_LINUX_7810']
         log_dir = cfg['LOG_DIR_LINUX_7810']
+        model_dir = cfg['MODEL_PATH_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
         pass
 
@@ -39,6 +40,9 @@ class CoarseRefine():
         epoch = 0
         keep_training = True
         step = 0
+
+        # the saver for model saving and loading
+        saver = tf.train.Saver()
 
         # coarse model
         if self.cfg['MODEL'] == 1:
@@ -111,6 +115,9 @@ class CoarseRefine():
                         if step >= max_iteration:
                             keep_training = False
                             break
+
+                        if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
+                            self.model.save(sess, saver, model_dir, 'model')
 
                         # logs = [('epoch', epoch), ('iter', step)] + logs
 
