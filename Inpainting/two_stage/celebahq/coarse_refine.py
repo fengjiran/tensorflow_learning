@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 from networks import InpaintingModel
 from dataset import Dataset
-# from utils import Progbar
+from utils import create_mask
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -31,7 +31,10 @@ class CoarseRefine():
         self.train_dataset = Dataset(config)
 
     def train(self):
-        images, masks, train_iterator = self.train_dataset.load_item()
+        images, train_iterator = self.train_dataset.load_item()
+        masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+                            self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
+
         flist = self.train_dataset.flist
         total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
@@ -115,12 +118,6 @@ class CoarseRefine():
                         with open('coarse_logs.csv', 'a+') as f:
                             mywrite = csv.writer(f)
                             mywrite.writerow(coarse_logs_)
-                        # print('Epoch: {}, Iter: {}, coarse_gen_loss: {}, coarse_dis_loss: {}'.format(
-                        #     epoch,
-                        #     step,
-                        #     gen_loss,
-                        #     dis_loss
-                        # ))
 
                         if step % self.cfg['SUMMARY_INTERVAL'] == 0:
                             summary = sess.run(coarse_summary)
@@ -131,6 +128,8 @@ class CoarseRefine():
                             break
 
                         if step % self.cfg['SAVE_INTERVAL'] == 0:
+                            # print('\nsaving the model ...\n')
+                            # saver.save(sess, os.path.join(model_dir, 'model'))
                             self.model.save(sess, saver, model_dir, 'model')
 
                         step += 1
