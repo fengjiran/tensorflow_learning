@@ -41,14 +41,23 @@ class CoarseRefine():
         keep_training = True
         step = 0
 
+        coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
+            self.model.build_coarse_model(images, masks)
+
+        refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs =\
+            self.model.build_refine_model(images, masks)
+
+        joint_outputs, joint_outputs_merged, joint_gen_train, joint_dis_train, joint_logs =\
+            self.model.build_joint_model(images, masks)
+
         # the saver for model saving and loading
         saver = tf.train.Saver()
 
         # coarse model
         if self.cfg['MODEL'] == 1:
             # train
-            coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
-                self.model.build_coarse_model(images, masks)
+            # coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
+            #     self.model.build_coarse_model(images, masks)
 
             coarse_dis_train_ops = []
             for i in range(5):
@@ -110,15 +119,14 @@ class CoarseRefine():
                             summary = sess.run(all_summary)
                             summary_writer.add_summary(summary, step)
 
-                        step += 1
-
                         if step >= max_iteration:
                             keep_training = False
                             break
 
-                        if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
+                        if step % self.cfg['SAVE_INTERVAL'] == 0:
                             self.model.save(sess, saver, model_dir, 'model')
 
+                        step += 1
                         # logs = [('epoch', epoch), ('iter', step)] + logs
 
                         # progbar.add(images.get_shape().as_list()[0],
