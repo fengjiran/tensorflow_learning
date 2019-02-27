@@ -41,14 +41,13 @@ class CoarseRefine():
         keep_training = True
         step = 0
 
-        coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
-            self.model.build_coarse_model(images, masks)
+        coarse_returned, refine_returned, joint_returned = self.model.build_model(images, masks)
 
-        refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs =\
-            self.model.build_refine_model(images, masks)
+        coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs = coarse_returned
 
-        joint_outputs, joint_outputs_merged, joint_gen_train, joint_dis_train, joint_logs =\
-            self.model.build_joint_model(images, masks)
+        refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs = refine_returned
+
+        joint_outputs, joint_outputs_merged, joint_gen_train, joint_dis_train, joint_logs = joint_returned
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
@@ -73,7 +72,15 @@ class CoarseRefine():
                                   'gen_style_loss',
                                   'gen_content_loss'])
 
-            all_summary = tf.summary.merge_all()
+            coarse_summary_collection = [tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_dis_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_gan_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_l1_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_style_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_content_loss'),
+                                         tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gt_masked_inpainted')]
+            coarse_summary = tf.summary.merge(coarse_summary_collection)
+            # all_summary = tf.summary.merge_all()
 
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
@@ -116,7 +123,7 @@ class CoarseRefine():
                         # ))
 
                         if step % self.cfg['SUMMARY_INTERVAL'] == 0:
-                            summary = sess.run(all_summary)
+                            summary = sess.run(coarse_summary)
                             summary_writer.add_summary(summary, step)
 
                         if step >= max_iteration:
