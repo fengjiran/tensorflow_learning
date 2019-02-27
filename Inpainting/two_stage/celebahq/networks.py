@@ -492,9 +492,167 @@ class InpaintingModel():
         else:
             use_sigmoid = False
 
-        ######################### Build coarse loss function #########################
+        # get the global steps
+        gen_global_step = tf.get_variable('gen_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+        dis_global_step = tf.get_variable('dis_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+
+        # --------------------- Build coarse loss function -----------------------------
         coarse_gen_loss = 0.0
         coarse_dis_loss = 0.0
+
+        # discriminator loss
+        coarse_dis_input_real = images
+        coarse_dis_input_fake = tf.stop_gradient(coarse_outputs)
+        coarse_dis_real, _ = self.coarse_discriminator(coarse_dis_input_real, use_sigmoid=use_sigmoid)
+        coarse_dis_fake, _ = self.coarse_discriminator(coarse_dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        coarse_dis_real_loss = adversarial_loss(coarse_dis_real, is_real=True,
+                                                gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        coarse_dis_fake_loss = adversarial_loss(coarse_dis_fake, is_real=False,
+                                                gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        coarse_dis_loss += (coarse_dis_real_loss + coarse_dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        coarse_gen_input_fake = coarse_outputs
+        coarse_gen_fake, _ = self.coarse_discriminator(coarse_gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        coarse_gen_gan_loss = adversarial_loss(coarse_gen_fake, is_real=True,
+                                               gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        coarse_gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
+        coarse_gen_loss += coarse_gen_gan_loss
+
+        # generator l1 loss
+        coarse_gen_l1_loss = tf.losses.absolute_difference(
+            images, coarse_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        coarse_gen_loss += coarse_gen_l1_loss
+
+        # generator perceptual loss
+        coarse_gen_content_loss = perceptual_loss(coarse_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        coarse_gen_loss += coarse_gen_content_loss
+
+        # generator style loss
+        coarse_gen_style_loss = style_loss(coarse_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        coarse_gen_loss += coarse_gen_style_loss
+
+        # get coarse model variables
+        coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
+
+        # get the optimizer for training
+        coarse_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+        coarse_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+
+        # optimize the model
+        coarse_gen_train = coarse_gen_optimizer.minimize(coarse_gen_loss,
+                                                         global_step=gen_global_step,
+                                                         var_list=coarse_gen_vars)
+        coarse_dis_train = coarse_dis_optimizer.minimize(coarse_dis_loss,
+                                                         global_step=dis_global_step,
+                                                         var_list=coarse_dis_vars)
+
+        # create logs
+        coarse_logs = [coarse_dis_loss, coarse_gen_loss, coarse_gen_gan_loss,
+                       coarse_gen_l1_loss, coarse_gen_style_loss, coarse_gen_content_loss]
+
+        # add summary for monitor
+        tf.summary.scalar('coarse_dis_loss', coarse_dis_loss)
+        tf.summary.scalar('coarse_gen_loss', coarse_gen_loss)
+        tf.summary.scalar('coarse_gen_gan_loss', coarse_gen_gan_loss)
+        tf.summary.scalar('coarse_gen_l1_loss', coarse_gen_l1_loss)
+        tf.summary.scalar('coarse_gen_style_loss', coarse_gen_style_loss)
+        tf.summary.scalar('coarse_gen_content_loss', coarse_gen_content_loss)
+
+        coarse_visual_img = [images, images_masked, coarse_outputs_merged]
+        coarse_visual_img = tf.concat(coarse_visual_img, axis=2)
+        images_summary(coarse_visual_img, 'coarse_gt_masked_inpainted', 4)
+
+        coarse_returned = [coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs]
+
+        # --------------------- Build refine loss function -----------------------------
+        refine_gen_loss = 0.0
+        refine_dis_loss = 0.0
+
+        # discriminator loss
+        refine_dis_input_real = images
+        refine_dis_input_fake = tf.stop_gradient(refine_outputs)
+        refine_dis_real, _ = self.refine_discriminator(refine_dis_input_real, use_sigmoid=use_sigmoid)
+        refine_dis_fake, _ = self.refine_discriminator(refine_dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        refine_dis_real_loss = adversarial_loss(refine_dis_real, is_real=True,
+                                                gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        refine_dis_fake_loss = adversarial_loss(refine_dis_fake, is_real=False,
+                                                gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        refine_dis_loss += (refine_dis_real_loss + refine_dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        refine_gen_input_fake = refine_outputs
+        refine_gen_fake, _ = self.refine_discriminator(refine_gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        refine_gen_gan_loss = adversarial_loss(refine_gen_fake, is_real=True,
+                                               gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        refine_gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
+        refine_gen_loss += refine_gen_gan_loss
+
+        # generator l1 loss
+        refine_gen_l1_loss = tf.losses.absolute_difference(
+            images, refine_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        refine_gen_loss += refine_gen_l1_loss
+
+        # generator perceptual loss
+        refine_gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        refine_gen_loss += refine_gen_content_loss
+
+        # generator style loss
+        refine_gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        refine_gen_loss += refine_gen_style_loss
+
+        # get the refine model variables
+        refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
+        refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
+
+        # get the refine optimizers
+        refine_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+        refine_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                      beta1=self.cfg['BETA1'],
+                                                      beta2=self.cfg['BETA2'])
+
+        # optimize the refine models
+        refine_gen_train = refine_gen_optimizer.minimize(refine_gen_loss,
+                                                         global_step=gen_global_step,
+                                                         var_list=refine_gen_vars)
+        refine_dis_train = refine_dis_optimizer.minimize(refine_dis_loss,
+                                                         global_step=dis_global_step,
+                                                         var_list=refine_dis_vars)
+
+        # create logs
+        refine_logs = [refine_dis_loss, refine_gen_loss, refine_gen_gan_loss,
+                       refine_gen_l1_loss, refine_gen_style_loss, refine_gen_content_loss]
+
+        # add summary for monitor
+        # tf.summary.scalar('refine_dis_loss', refine_dis_loss)
+        # tf.summary.scalar('refine_gen_loss', refine_gen_loss)
+        # tf.summary.scalar('refine_gen_gan_loss', refine_gen_gan_loss)
+        # tf.summary.scalar('refine_gen_l1_loss', refine_gen_l1_loss)
+        # tf.summary.scalar('refine_gen_style_loss', refine_gen_style_loss)
+        # tf.summary.scalar('refine_gen_content_loss', refine_gen_content_loss)
+
+        # refine_visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
+        # refine_visual_img = tf.concat(refine_visual_img, axis=2)
+        # images_summary(refine_visual_img, 'gt_masked_coarse_refine', 4)
+
+        refine_returned = [refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs]
+
+        return coarse_returned, refine_returned
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model ...\n')
