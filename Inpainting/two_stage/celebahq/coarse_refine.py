@@ -106,7 +106,7 @@ class CoarseRefine():
                         #     dis_loss
                         # ))
 
-                        if step % 200 == 0:
+                        if step % self.cfg['SUMMARY_INTERVAL'] == 0:
                             summary = sess.run(all_summary)
                             summary_writer.add_summary(summary, step)
 
