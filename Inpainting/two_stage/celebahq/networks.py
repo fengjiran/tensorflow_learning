@@ -639,18 +639,73 @@ class InpaintingModel():
                        refine_gen_l1_loss, refine_gen_style_loss, refine_gen_content_loss]
 
         # add summary for monitor
-        # tf.summary.scalar('refine_dis_loss', refine_dis_loss)
-        # tf.summary.scalar('refine_gen_loss', refine_gen_loss)
-        # tf.summary.scalar('refine_gen_gan_loss', refine_gen_gan_loss)
-        # tf.summary.scalar('refine_gen_l1_loss', refine_gen_l1_loss)
-        # tf.summary.scalar('refine_gen_style_loss', refine_gen_style_loss)
-        # tf.summary.scalar('refine_gen_content_loss', refine_gen_content_loss)
+        tf.summary.scalar('refine_dis_loss', refine_dis_loss)
+        tf.summary.scalar('refine_gen_loss', refine_gen_loss)
+        tf.summary.scalar('refine_gen_gan_loss', refine_gen_gan_loss)
+        tf.summary.scalar('refine_gen_l1_loss', refine_gen_l1_loss)
+        tf.summary.scalar('refine_gen_style_loss', refine_gen_style_loss)
+        tf.summary.scalar('refine_gen_content_loss', refine_gen_content_loss)
 
-        # refine_visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
-        # refine_visual_img = tf.concat(refine_visual_img, axis=2)
-        # images_summary(refine_visual_img, 'gt_masked_coarse_refine', 4)
+        refine_visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
+        refine_visual_img = tf.concat(refine_visual_img, axis=2)
+        images_summary(refine_visual_img, 'gt_masked_coarse_refine', 4)
 
         refine_returned = [refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs]
+
+        # --------------------- Build joint loss function -----------------------------
+        joint_gen_loss = 0.0
+        joint_dis_loss = 0.0
+
+        # discriminator loss
+        joint_dis_input_real = images
+        joint_dis_input_fake = tf.stop_gradient(refine_outputs)
+        joint_dis_real, _ = self.refine_discriminator(joint_dis_input_real, reuse=True, use_sigmoid=use_sigmoid)
+        joint_dis_fake, _ = self.refine_discriminator(joint_dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        joint_dis_real_loss = adversarial_loss(joint_dis_real, is_real=True,
+                                               gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        joint_dis_fake_loss = adversarial_loss(joint_dis_fake, is_real=False,
+                                               gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        joint_dis_loss += (joint_dis_real_loss + joint_dis_fake_loss) / 2.0
+
+        # generator adversartial loss
+        joint_gen_input_fake = refine_outputs
+        joint_gen_fake, _ = self.refine_discriminator(joint_gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        joint_gen_gan_loss = adversarial_loss(joint_gen_fake, is_real=True,
+                                              gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        joint_gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
+        joint_gen_loss += joint_gen_gan_loss
+
+        # generator l1 loss
+        joint_gen_l1_loss = tf.losses.absolute_difference(
+            images, refine_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+        joint_gen_loss += joint_gen_l1_loss
+
+        # generator perceptual loss
+        joint_gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        joint_gen_loss += joint_gen_content_loss
+
+        # generator style loss
+        joint_gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        joint_gen_loss += joint_gen_style_loss
+
+        joint_gen_vars = coarse_gen_vars + refine_gen_vars
+        joint_dis_vars = refine_dis_vars
+
+        # get the joint optimizers
+        joint_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
+                                                     beta1=self.cfg['BETA1'],
+                                                     beta2=self.cfg['BETA2'])
+        joint_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                                     beta1=self.cfg['BETA1'],
+                                                     beta2=self.cfg['BETA2'])
+
+        # optimize the joint models
+        joint_gen_train = joint_gen_optimizer.minimize(joint_gen_loss,
+                                                       global_step=gen_global_step,
+                                                       var_list=joint_gen_vars)
+        joint_dis_train = joint_dis_optimizer.minimize(joint_dis_loss,
+                                                       global_step=dis_global_step,
+                                                       var_list=joint_dis_vars)
 
         return coarse_returned, refine_returned
 
