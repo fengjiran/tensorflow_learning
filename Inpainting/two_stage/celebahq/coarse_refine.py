@@ -61,11 +61,6 @@ class CoarseRefine():
             # coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs =\
             #     self.model.build_coarse_model(images, masks)
 
-            coarse_dis_train_ops = []
-            for i in range(5):
-                coarse_dis_train_ops.append(coarse_dis_train)
-            coarse_dis_train = tf.group(*coarse_dis_train_ops)
-
             with open('coarse_logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss',
@@ -133,10 +128,6 @@ class CoarseRefine():
                             self.model.save(sess, saver, model_dir, 'model')
 
                         step += 1
-                        # logs = [('epoch', epoch), ('iter', step)] + logs
-
-                        # progbar.add(images.get_shape().as_list()[0],
-                        #             values=logs if self.cfg['VERBOSE'] else [x for x in logs if not x[0].startwith('l_')])
 
 
 if __name__ == '__main__':
