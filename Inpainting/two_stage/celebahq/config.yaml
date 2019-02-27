@@ -11,7 +11,7 @@ VERBOSE: 0                         # turns on verbose mode in the output console
 L1_LOSS_WEIGHT: 1                  # l1 loss weight
 STYLE_LOSS_WEIGHT: 0.00001         # style loss weight
 CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.01              # adversarial loss weight
+ADV_LOSS_WEIGHT: 0.03              # adversarial loss weight
 
 GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
