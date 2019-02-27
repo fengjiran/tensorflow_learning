@@ -10,6 +10,7 @@ from ops import instance_norm
 from loss import adversarial_loss
 from loss import perceptual_loss
 from loss import style_loss
+from loss import Vgg19
 
 from utils import images_summary
 
@@ -21,23 +22,24 @@ class InpaintingModel():
         print('Construct the inpainting model.')
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
+        self.vgg = Vgg19()
 
         # global step for training
-        self.gen_global_step = tf.get_variable('gen_global_step',
-                                               [],
-                                               tf.int32,
-                                               initializer=tf.zeros_initializer(),
-                                               trainable=False)
-        self.dis_global_step = tf.get_variable('dis_global_step',
-                                               [],
-                                               tf.int32,
-                                               initializer=tf.zeros_initializer(),
-                                               trainable=False)
+        # self.gen_global_step = tf.get_variable('gen_global_step',
+        #                                        [],
+        #                                        tf.int32,
+        #                                        initializer=tf.zeros_initializer(),
+        #                                        trainable=False)
+        # self.dis_global_step = tf.get_variable('dis_global_step',
+        #                                        [],
+        #                                        tf.int32,
+        #                                        initializer=tf.zeros_initializer(),
+        #                                        trainable=False)
 
-        self.coarse_gen_vars = None
-        self.coarse_dis_vars = None
-        self.refine_gen_vars = None
-        self.refine_dis_vars = None
+        # self.coarse_gen_vars = None
+        # self.coarse_dis_vars = None
+        # self.refine_gen_vars = None
+        # self.refine_dis_vars = None
 
     def coarse_generator(self, x, reuse=None):
         with tf.variable_scope('coarse_generator', reuse=reuse):
@@ -148,16 +150,16 @@ class InpaintingModel():
         gen_loss += gen_l1_loss
 
         # generator perceptual loss
-        gen_content_loss = perceptual_loss(outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_content_loss = perceptual_loss(outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         gen_loss += gen_content_loss
 
         # generator style loss
-        gen_style_loss = style_loss(outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_style_loss = style_loss(outputs * masks, images * masks, self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
         # get coarse model variables
-        self.coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
-        self.coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
+        coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
 
         # get the optimizer for training
         coarse_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
@@ -168,24 +170,24 @@ class InpaintingModel():
                                                       beta2=self.cfg['BETA2'])
 
         # global step for training
-        # coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
-        #                                          [],
-        #                                          tf.int32,
-        #                                          initializer=tf.zeros_initializer(),
-        #                                          trainable=False)
-        # coarse_dis_global_step = tf.get_variable('coarse_dis_global_step',
-        #                                          [],
-        #                                          tf.int32,
-        #                                          initializer=tf.zeros_initializer(),
-        #                                          trainable=False)
+        coarse_gen_global_step = tf.get_variable('coarse_gen_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+        coarse_dis_global_step = tf.get_variable('coarse_dis_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
 
         # optimize the model
         coarse_gen_train = coarse_gen_optimizer.minimize(gen_loss,
-                                                         global_step=self.gen_global_step,
-                                                         var_list=self.coarse_gen_vars)
+                                                         global_step=coarse_gen_global_step,
+                                                         var_list=coarse_gen_vars)
         coarse_dis_train = coarse_dis_optimizer.minimize(dis_loss,
-                                                         global_step=self.dis_global_step,
-                                                         var_list=self.coarse_dis_vars)
+                                                         global_step=coarse_dis_global_step,
+                                                         var_list=coarse_dis_vars)
 
         # create logs
         logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
@@ -317,16 +319,16 @@ class InpaintingModel():
         gen_loss += gen_l1_loss
 
         # generator perceptual loss
-        gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_content_loss = perceptual_loss(refine_outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         gen_loss += gen_content_loss
 
         # generator style loss
-        gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_style_loss = style_loss(refine_outputs * masks, images * masks, self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
         # get the refine model variables
-        self.refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
-        self.refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
+        refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
+        refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
 
         # get the refine optimizers
         refine_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
@@ -337,24 +339,24 @@ class InpaintingModel():
                                                       beta2=self.cfg['BETA2'])
 
         # get the global steps
-        # refine_gen_global_step = tf.get_variable('refine_gen_global_step',
-        #                                          [],
-        #                                          tf.int32,
-        #                                          initializer=tf.zeros_initializer(),
-        #                                          trainable=False)
-        # refine_dis_global_step = tf.get_variable('refine_dis_global_step',
-        #                                          [],
-        #                                          tf.int32,
-        #                                          initializer=tf.zeros_initializer(),
-        #                                          trainable=False)
+        refine_gen_global_step = tf.get_variable('refine_gen_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
+        refine_dis_global_step = tf.get_variable('refine_dis_global_step',
+                                                 [],
+                                                 tf.int32,
+                                                 initializer=tf.zeros_initializer(),
+                                                 trainable=False)
 
         # optimize the refine models
         refine_gen_train = refine_gen_optimizer.minimize(gen_loss,
-                                                         global_step=self.gen_global_step,
-                                                         var_list=self.refine_gen_vars)
+                                                         global_step=refine_gen_global_step,
+                                                         var_list=refine_gen_vars)
         refine_dis_train = refine_dis_optimizer.minimize(dis_loss,
-                                                         global_step=self.dis_global_step,
-                                                         var_list=self.refine_dis_vars)
+                                                         global_step=refine_dis_global_step,
+                                                         var_list=refine_dis_vars)
 
         # create logs
         logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_style_loss, gen_content_loss]
@@ -415,21 +417,21 @@ class InpaintingModel():
         gen_loss += gen_l1_loss
 
         # generator perceptual loss
-        gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        gen_content_loss = perceptual_loss(refine_outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         gen_loss += gen_content_loss
 
         # generator style loss
-        gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        gen_style_loss = style_loss(refine_outputs * masks, images * masks, self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         gen_loss += gen_style_loss
 
         # get the joint model variables
-        # coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
-        # # coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
-        # refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
-        # refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
+        coarse_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_generator')
+        # coarse_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'coarse_discriminator')
+        refine_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_generator')
+        refine_dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'refine_discriminator')
 
-        joint_gen_vars = self.coarse_gen_vars + self.refine_gen_vars
-        joint_dis_vars = self.refine_dis_vars
+        joint_gen_vars = coarse_gen_vars + refine_gen_vars
+        joint_dis_vars = refine_dis_vars
 
         joint_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
                                                      beta1=self.cfg['BETA1'],
@@ -439,22 +441,22 @@ class InpaintingModel():
                                                      beta2=self.cfg['BETA2'])
 
         # get the global steps
-        # joint_gen_global_step = tf.get_variable('joint_gen_global_step',
-        #                                         [],
-        #                                         tf.int32,
-        #                                         initializer=tf.zeros_initializer(),
-        #                                         trainable=False)
-        # joint_dis_global_step = tf.get_variable('joint_dis_global_step',
-        #                                         [],
-        #                                         tf.int32,
-        #                                         initializer=tf.zeros_initializer(),
-        #                                         trainable=False)
+        joint_gen_global_step = tf.get_variable('joint_gen_global_step',
+                                                [],
+                                                tf.int32,
+                                                initializer=tf.zeros_initializer(),
+                                                trainable=False)
+        joint_dis_global_step = tf.get_variable('joint_dis_global_step',
+                                                [],
+                                                tf.int32,
+                                                initializer=tf.zeros_initializer(),
+                                                trainable=False)
 
         joint_gen_train = joint_gen_optimizer.minimize(gen_loss,
-                                                       global_step=self.gen_global_step,
+                                                       global_step=joint_gen_global_step,
                                                        var_list=joint_gen_vars)
         joint_dis_train = joint_dis_optimizer.minimize(dis_loss,
-                                                       global_step=self.dis_global_step,
+                                                       global_step=joint_dis_global_step,
                                                        var_list=joint_dis_vars)
 
         # create logs
@@ -533,11 +535,12 @@ class InpaintingModel():
         coarse_gen_loss += coarse_gen_l1_loss
 
         # generator perceptual loss
-        coarse_gen_content_loss = perceptual_loss(coarse_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        coarse_gen_content_loss = perceptual_loss(coarse_outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         coarse_gen_loss += coarse_gen_content_loss
 
         # generator style loss
-        coarse_gen_style_loss = style_loss(coarse_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        coarse_gen_style_loss = style_loss(coarse_outputs * masks, images * masks,
+                                           self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         coarse_gen_loss += coarse_gen_style_loss
 
         # get coarse model variables
@@ -559,6 +562,11 @@ class InpaintingModel():
         coarse_dis_train = coarse_dis_optimizer.minimize(coarse_dis_loss,
                                                          global_step=dis_global_step,
                                                          var_list=coarse_dis_vars)
+
+        coarse_dis_train_ops = []
+        for i in range(5):
+            coarse_dis_train_ops.append(coarse_dis_train)
+        coarse_dis_train = tf.group(*coarse_dis_train_ops)
 
         # create logs
         coarse_logs = [coarse_dis_loss, coarse_gen_loss, coarse_gen_gan_loss,
@@ -607,11 +615,12 @@ class InpaintingModel():
         refine_gen_loss += refine_gen_l1_loss
 
         # generator perceptual loss
-        refine_gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        refine_gen_content_loss = perceptual_loss(refine_outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         refine_gen_loss += refine_gen_content_loss
 
         # generator style loss
-        refine_gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        refine_gen_style_loss = style_loss(refine_outputs * masks, images * masks,
+                                           self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         refine_gen_loss += refine_gen_style_loss
 
         # get the refine model variables
@@ -633,6 +642,11 @@ class InpaintingModel():
         refine_dis_train = refine_dis_optimizer.minimize(refine_dis_loss,
                                                          global_step=dis_global_step,
                                                          var_list=refine_dis_vars)
+
+        refine_dis_train_ops = []
+        for i in range(5):
+            refine_dis_train_ops.append(refine_dis_train)
+        refine_dis_train = tf.group(*refine_dis_train_ops)
 
         # create logs
         refine_logs = [refine_dis_loss, refine_gen_loss, refine_gen_gan_loss,
@@ -681,11 +695,12 @@ class InpaintingModel():
         joint_gen_loss += joint_gen_l1_loss
 
         # generator perceptual loss
-        joint_gen_content_loss = perceptual_loss(refine_outputs, images) * self.cfg['CONTENT_LOSS_WEIGHT']
+        joint_gen_content_loss = perceptual_loss(refine_outputs, images, self.vgg) * self.cfg['CONTENT_LOSS_WEIGHT']
         joint_gen_loss += joint_gen_content_loss
 
         # generator style loss
-        joint_gen_style_loss = style_loss(refine_outputs * masks, images * masks) * self.cfg['STYLE_LOSS_WEIGHT']
+        joint_gen_style_loss = style_loss(refine_outputs * masks, images * masks,
+                                          self.vgg) * self.cfg['STYLE_LOSS_WEIGHT']
         joint_gen_loss += joint_gen_style_loss
 
         joint_gen_vars = coarse_gen_vars + refine_gen_vars
@@ -695,9 +710,10 @@ class InpaintingModel():
         joint_gen_optimizer = tf.train.AdamOptimizer(self.cfg['LR'],
                                                      beta1=self.cfg['BETA1'],
                                                      beta2=self.cfg['BETA2'])
-        joint_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
-                                                     beta1=self.cfg['BETA1'],
-                                                     beta2=self.cfg['BETA2'])
+        joint_dis_optimizer = refine_dis_optimizer
+        # joint_dis_optimizer = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+        #                                              beta1=self.cfg['BETA1'],
+        #                                              beta2=self.cfg['BETA2'])
 
         # optimize the joint models
         joint_gen_train = joint_gen_optimizer.minimize(joint_gen_loss,
@@ -706,6 +722,11 @@ class InpaintingModel():
         joint_dis_train = joint_dis_optimizer.minimize(joint_dis_loss,
                                                        global_step=dis_global_step,
                                                        var_list=joint_dis_vars)
+
+        joint_dis_train_ops = []
+        for i in range(5):
+            joint_dis_train_ops.append(joint_dis_train)
+        joint_dis_train = tf.group(*joint_dis_train_ops)
 
         # create logs
         joint_logs = [joint_dis_loss, joint_gen_loss, joint_gen_gan_loss,
