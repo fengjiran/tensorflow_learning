@@ -648,7 +648,7 @@ class InpaintingModel():
 
         refine_visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
         refine_visual_img = tf.concat(refine_visual_img, axis=2)
-        images_summary(refine_visual_img, 'gt_masked_coarse_refine', 4)
+        images_summary(refine_visual_img, 'refine_gt_masked_coarse_refine', 4)
 
         refine_returned = [refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs]
 
@@ -707,7 +707,26 @@ class InpaintingModel():
                                                        global_step=dis_global_step,
                                                        var_list=joint_dis_vars)
 
-        return coarse_returned, refine_returned
+        # create logs
+        joint_logs = [joint_dis_loss, joint_gen_loss, joint_gen_gan_loss,
+                      joint_gen_l1_loss, joint_gen_style_loss, joint_gen_content_loss]
+
+        # add summary for monitor
+        tf.summary.scalar('joint_dis_loss', joint_dis_loss)
+        tf.summary.scalar('joint_gen_loss', joint_gen_loss)
+        tf.summary.scalar('joint_gen_gan_loss', joint_gen_gan_loss)
+        tf.summary.scalar('joint_gen_l1_loss', joint_gen_l1_loss)
+        tf.summary.scalar('joint_gen_style_loss', joint_gen_style_loss)
+        tf.summary.scalar('joint_gen_content_loss', joint_gen_content_loss)
+
+        # add summaries for image visual
+        joint_visual_img = [images, images_masked, coarse_outputs_merged, refine_outputs_merged]
+        joint_visual_img = tf.concat(joint_visual_img, axis=2)
+        images_summary(joint_visual_img, 'joint_gt_masked_coarse_refine', 4)
+
+        joint_returned = [refine_outputs, refine_outputs_merged, joint_gen_train, joint_dis_train, joint_logs]
+
+        return coarse_returned, refine_returned, joint_returned
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model ...\n')
