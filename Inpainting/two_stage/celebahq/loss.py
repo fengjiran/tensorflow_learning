@@ -100,7 +100,7 @@ def perceptual_loss(x, y, vgg, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
     return content_loss
 
 
-class Vgg19(object):
+class Vgg19():
     """Construct VGG19 model."""
 
     def __init__(self, vgg19_npy_path=vgg19_npy_path):
@@ -277,9 +277,12 @@ class Vgg19(object):
 
     def get_conv_filter(self, name):
         return tf.constant(self.data_dict[name][0], name='filters')
+        # return self.data_dict[name][0]
 
     def get_bias(self, name):
         return tf.constant(self.data_dict[name][1], name='biases')
+        # return self.data_dict[name][1]
 
     def get_fc_weight(self, name):
         return tf.constant(self.data_dict[name][0], name='weights')
+        # return self.data_dict[name][0]
