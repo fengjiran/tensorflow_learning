@@ -44,6 +44,8 @@ class CoarseRefine():
         keep_training = True
         step = 0
 
+        temp = self.model.test(images, masks)
+
         # coarse_returned, refine_returned, joint_returned = self.model.build_model(images, masks)
 
         # coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs = coarse_returned
