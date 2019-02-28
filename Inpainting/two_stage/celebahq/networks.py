@@ -111,6 +111,7 @@ class InpaintingModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
+    """
     def build_coarse_model(self, images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
@@ -205,6 +206,7 @@ class InpaintingModel():
         images_summary(visual_img, 'gt_masked_inpainted', 4)
 
         return outputs, outputs_merged, coarse_gen_train, coarse_dis_train, logs
+    """
 
     def refine_generator(self, x, reuse=None):
         with tf.variable_scope('refine_generator', reuse=reuse):
@@ -276,6 +278,7 @@ class InpaintingModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
+    """
     def build_refine_model(self, images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
@@ -374,7 +377,9 @@ class InpaintingModel():
         # images_summary(visual_img, 'gt_masked_coarse_refine', 4)
 
         return refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, logs
+    """
 
+    """
     def build_joint_model(self, images, masks):
         # generator input: [rgb(3) + mask(1)]
         # discriminator input: [rgb(3)]
@@ -476,6 +481,10 @@ class InpaintingModel():
         # images_summary(visual_img, 'gt_masked_coarse_refine', 4)
 
         return refine_outputs, refine_outputs_merged, joint_gen_train, joint_dis_train, logs
+    """
+
+    def test(self, images, masks):
+        pass
 
     def build_model(self, images, masks):
         # generator input: [rgb(3)+mask(1)]
