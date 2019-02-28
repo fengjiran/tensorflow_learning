@@ -44,88 +44,95 @@ class CoarseRefine():
         keep_training = True
         step = 0
 
-        coarse_returned, refine_returned, joint_returned = self.model.build_model(images, masks)
+        # coarse_returned, refine_returned, joint_returned = self.model.build_model(images, masks)
 
-        coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs = coarse_returned
+        # coarse_outputs, coarse_outputs_merged, coarse_gen_train, coarse_dis_train, coarse_logs = coarse_returned
 
-        refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs = refine_returned
+        # refine_outputs, refine_outputs_merged, refine_gen_train, refine_dis_train, refine_logs = refine_returned
 
-        joint_outputs, joint_outputs_merged, joint_gen_train, joint_dis_train, joint_logs = joint_returned
+        # joint_outputs, joint_outputs_merged, joint_gen_train, joint_dis_train, joint_logs = joint_returned
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
-
-        # coarse model
-        # if self.cfg['MODEL'] == 1:
-        # train
-
-        with open('coarse_logs.csv', 'a+') as f:
-            mywrite = csv.writer(f)
-            mywrite.writerow(['dis_loss',
-                              'gen_loss',
-                              'gen_gan_loss',
-                              'gen_l1_loss',
-                              'gen_style_loss',
-                              'gen_content_loss'])
-
-        coarse_summary_collection = [tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_dis_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_gan_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_l1_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_style_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_content_loss'),
-                                     tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gt_masked_inpainted')]
-        coarse_summary = tf.summary.merge(coarse_summary_collection)
-        # all_summary = tf.summary.merge_all()
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             sess.run(train_iterator.initializer, feed_dict={self.train_dataset.train_filenames: flist})
-
-            summary_writer = tf.summary.FileWriter(log_dir)
-
             sess.run(tf.global_variables_initializer())
+            self.model.save(sess, saver, model_dir, 'model')
 
-            # epoch = 0
-            # keep_training = True
-            # step = 0
-            while keep_training:
-                epoch += 1
-                print('\n\nTraining epoch: %d' % epoch)
+        # coarse model
+        # if self.cfg['MODEL'] == 1:
+        #     # train
 
-                # progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
+        #     with open('coarse_logs.csv', 'a+') as f:
+        #         mywrite = csv.writer(f)
+        #         mywrite.writerow(['dis_loss',
+        #                           'gen_loss',
+        #                           'gen_gan_loss',
+        #                           'gen_l1_loss',
+        #                           'gen_style_loss',
+        #                           'gen_content_loss'])
 
-                for i in range(num_batch):
-                    _, _, coarse_logs_ = sess.run([coarse_dis_train,
-                                                   coarse_gen_train,
-                                                   coarse_logs])
-                    print('Epoch: {}, Iter: {}'.format(epoch, step))
-                    print('-----------dis_loss: {}'.format(coarse_logs_[0]))
-                    print('-----------gen_loss: {}'.format(coarse_logs_[1]))
-                    print('-----------gen_gan_loss: {}'.format(coarse_logs_[2]))
-                    print('-----------gen_l1_loss: {}'.format(coarse_logs_[3]))
-                    print('-----------gen_style_loss: {}'.format(coarse_logs_[4]))
-                    print('-----------gen_content_loss: {}'.format(coarse_logs_[5]))
+        #     coarse_summary_collection = [tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_dis_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_gan_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_l1_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_style_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gen_content_loss'),
+        #                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'coarse_gt_masked_inpainted')]
+        #     coarse_summary = tf.summary.merge(coarse_summary_collection)
+        #     # all_summary = tf.summary.merge_all()
 
-                    with open('coarse_logs.csv', 'a+') as f:
-                        mywrite = csv.writer(f)
-                        mywrite.writerow(coarse_logs_)
+        #     config = tf.ConfigProto()
+        #     config.gpu_options.allow_growth = True
+        #     with tf.Session(config=config) as sess:
+        #         sess.run(train_iterator.initializer, feed_dict={self.train_dataset.train_filenames: flist})
 
-                    if step % self.cfg['SUMMARY_INTERVAL'] == 0:
-                        summary = sess.run(coarse_summary)
-                        summary_writer.add_summary(summary, step)
+        #         summary_writer = tf.summary.FileWriter(log_dir)
 
-                    if step >= max_iteration:
-                        keep_training = False
-                        break
+        #         sess.run(tf.global_variables_initializer())
 
-                    if step % self.cfg['SAVE_INTERVAL'] == 0:
-                        # print('\nsaving the model ...\n')
-                        # saver.save(sess, os.path.join(model_dir, 'model'))
-                        self.model.save(sess, saver, model_dir, 'model')
+        #         # epoch = 0
+        #         # keep_training = True
+        #         # step = 0
+        #         while keep_training:
+        #             epoch += 1
+        #             print('\n\nTraining epoch: %d' % epoch)
 
-                    step += 1
+        #             # progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
+
+        #             for i in range(num_batch):
+        #                 _, _, coarse_logs_ = sess.run([coarse_dis_train,
+        #                                                coarse_gen_train,
+        #                                                coarse_logs])
+        #                 print('Epoch: {}, Iter: {}'.format(epoch, step))
+        #                 print('-----------dis_loss: {}'.format(coarse_logs_[0]))
+        #                 print('-----------gen_loss: {}'.format(coarse_logs_[1]))
+        #                 print('-----------gen_gan_loss: {}'.format(coarse_logs_[2]))
+        #                 print('-----------gen_l1_loss: {}'.format(coarse_logs_[3]))
+        #                 print('-----------gen_style_loss: {}'.format(coarse_logs_[4]))
+        #                 print('-----------gen_content_loss: {}'.format(coarse_logs_[5]))
+
+        #                 with open('coarse_logs.csv', 'a+') as f:
+        #                     mywrite = csv.writer(f)
+        #                     mywrite.writerow(coarse_logs_)
+
+        #                 if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+        #                     summary = sess.run(coarse_summary)
+        #                     summary_writer.add_summary(summary, step)
+
+        #                 if step >= max_iteration:
+        #                     keep_training = False
+        #                     break
+
+        #                 if step % self.cfg['SAVE_INTERVAL'] == 0:
+        #                     # print('\nsaving the model ...\n')
+        #                     # saver.save(sess, os.path.join(model_dir, 'model'))
+        #                     self.model.save(sess, saver, model_dir, 'model')
+
+        #                 step += 1
 
 
 if __name__ == '__main__':
