@@ -539,14 +539,14 @@ class InpaintingModel():
         coarse_gen_loss += coarse_gen_l1_loss
 
         # generator perceptual loss
-        x = self.vgg.build(coarse_outputs)
-        y = self.vgg.build(images)
+        x = self.vgg.forward(coarse_outputs)
+        y = self.vgg.forward(images, reuse=True)
         coarse_gen_content_loss = perceptual_loss(x, y) * self.cfg['CONTENT_LOSS_WEIGHT']
         coarse_gen_loss += coarse_gen_content_loss
 
         # generator style loss
-        m = self.vgg.build(coarse_outputs * masks)
-        n = self.vgg.build(images * masks)
+        m = self.vgg.forward(coarse_outputs * masks, reuse=True)
+        n = self.vgg.forward(images * masks, reuse=True)
         # coarse_gen_style_loss = style_loss(m, n) * self.cfg['STYLE_LOSS_WEIGHT']
         # coarse_gen_loss += coarse_gen_style_loss
 
