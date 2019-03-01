@@ -144,6 +144,26 @@ class CoarseRefine():
                                              tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gt_masked_coarse_refine')]
                 refine_summary = tf.summary.merge(coarse_summary_collection)
 
+                while keep_training:
+                    epoch += 1
+                    print('\n\nTraining epoch: %d' % epoch)
+
+                    for i in range(num_batch):
+                        _, _, refine_logs_ = sess.run([refine_dis_train,
+                                                       refine_gen_train,
+                                                       refine_logs])
+                        print('Epoch: {}, Iter: {}'.format(epoch, step))
+                        print('-----------dis_loss: {}'.format(refine_logs_[0]))
+                        print('-----------gen_loss: {}'.format(refine_logs_[1]))
+                        print('-----------gen_gan_loss: {}'.format(refine_logs_[2]))
+                        print('-----------gen_l1_loss: {}'.format(refine_logs_[3]))
+                        print('-----------gen_style_loss: {}'.format(refine_logs_[4]))
+                        print('-----------gen_content_loss: {}'.format(refine_logs_[5]))
+
+                        with open('refine_logs.csv', 'a+') as f:
+                            mywrite = csv.writer(f)
+                            mywrite.writerow(refine_logs_)
+
 
 if __name__ == '__main__':
     model = CoarseRefine(cfg)
