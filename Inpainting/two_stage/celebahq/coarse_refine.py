@@ -114,14 +114,18 @@ class CoarseRefine():
                             summary = sess.run(coarse_summary)
                             summary_writer.add_summary(summary, step)
 
+                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                            self.model.save(sess, saver, model_dir, 'model')
+
                         if step >= max_iteration:
                             keep_training = False
                             break
 
-                        if step % self.cfg['SAVE_INTERVAL'] == 0:
-                            self.model.save(sess, saver, model_dir, 'model')
-
                         step += 1
+
+            # refine model
+            elif self.cfg['MODEL'] == 2:
+                pass
 
 
 if __name__ == '__main__':
