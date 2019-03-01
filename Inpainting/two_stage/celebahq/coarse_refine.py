@@ -177,6 +177,60 @@ class CoarseRefine():
 
                         step += 1
 
+            # joint model
+            elif self.cfg['MODEL'] == 3:
+                # train
+                with open('joint_logs.csv', 'a+') as f:
+                    mywrite = csv.writer(f)
+                    mywrite.writerow(['dis_loss',
+                                      'gen_loss',
+                                      'gen_gan_loss',
+                                      'gen_l1_loss',
+                                      'gen_style_loss',
+                                      'gen_content_loss'])
+
+                joint_summary_collection = [tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_dis_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gen_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gen_gan_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gen_l1_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gen_style_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gen_content_loss'),
+                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'joint_gt_masked_coarse_refine')]
+                joint_summary = tf.summary.merge(joint_summary_collection)
+
+                while keep_training:
+                    epoch += 1
+                    print('\n\nTraining epoch: %d' % epoch)
+
+                    for i in range(num_batch):
+                        _, _, joint_logs_ = sess.run([joint_dis_train,
+                                                      joint_gen_train,
+                                                      joint_logs])
+                        print('Epoch: {}, Iter: {}'.format(epoch, step))
+                        print('-----------dis_loss: {}'.format(joint_logs_[0]))
+                        print('-----------gen_loss: {}'.format(joint_logs_[1]))
+                        print('-----------gen_gan_loss: {}'.format(joint_logs_[2]))
+                        print('-----------gen_l1_loss: {}'.format(joint_logs_[3]))
+                        print('-----------gen_style_loss: {}'.format(joint_logs_[4]))
+                        print('-----------gen_content_loss: {}'.format(joint_logs_[5]))
+
+                        with open('joint_logs.csv', 'a+') as f:
+                            mywrite = csv.writer(f)
+                            mywrite.writerow(joint_logs_)
+
+                        if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+                            summary = sess.run(joint_summary)
+                            summary_writer.add_summary(summary, step)
+
+                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                            self.model.save(sess, saver, model_dir, 'model')
+
+                        if step >= max_iteration:
+                            keep_training = False
+                            break
+
+                        step += 1
+
 
 if __name__ == '__main__':
     model = CoarseRefine(cfg)
