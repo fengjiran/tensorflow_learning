@@ -142,7 +142,7 @@ class CoarseRefine():
                                              tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_style_loss'),
                                              tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_content_loss'),
                                              tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gt_masked_coarse_refine')]
-                refine_summary = tf.summary.merge(coarse_summary_collection)
+                refine_summary = tf.summary.merge(refine_summary_collection)
 
                 while keep_training:
                     epoch += 1
@@ -163,6 +163,19 @@ class CoarseRefine():
                         with open('refine_logs.csv', 'a+') as f:
                             mywrite = csv.writer(f)
                             mywrite.writerow(refine_logs_)
+
+                        if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+                            summary = sess.run(refine_summary)
+                            summary_writer.add_summary(summary, step)
+
+                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                            self.model.save(sess, saver, model_dir, 'model')
+
+                        if step >= max_iteration:
+                            keep_training = False
+                            break
+
+                        step += 1
 
 
 if __name__ == '__main__':
