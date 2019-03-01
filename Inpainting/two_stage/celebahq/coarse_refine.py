@@ -135,6 +135,15 @@ class CoarseRefine():
                                       'gen_style_loss',
                                       'gen_content_loss'])
 
+                refine_summary_collection = [tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_dis_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_gan_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_l1_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_style_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gen_content_loss'),
+                                             tf.get_collection(tf.GraphKeys.SUMMARIES, 'refine_gt_masked_coarse_refine')]
+                refine_summary = tf.summary.merge(coarse_summary_collection)
+
 
 if __name__ == '__main__':
     model = CoarseRefine(cfg)
