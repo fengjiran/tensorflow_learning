@@ -63,8 +63,8 @@ def compute_gram(x):
 def style_loss(x, y, vgg):
     """Compute style loss, vgg-based."""
     # vgg = Vgg19()
-    x_vgg_out = vgg.build(x)
-    y_vgg_out = vgg.build(y)
+    x_vgg_out = x  # vgg.build(x)
+    y_vgg_out = y  # vgg.build(y)
 
     # compute style loss
     style_loss1 = 0.0
@@ -86,8 +86,8 @@ def style_loss(x, y, vgg):
 def perceptual_loss(x, y, vgg, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
     """Compute perceptual loss, vgg-based."""
     # vgg = Vgg19()
-    x_vgg_out = vgg.build(x)
-    y_vgg_out = vgg.build(y)
+    x_vgg_out = x  # vgg.build(x)
+    y_vgg_out = y  # vgg.build(y)
 
     content_loss = 0.0
 
