@@ -114,7 +114,7 @@ class CoarseRefine():
                             summary = sess.run(coarse_summary)
                             summary_writer.add_summary(summary, step)
 
-                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                        if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
                             self.model.save(sess, saver, model_dir, 'model')
 
                         if step >= max_iteration:
@@ -168,7 +168,7 @@ class CoarseRefine():
                             summary = sess.run(refine_summary)
                             summary_writer.add_summary(summary, step)
 
-                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                        if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
                             self.model.save(sess, saver, model_dir, 'model')
 
                         if step >= max_iteration:
@@ -222,7 +222,7 @@ class CoarseRefine():
                             summary = sess.run(joint_summary)
                             summary_writer.add_summary(summary, step)
 
-                        if step % self.cfg['SAVE_INTERVAL'] == 0:
+                        if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
                             self.model.save(sess, saver, model_dir, 'model')
 
                         if step >= max_iteration:
