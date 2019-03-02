@@ -8,7 +8,7 @@ INPUT_SIZE: 256                    # input image size for training 0 for origina
 MAX_ITERS: 2000000                 # maximum number of iterations to train the model
 VERBOSE: 0                         # turns on verbose mode in the output console
 
-L1_LOSS_WEIGHT: 1                  # l1 loss weight
+L1_LOSS_WEIGHT: 1.2                # l1 loss weight
 STYLE_LOSS_WEIGHT: 0.00001         # style loss weight
 CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
 ADV_LOSS_WEIGHT: 0.03              # adversarial loss weight
