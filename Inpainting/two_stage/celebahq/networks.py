@@ -584,7 +584,7 @@ class InpaintingModel():
                                           trainable=False)
 
         # --------------------- Build coarse loss function -----------------------------
-        coarse_gen_loss = 0.0
+        # coarse_gen_loss = 0.0
         # coarse_dis_loss = 0.0
 
         # discriminator loss
@@ -604,7 +604,7 @@ class InpaintingModel():
         coarse_gen_gan_loss = adversarial_loss(coarse_gen_fake, is_real=True,
                                                gan_type=self.cfg['GAN_LOSS'], is_disc=False)
         coarse_gen_gan_loss *= self.cfg['ADV_LOSS_WEIGHT']
-        coarse_gen_loss += coarse_gen_gan_loss
+        coarse_gen_loss = coarse_gen_gan_loss
 
         # generator l1 loss
         coarse_gen_l1_loss = tf.losses.absolute_difference(
