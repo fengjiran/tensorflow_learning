@@ -14,10 +14,11 @@ The Canny has three adjustable parameters: the width of the Gaussian (the
 noisier the image, the greater the width), and the low and high threshold for
 the hysteresis thresholding.
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
-from skimage import filter
+from skimage import feature
 
 # Generate noisy image of a square
 im = np.zeros((128, 128))
@@ -28,8 +29,8 @@ im = ndimage.gaussian_filter(im, 4)
 im += 0.2 * np.random.random(im.shape)
 
 # Compute the Canny filter for two values of sigma
-edges1 = filter.canny(im)
-edges2 = filter.canny(im, sigma=3)
+edges1 = feature.canny(im, sigma=2)
+edges2 = feature.canny(im, sigma=3)
 
 # display results
 plt.figure(figsize=(8, 3))
@@ -54,4 +55,3 @@ plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
 
 
 plt.show()
-
