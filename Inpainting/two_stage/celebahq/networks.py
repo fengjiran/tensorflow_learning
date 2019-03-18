@@ -589,7 +589,8 @@ class InpaintingModel():
 
         # discriminator loss
         coarse_dis_input_real = images
-        coarse_dis_input_fake = tf.stop_gradient(coarse_outputs)
+        coarse_dis_input_fake = tf.stop_gradient(coarse_outputs_merged)
+        # coarse_dis_input_fake = tf.stop_gradient(coarse_outputs)
         coarse_dis_real, _ = self.coarse_discriminator(coarse_dis_input_real, use_sigmoid=use_sigmoid)
         coarse_dis_fake, _ = self.coarse_discriminator(coarse_dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         coarse_dis_real_loss = adversarial_loss(coarse_dis_real, is_real=True,
@@ -599,7 +600,8 @@ class InpaintingModel():
         coarse_dis_loss += (coarse_dis_real_loss + coarse_dis_fake_loss) / 2.0
 
         # generator adversartial loss
-        coarse_gen_input_fake = coarse_outputs
+        coarse_gen_input_fake = coarse_outputs_merged
+        # coarse_gen_input_fake = coarse_outputs
         coarse_gen_fake, _ = self.coarse_discriminator(coarse_gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         coarse_gen_gan_loss = adversarial_loss(coarse_gen_fake, is_real=True,
                                                gan_type=self.cfg['GAN_LOSS'], is_disc=False)
@@ -608,17 +610,17 @@ class InpaintingModel():
 
         # generator l1 loss
         coarse_gen_l1_loss = tf.losses.absolute_difference(
-            images, coarse_outputs) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
+            images, coarse_outputs_merged) * self.cfg['L1_LOSS_WEIGHT'] / tf.reduce_mean(masks)
         coarse_gen_loss += coarse_gen_l1_loss
 
         # generator perceptual loss
-        coarse_content_x = self.vgg.forward(coarse_outputs)
+        coarse_content_x = self.vgg.forward(coarse_outputs_merged)
         coarse_content_y = self.vgg.forward(images, reuse=True)
         coarse_gen_content_loss = perceptual_loss(coarse_content_x, coarse_content_y) * self.cfg['CONTENT_LOSS_WEIGHT']
         coarse_gen_loss += coarse_gen_content_loss
 
         # generator style loss
-        coarse_style_x = self.vgg.forward(coarse_outputs * masks, reuse=True)
+        coarse_style_x = self.vgg.forward(coarse_outputs_merged * masks, reuse=True)
         coarse_style_y = self.vgg.forward(images * masks, reuse=True)
         coarse_gen_style_loss = style_loss(coarse_style_x, coarse_style_y) * self.cfg['STYLE_LOSS_WEIGHT']
         coarse_gen_loss += coarse_gen_style_loss
