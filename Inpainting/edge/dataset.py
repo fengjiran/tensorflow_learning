@@ -64,9 +64,10 @@ class Dataset():
             return img  # [-1, 1]
 
     def load_edge(self, images):
-
+        images = (images + 1) * 127.5  # [0, 255]
         sigma = self.cfg['SIGMA']
         img_gray = tf.image.rgb_to_grayscale(images)
+        img_gray /= 255.
         shape = img_gray.get_shape().as_list()
         img_gray = tf.reshape(img_gray, [shape[0], shape[1], shape[2]])
         img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
