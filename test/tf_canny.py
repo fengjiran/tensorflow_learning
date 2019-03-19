@@ -5,6 +5,10 @@ from skimage.feature import canny
 import tensorflow as tf
 
 
+def canny_wrap(image, sigma=1.0, mask=None, use_quantiles=False, low_threshold=None, high_threshold=None):
+    return canny(image, sigma, low_threshold, high_threshold, mask, use_quantiles)
+
+
 def tf_canny(image, sigma, mask):
     edge = tf.py_func(func=canny,
                       inp=[image, sigma, mask],
