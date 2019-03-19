@@ -10,6 +10,7 @@ from scipy import ndimage
 from skimage.feature import canny
 from skimage.color import rgb2gray
 from utils import create_mask
+from utils import tf_canny
 
 
 class Dataset():
