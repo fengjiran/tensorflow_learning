@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import numpy as np
+from skimage.feature import canny
 import tensorflow as tf
 
 
@@ -31,3 +32,14 @@ def images_summary(images, name, max_outs):
     """
     img = (images + 1) / 2.
     tf.summary.image(name, img, max_outs)
+
+
+def canny_wrap(image, sigma, mask=None, use_quantiles=False, low_threshold=None, high_threshold=None):
+    return canny(image, sigma, low_threshold, high_threshold, mask, use_quantiles)
+
+
+def tf_canny(image, sigma):
+    edge = tf.py_func(func=canny_wrap,
+                      inp=[image, sigma],
+                      Tout=tf.bool)
+    return edge
