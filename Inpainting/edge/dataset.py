@@ -12,7 +12,7 @@ class Dataset():
 
     def __init__(self, config, training=True):
         if pf.system() == 'Windows':
-            flist = config['FLIST_WINDOWS']
+            flist = config['FLIST_WIN']
         elif pf.system() == 'Linux':
             if pf.node() == 'icie-Precision-Tower-7810':
                 flist = config['FLIST_LINUX_7810']
@@ -85,3 +85,5 @@ if __name__ == '__main__':
         cfg = yaml.load(f)
 
     dataset = Dataset(cfg)
+    flist = dataset.load_flist(cfg['FLIST_WIN'])
+    print(len(flist))
