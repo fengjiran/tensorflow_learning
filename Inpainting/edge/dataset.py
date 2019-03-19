@@ -4,6 +4,7 @@ import platform as pf
 import yaml
 import numpy as np
 import tensorflow as tf
+from utils import create_mask
 
 
 class Dataset():
@@ -40,10 +41,10 @@ class Dataset():
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
-        # masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
-        #                     self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
+        masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+                            self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
-        return images, train_iterator
+        return images, masks, train_iterator
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
