@@ -4,7 +4,9 @@ import platform as pf
 import yaml
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from scipy.misc import imread
+from scipy import ndimage
 from skimage.feature import canny
 from skimage.color import rgb2gray
 from utils import create_mask
@@ -89,5 +91,29 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     flist = dataset.load_flist(cfg['FLIST_WIN'])
-    print(len(flist))
-    print(flist[0])
+    # print(len(flist))
+    # print(flist[0])
+    img = imread(flist[0])
+    img_gray = rgb2gray(img)
+    img_edge = canny(img_gray, sigma=2)
+
+    plt.figure(figsize=(8, 3))
+
+    plt.subplot(131)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.title('rgb', fontsize=20)
+
+    plt.subplot(132)
+    plt.imshow(img_gray, cmap=plt.cm.gray)
+    plt.axis('off')
+    plt.title('gray', fontsize=20)
+
+    plt.subplot(133)
+    plt.imshow(img_edge, cmap=plt.cm.gray)
+    plt.axis('off')
+    plt.title('edge', fontsize=20)
+
+    plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9, bottom=0.02, left=0.02, right=0.98)
+
+    plt.show()
