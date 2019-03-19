@@ -35,7 +35,7 @@ class Dataset():
         """Get the length of dataset."""
         return len(self.flist)
 
-    def load_item(self):
+    def load_images(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
         train_dataset = train_dataset.shuffle(buffer_size=500)
