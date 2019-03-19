@@ -83,3 +83,5 @@ class Dataset():
 if __name__ == '__main__':
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
+
+    dataset = Dataset(cfg)
