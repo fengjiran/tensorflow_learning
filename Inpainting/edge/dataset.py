@@ -12,7 +12,7 @@ class Dataset():
 
     def __init__(self, config, training=True):
         if pf.system() == 'Windows':
-            pass
+            flist = config['FLIST_WINDOWS']
         elif pf.system() == 'Linux':
             if pf.node() == 'icie-Precision-Tower-7810':
                 flist = config['FLIST_LINUX_7810']
