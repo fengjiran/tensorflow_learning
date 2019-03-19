@@ -14,8 +14,8 @@ def tf_canny(image, sigma, low_threshold, high_threshold, mask, use_quantiles):
 
 if __name__ == '__main__':
     image = tf.placeholder(tf.float32, [157, 157])
-    edge1 = tf_canny(image, sigma=1.0)
-    edge2 = tf_canny(image, sigma=3.0)
+    edge1 = tf_canny(image, 1.0, None, None, None, False)
+    edge2 = tf_canny(image, 3.0, None, None, None, False)
 
     # Generate noisy image of a square
     im = np.zeros((128, 128))
