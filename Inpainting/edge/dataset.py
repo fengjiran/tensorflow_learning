@@ -68,6 +68,10 @@ class Dataset():
         img_gray = tf.image.rgb_to_grayscale(images)
         shape = img_gray.get_shape().as_list()
         img_gray = tf.reshape(img_gray, [shape[0], shape[1], shape[2]])
+        img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
+                              elems=img_gray,
+                              dtype=tf.bool)
+        return img_edges
 
     def load_flist(self, flist):
         if isinstance(flist, list):
