@@ -78,3 +78,8 @@ class Dataset():
                     return [flist]
 
         return []
+
+
+if __name__ == '__main__':
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
