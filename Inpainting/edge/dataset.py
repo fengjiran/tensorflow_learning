@@ -91,8 +91,7 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     flist = dataset.load_flist(cfg['FLIST_WIN'])
-    # print(len(flist))
-    # print(flist[0])
+
     img = imread(flist[0])
     img_gray = rgb2gray(img)
     img_edge = canny(img_gray, sigma=2)
