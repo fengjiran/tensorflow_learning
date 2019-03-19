@@ -4,6 +4,9 @@ import platform as pf
 import yaml
 import numpy as np
 import tensorflow as tf
+from scipy.misc import imread
+from skimage.feature import canny
+from skimage.color import rgb2gray
 from utils import create_mask
 
 
@@ -87,3 +90,4 @@ if __name__ == '__main__':
     dataset = Dataset(cfg)
     flist = dataset.load_flist(cfg['FLIST_WIN'])
     print(len(flist))
+    print(flist[0])
