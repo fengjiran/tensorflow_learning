@@ -47,10 +47,10 @@ class Dataset():
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
-        masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
-                            self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
+        # masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+        #                     self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
-        return images, masks, train_iterator
+        return images, train_iterator
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -103,6 +103,15 @@ if __name__ == '__main__':
         cfg = yaml.load(f)
 
     dataset = Dataset(cfg)
+    images, iterator = dataset.load_images()
+    edges = dataset.load_edge(images)
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
+        sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
+        tmp = sess.run(edges)
+        print(tmp.shape)
 
     # flist = dataset.load_flist(cfg['FLIST_WIN'])
     # img = imread(flist[0])
