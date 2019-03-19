@@ -105,6 +105,8 @@ if __name__ == '__main__':
 
     img = imread(flist[0])
     img_gray = rgb2gray(img)
+    print(img[0])
+    print(img_gray)
     img_edge = canny(img_gray, sigma=2)
 
     plt.figure(figsize=(8, 3))
