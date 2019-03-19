@@ -5,17 +5,22 @@ from skimage.feature import canny
 import tensorflow as tf
 
 
-def tf_canny(image, sigma, low_threshold, high_threshold, mask, use_quantiles):
+def tf_canny(image, sigma, mask):
     edge = tf.py_func(func=canny,
-                      inp=[image, sigma, low_threshold, high_threshold, mask, use_quantiles],
+                      inp=[image, sigma, mask],
                       Tout=tf.bool)
     return edge
 
 
+def my_func(a, b=np.array(2, dtype=np.float32), c=np.array(3, dtype=np.float32)):
+    return a + b + c
+
+
 if __name__ == '__main__':
     image = tf.placeholder(tf.float32, [157, 157])
-    edge1 = tf_canny(image, 1.0, None, None, None, False)
-    edge2 = tf_canny(image, 3.0, None, None, None, False)
+    mask = tf.zeros([157, 157], dtype=tf.bool)
+    edge1 = tf_canny(image, 1.0, mask)
+    edge2 = tf_canny(image, 3.0, mask)
 
     # Generate noisy image of a square
     im = np.zeros((128, 128))
