@@ -89,7 +89,11 @@ class Dataset():
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
                                   elems=img_gray,
                                   dtype=tf.bool)
-        return img_edges, img_gray
+            return img_edges, img_gray
+
+        # external
+        else:
+            pass
 
     def load_flist(self, flist):
         if isinstance(flist, list):
