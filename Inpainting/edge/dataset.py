@@ -70,6 +70,10 @@ class Dataset():
         img_gray /= 255.  # [0, 1]
         shape = img_gray.get_shape().as_list()
         img_gray = tf.reshape(img_gray, [shape[0], shape[1], shape[2]])
+
+        # in test mode images are masked (with masked regions),
+        # using 'mask' parameter prevents canny to detect edges for the masked regions
+
         img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
                               elems=img_gray,
                               dtype=tf.bool)
