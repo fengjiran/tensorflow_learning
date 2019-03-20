@@ -72,14 +72,13 @@ class Dataset():
         shape = img_grays.get_shape().as_list()
         img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
-        return img_grays
+        return img_grays  # [N, 256, 256]
 
     def load_edge(self, images, mask=None):
         sigma = self.cfg['SIGMA']
 
         img_grays = self.load_grayscale(images)
         shape = images.get_shape().as_list()
-        # img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
@@ -98,14 +97,22 @@ class Dataset():
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
                                   elems=img_grays,
                                   dtype=tf.bool)
-            return img_edges
+            return img_edges  # [N, 256, 256]
 
         # external
         else:
             pass
 
     def load_mask(self, images):
-        pass
+        shape = images.get_shape().as_list()
+        imgh = shape[1]
+        imgw = shape[2]
+
+        mask_type = self.cfg['MASK']
+
+        # external + random block
+        if mask_type == 4:
+            pass
 
     def load_flist(self, flist):
         if isinstance(flist, list):
