@@ -73,7 +73,7 @@ class Dataset():
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
-        mask = None if self.training else mask
+        mask = tf.cast(tf.ones([shape[1], shape[2]]), dtype=tf.bool) if self.training else mask
 
         img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
                               elems=img_gray,
