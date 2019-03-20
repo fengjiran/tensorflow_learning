@@ -63,7 +63,7 @@ class Dataset():
             # img = img / 127.5 - 1
             return img  # [-1, 1]
 
-    def load_edge(self, images):
+    def load_edge(self, images, mask):
         images = (images + 1) * 127.5  # [0, 255]
         sigma = self.cfg['SIGMA']
         img_gray = tf.image.rgb_to_grayscale(images)
@@ -73,6 +73,7 @@ class Dataset():
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
+        mask = None if self.training else mask
 
         img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
                               elems=img_gray,
