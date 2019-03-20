@@ -2,6 +2,7 @@ import os
 import glob
 import platform as pf
 import yaml
+import random
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -75,9 +76,19 @@ class Dataset():
         # using 'mask' parameter prevents canny to detect edges for the masked regions
         mask = tf.cast(tf.ones([shape[1], shape[2]]), dtype=tf.bool) if mask == None else tf.cast(mask, dtype=tf.bool)
 
-        img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
-                              elems=img_gray,
-                              dtype=tf.bool)
+        # canny
+        if self.cfg['EDGE'] == 1:
+            # no edge
+            if sigma == -1:
+                return tf.zeros([shape[1], shape[2]], dtype=tf.bool)
+
+            # random sigma
+            if sigma == 0:
+                sigma = random.randint(1, 4)
+
+            img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
+                                  elems=img_gray,
+                                  dtype=tf.bool)
         return img_edges, img_gray
 
     def load_flist(self, flist):
