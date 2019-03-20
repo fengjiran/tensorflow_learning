@@ -111,6 +111,7 @@ if __name__ == '__main__':
     with tf.Session(config=config) as sess:
         sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
         tmp0, tmp1, tmp2 = sess.run([images, grays, edges])
+        tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
 
         plt.figure(figsize=(8, 3))
