@@ -117,17 +117,17 @@ if __name__ == '__main__':
         plt.figure(figsize=(8, 3))
 
         plt.subplot(131)
-        plt.imshow(tmp0[0])
+        plt.imshow(tmp0[1])
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
         plt.subplot(132)
-        plt.imshow(tmp1[0], cmap=plt.cm.gray)
+        plt.imshow(tmp1[1], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('gray', fontsize=20)
 
         plt.subplot(133)
-        plt.imshow(tmp2[0], cmap=plt.cm.gray)
+        plt.imshow(tmp2[1], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('edge', fontsize=20)
 
