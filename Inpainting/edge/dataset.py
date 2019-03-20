@@ -111,7 +111,16 @@ if __name__ == '__main__':
     with tf.Session(config=config) as sess:
         sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
         tmp = sess.run(edges)
-        print(tmp.shape)
+        print(tmp[0].shape)
+
+        plt.figure(figsize=(8, 3))
+
+        plt.subplot(131)
+        plt.imshow(tmp[0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('edge', fontsize=20)
+
+        plt.show()
 
     # flist = dataset.load_flist(cfg['FLIST_WIN'])
     # img = imread(flist[0])
