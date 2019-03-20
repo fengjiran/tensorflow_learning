@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     images, iterator = dataset.load_images()
-    edges, grays = dataset.load_edge(images)
+    edges, grays = dataset.load_edge(images, 1)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
