@@ -2,7 +2,7 @@ import os
 import glob
 import platform as pf
 import yaml
-import random
+# import random
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -36,6 +36,17 @@ class Dataset():
         """Get the length of dataset."""
         return len(self.flist)
 
+    def input_parse(self, img_path):
+        with tf.device('/cpu:0'):
+            img_file = tf.read_file(img_path)
+            img_decoded = tf.image.decode_png(img_file, channels=3)
+            img = tf.cast(img_decoded, tf.float32)  # [1024, 1024, 3]
+            # img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
+            # img = tf.clip_by_value(img, 0., 255.)
+            # img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
+            # img = img / 127.5 - 1
+            return img  # [-1, 1]
+
     def load_images(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
@@ -53,24 +64,19 @@ class Dataset():
 
         return images, train_iterator
 
-    def input_parse(self, img_path):
-        with tf.device('/cpu:0'):
-            img_file = tf.read_file(img_path)
-            img_decoded = tf.image.decode_png(img_file, channels=3)
-            img = tf.cast(img_decoded, tf.float32)  # [1024, 1024, 3]
-            # img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
-            # img = tf.clip_by_value(img, 0., 255.)
-            # img = tf.image.resize_image_with_crop_or_pad(img, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
-            # img = img / 127.5 - 1
-            return img  # [-1, 1]
+    def load_grayscale(self, images):
+        # images: [-1, 1]
+        images = (images + 1) * 127.5  # [0, 255]
+        img_grays = tf.image.rgb_to_grayscale(images)
+        img_grays /= 255.  # [0, 1]
+        return img_grays
 
     def load_edge(self, images, mask=None):
-        images = (images + 1) * 127.5  # [0, 255]
         sigma = self.cfg['SIGMA']
-        img_gray = tf.image.rgb_to_grayscale(images)
-        img_gray /= 255.  # [0, 1]
-        shape = img_gray.get_shape().as_list()
-        img_gray = tf.reshape(img_gray, [shape[0], shape[1], shape[2]])
+
+        img_grays = self.load_grayscale(images)
+        shape = img_grays.get_shape().as_list()
+        img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
@@ -84,12 +90,12 @@ class Dataset():
 
             # random sigma
             if sigma == 0:
-                sigma = random.randint(1, 4)
+                sigma = tf.random.uniform([], 1, 5)
 
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
-                                  elems=img_gray,
+                                  elems=img_grays,
                                   dtype=tf.bool)
-            return img_edges, img_gray
+            return img_edges
 
         # external
         else:
@@ -127,7 +133,8 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     images, iterator = dataset.load_images()
-    edges, grays = dataset.load_edge(images)
+    grays = dataset.load_grayscale(images)
+    edges = dataset.load_edge(images)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
