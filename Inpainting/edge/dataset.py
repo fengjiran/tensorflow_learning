@@ -78,7 +78,7 @@ class Dataset():
         sigma = self.cfg['SIGMA']
 
         img_grays = self.load_grayscale(images)
-        # shape = img_grays.get_shape().as_list()
+        shape = images.get_shape().as_list()
         # img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
         # in test mode images are masked (with masked regions),
