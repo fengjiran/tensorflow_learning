@@ -95,6 +95,9 @@ class Dataset():
         else:
             pass
 
+    def load_mask(self, images):
+        pass
+
     def load_flist(self, flist):
         if isinstance(flist, list):
             return flist
