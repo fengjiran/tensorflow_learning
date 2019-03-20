@@ -34,12 +34,12 @@ def images_summary(images, name, max_outs):
     tf.summary.image(name, img, max_outs)
 
 
-def canny_wrap(image, sigma, mask=None, use_quantiles=False, low_threshold=None, high_threshold=None):
+def canny_wrap(image, sigma, mask, use_quantiles=False, low_threshold=None, high_threshold=None):
     return canny(image, sigma, low_threshold, high_threshold, mask, use_quantiles)
 
 
-def tf_canny(image, sigma):
+def tf_canny(image, sigma, mask):
     edge = tf.py_func(func=canny_wrap,
-                      inp=[image, sigma],
+                      inp=[image, sigma, mask],
                       Tout=tf.bool)
     return edge
