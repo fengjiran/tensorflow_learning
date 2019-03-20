@@ -63,7 +63,7 @@ class Dataset():
             # img = img / 127.5 - 1
             return img  # [-1, 1]
 
-    def load_edge(self, images, mask):
+    def load_edge(self, images, mask=None):
         images = (images + 1) * 127.5  # [0, 255]
         sigma = self.cfg['SIGMA']
         img_gray = tf.image.rgb_to_grayscale(images)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     images, iterator = dataset.load_images()
-    edges, grays = dataset.load_edge(images, 1)
+    edges, grays = dataset.load_edge(images)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
