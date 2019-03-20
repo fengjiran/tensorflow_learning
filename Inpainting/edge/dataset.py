@@ -73,7 +73,7 @@ class Dataset():
         img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma),
                               elems=img_gray,
                               dtype=tf.bool)
-        return img_edges
+        return img_edges, img_gray
 
     def load_flist(self, flist):
         if isinstance(flist, list):
@@ -104,19 +104,19 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg)
     images, iterator = dataset.load_images()
-    edges = dataset.load_edge(images)
+    edges, grays = dataset.load_edge(images)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
         sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
-        tmp = sess.run(edges)
-        print(tmp[0].shape)
+        tmp0, tmp1, tmp2 = sess.run([images, grays, edges])
+        print(tmp0[0].shape)
 
         plt.figure(figsize=(8, 3))
 
         plt.subplot(131)
-        plt.imshow(tmp[0], cmap=plt.cm.gray)
+        plt.imshow(tmp0[0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('edge', fontsize=20)
 
