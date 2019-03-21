@@ -20,6 +20,7 @@ class Dataset():
     def __init__(self, config, training=True):
         if pf.system() == 'Windows':
             flist = config['FLIST_WIN']
+            mask_flist = config['MASK_FLIST_WIN']
         elif pf.system() == 'Linux':
             if pf.node() == 'icie-Precision-Tower-7810':
                 flist = config['FLIST_LINUX_7810']
@@ -30,6 +31,8 @@ class Dataset():
         self.cfg = config
         self.training = training
         self.flist = self.load_flist(flist)
+        if config['MASK'] == 2:
+            self.mask_flist = self.load_flist(mask_flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
         self.mask_filenames = tf.placeholder(tf.string, shape=[None])
 
@@ -51,8 +54,8 @@ class Dataset():
     def load_images(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=250)
-        train_dataset = train_dataset.apply(tf.contrib.data.batch_and_drop_remainder(self.cfg['BATCH_SIZE']))
+        train_dataset = train_dataset.shuffle(buffer_size=100)
+        train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'])
         train_dataset = train_dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
         train_iterator = train_dataset.make_initializable_iterator()
@@ -77,8 +80,8 @@ class Dataset():
         sigma = self.cfg['SIGMA']
 
         img_grays = self.load_grayscale(images)
-        shape = images.get_shape().as_list()
-        img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
+        shape = img_grays.get_shape().as_list()
+        img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
@@ -97,7 +100,7 @@ class Dataset():
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
                                   elems=img_grays,
                                   dtype=tf.bool)
-            img_edges = tf.reshape(img_edges, [shape[0], shape[1], shape[2], 1])
+            img_edges = tf.reshape(img_edges, [-1, shape[1], shape[2], 1])
             img_edges = tf.cast(img_edges, dtype=tf.float32)
             return img_edges  # [N, 256, 256, 1]
 
@@ -123,7 +126,7 @@ class Dataset():
         if mask_type == 2:
             mask_dataset = tf.data.Dataset.from_tensor_slices(self.mask_filenames)
             mask_dataset = mask_dataset.map(self.external_mask_parse)
-            mask_dataset = mask_dataset.shuffle(buffer_size=250)
+            mask_dataset = mask_dataset.shuffle(buffer_size=100)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
             mask_iterator = mask_dataset.make_initializable_iterator()
             masks = mask_iterator.get_next()  # [N, 256, 256, 1]
@@ -139,8 +142,9 @@ class Dataset():
             img = tf.cast(tf.greater(img, 3), dtype=tf.uint8)
             img = tf.image.rot90(img, tf.random_uniform([], 0, 4, tf.int32))
             img = tf.image.random_flip_left_right(img)
+            img = tf.reshape(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'], 1])
 
-            return img  # [1, 256, 256, 1]
+            return img  # [256, 256, 1]
 
     def load_flist(self, flist):
         if isinstance(flist, list):
@@ -174,31 +178,45 @@ if __name__ == '__main__':
     grays = dataset.load_grayscale(images)
     edges = dataset.load_edge(images)
 
+    if cfg['MASK'] == 2:
+        masks, mask_iterator = dataset.load_mask()
+
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
         sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
         tmp0, tmp1, tmp2 = sess.run([images, grays, edges])
+
+        if cfg['MASK'] == 2:
+            sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
+            tmp3 = sess.run(masks)
+            print(tmp3.shape)
+
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
         print(tmp2[1, :, :, 0])
 
         plt.figure(figsize=(8, 3))
 
-        plt.subplot(131)
+        plt.subplot(141)
         plt.imshow(tmp0[1])
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
-        plt.subplot(132)
+        plt.subplot(142)
         plt.imshow(tmp1[1, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('gray', fontsize=20)
 
-        plt.subplot(133)
+        plt.subplot(143)
         plt.imshow(tmp2[1, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('edge', fontsize=20)
+
+        plt.subplot(144)
+        plt.imshow(tmp3[1, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('mask', fontsize=20)
 
         plt.show()
 
