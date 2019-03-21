@@ -32,6 +32,8 @@ class Dataset():
         self.training = training
         self.flist = self.load_flist(flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
+
+        # external mask
         if config['MASK'] == 2:
             self.mask_flist = self.load_flist(mask_flist)
             self.mask_filenames = tf.placeholder(tf.string, shape=[None])
