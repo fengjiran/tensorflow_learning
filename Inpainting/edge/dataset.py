@@ -124,6 +124,10 @@ class Dataset():
             img_file = tf.read_file(img_path)
             img_decoded = tf.image.decode_png(img_file)  # [640, 960]
             img = tf.image.resize_image_with_crop_or_pad(img_decoded, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
+            img = tf.image.rot90(img, tf.random_uniform([], 0, 4, tf.int32))
+            img = tf.image.random_flip_left_right(img)
+
+            return img
 
     def load_flist(self, flist):
         if isinstance(flist, list):
