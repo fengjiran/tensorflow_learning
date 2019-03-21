@@ -92,7 +92,7 @@ class Dataset():
 
             # random sigma
             if sigma == 0:
-                sigma = tf.random.uniform([], 1, 5)
+                sigma = tf.random_uniform([], 1, 5)
 
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
                                   elems=img_grays,
