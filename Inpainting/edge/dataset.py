@@ -31,10 +31,10 @@ class Dataset():
         self.cfg = config
         self.training = training
         self.flist = self.load_flist(flist)
+        self.train_filenames = tf.placeholder(tf.string, shape=[None])
         if config['MASK'] == 2:
             self.mask_flist = self.load_flist(mask_flist)
-        self.train_filenames = tf.placeholder(tf.string, shape=[None])
-        self.mask_filenames = tf.placeholder(tf.string, shape=[None])
+            self.mask_filenames = tf.placeholder(tf.string, shape=[None])
 
     def __len__(self):
         """Get the length of dataset."""
