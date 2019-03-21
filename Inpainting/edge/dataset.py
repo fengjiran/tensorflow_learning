@@ -60,8 +60,6 @@ class Dataset():
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
-        # masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
-        #                     self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
         return images, train_iterator
 
@@ -70,16 +68,17 @@ class Dataset():
         images = (images + 1) * 127.5  # [0, 255]
         img_grays = tf.image.rgb_to_grayscale(images)
         img_grays /= 255.  # [0, 1]
-        shape = img_grays.get_shape().as_list()
-        img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
+        # shape = img_grays.get_shape().as_list()
+        # img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
-        return img_grays  # [N, 256, 256]
+        return img_grays  # [N, 256, 256, 1]
 
     def load_edge(self, images, mask=None):
         sigma = self.cfg['SIGMA']
 
         img_grays = self.load_grayscale(images)
         shape = images.get_shape().as_list()
+        img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
 
         # in test mode images are masked (with masked regions),
         # using 'mask' parameter prevents canny to detect edges for the masked regions
@@ -98,16 +97,17 @@ class Dataset():
             img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
                                   elems=img_grays,
                                   dtype=tf.bool)
-            return img_edges  # [N, 256, 256]
+            img_edges = tf.reshape(img_edges, [shape[0], shape[1], shape[2], 1])
+            return img_edges  # [N, 256, 256, 1]
 
         # external
         else:
             pass
 
-    def load_mask(self, images):
-        shape = images.get_shape().as_list()
-        imgh = shape[1]
-        imgw = shape[2]
+    def load_mask(self):
+        # shape = images.get_shape().as_list()
+        # imgh = shape[1]
+        # imgw = shape[2]
 
         mask_type = self.cfg['MASK']
 
@@ -116,6 +116,8 @@ class Dataset():
             masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
                                 self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
+            return masks
+
         # external mask
         if mask_type == 2:
             mask_dataset = tf.data.Dataset.from_tensor_slices(self.mask_filenames)
@@ -123,7 +125,9 @@ class Dataset():
             mask_dataset = mask_dataset.shuffle(buffer_size=250)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
             mask_iterator = mask_dataset.make_initializable_iterator()
-            masks = mask_iterator.get_next()
+            masks = mask_iterator.get_next()  # [N, 256, 256, 1]
+
+            return masks, mask_iterator
 
     def external_mask_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -135,7 +139,7 @@ class Dataset():
             img = tf.image.rot90(img, tf.random_uniform([], 0, 4, tf.int32))
             img = tf.image.random_flip_left_right(img)
 
-            return img
+            return img  # [1, 256, 256, 1]
 
     def load_flist(self, flist):
         if isinstance(flist, list):
