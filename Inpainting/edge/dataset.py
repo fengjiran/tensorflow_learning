@@ -115,6 +115,16 @@ class Dataset():
             masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
                                 self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
+        # external mask
+        if mask_type == 2:
+            pass
+
+    def external_mask_parse(self, img_path):
+        with tf.device('/cpu:0'):
+            img_file = tf.read_file(img_path)
+            img_decoded = tf.image.decode_png(img_file)  # [640, 960]
+            img = tf.image.resize_image_with_crop_or_pad(img_decoded, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
+
     def load_flist(self, flist):
         if isinstance(flist, list):
             return flist
