@@ -98,6 +98,7 @@ class Dataset():
                                   elems=img_grays,
                                   dtype=tf.bool)
             img_edges = tf.reshape(img_edges, [shape[0], shape[1], shape[2], 1])
+            img_edges = tf.cast(img_edges, dtype=tf.float32)
             return img_edges  # [N, 256, 256, 1]
 
         # external
@@ -180,6 +181,7 @@ if __name__ == '__main__':
         tmp0, tmp1, tmp2 = sess.run([images, grays, edges])
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
+        print(tmp2[1, :, :, 0])
 
         plt.figure(figsize=(8, 3))
 
