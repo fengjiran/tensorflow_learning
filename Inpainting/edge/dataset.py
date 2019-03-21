@@ -110,9 +110,10 @@ class Dataset():
 
         mask_type = self.cfg['MASK']
 
-        # external + random block
-        if mask_type == 4:
-            pass
+        # random block + half
+        if mask_type == 1:
+            masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
+                                self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
     def load_flist(self, flist):
         if isinstance(flist, list):
