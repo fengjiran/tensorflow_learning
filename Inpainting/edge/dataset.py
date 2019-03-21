@@ -31,6 +31,7 @@ class Dataset():
         self.training = training
         self.flist = self.load_flist(flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
+        self.mask_filenames = tf.placeholder(tf.string, shape=[None])
 
     def __len__(self):
         """Get the length of dataset."""
@@ -117,13 +118,20 @@ class Dataset():
 
         # external mask
         if mask_type == 2:
-            pass
+            mask_dataset = tf.data.Dataset.from_tensor_slices(self.mask_filenames)
+            mask_dataset = mask_dataset.map(self.external_mask_parse)
+            mask_dataset = mask_dataset.shuffle(buffer_size=250)
+            mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
+            mask_iterator = mask_dataset.make_initializable_iterator()
+            masks = mask_iterator.get_next()
 
     def external_mask_parse(self, img_path):
         with tf.device('/cpu:0'):
             img_file = tf.read_file(img_path)
             img_decoded = tf.image.decode_png(img_file)  # [512, 512]
-            img = tf.image.resize_image_with_crop_or_pad(img_decoded, self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'])
+            img = tf.reshape(img_decoded, [1, 512, 512, 1])
+            img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
+            img = tf.cast(tf.greater(img, 3), dtype=tf.uint8)
             img = tf.image.rot90(img, tf.random_uniform([], 0, 4, tf.int32))
             img = tf.image.random_flip_left_right(img)
 
