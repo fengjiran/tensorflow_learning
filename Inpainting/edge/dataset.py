@@ -32,15 +32,25 @@ class Dataset():
         self.training = training
         self.flist = self.load_flist(flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
+        self.train_iterator = None
 
         # external mask
         if config['MASK'] == 2:
             self.mask_flist = self.load_flist(mask_flist)
             self.mask_filenames = tf.placeholder(tf.string, shape=[None])
+            self.mask_iterator = None
 
     def __len__(self):
         """Get the length of dataset."""
         return len(self.flist)
+
+    def load_items(self):
+        images = self.load_images()
+        img_grays = self.load_grayscales(images)
+        img_masks = self.load_masks()
+        img_edges = self.load_edges(images)
+
+        return images, img_grays, img_edges, img_masks
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -60,15 +70,15 @@ class Dataset():
         train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'])
         train_dataset = train_dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
-        train_iterator = train_dataset.make_initializable_iterator()
-        images = train_iterator.get_next()
+        self.train_iterator = train_dataset.make_initializable_iterator()
+        images = self.train_iterator.get_next()
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
 
-        return images, train_iterator
+        return images
 
-    def load_grayscale(self, images):
+    def load_grayscales(self, images):
         # images: [-1, 1]
         images = (images + 1) * 127.5  # [0, 255]
         img_grays = tf.image.rgb_to_grayscale(images)
@@ -78,10 +88,10 @@ class Dataset():
 
         return img_grays  # [N, 256, 256, 1]
 
-    def load_edge(self, images, mask=None):
+    def load_edges(self, images, mask=None):
         sigma = self.cfg['SIGMA']
 
-        img_grays = self.load_grayscale(images)
+        img_grays = self.load_grayscales(images)
         shape = img_grays.get_shape().as_list()
         img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
 
@@ -110,7 +120,7 @@ class Dataset():
         else:
             pass
 
-    def load_mask(self):
+    def load_masks(self):
         # shape = images.get_shape().as_list()
         # imgh = shape[1]
         # imgw = shape[2]
@@ -122,7 +132,7 @@ class Dataset():
             masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
                                 self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
-            return masks
+            return masks  # [1, 256, 256, 1]
 
         # external mask
         if mask_type == 2:
@@ -130,10 +140,10 @@ class Dataset():
             mask_dataset = mask_dataset.map(self.external_mask_parse)
             mask_dataset = mask_dataset.shuffle(buffer_size=100)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
-            mask_iterator = mask_dataset.make_initializable_iterator()
-            masks = mask_iterator.get_next()  # [N, 256, 256, 1]
+            self.mask_iterator = mask_dataset.make_initializable_iterator()
+            masks = self.mask_iterator.get_next()
 
-            return masks, mask_iterator
+            return masks  # [N, 256, 256, 1]
 
     def external_mask_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -176,22 +186,25 @@ if __name__ == '__main__':
         cfg = yaml.load(f)
 
     dataset = Dataset(cfg)
-    images, iterator = dataset.load_images()
-    grays = dataset.load_grayscale(images)
-    edges = dataset.load_edge(images)
+    images, img_grays, img_edges, img_masks = dataset.load_items()
+    iterator = dataset.train_iterator
+    mask_iterator = dataset.mask_iterator
+    # images, iterator = dataset.load_images()
+    # grays = dataset.load_grayscale(images)
+    # edges = dataset.load_edge(images)
 
-    if cfg['MASK'] == 2:
-        masks, mask_iterator = dataset.load_mask()
+    # if cfg['MASK'] == 2:
+    #     masks, mask_iterator = dataset.load_mask()
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
         sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
-        tmp0, tmp1, tmp2 = sess.run([images, grays, edges])
+        tmp0, tmp1, tmp2 = sess.run([images, img_grays, img_edges])
 
         if cfg['MASK'] == 2:
             sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
-            tmp3 = sess.run(masks)
+            tmp3 = sess.run(img_masks)
             print(tmp3.shape)
 
         tmp0 = (tmp0 + 1) / 2.
