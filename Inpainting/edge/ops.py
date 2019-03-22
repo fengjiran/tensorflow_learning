@@ -177,4 +177,5 @@ def instance_norm(x, name="instance_norm"):
 
 
 def attention(x, ch, sn=False, scope='attention', reuse=None):
-    pass
+    with tf.variable_scope(scope, reuse=reuse):
+        pass
