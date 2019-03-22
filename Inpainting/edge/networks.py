@@ -47,3 +47,15 @@ class EdgeModel():
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block6')
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block7')
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block8')
+
+            # decoder
+            x = deconv(x, channels=128, kernel=4, stride=2, init_type=self.init_type, name='deconv1')
+            x = instance_norm(x, name='in4')
+            x = tf.nn.relu(x)
+
+            x = deconv(x, channels=64, kernel=4, stride=2, init_type=self.init_type, name='deconv2')
+            x = instance_norm(x, name='in5')
+            x = tf.nn.relu(x)
+
+            x = conv(x, channels=3, kernel=7, stride=1, pad=3,
+                     pad_type='reflect', init_type=self.init_type, name='conv4')
