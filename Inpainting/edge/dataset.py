@@ -156,6 +156,9 @@ class Dataset():
             img = tf.image.random_flip_left_right(img)
             img = tf.reshape(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'], 1])
 
+            # 1 for the missing regions, 0 for background
+            img = 1 - img
+
             return img  # [256, 256, 1]
 
     def load_flist(self, flist):
@@ -220,22 +223,22 @@ if __name__ == '__main__':
         plt.figure(figsize=(8, 3))
 
         plt.subplot(141)
-        plt.imshow(tmp0[1])
+        plt.imshow(tmp0[0])
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
         plt.subplot(142)
-        plt.imshow(tmp1[1, :, :, 0], cmap=plt.cm.gray)
+        plt.imshow(tmp1[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('gray', fontsize=20)
 
         plt.subplot(143)
-        plt.imshow(tmp2[1, :, :, 0], cmap=plt.cm.gray)
+        plt.imshow(tmp2[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('edge', fontsize=20)
 
         plt.subplot(144)
-        plt.imshow(tmp3[1, :, :, 0], cmap=plt.cm.gray)
+        plt.imshow(tmp3[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('mask', fontsize=20)
 
