@@ -174,3 +174,7 @@ def instance_norm(x, name="instance_norm"):
         inv = tf.rsqrt(variance + epsilon)
         normalized = (x - mean) * inv
         return scale * normalized + offset
+
+
+def attention(x, ch, sn=False, scope='attention', reuse=None):
+    pass
