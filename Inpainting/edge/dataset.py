@@ -48,7 +48,7 @@ class Dataset():
         images = self.load_images()
         img_grays = self.load_grayscales(images)
         img_masks = self.load_masks()
-        img_edges = self.load_edges(images)
+        img_edges = self.load_edges(img_grays)
 
         return images, img_grays, img_edges, img_masks
 
@@ -76,7 +76,7 @@ class Dataset():
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
 
-        return images
+        return images  # [N, 256, 256, 3]
 
     def load_grayscales(self, images):
         # images: [-1, 1]
@@ -88,10 +88,10 @@ class Dataset():
 
         return img_grays  # [N, 256, 256, 1]
 
-    def load_edges(self, images, mask=None):
+    def load_edges(self, img_grays, mask=None):
         sigma = self.cfg['SIGMA']
 
-        img_grays = self.load_grayscales(images)
+        # img_grays = self.load_grayscales(images)
         shape = img_grays.get_shape().as_list()
         img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
 
@@ -199,13 +199,19 @@ if __name__ == '__main__':
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
-        tmp0, tmp1, tmp2 = sess.run([images, img_grays, img_edges])
+        iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
+        feed_dict = {dataset.train_filenames: dataset.flist,
+                     dataset.mask_filenames: dataset.mask_flist} if cfg['MASK'] == 2 else {dataset.train_filenames: dataset.flist}
 
-        if cfg['MASK'] == 2:
-            sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
-            tmp3 = sess.run(img_masks)
-            print(tmp3.shape)
+        sess.run(iterators, feed_dict=feed_dict)
+
+        # sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
+        # if cfg['MASK'] == 2:
+        #     sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
+        #     # tmp3 = sess.run(img_masks)
+        #     # print(tmp3.shape)
+
+        tmp0, tmp1, tmp2, tmp3 = sess.run([images, img_grays, img_edges, img_masks])
 
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
