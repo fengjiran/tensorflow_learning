@@ -90,3 +90,12 @@ class EdgeModel():
                 outputs = tf.nn.sigmoid(conv5)
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
+
+    def build_model(self, img_grays, edges, masks):
+        # generator input: [grayscale(1) + edge(1) + mask(1)]
+        # discriminator input: [grayscale(1) + edge(1)]
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        outputs = self.edge_generator(inputs)
+        outputs_merged = outputs * masks + edges * (1 - masks)
