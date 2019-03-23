@@ -139,3 +139,8 @@ class EdgeModel():
         gen_loss += gen_gan_loss
 
         # generator feature matching loss
+        gen_fm_loss = 0.0
+        for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
+            gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
+        gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
+        gen_loss += gen_fm_loss
