@@ -29,6 +29,7 @@ class Edge():
     def train(self):
         images, img_grays, img_edges, img_masks = self.dataset.load_items()
         flist = self.dataset.flist
+        mask_flist = self.dataset.mask_flist
         total = len(self.dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
@@ -38,6 +39,8 @@ class Edge():
         step = 0
 
         gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
+        iterator = self.dataset.train_iterator
+        mask_iterator = self.dataset.mask_iterator
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
@@ -45,4 +48,7 @@ class Edge():
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
-            pass
+            iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
+            feed_dict = {self.dataset.train_filenames: flist,
+                         self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
+            sess.run(iterators, feed_dict=feed_dict)
