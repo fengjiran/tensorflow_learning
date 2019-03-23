@@ -104,3 +104,29 @@ class EdgeModel():
             use_sigmoid = True
         else:
             use_sigmoid = False
+
+        # get the global steps
+        gen_global_step = tf.get_variable('gen_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+        dis_global_step = tf.get_variable('dis_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+
+        gen_loss = 0.0
+        dis_loss = 0.0
+
+        # discriminator loss
+        dis_input_real = tf.concat([img_grays, edges], axis=3)
+        dis_input_fake = tf.concat([img_grays, tf.stop_gradient(outputs_merged)], axis=3)
+        dis_real, dis_real_feat = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, dis_fake_feat = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real_loss = adversarial_loss(dis_real, is_real=True,
+                                         gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False,
+                                         gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
