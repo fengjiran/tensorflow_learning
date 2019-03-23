@@ -27,4 +27,4 @@ class Edge():
         self.dataset = Dataset(config)
 
     def train(self):
-        pass
+        images, img_grays, img_edges, img_masks = self.dataset.load_items()
