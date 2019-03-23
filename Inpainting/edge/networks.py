@@ -178,3 +178,17 @@ class EdgeModel():
         tf.summary.scalar('gen_loss', gen_loss)
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
+
+        visual_img = [img_grays, edges, outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        tf.summary.image('gray_edge_merged', visual_img, 4)
+
+        return gen_train, dis_train, logs
+
+    def save(self, sess, saver, path, model_name):
+        print('\nsaving the model...\n')
+        saver.save(sess, os.path.join(path, model_name))
+
+    def load(self, sess, saver, path, model_name):
+        print('\nloading the model...\n')
+        saver.restore(sess, os.path.join(path, model_name))
