@@ -36,3 +36,13 @@ class Edge():
         epoch = 0
         keep_training = True
         step = 0
+
+        gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
+
+        # the saver for model saving and loading
+        saver = tf.train.Saver()
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
+            pass
