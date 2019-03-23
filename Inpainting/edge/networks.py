@@ -144,3 +144,37 @@ class EdgeModel():
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
         gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
         gen_loss += gen_fm_loss
+
+        # get model variables
+        gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
+        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_discriminator')
+
+        # get the optimizer for training
+        gen_opt = tf.train.AdamOptimizer(self.cfg['LR'],
+                                         beta1=self.cfg['BETA1'],
+                                         beta2=self.cfg['BETA2'])
+        dis_opt = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                         beta1=self.cfg['BETA1'],
+                                         beta2=self.cfg['BETA2'])
+
+        # optimize the model
+        gen_train = gen_opt.minimize(gen_loss,
+                                     global_step=gen_global_step,
+                                     var_list=gen_vars)
+        dis_train = dis_opt.minimize(dis_loss,
+                                     global_step=dis_global_step,
+                                     var_list=dis_vars)
+
+        dis_train_ops = []
+        for i in range(5):
+            dis_train_ops.append(dis_train)
+        dis_train = tf.group(*dis_train_ops)
+
+        # create logs
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
+
+        # add summary for monitor
+        tf.summary.scalar('dis_loss', dis_loss)
+        tf.summary.scalar('gen_loss', gen_loss)
+        tf.summary.scalar('gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('gen_fm_loss', gen_fm_loss)
