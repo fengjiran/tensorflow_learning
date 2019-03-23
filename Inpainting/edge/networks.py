@@ -134,3 +134,8 @@ class EdgeModel():
         # generator adversarial loss
         gen_input_fake = tf.concat([img_grays, outputs_merged], axis=3)
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
+                                        gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+        gen_loss += gen_gan_loss
+
+        # generator feature matching loss
