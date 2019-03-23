@@ -2,8 +2,8 @@ import csv
 import platform as pf
 import yaml
 import tensorflow as tf
-from dataset import Dataset
-from networks import EdgeModel
+from .dataset import Dataset
+from .networks import EdgeModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -28,3 +28,11 @@ class Edge():
 
     def train(self):
         images, img_grays, img_edges, img_masks = self.dataset.load_items()
+        flist = self.dataset.flist
+        total = len(self.dataset)
+        num_batch = total // self.cfg['BATCH_SIZE']
+        max_iteration = self.cfg['MAX_ITERS']
+
+        epoch = 0
+        keep_training = True
+        step = 0
