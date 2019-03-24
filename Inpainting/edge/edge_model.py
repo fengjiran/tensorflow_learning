@@ -55,5 +55,5 @@ class EdgeAware():
 
 
 if __name__ == '__main__':
-    model = EdgeAware()
+    model = EdgeAware(cfg)
     model.train()
