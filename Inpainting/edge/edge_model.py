@@ -2,8 +2,8 @@ import csv
 import platform as pf
 import yaml
 import tensorflow as tf
-from .dataset import Dataset
-from .networks import EdgeModel
+from dataset import Dataset
+from networks import EdgeModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -18,7 +18,7 @@ elif pf.system() == 'Linux':
         pass
 
 
-class Edge():
+class EdgeAware():
     """Construct edge model."""
 
     def __init__(self, config):
@@ -52,3 +52,8 @@ class Edge():
             feed_dict = {self.dataset.train_filenames: flist,
                          self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
             sess.run(iterators, feed_dict=feed_dict)
+
+
+if __name__ == '__main__':
+    model = EdgeAware()
+    model.train()
