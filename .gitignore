@@ -58,5 +58,7 @@ Inpainting/comparison/generative_inpainting/model_logs
 Inpainting/comparison/generative_inpainting/neuralgym_logs
 Inpainting/two_stage/celebahq/log
 Inpainting/two_stage/celebahq/model
+Inpainting/edge/log
+Inpainting/edge/model
 
 *.pickle
