@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 
 if pf.system() == 'Windows':
-    pass
+    vgg19_npy_path = 'F:\\Datasets\\vgg19.npy'
 elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         vgg19_npy_path = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/vgg19.npy'
