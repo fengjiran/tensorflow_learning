@@ -153,7 +153,7 @@ class Dataset():
             img = tf.reshape(img_decoded, [1, 512, 512, 1])
             img = tf.image.resize_area(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
             img = tf.reshape(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'], 1])
-            img = tf.cast(tf.greater(img, 3), dtype=tf.uint8)
+            img = tf.cast(tf.greater(img, 3), dtype=tf.float32)
             img = tf.image.rot90(img, tf.random_uniform([], 0, 4, tf.int32))
             img = tf.image.random_flip_left_right(img)
             # img = tf.reshape(img, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'], 1])
