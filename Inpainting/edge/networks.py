@@ -7,9 +7,9 @@ from ops import deconv
 from ops import resnet_block
 from ops import instance_norm
 
-from loss import adversarial_loss
+from .loss import adversarial_loss
 
-from utils import images_summary
+# from utils import images_summary
 
 
 class EdgeModel():
