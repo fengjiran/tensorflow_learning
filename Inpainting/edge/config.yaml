@@ -25,6 +25,7 @@ SUMMARY_INTERVAL: 200              # how many iterations to wait before saving s
 
 FLIST_WIN: "F:\\Datasets\\flist\\celebahq.flist"
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
+MASK_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/qd_imd_train.flist
 FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_linux_7810.flist
 LOG_DIR_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/edge/log
 MODEL_PATH_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/edge/model
