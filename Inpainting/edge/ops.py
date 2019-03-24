@@ -57,7 +57,7 @@ def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, init_type='n
             weight_init = tf.orthogonal_initializer(gain=0.02)
 
         x_shape = x.get_shape().as_list()
-        output_shape = [-1, x_shape[1] * stride, x_shape[2] * stride, channels]
+        output_shape = [x_shape[0], x_shape[1] * stride, x_shape[2] * stride, channels]
 
         if sn:
             w = tf.get_variable("kernel", shape=[kernel, kernel, channels, x.get_shape()[-1]],
