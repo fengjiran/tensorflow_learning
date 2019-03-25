@@ -15,3 +15,5 @@ with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
 
 edge_model = EdgeModel(cfg)
+
+gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
