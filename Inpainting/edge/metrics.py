@@ -15,7 +15,7 @@ def edge_accuracy_per_image(real_edge, fake_edge, threshold):
         precision = 1
         recall = 1
     else:
-        true_positive = tf.cast((real_edge == fake_edge), dtype=tf.float32) * tf.cast(real_edge, dtype=tf.float32)
+        true_positive = tf.cast(tf.equal(real_edge, fake_edge), dtype=tf.float32) * tf.cast(real_edge, dtype=tf.float32)
         recall = tf.reduce_sum(true_positive) / (relevant + 1e-8)
         precision = tf.reduce_sum(true_positive) / (selected + 1e-8)
 
