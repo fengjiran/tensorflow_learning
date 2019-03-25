@@ -185,9 +185,6 @@ class EdgeModel():
 
         return gen_train, dis_train, logs
 
-    def build_test_graph(self, batch_data, reuse):
-        pass
-
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
         saver.save(sess, os.path.join(path, model_name))
