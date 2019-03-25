@@ -179,7 +179,7 @@ class EdgeModel():
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
 
-        visual_img = [img_grays, edges, outputs_merged]
+        visual_img = [img_grays, edges, edges_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('gray_edge_merged', visual_img, 4)
 
