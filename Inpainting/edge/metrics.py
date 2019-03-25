@@ -1,6 +1,22 @@
 import tensorflow as tf
 
 
+def tf_psnr(batch_img1, batch_img2, max_val):
+    return tf.reduce_mean(tf.image.psnr(batch_img1, batch_img2, max_val))
+
+
+def tf_ssim(batch_img1, batch_img2, max_val):
+    return tf.reduce_mean(tf.image.ssim(batch_img1, batch_img2, max_val))
+
+
+def tf_l1_loss(batch_img1, batch_img2):
+    return tf.reduce_mean(tf.abs(batch_img1 - batch_img2))
+
+
+def tf_l2_loss(batch_img1, batch_img2):
+    return tf.reduce_mean(tf.square(batch_img1 - batch_img2))
+
+
 def edge_accuracy_per_image(real_edge, fake_edge, threshold):
     real_edge = real_edge > threshold
     fake_edge = fake_edge > threshold
