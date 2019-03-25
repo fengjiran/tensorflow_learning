@@ -29,16 +29,16 @@ def edge_accuracy(batch_real_edge, batch_fake_edge, threshold):
                     elems=elems,
                     dtype=(tf.float32, tf.float32))
 
-    # precision = acc[:, 0]
-    # recall = acc[:, 1]
+    precision = acc[0]
+    recall = acc[1]
 
-    return acc  # tf.reduce_mean(precision), tf.reduce_mean(recall)
+    return tf.reduce_mean(precision), tf.reduce_mean(recall)
 
 
 if __name__ == '__main__':
     a = tf.random_uniform([10, 256, 256, 1])
     b = tf.random_uniform([10, 256, 256, 1])
-    acc = edge_accuracy_per_image(a, b, 0.5)
+    acc = edge_accuracy(a, b, 0.5)
     print(acc[0].get_shape().as_list())
     print(acc)
     with tf.Session() as sess:
