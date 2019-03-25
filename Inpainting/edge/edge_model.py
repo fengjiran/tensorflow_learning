@@ -71,7 +71,7 @@ class EdgeAware():
                     print('-----------gen_gan_loss: {}'.format(logs_[2]))
                     print('-----------gen_fm_loss: {}'.format(logs_[3]))
 
-                    with open('coarse_logs.csv', 'a+') as f:
+                    with open('logs.csv', 'a+') as f:
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
