@@ -67,7 +67,7 @@ class Dataset():
     def load_images(self):
         train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
         train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=100)
+        train_dataset = train_dataset.shuffle(buffer_size=250)
         train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'])
         train_dataset = train_dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
@@ -139,7 +139,7 @@ class Dataset():
         if mask_type == 2:
             mask_dataset = tf.data.Dataset.from_tensor_slices(self.mask_filenames)
             mask_dataset = mask_dataset.map(self.external_mask_parse)
-            mask_dataset = mask_dataset.shuffle(buffer_size=100)
+            mask_dataset = mask_dataset.shuffle(buffer_size=250)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
             mask_dataset = mask_dataset.repeat()
             self.mask_iterator = mask_dataset.make_initializable_iterator()
