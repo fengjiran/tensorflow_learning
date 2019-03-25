@@ -19,7 +19,7 @@ def edge_accuracy_per_image(real_edge, fake_edge, threshold):
         recall = tf.reduce_sum(true_positive) / (relevant + 1e-8)
         precision = tf.reduce_sum(true_positive) / (selected + 1e-8)
 
-    return (precision, recall)
+    return precision, recall
 
 
 def edge_accuracy(batch_real_edge, batch_fake_edge, threshold):
@@ -27,7 +27,7 @@ def edge_accuracy(batch_real_edge, batch_fake_edge, threshold):
 
     acc = tf.map_fn(fn=lambda x: edge_accuracy_per_image(x[0], x[1], threshold),
                     elems=elems,
-                    dtype=tf.float32)
+                    dtype=(tf.float32, tf.float32))
 
     # precision = acc[:, 0]
     # recall = acc[:, 1]
@@ -40,4 +40,6 @@ if __name__ == '__main__':
     b = tf.random_uniform([10, 256, 256, 1])
     acc = edge_accuracy_per_image(a, b, 0.5)
     print(acc[0].get_shape().as_list())
-    # print(acc)
+    print(acc)
+    with tf.Session() as sess:
+        print(sess.run(acc))
