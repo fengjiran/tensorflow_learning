@@ -141,6 +141,7 @@ class Dataset():
             mask_dataset = mask_dataset.map(self.external_mask_parse)
             mask_dataset = mask_dataset.shuffle(buffer_size=100)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
+            mask_dataset = mask_dataset.repeat()
             self.mask_iterator = mask_dataset.make_initializable_iterator()
             masks = self.mask_iterator.get_next()
 
