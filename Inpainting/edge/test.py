@@ -16,6 +16,14 @@ with open('config.yaml', 'r') as f:
 
 edge_model = EdgeModel(cfg)
 
-gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+# 1 for missing region, 0 for background
 mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+
+gray_masked = gray * (1 - mask) + mask
+edge_masked = edge * (1 - mask)
+
+inputs = tf.concat([gray_masked, edge_masked, mask * tf.ones_like(gray)], axis=3)
+
+outputs = edge_model.edge_generator(inputs)
