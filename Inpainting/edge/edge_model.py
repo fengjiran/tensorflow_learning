@@ -29,7 +29,7 @@ class EdgeAware():
     def train(self):
         images, img_grays, img_edges, img_masks = self.dataset.load_items()
         flist = self.dataset.flist
-        mask_flist = self.dataset.mask_flist
+        mask_flist = self.dataset.mask_flist if cfg['MASK'] == 2 else None
         total = len(self.dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
