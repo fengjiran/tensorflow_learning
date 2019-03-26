@@ -4,10 +4,10 @@ import os
 import yaml
 import platform as pf
 import numpy as np
-import cv2
 from scipy.misc import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray
+import cv2
 import tensorflow as tf
 from networks import EdgeModel
 
@@ -24,7 +24,10 @@ elif pf.system() == 'Linux':
 
 # use flist
 image_path = None
-mask_path = None
+if cfg['MASK'] == 1:  # random block
+    mask_path = None
+else:  # external
+    mask_path = None
 
 
 edge_model = EdgeModel(cfg)
