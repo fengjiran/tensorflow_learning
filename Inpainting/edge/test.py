@@ -43,11 +43,10 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
     # saver.restore(sess, os.path.join(checkpoint_dir, 'model'))
-    vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'edge_generator')
+    vars_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
     assign_ops = []
     for var in vars_list:
         vname = var.name
-        # print(vname)
         from_name = vname
         var_value = tf.train.load_variable(os.path.join(checkpoint_dir, 'model'), from_name)
         assign_ops.append(tf.assign(var, var_value))
