@@ -22,6 +22,10 @@ elif pf.system() == 'Linux':
     elif pf.node() == 'icie-Precision-T7610':
         pass
 
+# use flist
+image_path = None
+mask_path = None
+
 
 edge_model = EdgeModel(cfg)
 
