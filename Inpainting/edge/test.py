@@ -23,7 +23,7 @@ elif pf.system() == 'Linux':
         pass
 
 # use flist
-image_path = None
+image_path = 'img.png'
 if cfg['MASK'] == 1:  # random block
     hole_size = cfg['INPUT_SIZE'] // 2
     top = np.random.randint(0, hole_size + 1)
