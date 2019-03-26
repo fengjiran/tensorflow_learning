@@ -4,7 +4,7 @@ import os
 import yaml
 import platform as pf
 import numpy as np
-# import cv2
+import cv2
 from scipy.misc import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray
