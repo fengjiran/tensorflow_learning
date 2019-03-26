@@ -25,7 +25,17 @@ elif pf.system() == 'Linux':
 # use flist
 image_path = None
 if cfg['MASK'] == 1:  # random block
-    mask_path = None
+    hole_size = cfg['INPUT_SIZE'] // 2
+    top = np.random.randint(0, hole_size + 1)
+    left = np.random.randint(0, hole_size + 1)
+    img_mask = np.pad(array=np.ones((hole_size, hole_size)),
+                      pad_width=((top, cfg['INPUT_SIZE'] - hole_size - top),
+                                 (left, cfg['INPUT_SIZE'] - hole_size - left)),
+                      mode='constant',
+                      constant_values=0)
+
+    img_mask = np.expand_dims(img_mask, 0)
+    img_mask = np.expand_dims(img_mask, -1)  # (1, 256, 256, 1)
 else:  # external
     mask_path = None
 
