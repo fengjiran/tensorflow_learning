@@ -7,8 +7,8 @@ import numpy as np
 from scipy.misc import imread
 from skimage.feature import canny
 from skimage.color import rgb2gray
-import cv2
 import tensorflow as tf
+import cv2
 from networks import EdgeModel
 
 with open('config.yaml', 'r') as f:
@@ -60,7 +60,8 @@ with tf.Session(config=config) as sess:
     sess.run(assign_ops)
     print('Model loaded.')
 
-    image = imread(image_path)
-    image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
-    img_gray = rgb2gray(image)
-    img_edge = canny(img_gray, sigma=cfg['SIGMA'])
+    image = imread(image_path)  # (1024, 1024, 3)
+    image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
+    img_gray = rgb2gray(image)  # (256, 256)
+    img_edge = canny(img_gray, sigma=cfg['SIGMA'])  # (256, 256)
+    print(img_gray.shape, img_edge.shape)
