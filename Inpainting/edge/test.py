@@ -35,7 +35,7 @@ if cfg['MASK'] == 1:  # random block
                       constant_values=0)
 
     img_mask = np.expand_dims(img_mask, 0)
-    img_mask = np.expand_dims(img_mask, -1)  # (1, 256, 256, 1)
+    img_mask = np.expand_dims(img_mask, -1)  # (1, 256, 256, 1) float
 else:  # external
     mask_path = None
 
