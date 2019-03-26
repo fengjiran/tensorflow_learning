@@ -47,9 +47,8 @@ with tf.Session(config=config) as sess:
     assign_ops = []
     for var in vars_list:
         vname = var.name
-        print(vname)
+        # print(vname)
         from_name = vname
-        # var_value = tf.contrib.framework.load_variable(checkpoint_dir, from_name)
         var_value = tf.train.load_variable(os.path.join(checkpoint_dir, 'model'), from_name)
         assign_ops.append(tf.assign(var, var_value))
     sess.run(assign_ops)
