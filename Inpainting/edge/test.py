@@ -74,4 +74,17 @@ with tf.Session(config=config) as sess:
     image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
     img_gray = rgb2gray(image)  # (256, 256)
     img_edge = canny(img_gray, sigma=cfg['SIGMA'])  # (256, 256)
-    print(img_gray.shape, img_edge.shape)
+
+    img_gray = np.expand_dims(img_gray, 0)
+    img_gray = np.expand_dims(img_gray, -1)
+
+    img_edge = np.expand_dims(img_edge, 0)
+    img_edge = np.expand_dims(img_edge, -1)
+    img_edge = img_edge.astype(np.float)
+
+    feed_dict = {mask: img_mask, edge: img_edge, gray: img_gray}
+
+    inpainted_edge = sess.run(outputs_merged, feed_dict=feed_dict)
+    print(inpainted_edge.shape)
+
+    # print(img_gray.shape, img_edge.shape)
