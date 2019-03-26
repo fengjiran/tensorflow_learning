@@ -56,3 +56,5 @@ with tf.Session(config=config) as sess:
         assign_ops.append(tf.assign(var, var_value))
     sess.run(assign_ops)
     print('Model loaded.')
+
+    image = imread(image_path)
