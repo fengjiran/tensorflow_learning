@@ -19,7 +19,7 @@ def check_image(image):
     return image
 
 
-def rgb_to_lab(srgb):
+def rgb_to_lab(srgb):  # srgb in [0, 1]
     with tf.name_scope("rgb_to_lab"):
         srgb = check_image(srgb)
         srgb_pixels = tf.reshape(srgb, [-1, 3])
@@ -70,5 +70,36 @@ if __name__ == '__main__':
     lab = rgb_to_lab(a)
 
     with tf.Session() as sess:
-        b = sess.run(lab, feed_dict={a: img.astype(np.float)})
-        print(b.shape)
+        b = sess.run(lab, feed_dict={a: img / 255.})
+        l_comp = b[:, :, 0]
+        a_comp = b[:, :, 1]
+        b_comp = b[:, :, 2]
+
+        l_comp /= 100.
+        a_comp = (a_comp + 128) / 255.
+        b_comp = (b_comp + 128) / 255.
+        # print(b.shape)
+        # print(b[:, :, 0].min(), b[:, :, 0].max())
+        # print(b[:, :, 1].min(), b[:, :, 1].max())
+        # print(b[:, :, 2].min(), b[:, :, 2].max())
+
+        plt.figure()
+
+        plt.subplot(141)
+        plt.imshow(img)
+        plt.title('rgb')
+
+        plt.subplot(142)
+        plt.imshow(l_comp, cmap=plt.cm.gray)
+        plt.title('l_comp')
+
+        plt.subplot(143)
+        plt.imshow(a_comp, cmap=plt.cm.gray)
+        plt.title('a_comp')
+
+        plt.subplot(144)
+        plt.imshow(b_comp, cmap=plt.cm.gray)
+        plt.title('b_comp')
+
+        # plt.imshow((b[:, :, 1] + 128) / 255., cmap=plt.cm.gray)
+        plt.show()
