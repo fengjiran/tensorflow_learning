@@ -87,18 +87,22 @@ if __name__ == '__main__':
 
         plt.subplot(141)
         plt.imshow(img)
+        plt.axis('off')
         plt.title('rgb')
 
         plt.subplot(142)
-        plt.imshow(l_comp, cmap=plt.cm.gray)
+        plt.imshow(l_comp)
+        plt.axis('off')
         plt.title('l_comp')
 
         plt.subplot(143)
         plt.imshow(a_comp, cmap=plt.cm.gray)
+        plt.axis('off')
         plt.title('a_comp')
 
         plt.subplot(144)
         plt.imshow(b_comp, cmap=plt.cm.gray)
+        plt.axis('off')
         plt.title('b_comp')
 
         # plt.imshow((b[:, :, 1] + 128) / 255., cmap=plt.cm.gray)
