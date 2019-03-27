@@ -12,7 +12,7 @@ from loss import adversarial_loss
 # from utils import images_summary
 
 
-class EdgeModel():
+class ColorModel():
     """Construct edge model."""
 
     def __init__(self, config=None):
