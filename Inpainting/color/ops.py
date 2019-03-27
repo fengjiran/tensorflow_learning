@@ -1,3 +1,6 @@
+import numpy as np
+from scipy.misc import imread
+import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
@@ -57,3 +60,15 @@ def rgb_to_lab(srgb):
             lab_pixels = tf.matmul(fxfyfz_pixels, fxfyfz_to_lab) + tf.constant([-16.0, 0.0, 0.0])
 
         return tf.reshape(lab_pixels, tf.shape(srgb))
+
+
+if __name__ == '__main__':
+    img = imread('img.png')
+    print(img.shape)
+
+    a = tf.placeholder(tf.float32, [1024, 1024, 3])
+    lab = rgb_to_lab(a)
+
+    with tf.Session() as sess:
+        b = sess.run(lab, feed_dict={a: img.astype(np.float)})
+        print(b.shape)
