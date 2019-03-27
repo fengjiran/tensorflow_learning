@@ -91,7 +91,7 @@ if __name__ == '__main__':
         plt.title('rgb')
 
         plt.subplot(142)
-        plt.imshow(l_comp)
+        plt.imshow(l_comp, cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('l_comp')
 
