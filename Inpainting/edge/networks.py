@@ -60,9 +60,9 @@ class EdgeModel():
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
 
-            x = tf.nn.sigmoid(x)
+            edge = tf.nn.sigmoid(x)
 
-            return x
+            return x, edge
 
     def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
