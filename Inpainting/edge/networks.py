@@ -97,7 +97,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs)
+        logits, outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         if self.cfg['GAN_LOSS'] == 'lsgan':
