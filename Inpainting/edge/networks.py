@@ -145,6 +145,9 @@ class EdgeModel():
         gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
         gen_loss += gen_fm_loss
 
+        # generator cross entropy loss
+        gen_ce_loss = 0.0
+
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
         dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_discriminator')
