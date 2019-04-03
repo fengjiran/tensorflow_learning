@@ -147,6 +147,9 @@ class EdgeModel():
 
         # generator cross entropy loss
         gen_ce_loss = 0.0
+        gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
+        gen_ce_loss = gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
+        gen_loss += gen_ce_loss
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
