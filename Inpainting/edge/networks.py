@@ -177,7 +177,7 @@ class EdgeModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss, gen_ce_loss]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
