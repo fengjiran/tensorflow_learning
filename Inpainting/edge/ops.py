@@ -45,6 +45,10 @@ def conv(x, channels, kernel=4, stride=1, dilation=1,
         return x
 
 
+def deconv_(x, channels, kernel=4, stride=1, use_bias=True, sn=True, init_type='normal', name='deconv_0'):
+    pass
+
+
 def deconv(x, channels, kernel=4, stride=1, use_bias=True, sn=True, init_type='normal', name='deconv_0'):
     with tf.variable_scope(name):
         if init_type == 'normal':
