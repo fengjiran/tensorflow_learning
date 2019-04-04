@@ -72,7 +72,7 @@ class EdgeModel():
 
             edge = tf.nn.sigmoid(x)
 
-            return x, edge
+            return edge
 
     def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
@@ -107,7 +107,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        logits, outputs = self.edge_generator(inputs)
+        outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         if self.cfg['GAN_LOSS'] == 'lsgan':
@@ -156,10 +156,10 @@ class EdgeModel():
         gen_loss += gen_fm_loss
 
         # generator cross entropy loss
-        gen_ce_loss = 0.0
-        gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
-        gen_ce_loss = gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
-        gen_loss += gen_ce_loss
+        # gen_ce_loss = 0.0
+        # gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
+        # gen_ce_loss = gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
+        # gen_loss += gen_ce_loss
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
@@ -187,14 +187,14 @@ class EdgeModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss, gen_ce_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
         tf.summary.scalar('gen_loss', gen_loss)
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
-        tf.summary.scalar('gen_ce_loss', gen_ce_loss)
+        # tf.summary.scalar('gen_ce_loss', gen_ce_loss)
 
         visual_img = [img_grays, grays_masked, edges, edges_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
