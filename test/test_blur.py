@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.misc import imread
+import matplotlib.pyplot as plt
 import cv2
 
 
@@ -32,3 +33,17 @@ if __name__ == '__main__':
     img_color_domain = cv2.medianBlur(img_color_domain, 3)
 
     print(img_color_domain.shape)
+
+    plt.figure()
+
+    plt.subplot(121)
+    plt.imshow(img)
+    plt.axis('off')
+    plt.title('rgb', fontsize=20)
+
+    plt.subplot(122)
+    plt.imshow(img_color_domain)
+    plt.axis('off')
+    plt.title('color_domain', fontsize=20)
+
+    plt.show()
