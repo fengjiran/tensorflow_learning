@@ -23,12 +23,12 @@ def img_kmeans(img_blur, K=8):
 
 
 if __name__ == '__main__':
-    img = imread('test.png')
+    img = imread('test.jpg')
     print(img.shape)
 
     k = 3
 
-    img_color_domain = cv2.medianBlur(img, 21)
+    img_color_domain = cv2.medianBlur(img, 11)
     img_color_domain = img_kmeans(img_color_domain, k)
     img_color_domain = cv2.medianBlur(img_color_domain, 3)
 
