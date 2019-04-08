@@ -18,3 +18,7 @@ def img_kmeans(img_blur, K=8):
     res = center[label.flatten()]
     res = res.reshape((img_blur.shape))
     return res
+
+
+if __name__ == '__main__':
+    pass
