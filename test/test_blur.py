@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.misc import imread
 import cv2
 
 
@@ -21,4 +22,5 @@ def img_kmeans(img_blur, K=8):
 
 
 if __name__ == '__main__':
-    pass
+    img = imread('img.png')
+    print(img.shape)
