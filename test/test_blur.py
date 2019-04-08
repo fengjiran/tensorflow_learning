@@ -4,22 +4,22 @@ import matplotlib.pyplot as plt
 import cv2
 
 
-def img_kmeans(img_blur, K=8):
-    Z = img_blur.reshape((-1, 3))
+# def img_kmeans(img_blur, K=8):
+#     Z = img_blur.reshape((-1, 3))
 
-    # convert to np.float32
-    Z = np.float32(Z)
+#     # convert to np.float32
+#     Z = np.float32(Z)
 
-    # define criteria, number of clusters(K) and apply kmeans()
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    # K = 8
-    ret, label, center = cv2.kmeans(Z, K, None, criteria, 8, cv2.KMEANS_PP_CENTERS)
+#     # define criteria, number of clusters(K) and apply kmeans()
+#     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+#     # K = 8
+#     ret, label, center = cv2.kmeans(Z, K, None, criteria, 8, cv2.KMEANS_PP_CENTERS)
 
-    # Now convert back into uint8, and make original image
-    center = np.uint8(center)
-    res = center[label.flatten()]
-    res = res.reshape((img_blur.shape))
-    return res
+#     # Now convert back into uint8, and make original image
+#     center = np.uint8(center)
+#     res = center[label.flatten()]
+#     res = res.reshape((img_blur.shape))
+#     return res
 
 
 def get_color_domain(img, blur_factor1, blur_factor2, k):
@@ -41,7 +41,7 @@ def get_color_domain(img, blur_factor1, blur_factor2, k):
 
     img_color_domain = cv2.medianBlur(res, blur_factor2)
 
-    img_color_domain /= 255.
+    img_color_domain = img_color_domain / 255.
     return img_color_domain
 
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     img = img
     print(img.shape)
 
-    img_color_domain = get_color_domain(img, 11, 3, 8)
+    img_color_domain = get_color_domain(img, 11, 3, 3)
 
     # img_color_domain = cv2.medianBlur(img, 11)
     # img_color_domain = img_kmeans(img_color_domain, k)
