@@ -48,7 +48,7 @@ def tf_canny(image, sigma, mask):
     return edge
 
 
-def get_color_domain(img, blur_factor1, blur_factor2, k):  # img:[0, 255]
+def get_color_domain(img, blur_factor1, blur_factor2, k):  # img:[0, 255], uint8
     img_blur = cv2.medianBlur(img, blur_factor1)
     Z = img_blur.reshape((-1, 3))
 
