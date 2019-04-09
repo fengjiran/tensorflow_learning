@@ -142,6 +142,10 @@ class ColorModel():
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
 
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(color_domains, outputs)
+        gen_loss += gen_l1_loss
+
         # generator adversarial loss
         gen_input_fake = outputs_merged
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
