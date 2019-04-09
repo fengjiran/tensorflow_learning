@@ -83,6 +83,6 @@ if __name__ == '__main__':
 
     img1 = imread('img.png')
 
-    with tf.Session() as tf:
+    with tf.Session() as sess:
         res = sess.run(img_color_domain, feed_dict={img: img1})
         print(res.shape)
