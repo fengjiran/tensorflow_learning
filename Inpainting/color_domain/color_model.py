@@ -27,4 +27,35 @@ class ColorAware():
         self.dataset = Dataset(config)
 
     def train(self):
-        pass
+        images, img_masks, img_color_domains = self.dataset.load_items()
+        flist = self.dataset.flist
+        mask_flist = self.dataset.mask_flist if cfg['MASK'] == 2 else None
+        total = len(self.dataset)
+        num_batch = total // self.cfg['BATCH_SIZE']
+        max_iteration = self.cfg['MAX_ITERS']
+
+        epoch = 0
+        keep_training = True
+        step = 0
+
+        gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
+        iterator = self.dataset.train_iterator
+        mask_iterator = self.dataset.mask_iterator
+
+        # the saver for model saving and loading
+        saver = tf.train.Saver()
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
+            iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
+            feed_dict = {self.dataset.train_filenames: flist,
+                         self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
+            sess.run(iterators, feed_dict=feed_dict)
+            sess.run(tf.global_variables_initializer())
+            summary_writer = tf.summary.FileWriter(log_dir)
+
+            with open('logs.csv', 'a+') as f:
+                mywrite = csv.writer(f)
+                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss'])
+            all_summary = tf.summary.merge_all()
