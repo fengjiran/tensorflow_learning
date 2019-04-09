@@ -13,7 +13,7 @@ from loss import adversarial_loss
 
 
 class ColorModel():
-    """Construct edge model."""
+    """Construct color domain model."""
 
     def __init__(self, config=None):
         print('Construct the edge model.')
@@ -67,7 +67,7 @@ class ColorModel():
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
 
-            x = conv(x, channels=1, kernel=7, stride=1, pad=3,
+            x = conv(x, channels=3, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
 
             x = tf.nn.sigmoid(x)
