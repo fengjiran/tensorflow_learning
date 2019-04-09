@@ -67,15 +67,15 @@ def get_color_domain(img, blur_factor1, blur_factor2, k):  # img:[0, 255]
 
     img_color_domain = cv2.medianBlur(res, blur_factor2)
 
-    # img_color_domain = img_color_domain / 255.
-    # img_color_domain = img_color_domain.astype(np.float)
+    img_color_domain = img_color_domain / 255.
+    img_color_domain = img_color_domain.astype(np.float32)
     return img_color_domain  # [0, 1]
 
 
 def tf_get_color_domain(img, blur_factor1, blur_factor2, k):
     img_color_domain = tf.py_func(func=get_color_domain,
                                   inp=[img, blur_factor1, blur_factor2, k],
-                                  Tout=tf.uint8)
+                                  Tout=tf.float32)
     return img_color_domain
 
 
