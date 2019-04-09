@@ -92,6 +92,8 @@ class Dataset():
                                       elems=images,
                                       dtype=tf.float32)
 
+        return img_color_domains
+
     def load_grayscales(self, images):
         # images: [-1, 1]
         images = (images + 1) * 127.5  # [0, 255]
