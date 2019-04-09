@@ -2,7 +2,9 @@ import os
 import sys
 import time
 import numpy as np
+from scipy.misc import imread
 from skimage.feature import canny
+import cv2
 import tensorflow as tf
 
 
