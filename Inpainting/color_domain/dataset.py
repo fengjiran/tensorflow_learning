@@ -80,7 +80,7 @@ class Dataset():
 
         return images  # [N, 256, 256, 3]
 
-    def load_color_domain(self, image):
+    def load_color_domain(self, images):
         images = (images + 1) * 127.5  # [0, 255]
         images = tf.cast(images, tf.uint8)
 
