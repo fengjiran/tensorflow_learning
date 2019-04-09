@@ -227,7 +227,7 @@ if __name__ == '__main__':
         #     # tmp3 = sess.run(img_masks)
         #     # print(tmp3.shape)
 
-        tmp0, tmp1, tmp2, tmp3 = sess.run([images, img_grays, img_edges, img_masks])
+        tmp0, tmp1, tmp2, tmp3, tmp4 = sess.run([images, img_grays, img_edges, img_masks, img_color_domains])
 
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
@@ -235,25 +235,30 @@ if __name__ == '__main__':
 
         plt.figure(figsize=(8, 3))
 
-        plt.subplot(141)
+        plt.subplot(151)
         plt.imshow(tmp0[0])
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
-        plt.subplot(142)
+        plt.subplot(152)
         plt.imshow(tmp1[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('gray', fontsize=20)
 
-        plt.subplot(143)
+        plt.subplot(153)
         plt.imshow(tmp2[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('edge', fontsize=20)
 
-        plt.subplot(144)
+        plt.subplot(154)
         plt.imshow(tmp3[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('mask', fontsize=20)
+
+        plt.subplot(155)
+        plt.imshow(tmp4[0])
+        plt.axis('off')
+        plt.title('color_domain', fontsize=20)
 
         plt.show()
 
