@@ -45,3 +45,30 @@ def tf_canny(image, sigma, mask):
                       inp=[image, sigma, mask],
                       Tout=tf.bool)
     return edge
+
+
+def get_color_domain(img, blur_factor1, blur_factor2, k):  # img:[0, 255]
+    img_blur = cv2.medianBlur(img, blur_factor1)
+    Z = img_blur.reshape((-1, 3))
+
+    # convert to np.float32
+    Z = np.float32(Z)
+
+    # define criteria, number of clusters(K) and apply kmeans()
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    # K = 8
+    ret, label, center = cv2.kmeans(Z, k, None, criteria, 8, cv2.KMEANS_PP_CENTERS)
+
+    # Now convert back into uint8, and make original image
+    center = np.uint8(center)
+    res = center[label.flatten()]
+    res = res.reshape((img_blur.shape))
+
+    img_color_domain = cv2.medianBlur(res, blur_factor2)
+
+    img_color_domain = img_color_domain / 255.
+    return img_color_domain  # [0, 1]
+
+
+def tf_get_color_domain(img, blur_factor1, blur_factor2, k):
+    pass
