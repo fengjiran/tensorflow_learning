@@ -20,7 +20,7 @@ class ColorModel():
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
 
-    def edge_generator(self, x, reuse=None):
+    def color_domain_generator(self, x, reuse=None):
         with tf.variable_scope('edge_generator', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
@@ -101,14 +101,14 @@ class ColorModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
-    def build_model(self, img_grays, edges, masks):
-        # generator input: [grayscale(1) + edge(1) + mask(1)]
-        # discriminator input: [grayscale(1) + edge(1)]
-        edges_masked = edges * (1 - masks)
-        grays_masked = img_grays * (1 - masks) + masks
-        inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs)
-        outputs_merged = outputs * masks + edges * (1 - masks)
+    def build_model(self, images, color_domains, masks):
+        # generator input: [img(3) + mask(1)]
+        # discriminator input: [img(3)]
+        color_domains_masked = color_domains * (1 - masks) + masks
+        imgs_masked = images * (1 - masks) + masks
+        inputs = tf.concat([imgs_masked, color_domains_masked, masks * tf.ones_like(images[:, :, :, 0])], axis=3)
+        outputs = self.color_domain_generator(inputs)
+        outputs_merged = outputs * masks + color_domains * (1 - masks)
 
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
@@ -131,8 +131,8 @@ class ColorModel():
         dis_loss = 0.0
 
         # discriminator loss
-        dis_input_real = tf.concat([img_grays, edges], axis=3)
-        dis_input_fake = tf.concat([img_grays, tf.stop_gradient(outputs_merged)], axis=3)
+        dis_input_real = color_domains
+        dis_input_fake = tf.stop_gradient(outputs_merged)
         dis_real, dis_real_feat = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
         dis_fake, dis_fake_feat = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         dis_real_loss = adversarial_loss(dis_real, is_real=True,
@@ -142,7 +142,7 @@ class ColorModel():
         dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
 
         # generator adversarial loss
-        gen_input_fake = tf.concat([img_grays, outputs_merged], axis=3)
+        gen_input_fake = outputs_merged
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
@@ -189,7 +189,7 @@ class ColorModel():
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
 
-        visual_img = [img_grays, grays_masked, edges, edges_masked, outputs_merged]
+        visual_img = [images, color_domains, color_domains_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('gray_edge_merged', visual_img, 4)
 
