@@ -75,3 +75,7 @@ def tf_get_color_domain(img, blur_factor1, blur_factor2, k):
                                   inp=[img, blur_factor1, blur_factor2, k],
                                   Tout=tf.float32)
     return img_color_domain
+
+
+if __name__ == '__main__':
+    pass
