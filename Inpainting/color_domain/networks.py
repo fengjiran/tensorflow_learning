@@ -21,7 +21,7 @@ class ColorModel():
         self.init_type = self.cfg['INIT_TYPE']
 
     def color_domain_generator(self, x, reuse=None):
-        with tf.variable_scope('edge_generator', reuse=reuse):
+        with tf.variable_scope('color_generator', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
@@ -74,8 +74,8 @@ class ColorModel():
 
             return x
 
-    def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
-        with tf.variable_scope('edge_discriminator', reuse=reuse):
+    def color_discriminator(self, x, reuse=None, use_sigmoid=False):
+        with tf.variable_scope('color_discriminator', reuse=reuse):
             conv1 = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero',
                          use_bias=False, init_type=self.init_type, name='conv1')
             conv1 = tf.nn.leaky_relu(conv1)
@@ -134,8 +134,8 @@ class ColorModel():
         # discriminator loss
         dis_input_real = color_domains
         dis_input_fake = tf.stop_gradient(outputs_merged)
-        dis_real, dis_real_feat = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
-        dis_fake, dis_fake_feat = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real, dis_real_feat = self.color_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, dis_fake_feat = self.color_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         dis_real_loss = adversarial_loss(dis_real, is_real=True,
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_fake_loss = adversarial_loss(dis_fake, is_real=False,
@@ -148,7 +148,7 @@ class ColorModel():
 
         # generator adversarial loss
         gen_input_fake = outputs_merged
-        gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_fake, gen_fake_feat = self.color_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
         # gen_loss += gen_gan_loss
@@ -164,8 +164,8 @@ class ColorModel():
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
 
         # get model variables
-        gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
-        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_discriminator')
+        gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_generator')
+        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_discriminator')
 
         # get the optimizer for training
         gen_opt = tf.train.AdamOptimizer(self.cfg['LR'],
