@@ -200,7 +200,7 @@ class ColorModel():
 
         visual_img = [images, color_domains, color_domains_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
-        tf.summary.image('gray_edge_merged', visual_img, 4)
+        tf.summary.image('gray_color_merged', visual_img, 4)
 
         return gen_train, dis_train, logs
 
