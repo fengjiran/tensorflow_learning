@@ -102,8 +102,8 @@ class ColorModel():
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
     def build_model(self, images, color_domains, masks):
-        # generator input: [img(3) + mask(1)]
-        # discriminator input: [img(3)]
+        # generator input: [img(3) + color_domain(3) + mask(1)]
+        # discriminator input: [color_domain(3)]
         color_domains_masked = color_domains * (1 - masks) + masks
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains_masked, masks * tf.ones_like(images[:, :, :, 0])], axis=3)
