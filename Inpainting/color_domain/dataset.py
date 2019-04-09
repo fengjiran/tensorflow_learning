@@ -93,7 +93,7 @@ class Dataset():
                                       elems=images,
                                       dtype=tf.float32)
 
-        return img_color_domains
+        return img_color_domains  # [N, 256, 256, 3]
 
     def load_grayscales(self, images):
         # images: [-1, 1]
@@ -211,9 +211,6 @@ if __name__ == '__main__':
     images, img_grays, img_edges, img_masks, img_color_domains = dataset.load_items()
     iterator = dataset.train_iterator
     mask_iterator = dataset.mask_iterator
-    # images, iterator = dataset.load_images()
-    # grays = dataset.load_grayscale(images)
-    # edges = dataset.load_edge(images)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
