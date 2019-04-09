@@ -4,6 +4,7 @@ import time
 import numpy as np
 from scipy.misc import imread
 from skimage.feature import canny
+import matplotlib.pyplot as plt
 import cv2
 import tensorflow as tf
 
@@ -66,14 +67,15 @@ def get_color_domain(img, blur_factor1, blur_factor2, k):  # img:[0, 255]
 
     img_color_domain = cv2.medianBlur(res, blur_factor2)
 
-    img_color_domain = img_color_domain / 255.
+    # img_color_domain = img_color_domain / 255.
+    # img_color_domain = img_color_domain.astype(np.float)
     return img_color_domain  # [0, 1]
 
 
 def tf_get_color_domain(img, blur_factor1, blur_factor2, k):
     img_color_domain = tf.py_func(func=get_color_domain,
                                   inp=[img, blur_factor1, blur_factor2, k],
-                                  Tout=tf.float32)
+                                  Tout=tf.uint8)
     return img_color_domain
 
 
@@ -86,3 +88,17 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         res = sess.run(img_color_domain, feed_dict={img: img1})
         print(res.shape)
+
+        plt.figure()
+
+        plt.subplot(121)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.title('rgb', fontsize=20)
+
+        plt.subplot(122)
+        plt.imshow(res)
+        plt.axis('off')
+        plt.title('color_domain', fontsize=20)
+
+        plt.show()
