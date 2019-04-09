@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 
 from ops import conv
-from ops import deconv
+# from ops import deconv
 from ops import resnet_block
 from ops import instance_norm
 
