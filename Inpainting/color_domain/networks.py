@@ -210,7 +210,3 @@ class ColorModel():
     def load(self, sess, saver, path, model_name):
         print('\nloading the model...\n')
         saver.restore(sess, os.path.join(path, model_name))
-
-
-if __name__ == '__main__':
-    x = tf.placeholder(tf.float32, [10, 256, 256, 7])
