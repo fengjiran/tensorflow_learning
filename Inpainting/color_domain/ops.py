@@ -22,7 +22,7 @@ def conv(x, channels, kernel=4, stride=1, dilation=1,
             x = tf.pad(x, [[0, 0], [pad, pad], [pad, pad], [0, 0]], mode='REFLECT')
 
         if sn:
-            w = tf.get_variable("kernel", shape=[kernel, kernel, x.get_shape()[-1], channels],
+            w = tf.get_variable("kernel", shape=[kernel, kernel, tf.shape(x)[-1], channels],
                                 initializer=weight_init,
                                 regularizer=None)
             bias = tf.get_variable("bias", [channels], initializer=tf.constant_initializer(0.0))
