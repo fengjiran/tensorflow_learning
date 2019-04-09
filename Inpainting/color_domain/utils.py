@@ -92,7 +92,7 @@ if __name__ == '__main__':
         plt.figure()
 
         plt.subplot(121)
-        plt.imshow(img)
+        plt.imshow(img1)
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
