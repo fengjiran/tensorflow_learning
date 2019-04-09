@@ -189,12 +189,13 @@ class ColorModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_fm_loss]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
         tf.summary.scalar('gen_loss', gen_loss)
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
 
         visual_img = [images, color_domains, color_domains_masked, outputs_merged]
