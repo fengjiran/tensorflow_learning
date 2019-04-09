@@ -60,5 +60,6 @@ Inpainting/two_stage/celebahq/log
 Inpainting/two_stage/celebahq/model
 Inpainting/edge/log
 Inpainting/edge/model
-
+Inpainting/color_domain/log
+Inpainting/color_domain/model
 *.pickle
