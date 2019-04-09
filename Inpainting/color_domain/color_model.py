@@ -93,3 +93,12 @@ class ColorAware():
 if __name__ == '__main__':
     model = ColorAware(cfg)
     model.train()
+    # images, img_masks, img_color_domains = model.dataset.load_items()
+    # color_domains_masked = img_color_domains * (1 - img_masks) + img_masks
+    # imgs_masked = images * (1 - img_masks) + img_masks
+    # inputs = tf.concat([imgs_masked, color_domains_masked, img_masks * tf.ones_like(images[:, :, :, 0])], axis=3)
+
+    # print(tf.shape(img_color_domains))
+
+    # # x = tf.placeholder(tf.float32, [10, 256, 256, 7])
+    # y = model.model.color_domain_generator(img_color_domains)
