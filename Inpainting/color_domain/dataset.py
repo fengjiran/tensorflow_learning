@@ -85,6 +85,8 @@ class Dataset():
     def load_color_domain(self, images):
         images = (images + 1) * 127.5  # [0, 255]
         images = tf.cast(images, tf.uint8)
+        # shape = images.get_shape().as_list()
+        shape = tf.shape(images)
 
         blur_factor1 = self.cfg['BLUR_FACTOR1']
         blur_factor2 = self.cfg['BLUR_FACTOR2']
@@ -94,6 +96,7 @@ class Dataset():
                                       elems=images,
                                       dtype=tf.float32)
 
+        img_color_domains = tf.reshape(img_color_domains, shape)
         return img_color_domains  # [N, 256, 256, 3]
 
     def load_grayscales(self, images):
@@ -232,7 +235,7 @@ if __name__ == '__main__':
 
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
-        print(tmp2[1, :, :, 0])
+        # print(tmp2[1, :, :, 0])
 
         plt.figure(figsize=(8, 3))
 
