@@ -12,6 +12,7 @@ from skimage.feature import canny
 from skimage.color import rgb2gray
 from utils import create_mask
 from utils import tf_canny
+from utils import tf_get_color_domain
 
 
 class Dataset():
@@ -80,7 +81,16 @@ class Dataset():
         return images  # [N, 256, 256, 3]
 
     def load_color_domain(self, image):
-        pass
+        images = (images + 1) * 127.5  # [0, 255]
+        images = tf.cast(images, tf.uint8)
+
+        blur_factor1 = self.cfg['BLUR_FACTOR1']
+        blur_factor2 = self.cfg['BLUR_FACTOR2']
+        k = self.cfg['K']
+
+        img_color_domains = tf.map_fn(fn=lambda im: tf_get_color_domain(im, blur_factor1, blur_factor2, k),
+                                      elems=images,
+                                      dtype=tf.float32)
 
     def load_grayscales(self, images):
         # images: [-1, 1]
