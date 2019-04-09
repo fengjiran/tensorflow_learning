@@ -78,4 +78,11 @@ def tf_get_color_domain(img, blur_factor1, blur_factor2, k):
 
 
 if __name__ == '__main__':
-    pass
+    img = tf.placeholder(tf.uint8, [1024, 1024, 3])
+    img_color_domain = tf_get_color_domain(img, 21, 3, 3)
+
+    img1 = imread('img.png')
+
+    with tf.Session() as tf:
+        res = sess.run(img_color_domain, feed_dict={img: img1})
+        print(res.shape)
