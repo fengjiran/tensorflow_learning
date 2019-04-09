@@ -48,12 +48,13 @@ class Dataset():
 
     def load_items(self):
         images = self.load_images()
-        img_grays = self.load_grayscales(images)
+        # img_grays = self.load_grayscales(images)
         img_color_domains = self.load_color_domain(images)
         img_masks = self.load_masks()
-        img_edges = self.load_edges(img_grays)
+        # img_edges = self.load_edges(img_grays)
 
-        return images, img_grays, img_edges, img_masks, img_color_domains
+        return images, img_masks, img_color_domains
+        # return images, img_grays, img_edges, img_masks, img_color_domains
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -208,7 +209,7 @@ if __name__ == '__main__':
         cfg = yaml.load(f)
 
     dataset = Dataset(cfg)
-    images, img_grays, img_edges, img_masks, img_color_domains = dataset.load_items()
+    images, img_masks, img_color_domains = dataset.load_items()
     iterator = dataset.train_iterator
     mask_iterator = dataset.mask_iterator
 
@@ -227,7 +228,7 @@ if __name__ == '__main__':
         #     # tmp3 = sess.run(img_masks)
         #     # print(tmp3.shape)
 
-        tmp0, tmp1, tmp2, tmp3, tmp4 = sess.run([images, img_grays, img_edges, img_masks, img_color_domains])
+        tmp0, tmp1, tmp2 = sess.run([images, img_masks, img_color_domains])
 
         tmp0 = (tmp0 + 1) / 2.
         print(tmp0[0].shape)
@@ -235,28 +236,28 @@ if __name__ == '__main__':
 
         plt.figure(figsize=(8, 3))
 
-        plt.subplot(151)
+        plt.subplot(131)
         plt.imshow(tmp0[0])
         plt.axis('off')
         plt.title('rgb', fontsize=20)
 
-        plt.subplot(152)
+        # plt.subplot(152)
+        # plt.imshow(tmp1[0, :, :, 0], cmap=plt.cm.gray)
+        # plt.axis('off')
+        # plt.title('gray', fontsize=20)
+
+        # plt.subplot(153)
+        # plt.imshow(tmp2[0, :, :, 0], cmap=plt.cm.gray)
+        # plt.axis('off')
+        # plt.title('edge', fontsize=20)
+
+        plt.subplot(132)
         plt.imshow(tmp1[0, :, :, 0], cmap=plt.cm.gray)
-        plt.axis('off')
-        plt.title('gray', fontsize=20)
-
-        plt.subplot(153)
-        plt.imshow(tmp2[0, :, :, 0], cmap=plt.cm.gray)
-        plt.axis('off')
-        plt.title('edge', fontsize=20)
-
-        plt.subplot(154)
-        plt.imshow(tmp3[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('mask', fontsize=20)
 
-        plt.subplot(155)
-        plt.imshow(tmp4[0])
+        plt.subplot(133)
+        plt.imshow(tmp2[0])
         plt.axis('off')
         plt.title('color_domain', fontsize=20)
 
