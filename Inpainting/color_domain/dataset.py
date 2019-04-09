@@ -79,6 +79,9 @@ class Dataset():
 
         return images  # [N, 256, 256, 3]
 
+    def load_color_domain(self, image):
+        pass
+
     def load_grayscales(self, images):
         # images: [-1, 1]
         images = (images + 1) * 127.5  # [0, 255]
