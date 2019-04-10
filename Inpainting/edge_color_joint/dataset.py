@@ -48,13 +48,13 @@ class Dataset():
 
     def load_items(self):
         images = self.load_images()
-        # img_grays = self.load_grayscales(images)
+        img_grays = self.load_grayscales(images)
         img_color_domains = self.load_color_domain(images)
         img_masks = self.load_masks()
-        # img_edges = self.load_edges(img_grays)
+        img_edges = self.load_edges(img_grays)
 
-        return images, img_masks, img_color_domains
-        # return images, img_grays, img_edges, img_masks, img_color_domains
+        # return images, img_masks, img_color_domains
+        return images, img_grays, img_edges, img_masks, img_color_domains
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
