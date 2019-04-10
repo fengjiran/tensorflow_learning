@@ -38,3 +38,4 @@ FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebah
 LOG_DIR_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/color_domain/log
 MODEL_PATH_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/color_domain/model
 MODEL_PATH_WIN: "E:\\TensorFlow_Learning\\Inpainting\\color_domain\\model"
+LOG_DIR_WIN: "E:\\TensorFlow_Learning\\Inpainting\\color_domain\\log"
