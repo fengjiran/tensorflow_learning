@@ -33,3 +33,15 @@ class PreInpaint():
         images, img_grays, img_edges, img_masks, img_color_domains = self.dataset.load_items()
         flist = self.dataset.flist  # for image
         mask_flist = self.dataset.mask_flist if self.cfg['MASK'] == 2 else None
+        total = len(self.dataset)
+        num_batch = total // self.cfg['BATCH_SIZE']
+
+        max_iteration = self.cfg['MAX_ITERS']
+
+        # epoch = 0
+        keep_training = True
+        # step = 0
+
+        gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
+        iterator = self.dataset.train_iterator
+        mask_iterator = self.dataset.mask_iterator
