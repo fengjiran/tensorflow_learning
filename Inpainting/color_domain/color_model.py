@@ -63,7 +63,7 @@ class ColorAware():
             else:
                 saver.restore(sess, os.path.join(model_dir, 'model'))
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
-                step = step.eval()
+                # step = step.eval()
                 print(step)
 
             # with open('logs.csv', 'a+') as f:
