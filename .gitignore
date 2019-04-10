@@ -62,4 +62,7 @@ Inpainting/edge/log
 Inpainting/edge/model
 Inpainting/color_domain/log
 Inpainting/color_domain/model
+Inpainting/edge_color_joint/log
+Inpainting/edge_color_joint/model
+
 *.pickle
