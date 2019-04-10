@@ -1,3 +1,4 @@
+import os
 import csv
 import platform as pf
 import yaml
@@ -52,8 +53,14 @@ class ColorAware():
             feed_dict = {self.dataset.train_filenames: flist,
                          self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
             sess.run(iterators, feed_dict=feed_dict)
-            sess.run(tf.global_variables_initializer())
+            # sess.run(tf.global_variables_initializer())
             summary_writer = tf.summary.FileWriter(log_dir)
+
+            if self.cfg['firstTimeTrain']:
+                step = 0
+                sess.run(tf.global_variables_initializer())
+            else:
+                saver.restore(sess, os.path.join(model_dir, 'model'))
 
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
