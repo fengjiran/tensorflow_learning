@@ -146,14 +146,16 @@ class EdgeModel():
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        gen_loss += gen_gan_loss
+        # gen_loss += gen_gan_loss
 
         # generator feature matching loss
         gen_fm_loss = 0.0
         for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
-        gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
-        gen_loss += gen_fm_loss
+        # gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
+        # gen_loss += gen_fm_loss
+
+        gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
 
         # generator cross entropy loss
         # gen_ce_loss = 0.0
