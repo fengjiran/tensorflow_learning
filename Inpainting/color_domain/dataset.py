@@ -26,7 +26,6 @@ class Dataset():
             if pf.node() == 'icie-Precision-Tower-7810':
                 flist = config['FLIST_LINUX_7810']
                 mask_flist = config['MASK_FLIST_LINUX_7810']
-                # log_dir = cfg['LOG_DIR_LINUX_7810']
             elif pf.node() == 'icie-Precision-T7610':
                 pass
 
