@@ -62,6 +62,9 @@ class ColorAware():
                 sess.run(tf.global_variables_initializer())
             else:
                 saver.restore(sess, os.path.join(model_dir, 'model'))
+                step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
+                step = step.eval()
+                print(step)
 
             # with open('logs.csv', 'a+') as f:
             #     mywrite = csv.writer(f)
