@@ -101,15 +101,15 @@ class InpaintModel():
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
 
-    def build_model(self, images, color_domains, masks):
-        # generator input: [img(3) + color_domain(3) + mask(1)]
-        # discriminator input: [color_domain(3)]
-        color_domains_masked = color_domains * (1 - masks) + masks
+    def build_model(self, images, edges, color_domains, masks):
+        # generator input: [img_masked(3) + edge(1) + color_domain(3) + mask(1)]
+        # discriminator input: [img(3)]
+        # color_domains_masked = color_domains * (1 - masks) + masks
         imgs_masked = images * (1 - masks) + masks
-        inputs = tf.concat([imgs_masked, color_domains_masked,
+        inputs = tf.concat([imgs_masked, color_domains, edges,
                             masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
-        outputs = self.color_domain_generator(inputs)
-        outputs_merged = outputs * masks + color_domains * (1 - masks)
+        outputs = self.inpaint_generator(inputs)
+        outputs_merged = outputs * masks + images * (1 - masks)
 
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
@@ -132,7 +132,7 @@ class InpaintModel():
         dis_loss = 0.0
 
         # discriminator loss
-        dis_input_real = color_domains
+        dis_input_real = images
         dis_input_fake = tf.stop_gradient(outputs_merged)
         dis_real, dis_real_feat = self.color_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
         dis_fake, dis_fake_feat = self.color_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
@@ -143,7 +143,7 @@ class InpaintModel():
         dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
 
         # generator l1 loss
-        gen_l1_loss = tf.losses.absolute_difference(color_domains, outputs) / tf.reduce_mean(masks)
+        gen_l1_loss = tf.losses.absolute_difference(images, outputs) / tf.reduce_mean(masks)
         # gen_loss += gen_l1_loss
 
         # generator adversarial loss
@@ -157,7 +157,7 @@ class InpaintModel():
         gen_fm_loss = 0.0
         for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
-        gen_fm_loss = gen_fm_loss
+        # gen_fm_loss = gen_fm_loss
         # gen_loss += gen_fm_loss
 
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
@@ -198,7 +198,7 @@ class InpaintModel():
         tf.summary.scalar('gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
 
-        visual_img = [images, color_domains, color_domains_masked, outputs_merged]
+        visual_img = [images, masks, edges, color_domains, imgs_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('image_color_masked_merged', visual_img, 4)
 
