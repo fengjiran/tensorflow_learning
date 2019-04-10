@@ -16,7 +16,7 @@ class ColorModel():
     """Construct color domain model."""
 
     def __init__(self, config=None):
-        print('Construct the edge model.')
+        print('Construct the color domain model.')
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
 
