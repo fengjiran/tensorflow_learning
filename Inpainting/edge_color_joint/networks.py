@@ -8,6 +8,9 @@ from ops import resnet_block
 from ops import instance_norm
 
 from loss import adversarial_loss
+from loss import perceptual_loss
+from loss import style_loss
+from loss import Vgg19
 
 # from utils import images_summary
 
@@ -144,24 +147,32 @@ class InpaintModel():
 
         # generator l1 loss
         gen_l1_loss = tf.losses.absolute_difference(images, outputs) / tf.reduce_mean(masks)
-        # gen_loss += gen_l1_loss
 
         # generator adversarial loss
         gen_input_fake = outputs_merged
         gen_fake, gen_fake_feat = self.color_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        # gen_loss += gen_gan_loss
 
         # generator feature matching loss
-        gen_fm_loss = 0.0
-        for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
-            gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
-        # gen_fm_loss = gen_fm_loss
-        # gen_loss += gen_fm_loss
+        # gen_fm_loss = 0.0
+        # for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
+        #     gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
+
+        # generator perceptual loss
+        content_x = self.vgg.forward(outputs_merged)
+        content_y = self.vgg.forward(images, reuse=True)
+        gen_content_loss = perceptual_loss(content_x, content_y)
+
+        # generator style loss
+        style_x = self.vgg.forward(outputs_merged * masks, reuse=True)
+        style_y = self.vgg.forward(images * masks, reuse=True)
+        gen_style_loss = style_loss(style_x, style_y)
 
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
-            gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
+            gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
+            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] +\
+            gen_style_loss * self.cfg['STYLE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
@@ -189,18 +200,19 @@ class InpaintModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, gen_style_loss]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
         tf.summary.scalar('gen_loss', gen_loss)
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_l1_loss', gen_l1_loss)
-        tf.summary.scalar('gen_fm_loss', gen_fm_loss)
+        tf.summary.scalar('gen_content_loss', gen_content_loss)
+        tf.summary.scalar('gen_style_loss', gen_style_loss)
 
         visual_img = [images, masks, edges, color_domains, imgs_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
-        tf.summary.image('image_color_masked_merged', visual_img, 4)
+        tf.summary.image('image_mask_edge_color_merge', visual_img, 4)
 
         return gen_train, dis_train, logs
 
