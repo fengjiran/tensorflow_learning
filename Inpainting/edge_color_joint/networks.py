@@ -12,7 +12,7 @@ from loss import adversarial_loss
 # from utils import images_summary
 
 
-class ColorModel():
+class InpaintModel():
     """Construct color domain model."""
 
     def __init__(self, config=None):
@@ -20,8 +20,8 @@ class ColorModel():
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
 
-    def color_domain_generator(self, x, reuse=None):
-        with tf.variable_scope('color_generator', reuse=reuse):
+    def inpaint_generator(self, x, reuse=None):
+        with tf.variable_scope('inpaint_generator', reuse=reuse):
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
@@ -74,8 +74,8 @@ class ColorModel():
 
             return x
 
-    def color_discriminator(self, x, reuse=None, use_sigmoid=False):
-        with tf.variable_scope('color_discriminator', reuse=reuse):
+    def inpaint_discriminator(self, x, reuse=None, use_sigmoid=False):
+        with tf.variable_scope('inpaint_discriminator', reuse=reuse):
             conv1 = conv(x, channels=64, kernel=4, stride=2, pad=1, pad_type='zero',
                          use_bias=False, init_type=self.init_type, name='conv1')
             conv1 = tf.nn.leaky_relu(conv1)
@@ -164,8 +164,8 @@ class ColorModel():
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
 
         # get model variables
-        gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_generator')
-        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_discriminator')
+        gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
+        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_discriminator')
 
         # get the optimizer for training
         gen_opt = tf.train.AdamOptimizer(self.cfg['LR'],
