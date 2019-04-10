@@ -36,9 +36,9 @@ class ColorAware():
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
 
-        epoch = 0
+        # epoch = 0
         keep_training = True
-        step = 0
+        # step = 0
 
         gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
         iterator = self.dataset.train_iterator
@@ -59,10 +59,12 @@ class ColorAware():
 
             if self.cfg['firstTimeTrain']:
                 step = 0
+                epoch = 0
                 sess.run(tf.global_variables_initializer())
             else:
                 saver.restore(sess, os.path.join(model_dir, 'model'))
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
+                epoch = step // num_batch
 
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
