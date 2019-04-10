@@ -70,35 +70,36 @@ class EdgeAware():
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss'])
             all_summary = tf.summary.merge_all()
+            print(total)
 
-            while keep_training:
-                epoch += 1
-                print('\n\nTraining epoch: %d' % epoch)
-                for i in range(num_batch):
-                    _, _, logs_ = sess.run([dis_train, gen_train, logs])
-                    print('Epoch: {}, Iter: {}'.format(epoch, step))
-                    print('-----------dis_loss: {}'.format(logs_[0]))
-                    print('-----------gen_loss: {}'.format(logs_[1]))
-                    print('-----------gen_gan_loss: {}'.format(logs_[2]))
-                    print('-----------gen_fm_loss: {}'.format(logs_[3]))
-                    # print('-----------gen_ce_loss: {}'.format(logs_[4]))
+            # while keep_training:
+            #     epoch += 1
+            #     print('\n\nTraining epoch: %d' % epoch)
+            #     for i in range(num_batch):
+            #         _, _, logs_ = sess.run([dis_train, gen_train, logs])
+            #         print('Epoch: {}, Iter: {}'.format(epoch, step))
+            #         print('-----------dis_loss: {}'.format(logs_[0]))
+            #         print('-----------gen_loss: {}'.format(logs_[1]))
+            #         print('-----------gen_gan_loss: {}'.format(logs_[2]))
+            #         print('-----------gen_fm_loss: {}'.format(logs_[3]))
+            #         # print('-----------gen_ce_loss: {}'.format(logs_[4]))
 
-                    with open('logs.csv', 'a+') as f:
-                        mywrite = csv.writer(f)
-                        mywrite.writerow(logs_)
+            #         with open('logs.csv', 'a+') as f:
+            #             mywrite = csv.writer(f)
+            #             mywrite.writerow(logs_)
 
-                    if step % self.cfg['SUMMARY_INTERVAL'] == 0:
-                        summary = sess.run(all_summary)
-                        summary_writer.add_summary(summary, step)
+            #         if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+            #             summary = sess.run(all_summary)
+            #             summary_writer.add_summary(summary, step)
 
-                    if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
-                        self.model.save(sess, saver, model_dir, 'model')
+            #         if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
+            #             self.model.save(sess, saver, model_dir, 'model')
 
-                    if step >= max_iteration:
-                        keep_training = False
-                        break
+            #         if step >= max_iteration:
+            #             keep_training = False
+            #             break
 
-                    step += 1
+            #         step += 1
 
 
 if __name__ == '__main__':
