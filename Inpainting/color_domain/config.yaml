@@ -1,3 +1,4 @@
+firstTimeTrain: false              # the first time to train
 MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
 SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
 EDGE: 1                            # 1: canny, 2: external
