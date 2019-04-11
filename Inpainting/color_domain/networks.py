@@ -144,24 +144,21 @@ class ColorModel():
 
         # generator l1 loss
         gen_l1_loss = tf.losses.absolute_difference(color_domains, outputs) / tf.reduce_mean(masks)
-        # gen_loss += gen_l1_loss
 
         # generator adversarial loss
         gen_input_fake = outputs_merged
         gen_fake, gen_fake_feat = self.color_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        # gen_loss += gen_gan_loss
 
         # generator feature matching loss
         gen_fm_loss = 0.0
         for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
-        gen_fm_loss = gen_fm_loss
-        # gen_loss += gen_fm_loss
 
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
-            gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
+            gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] +\
+            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_generator')
