@@ -17,7 +17,8 @@ elif pf.system() == 'Linux':
         log_dir = cfg['LOG_DIR_LINUX_7810']
         model_dir = cfg['MODEL_PATH_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
-        pass
+        log_dir = cfg['LOG_DIR_LINUX_7610']
+        model_dir = cfg['MODEL_PATH_LINUX_7610']
 
 
 class ColorAware():
