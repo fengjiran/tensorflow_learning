@@ -21,30 +21,23 @@ class Dataset():
     def __init__(self, config, training=True):
         if pf.system() == 'Windows':
             flist = config['FLIST_WIN']
-            mask_flist = config['MASK_FLIST_WIN']
+
         elif pf.system() == 'Linux':
             if pf.node() == 'icie-Precision-Tower-7810':
                 train_flist = config['TRAIN_FLIST_LINUX_7810']
                 val_flist = config['VAL_FLIST_LINUX_7810']
                 test_flist = config['TEST_FLIST_LINUX_7810']
-                mask_flist = config['MASK_FLIST_LINUX_7810']
+
             elif pf.node() == 'icie-Precision-T7610':
                 train_flist = config['TRAIN_FLIST_LINUX_7610']
                 val_flist = config['VAL_FLIST_LINUX_7610']
                 test_flist = config['TEST_FLIST_LINUX_7610']
-                mask_flist = config['MASK_FLIST_LINUX_7610']
 
         self.cfg = config
         self.training = training
         self.flist = self.load_flist(flist)
         self.train_filenames = tf.placeholder(tf.string, shape=[None])
         self.train_iterator = None
-        self.mask_iterator = None
-
-        # external mask
-        if config['MASK'] == 2:
-            self.mask_flist = self.load_flist(mask_flist)
-            self.mask_filenames = tf.placeholder(tf.string, shape=[None])
 
     def __len__(self):
         """Get the length of dataset."""
@@ -54,10 +47,10 @@ class Dataset():
         images = self.load_images()
         # img_grays = self.load_grayscales(images)
         img_color_domains = self.load_color_domain(images)
-        img_masks = self.load_masks()
+
         # img_edges = self.load_edges(img_grays)
 
-        return images, img_masks, img_color_domains
+        return images, img_color_domains
         # return images, img_grays, img_edges, img_masks, img_color_domains
 
     def input_parse(self, img_path):
@@ -145,23 +138,66 @@ class Dataset():
         else:
             pass
 
-    def load_masks(self):
-        # shape = images.get_shape().as_list()
-        # imgh = shape[1]
-        # imgw = shape[2]
+    def load_flist(self, flist):
+        if isinstance(flist, list):
+            return flist
 
-        mask_type = self.cfg['MASK']
+        # flist: image file path, image directory path, text file flist path
+        if isinstance(flist, str):
+            if os.path.isdir(flist):
+                flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png')) + \
+                    list(glob.glob(flist + '/*.JPG'))
+                flist.sort()
+                return flist
+
+            if os.path.isfile(flist):
+                # return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
+                try:
+                    print('is a file')
+                    return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
+                except:
+                    return [flist]
+
+        return []
+
+
+class MaskDataset():
+    """Construct mask dataset class."""
+
+    def __init__(self, config):
+        if pf.system() == 'Windows':
+            mask_flist = config['MASK_FLIST_WIN']
+        elif pf.system() == 'Linux':
+            if pf.node() == 'icie-Precision-Tower-7810':
+                mask_flist = config['MASK_FLIST_LINUX_7810']
+            elif pf.node() == 'icie-Precision-T7610':
+                mask_flist = config['MASK_FLIST_LINUX_7610']
+
+        self.cfg = config
+        self.mask_iterator = None
+        self.mask_type = config['MASK']
+        self.mask_flist = mask_flist
+
+        # if config['MASK'] == 2:  # external mask dataset
+        #     self.mask_flist = self.load_flist(mask_flist)
+
+    def load_items(self):
+        masks = self.load_masks()
+        return masks
+
+    def load_masks(self):
 
         # random block + half
-        if mask_type == 1:
+        if self.mask_type == 1:
             masks = create_mask(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE'],
                                 self.cfg['INPUT_SIZE'] // 2, self.cfg['INPUT_SIZE'] // 2)
 
             return masks  # [1, 256, 256, 1]
 
         # external mask
-        if mask_type == 2:
-            mask_dataset = tf.data.Dataset.from_tensor_slices(self.mask_filenames)
+        if self.mask_type == 2:
+            mask_path = self.load_flist(self.mask_flist)
+            mask_dataset = tf.data.Dataset.from_tensor_slices(mask_path)
             mask_dataset = mask_dataset.map(self.external_mask_parse)
             mask_dataset = mask_dataset.shuffle(buffer_size=250)
             mask_dataset = mask_dataset.batch(self.cfg['BATCH_SIZE'])
@@ -209,13 +245,6 @@ class Dataset():
                     return [flist]
 
         return []
-
-
-class MaskDataset():
-    """Construct mask dataset class."""
-
-    def __init__(self):
-        pass
 
 
 if __name__ == '__main__':
