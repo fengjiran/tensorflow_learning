@@ -47,6 +47,7 @@ class ColorAware():
 
     def train(self):
         images, img_color_domains = self.train_dataset.load_items()
+        val_images, val_img_color_domains = self.val_dataset.load_items()
         img_masks = self.mask_dataset.load_items()
 
         total = len(self.train_dataset)
@@ -121,9 +122,6 @@ class ColorAware():
                         break
 
                     step += 1
-
-    def evaluate(self):
-        images, img_color_domains = self.val_dataset.load_items()
 
 
 if __name__ == '__main__':
