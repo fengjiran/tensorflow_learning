@@ -264,14 +264,13 @@ if __name__ == '__main__':
             test_flist = cfg['TEST_FLIST_LINUX_7610']
             mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
-    dataset = Dataset(cfg, train_flist)
-    mask_dataset = MaskDataset(cfg, mask_flist)
-
+    dataset = Dataset(cfg, val_flist)
     images, img_color_domains = dataset.load_items()
-    img_masks = mask_dataset.load_items()
-
     iterator = dataset.iterator
-    mask_iterator = dataset.mask_iterator
+
+    mask_dataset = MaskDataset(cfg, mask_flist)
+    img_masks = mask_dataset.load_items()
+    mask_iterator = mask_dataset.mask_iterator
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
