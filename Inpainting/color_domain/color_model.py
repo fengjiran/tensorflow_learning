@@ -58,7 +58,8 @@ class ColorAware():
         # step = 0
 
         gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
-        iterator = self.train_dataset.iterator
+        train_iterator = self.train_dataset.iterator
+        val_iterator = self.val_dataset.iterator
         mask_iterator = self.mask_dataset.mask_iterator
 
         # the saver for model saving and loading
@@ -67,8 +68,13 @@ class ColorAware():
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
-            iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
-            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist}
+            if cfg['MASK'] == 2:
+                iterators = [train_iterator.initializer, val_iterator.initializer, mask_iterator.initializer]
+            else:
+                iterators = [train_iterator.initializer, val_iterator.initializer]
+
+            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
+                         self.val_dataset.filenames: self.val_dataset.flist}
             sess.run(iterators, feed_dict=feed_dict)
             summary_writer = tf.summary.FileWriter(log_dir)
 
