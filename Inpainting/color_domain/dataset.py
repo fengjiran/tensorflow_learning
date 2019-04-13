@@ -247,25 +247,40 @@ if __name__ == '__main__':
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
 
-    dataset = Dataset(cfg)
-    images, img_masks, img_color_domains = dataset.load_items()
-    iterator = dataset.train_iterator
+    if pf.system() == 'Windows':
+        train_flist = cfg['TRAIN_FLIST_WIN']
+        val_flist = cfg['VAL_FLIST_WIN']
+        test_flist = cfg['TEST_FLIST_WIN']
+        mask_flist = cfg['MASK_FLIST_WIN']
+    elif pf.system() == 'Linux':
+        if pf.node() == 'icie-Precision-Tower-7810':
+            train_flist = cfg['TRAIN_FLIST_LINUX_7810']
+            val_flist = cfg['VAL_FLIST_LINUX_7810']
+            test_flist = cfg['TEST_FLIST_LINUX_7810']
+            mask_flist = cfg['MASK_FLIST_LINUX_7810']
+        elif pf.node() == 'icie-Precision-T7610':
+            train_flist = cfg['TRAIN_FLIST_LINUX_7610']
+            val_flist = cfg['VAL_FLIST_LINUX_7610']
+            test_flist = cfg['TEST_FLIST_LINUX_7610']
+            mask_flist = cfg['MASK_FLIST_LINUX_7610']
+
+    dataset = Dataset(cfg, train_flist)
+    mask_dataset = MaskDataset(cfg, mask_flist)
+
+    images, img_color_domains = dataset.load_items()
+    img_masks = mask_dataset.load_items()
+
+    iterator = dataset.iterator
     mask_iterator = dataset.mask_iterator
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
         iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
-        feed_dict = {dataset.train_filenames: dataset.flist,
-                     dataset.mask_filenames: dataset.mask_flist} if cfg['MASK'] == 2 else {dataset.train_filenames: dataset.flist}
+
+        feed_dict = {dataset.filenames: dataset.flist}
 
         sess.run(iterators, feed_dict=feed_dict)
-
-        # sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
-        # if cfg['MASK'] == 2:
-        #     sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
-        #     # tmp3 = sess.run(img_masks)
-        #     # print(tmp3.shape)
 
         tmp0, tmp1, tmp2 = sess.run([images, img_masks, img_color_domains])
 
