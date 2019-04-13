@@ -24,10 +24,15 @@ class Dataset():
             mask_flist = config['MASK_FLIST_WIN']
         elif pf.system() == 'Linux':
             if pf.node() == 'icie-Precision-Tower-7810':
-                flist = config['FLIST_LINUX_7810']
+                train_flist = config['TRAIN_FLIST_LINUX_7810']
+                val_flist = config['VAL_FLIST_LINUX_7810']
+                test_flist = config['TEST_FLIST_LINUX_7810']
                 mask_flist = config['MASK_FLIST_LINUX_7810']
             elif pf.node() == 'icie-Precision-T7610':
-                pass
+                train_flist = config['TRAIN_FLIST_LINUX_7610']
+                val_flist = config['VAL_FLIST_LINUX_7610']
+                test_flist = config['TEST_FLIST_LINUX_7610']
+                mask_flist = config['MASK_FLIST_LINUX_7610']
 
         self.cfg = config
         self.training = training
