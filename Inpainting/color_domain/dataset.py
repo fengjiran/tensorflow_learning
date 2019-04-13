@@ -193,7 +193,7 @@ class MaskDataset():
 
         # external mask
         if self.mask_type == 2:
-            mask_path = self.load_flist(self.mask_flist)
+            mask_path = tf.constant(self.load_flist(self.mask_flist))
             mask_dataset = tf.data.Dataset.from_tensor_slices(mask_path)
             mask_dataset = mask_dataset.map(self.external_mask_parse)
             mask_dataset = mask_dataset.shuffle(buffer_size=250)
