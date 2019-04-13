@@ -178,9 +178,6 @@ class MaskDataset():
         self.mask_type = config['MASK']
         self.mask_flist = mask_flist
 
-        # if config['MASK'] == 2:  # external mask dataset
-        #     self.mask_flist = self.load_flist(mask_flist)
-
     def load_items(self):
         masks = self.load_masks()
         return masks
