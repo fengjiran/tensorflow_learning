@@ -3,8 +3,8 @@ import csv
 import platform as pf
 import yaml
 import tensorflow as tf
-from dataset import Dataset
-from networks import ColorModel
+from .dataset import Dataset
+from .networks import ColorModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
