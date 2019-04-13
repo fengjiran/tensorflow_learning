@@ -116,6 +116,9 @@ class ColorAware():
 
                     step += 1
 
+    def evaluate(self):
+        images, img_color_domains = self.val_dataset.load_items()
+
 
 if __name__ == '__main__':
     model = ColorAware(cfg)
