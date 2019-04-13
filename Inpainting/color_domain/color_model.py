@@ -4,6 +4,7 @@ import platform as pf
 import yaml
 import tensorflow as tf
 from .dataset import Dataset
+from .dataset import MaskDataset
 from .networks import ColorModel
 
 with open('config.yaml', 'r') as f:
@@ -12,13 +13,25 @@ with open('config.yaml', 'r') as f:
 if pf.system() == 'Windows':
     log_dir = cfg['LOG_DIR_WIN']
     model_dir = cfg['MODEL_PATH_WIN']
+    train_flist = cfg['TRAIN_FLIST_WIN']
+    val_flist = cfg['VAL_FLIST_WIN']
+    test_flist = cfg['TEST_FLIST_WIN']
+    mask_flist = cfg['MASK_FLIST_WIN']
 elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         log_dir = cfg['LOG_DIR_LINUX_7810']
         model_dir = cfg['MODEL_PATH_LINUX_7810']
+        train_flist = cfg['TRAIN_FLIST_LINUX_7810']
+        val_flist = cfg['VAL_FLIST_LINUX_7810']
+        test_flist = cfg['TEST_FLIST_LINUX_7810']
+        mask_flist = cfg['MASK_FLIST_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
         log_dir = cfg['LOG_DIR_LINUX_7610']
         model_dir = cfg['MODEL_PATH_LINUX_7610']
+        train_flist = cfg['TRAIN_FLIST_LINUX_7610']
+        val_flist = cfg['VAL_FLIST_LINUX_7610']
+        test_flist = cfg['TEST_FLIST_LINUX_7610']
+        mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
 
 class ColorAware():
@@ -27,13 +40,16 @@ class ColorAware():
     def __init__(self, config):
         self.cfg = config
         self.model = ColorModel(config)
-        self.dataset = Dataset(config)
+
+        self.train_dataset = Dataset(config, train_flist)
+        self.val_dataset = Dataset(config, val_flist)
+        self.mask_dataset = MaskDataset(config, mask_flist)
 
     def train(self):
-        images, img_masks, img_color_domains = self.dataset.load_items()
-        flist = self.dataset.flist
-        mask_flist = self.dataset.mask_flist if cfg['MASK'] == 2 else None
-        total = len(self.dataset)
+        images, img_color_domains = self.train_dataset.load_items()
+        img_masks = self.mask_dataset.load_items()
+
+        total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
 
@@ -42,8 +58,8 @@ class ColorAware():
         # step = 0
 
         gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
-        iterator = self.dataset.train_iterator
-        mask_iterator = self.dataset.mask_iterator
+        iterator = self.train_dataset.iterator
+        mask_iterator = self.mask_dataset.mask_iterator
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
@@ -52,8 +68,7 @@ class ColorAware():
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
-            feed_dict = {self.dataset.train_filenames: flist,
-                         self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
+            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist}
             sess.run(iterators, feed_dict=feed_dict)
             summary_writer = tf.summary.FileWriter(log_dir)
 
