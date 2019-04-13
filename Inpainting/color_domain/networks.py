@@ -3,13 +3,14 @@ import os
 import tensorflow as tf
 
 from ops import conv
-# from ops import deconv
 from ops import resnet_block
 from ops import instance_norm
-
 from loss import adversarial_loss
 
-# from utils import images_summary
+from .metrics import tf_l1_loss
+from .metrics import tf_l2_loss
+from .metrics import tf_psnr
+from .metrics import tf_ssim
 
 
 class ColorModel():
