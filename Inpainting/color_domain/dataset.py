@@ -211,6 +211,13 @@ class Dataset():
         return []
 
 
+class MaskDataset():
+    """Construct mask dataset class."""
+
+    def __init__(self):
+        pass
+
+
 if __name__ == '__main__':
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
