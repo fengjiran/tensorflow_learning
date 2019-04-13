@@ -112,6 +112,12 @@ class ColorModel():
         outputs = self.color_domain_generator(inputs)
         outputs_merged = outputs * masks + color_domains * (1 - masks)
 
+        # metrics
+        psnr = tf_psnr(color_domains, outputs_merged, 1.0)
+        ssim = tf_ssim(color_domains, outputs_merged, 1.0)
+        l1 = tf_l1_loss(color_domains, outputs_merged)
+        l2 = tf_l2_loss(color_domains, outputs_merged)
+
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
         else:
@@ -187,7 +193,7 @@ class ColorModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_fm_loss, psnr, ssim, l1, l2]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
@@ -195,6 +201,11 @@ class ColorModel():
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
+
+        tf.summary.scalar('psnr', psnr)
+        tf.summary.scalar('ssim', ssim)
+        tf.summary.scalar('l1', l1)
+        tf.summary.scalar('l2', l2)
 
         visual_img = [images, color_domains, color_domains_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
