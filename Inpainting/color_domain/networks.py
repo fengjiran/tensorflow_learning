@@ -202,16 +202,40 @@ class ColorModel():
         tf.summary.scalar('gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
 
-        tf.summary.scalar('psnr', psnr)
-        tf.summary.scalar('ssim', ssim)
-        tf.summary.scalar('l1', l1)
-        tf.summary.scalar('l2', l2)
+        tf.summary.scalar('train_psnr', psnr)
+        tf.summary.scalar('train_ssim', ssim)
+        tf.summary.scalar('train_l1', l1)
+        tf.summary.scalar('train_l2', l2)
+
+        return gen_train, dis_train, logs
+
+    def eval_model(self, images, color_domains, masks):
+        # generator input: [img(3) + color_domain(3) + mask(1)]
+        color_domains_masked = color_domains * (1 - masks) + masks
+        imgs_masked = images * (1 - masks) + masks
+        inputs = tf.concat([imgs_masked, color_domains_masked,
+                            masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
+        outputs = self.color_domain_generator(inputs, reuse=True)
+        outputs_merged = outputs * masks + color_domains * (1 - masks)
+
+        # metrics
+        psnr = tf_psnr(color_domains, outputs_merged, 1.0)
+        ssim = tf_ssim(color_domains, outputs_merged, 1.0)
+        l1 = tf_l1_loss(color_domains, outputs_merged)
+        l2 = tf_l2_loss(color_domains, outputs_merged)
+
+        tf.summary.scalar('val_psnr', psnr)
+        tf.summary.scalar('val_ssim', ssim)
+        tf.summary.scalar('val_l1', l1)
+        tf.summary.scalar('val_l2', l2)
 
         visual_img = [images, color_domains, color_domains_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('image_color_masked_merged', visual_img, 4)
 
-        return gen_train, dis_train, logs
+        val_logs = [psnr, ssim, l1, l2]
+
+        return val_logs
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
