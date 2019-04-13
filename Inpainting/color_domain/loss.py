@@ -51,15 +51,6 @@ def compute_gram(x):
     return gram
 
 
-# def compute_gram(x):
-#     b, ch, h, w = x.size()
-#     f = x.view(b, ch, w * h)
-#     f_T = f.transpose(1, 2)
-#     G = f.bmm(f_T) / (h * w * ch)
-
-#     return G
-
-
 def style_loss(x, y):
     """Compute style loss, vgg-based."""
     # vgg = Vgg19()
