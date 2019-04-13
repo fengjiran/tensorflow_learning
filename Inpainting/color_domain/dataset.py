@@ -18,26 +18,26 @@ from utils import tf_get_color_domain
 class Dataset():
     """Construct dataset class."""
 
-    def __init__(self, config, training=True):
-        if pf.system() == 'Windows':
-            flist = config['FLIST_WIN']
-
-        elif pf.system() == 'Linux':
-            if pf.node() == 'icie-Precision-Tower-7810':
-                train_flist = config['TRAIN_FLIST_LINUX_7810']
-                val_flist = config['VAL_FLIST_LINUX_7810']
-                test_flist = config['TEST_FLIST_LINUX_7810']
-
-            elif pf.node() == 'icie-Precision-T7610':
-                train_flist = config['TRAIN_FLIST_LINUX_7610']
-                val_flist = config['VAL_FLIST_LINUX_7610']
-                test_flist = config['TEST_FLIST_LINUX_7610']
+    def __init__(self, config, flist):
+        # if pf.system() == 'Windows':
+        #     train_flist = config['TRAIN_FLIST_WIN']
+        #     val_flist = config['VAL_FLIST_WIN']
+        #     test_flist = config['TEST_FLIST_WIN']
+        # elif pf.system() == 'Linux':
+        #     if pf.node() == 'icie-Precision-Tower-7810':
+        #         train_flist = config['TRAIN_FLIST_LINUX_7810']
+        #         val_flist = config['VAL_FLIST_LINUX_7810']
+        #         test_flist = config['TEST_FLIST_LINUX_7810']
+        #     elif pf.node() == 'icie-Precision-T7610':
+        #         train_flist = config['TRAIN_FLIST_LINUX_7610']
+        #         val_flist = config['VAL_FLIST_LINUX_7610']
+        #         test_flist = config['TEST_FLIST_LINUX_7610']
 
         self.cfg = config
-        self.training = training
+        # self.training = training
         self.flist = self.load_flist(flist)
-        self.train_filenames = tf.placeholder(tf.string, shape=[None])
-        self.train_iterator = None
+        self.filenames = tf.placeholder(tf.string, shape=[None])
+        self.iterator = None
 
     def __len__(self):
         """Get the length of dataset."""
@@ -65,14 +65,14 @@ class Dataset():
             return img  # [-1, 1]
 
     def load_images(self):
-        train_dataset = tf.data.Dataset.from_tensor_slices(self.train_filenames)
-        train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=250)
-        train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'])
-        train_dataset = train_dataset.repeat()
+        dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
+        dataset = dataset.map(self.input_parse)
+        dataset = dataset.shuffle(buffer_size=250)
+        dataset = dataset.batch(self.cfg['BATCH_SIZE'])
+        dataset = dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
-        self.train_iterator = train_dataset.make_initializable_iterator()
-        images = self.train_iterator.get_next()
+        self.iterator = dataset.make_initializable_iterator()
+        images = self.iterator.get_next()
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
@@ -109,7 +109,6 @@ class Dataset():
     def load_edges(self, img_grays, mask=None):
         sigma = self.cfg['SIGMA']
 
-        # img_grays = self.load_grayscales(images)
         shape = img_grays.get_shape().as_list()
         img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
 
@@ -164,14 +163,14 @@ class Dataset():
 class MaskDataset():
     """Construct mask dataset class."""
 
-    def __init__(self, config):
-        if pf.system() == 'Windows':
-            mask_flist = config['MASK_FLIST_WIN']
-        elif pf.system() == 'Linux':
-            if pf.node() == 'icie-Precision-Tower-7810':
-                mask_flist = config['MASK_FLIST_LINUX_7810']
-            elif pf.node() == 'icie-Precision-T7610':
-                mask_flist = config['MASK_FLIST_LINUX_7610']
+    def __init__(self, config, mask_flist):
+        # if pf.system() == 'Windows':
+        #     mask_flist = config['MASK_FLIST_WIN']
+        # elif pf.system() == 'Linux':
+        #     if pf.node() == 'icie-Precision-Tower-7810':
+        #         mask_flist = config['MASK_FLIST_LINUX_7810']
+        #     elif pf.node() == 'icie-Precision-T7610':
+        #         mask_flist = config['MASK_FLIST_LINUX_7610']
 
         self.cfg = config
         self.mask_iterator = None
