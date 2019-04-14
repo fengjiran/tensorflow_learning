@@ -46,7 +46,6 @@ class Dataset():
     def load_items(self):
         images = self.load_images()
         img_color_domains = self.load_color_domain(images)
-
         return images, img_color_domains
 
     def input_parse(self, img_path):
@@ -91,47 +90,6 @@ class Dataset():
 
         img_color_domains = tf.reshape(img_color_domains, shape)
         return img_color_domains  # [N, 256, 256, 3]
-
-    def load_grayscales(self, images):
-        # images: [-1, 1]
-        images = (images + 1) * 127.5  # [0, 255]
-        img_grays = tf.image.rgb_to_grayscale(images)
-        img_grays /= 255.  # [0, 1]
-        # shape = img_grays.get_shape().as_list()
-        # img_grays = tf.reshape(img_grays, [shape[0], shape[1], shape[2]])
-
-        return img_grays  # [N, 256, 256, 1]
-
-    def load_edges(self, img_grays, mask=None):
-        sigma = self.cfg['SIGMA']
-
-        shape = img_grays.get_shape().as_list()
-        img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
-
-        # in test mode images are masked (with masked regions),
-        # using 'mask' parameter prevents canny to detect edges for the masked regions
-        mask = tf.cast(tf.ones([shape[1], shape[2]]), dtype=tf.bool) if mask is None else tf.cast(mask, dtype=tf.bool)
-
-        # canny
-        if self.cfg['EDGE'] == 1:
-            # no edge
-            if sigma == -1:
-                return tf.zeros([shape[1], shape[2]], dtype=tf.bool)
-
-            # random sigma
-            if sigma == 0:
-                sigma = tf.random_uniform([], 1, 5)
-
-            img_edges = tf.map_fn(fn=lambda im: tf_canny(im, sigma, mask),
-                                  elems=img_grays,
-                                  dtype=tf.bool)
-            img_edges = tf.reshape(img_edges, [-1, shape[1], shape[2], 1])
-            img_edges = tf.cast(img_edges, dtype=tf.float32)
-            return img_edges  # [N, 256, 256, 1]
-
-        # external
-        else:
-            pass
 
     def load_flist(self, flist):
         if isinstance(flist, list):
