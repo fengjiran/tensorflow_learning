@@ -45,6 +45,34 @@ class ColorAware():
         self.val_dataset = Dataset(config, val_flist)
         self.mask_dataset = MaskDataset(config, mask_flist)
 
+    def test_eval(self):
+        images, img_color_domains = self.train_dataset.load_items()
+        val_images, val_img_color_domains = self.val_dataset.load_items()
+        img_masks = self.mask_dataset.load_items()
+
+        gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
+        val_logs = self.model.eval_model(val_images, val_img_color_domains, img_masks)
+
+        train_iterator = self.train_dataset.iterator
+        val_iterator = self.val_dataset.iterator
+        mask_iterator = self.mask_dataset.mask_iterator
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
+            if cfg['MASK'] == 2:
+                iterators = [train_iterator.initializer, val_iterator.initializer, mask_iterator.initializer]
+            else:
+                iterators = [train_iterator.initializer, val_iterator.initializer]
+
+            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
+                         self.val_dataset.filenames: self.val_dataset.flist}
+            sess.run(iterators, feed_dict=feed_dict)
+            sess.run(tf.global_variables_initializer())
+
+            # val_logs_ = sess.run(val_logs)
+            logs_ = sess.run(logs)
+
     def train(self):
         images, img_color_domains = self.train_dataset.load_items()
         val_images, val_img_color_domains = self.val_dataset.load_items()
@@ -98,7 +126,7 @@ class ColorAware():
                 epoch += 1
                 print('\n\nTraining epoch: %d' % epoch)
                 for i in range(num_batch):
-                    _, _, logs_, _ = sess.run([dis_train, gen_train, logs, val_logs])
+                    _, _, logs_ = sess.run([dis_train, gen_train, logs])
                     print('Epoch: {}, Iter: {}'.format(epoch, step))
                     print('-----------dis_loss: {}'.format(logs_[0]))
                     print('-----------gen_loss: {}'.format(logs_[1]))
@@ -127,7 +155,10 @@ class ColorAware():
 
 if __name__ == '__main__':
     model = ColorAware(cfg)
-    model.train()
+    # model.train()
+
+    model.test_eval()
+
     # images, img_masks, img_color_domains = model.dataset.load_items()
     # color_domains_masked = img_color_domains * (1 - img_masks) + img_masks
     # imgs_masked = images * (1 - img_masks) + img_masks
