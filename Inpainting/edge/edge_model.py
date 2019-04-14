@@ -4,20 +4,34 @@ import platform as pf
 import yaml
 import tensorflow as tf
 from dataset import Dataset
+from dataset import MaskDataset
 from networks import EdgeModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
 
 if pf.system() == 'Windows':
-    pass
+    log_dir = cfg['LOG_DIR_WIN']
+    model_dir = cfg['MODEL_PATH_WIN']
+    train_flist = cfg['TRAIN_FLIST_WIN']
+    val_flist = cfg['VAL_FLIST_WIN']
+    test_flist = cfg['TEST_FLIST_WIN']
+    mask_flist = cfg['MASK_FLIST_WIN']
 elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         log_dir = cfg['LOG_DIR_LINUX_7810']
         model_dir = cfg['MODEL_PATH_LINUX_7810']
+        train_flist = cfg['TRAIN_FLIST_LINUX_7810']
+        val_flist = cfg['VAL_FLIST_LINUX_7810']
+        test_flist = cfg['TEST_FLIST_LINUX_7810']
+        mask_flist = cfg['MASK_FLIST_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
         log_dir = cfg['LOG_DIR_LINUX_7610']
         model_dir = cfg['MODEL_PATH_LINUX_7610']
+        train_flist = cfg['TRAIN_FLIST_LINUX_7610']
+        val_flist = cfg['VAL_FLIST_LINUX_7610']
+        test_flist = cfg['TEST_FLIST_LINUX_7610']
+        mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
 
 class EdgeAware():
@@ -26,23 +40,23 @@ class EdgeAware():
     def __init__(self, config):
         self.cfg = config
         self.model = EdgeModel(config)
-        self.dataset = Dataset(config)
+
+        self.train_dataset = Dataset(config, train_flist)
+        self.val_dataset = Dataset(config, val_flist)
+        self.mask_dataset = MaskDataset(config, mask_flist)
 
     def train(self):
-        images, img_grays, img_edges, img_masks = self.dataset.load_items()
-        flist = self.dataset.flist
-        mask_flist = self.dataset.mask_flist if self.cfg['MASK'] == 2 else None
+        images, img_grays, img_edges = self.train_dataset.load_items()
+        val_images, val_img_grays, val_img_edges = self.val_dataset.load_items()
+        img_masks = self.mask_dataset.load_items()
+
         total = len(self.dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
 
-        # epoch = 0
         keep_training = True
-        # step = 0
 
         gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
-        iterator = self.dataset.train_iterator
-        mask_iterator = self.dataset.mask_iterator
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
