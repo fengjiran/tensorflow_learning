@@ -51,7 +51,7 @@ class Dataset():
         # img_edges = self.load_edges(img_grays)
 
         return images, img_color_domains
-        # return images, img_grays, img_edges, img_masks, img_color_domains
+        # return images, img_grays, img_edges, img_color_domains
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -67,7 +67,7 @@ class Dataset():
     def load_images(self):
         dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
         dataset = dataset.map(self.input_parse)
-        dataset = dataset.shuffle(buffer_size=50)
+        dataset = dataset.shuffle(buffer_size=100)
         dataset = dataset.batch(self.cfg['BATCH_SIZE'])
         dataset = dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
