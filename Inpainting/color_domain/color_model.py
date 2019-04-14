@@ -134,9 +134,7 @@ class ColorAware():
 
 if __name__ == '__main__':
     model = ColorAware(cfg)
-    # model.train()
-
-    model.test_eval()
+    model.train()
 
     # images, img_masks, img_color_domains = model.dataset.load_items()
     # color_domains_masked = img_color_domains * (1 - img_masks) + img_masks
