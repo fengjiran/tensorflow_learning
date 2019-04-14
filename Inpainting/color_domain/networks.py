@@ -231,7 +231,7 @@ class ColorModel():
 
         visual_img = [images, color_domains, color_domains_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
-        tf.summary.image('image_color_masked_merged', visual_img, 4)
+        tf.summary.image('image_color_masked_merged', visual_img, 5)
 
         val_logs = [psnr, ssim, l1, l2]
 
