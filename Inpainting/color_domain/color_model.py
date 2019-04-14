@@ -54,11 +54,11 @@ class ColorAware():
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
 
-        # epoch = 0
         keep_training = True
-        # step = 0
 
         gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
+        val_logs = self.model.eval_model(val_images, val_img_color_domains, img_masks)
+
         train_iterator = self.train_dataset.iterator
         val_iterator = self.val_dataset.iterator
         mask_iterator = self.mask_dataset.mask_iterator
@@ -110,7 +110,7 @@ class ColorAware():
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
-                    if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+                    if step % self.cfg['EVAL_INTERVAL'] == 0:
                         summary = sess.run(all_summary)
                         summary_writer.add_summary(summary, step)
 
