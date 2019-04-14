@@ -45,34 +45,6 @@ class ColorAware():
         self.val_dataset = Dataset(config, val_flist)
         self.mask_dataset = MaskDataset(config, mask_flist)
 
-    def test_eval(self):
-        images, img_color_domains = self.train_dataset.load_items()
-        val_images, val_img_color_domains = self.val_dataset.load_items()
-        img_masks = self.mask_dataset.load_items()
-
-        gen_train, dis_train, logs = self.model.build_model(images, img_color_domains, img_masks)
-        val_logs = self.model.eval_model(val_images, val_img_color_domains, img_masks)
-
-        train_iterator = self.train_dataset.iterator
-        val_iterator = self.val_dataset.iterator
-        mask_iterator = self.mask_dataset.mask_iterator
-
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        with tf.Session(config=config) as sess:
-            if cfg['MASK'] == 2:
-                iterators = [train_iterator.initializer, val_iterator.initializer, mask_iterator.initializer]
-            else:
-                iterators = [train_iterator.initializer, val_iterator.initializer]
-
-            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
-                         self.val_dataset.filenames: self.val_dataset.flist}
-            sess.run(iterators, feed_dict=feed_dict)
-            sess.run(tf.global_variables_initializer())
-
-            # val_logs_ = sess.run(val_logs)
-            logs_ = sess.run(logs)
-
     def train(self):
         images, img_color_domains = self.train_dataset.load_items()
         val_images, val_img_color_domains = self.val_dataset.load_items()
@@ -140,6 +112,12 @@ class ColorAware():
                         mywrite.writerow(logs_)
 
                     if step % self.cfg['EVAL_INTERVAL'] == 0:
+                        val_logs_ = sess.run(val_logs)
+                        print('-----------psnr: {}'.format(val_logs_[0]))
+                        print('-----------ssim: {}'.format(val_logs_[1]))
+                        print('-----------l1: {}'.format(val_logs_[2]))
+                        print('-----------l2: {}'.format(val_logs_[3]))
+
                         summary = sess.run(all_summary)
                         summary_writer.add_summary(summary, step)
 
