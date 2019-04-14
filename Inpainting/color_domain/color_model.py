@@ -76,6 +76,7 @@ class ColorAware():
 
             feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
                          self.val_dataset.filenames: self.val_dataset.flist}
+
             sess.run(iterators, feed_dict=feed_dict)
             summary_writer = tf.summary.FileWriter(log_dir)
 
