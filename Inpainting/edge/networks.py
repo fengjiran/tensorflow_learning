@@ -198,11 +198,19 @@ class EdgeModel():
         tf.summary.scalar('gen_fm_loss', gen_fm_loss)
         # tf.summary.scalar('gen_ce_loss', gen_ce_loss)
 
+        return gen_train, dis_train, logs
+
+    def eval_model(self, img_grays, edges, masks):
+        # generator input: [grayscale(1) + edge(1) + mask(1)]
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        outputs = self.edge_generator(inputs, reuse=True)
+        outputs_merged = outputs * masks + edges * (1 - masks)
+
         visual_img = [img_grays, grays_masked, edges, edges_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('gray_edge_merged', visual_img, 4)
-
-        return gen_train, dis_train, logs
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
