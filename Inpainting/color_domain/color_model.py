@@ -90,7 +90,8 @@ class ColorAware():
 
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
-                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_fm_loss'])
+                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_fm_loss',
+                                  'psnr', 'ssim', 'l1', 'l2'])
             all_summary = tf.summary.merge_all()
 
             while keep_training:
