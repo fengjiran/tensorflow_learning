@@ -31,7 +31,6 @@ class Dataset():
         images = self.load_images()
         img_grays = self.load_grayscales(images)
         img_edges = self.load_edges(img_grays)
-
         return images, img_grays, img_edges
 
     def input_parse(self, img_path):
@@ -46,14 +45,14 @@ class Dataset():
             return img  # [-1, 1]
 
     def load_images(self):
-        train_dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
-        train_dataset = train_dataset.map(self.input_parse)
-        train_dataset = train_dataset.shuffle(buffer_size=250)
-        train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'])
-        train_dataset = train_dataset.repeat()
+        dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
+        dataset = dataset.map(self.input_parse)
+        dataset = dataset.shuffle(buffer_size=100)
+        dataset = dataset.batch(self.cfg['BATCH_SIZE'])
+        dataset = dataset.repeat()
         # train_dataset = train_dataset.batch(self.cfg['BATCH_SIZE'], drop_remainder=True)
-        self.train_iterator = train_dataset.make_initializable_iterator()
-        images = self.train_iterator.get_next()
+        self.iterator = dataset.make_initializable_iterator()
+        images = self.iterator.get_next()
         images = tf.image.resize_area(images, [self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']])
         images = tf.clip_by_value(images, 0., 255.)
         images = images / 127.5 - 1  # [-1, 1]
@@ -129,14 +128,6 @@ class MaskDataset():
     """Construct mask dataset class."""
 
     def __init__(self, config, mask_flist):
-        # if pf.system() == 'Windows':
-        #     mask_flist = config['MASK_FLIST_WIN']
-        # elif pf.system() == 'Linux':
-        #     if pf.node() == 'icie-Precision-Tower-7810':
-        #         mask_flist = config['MASK_FLIST_LINUX_7810']
-        #     elif pf.node() == 'icie-Precision-T7610':
-        #         mask_flist = config['MASK_FLIST_LINUX_7610']
-
         self.cfg = config
         self.mask_iterator = None
         self.mask_type = config['MASK']
@@ -212,31 +203,39 @@ if __name__ == '__main__':
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
 
-    dataset = Dataset(cfg)
-    images, img_grays, img_edges, img_masks = dataset.load_items()
-    iterator = dataset.train_iterator
-    mask_iterator = dataset.mask_iterator
-    # images, iterator = dataset.load_images()
-    # grays = dataset.load_grayscale(images)
-    # edges = dataset.load_edge(images)
+    if pf.system() == 'Windows':
+        train_flist = cfg['TRAIN_FLIST_WIN']
+        val_flist = cfg['VAL_FLIST_WIN']
+        test_flist = cfg['TEST_FLIST_WIN']
+        mask_flist = cfg['MASK_FLIST_WIN']
+    elif pf.system() == 'Linux':
+        if pf.node() == 'icie-Precision-Tower-7810':
+            train_flist = cfg['TRAIN_FLIST_LINUX_7810']
+            val_flist = cfg['VAL_FLIST_LINUX_7810']
+            test_flist = cfg['TEST_FLIST_LINUX_7810']
+            mask_flist = cfg['MASK_FLIST_LINUX_7810']
+        elif pf.node() == 'icie-Precision-T7610':
+            train_flist = cfg['TRAIN_FLIST_LINUX_7610']
+            val_flist = cfg['VAL_FLIST_LINUX_7610']
+            test_flist = cfg['TEST_FLIST_LINUX_7610']
+            mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
-    # if cfg['MASK'] == 2:
-    #     masks, mask_iterator = dataset.load_mask()
+    dataset = Dataset(cfg, train_flist)
+    images, img_grays, img_edges = dataset.load_items()
+    iterator = dataset.train_iterator
+
+    mask_dataset = MaskDataset(cfg, mask_flist)
+    img_masks = mask_dataset.load_items()
+    mask_iterator = mask_dataset.mask_iterator
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
         iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
-        feed_dict = {dataset.train_filenames: dataset.flist,
-                     dataset.mask_filenames: dataset.mask_flist} if cfg['MASK'] == 2 else {dataset.train_filenames: dataset.flist}
+
+        feed_dict = {dataset.filenames: dataset.flist}
 
         sess.run(iterators, feed_dict=feed_dict)
-
-        # sess.run(iterator.initializer, feed_dict={dataset.train_filenames: dataset.flist})
-        # if cfg['MASK'] == 2:
-        #     sess.run(mask_iterator.initializer, feed_dict={dataset.mask_filenames: dataset.mask_flist})
-        #     # tmp3 = sess.run(img_masks)
-        #     # print(tmp3.shape)
 
         tmp0, tmp1, tmp2, tmp3 = sess.run([images, img_grays, img_edges, img_masks])
 
