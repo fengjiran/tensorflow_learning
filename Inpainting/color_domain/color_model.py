@@ -98,7 +98,7 @@ class ColorAware():
                 epoch += 1
                 print('\n\nTraining epoch: %d' % epoch)
                 for i in range(num_batch):
-                    _, _, logs_ = sess.run([dis_train, gen_train, logs])
+                    _, _, logs_, _ = sess.run([dis_train, gen_train, logs, val_logs])
                     print('Epoch: {}, Iter: {}'.format(epoch, step))
                     print('-----------dis_loss: {}'.format(logs_[0]))
                     print('-----------gen_loss: {}'.format(logs_[1]))
