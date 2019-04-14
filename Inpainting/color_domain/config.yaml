@@ -28,7 +28,7 @@ GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
 
 SAVE_INTERVAL: 200                 # how many iterations to wait before saving model (0: never)
-SUMMARY_INTERVAL: 200              # how many iterations to wait before saving summaries
+EVAL_INTERVAL: 200                 # how many iterations to wait before model evaluation (0: never)
 
 
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
