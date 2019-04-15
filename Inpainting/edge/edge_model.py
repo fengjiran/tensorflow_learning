@@ -50,7 +50,7 @@ class EdgeAware():
         val_images, val_img_grays, val_img_edges = self.val_dataset.load_items()
         img_masks = self.mask_dataset.load_items()
 
-        total = len(self.dataset)
+        total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
 
