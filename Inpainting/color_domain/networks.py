@@ -243,8 +243,9 @@ class ColorModel():
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains_masked,
                             masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
-        outputs = self.color_domain_generator(inputs, reuse=True)
+        outputs = self.color_domain_generator(inputs)
         outputs_merged = outputs * masks + color_domains * (1 - masks)
+        return outputs_merged
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
