@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
     dataset = Dataset(cfg, train_flist)
     images, img_grays, img_edges = dataset.load_items()
-    iterator = dataset.train_iterator
+    iterator = dataset.iterator
 
     mask_dataset = MaskDataset(cfg, mask_flist)
     img_masks = mask_dataset.load_items()
