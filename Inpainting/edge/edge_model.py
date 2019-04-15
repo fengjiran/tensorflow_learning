@@ -79,8 +79,6 @@ class EdgeAware():
 
             sess.run(iterators, feed_dict=feed_dict)
 
-            summary_writer = tf.summary.FileWriter(log_dir)
-
             if self.cfg['firstTimeTrain']:
                 step = 0
                 epoch = 0
@@ -93,6 +91,8 @@ class EdgeAware():
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss'])
+
+            summary_writer = tf.summary.FileWriter(log_dir)
             all_summary = tf.summary.merge_all()
 
             while keep_training:
