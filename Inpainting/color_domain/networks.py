@@ -237,6 +237,9 @@ class ColorModel():
 
         return val_logs
 
+    def test_model(self, images, color_domains, masks):
+        pass
+
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
         saver.save(sess, os.path.join(path, model_name))
