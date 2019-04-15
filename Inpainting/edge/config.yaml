@@ -2,7 +2,7 @@ firstTimeTrain: true               # the first time to train
 MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
 SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
 EDGE: 1                            # 1: canny, 2: external
-MASK: 1                            # 1: random block, half, 2: external
+MASK: 2                            # 1: random block, half, 2: external
 LR: 0.0001                         # learning rate
 D2G_LR: 0.1                        # discriminator/generator learning rate ratio
 BETA1: 0.0                         # adam optimizer beta1
