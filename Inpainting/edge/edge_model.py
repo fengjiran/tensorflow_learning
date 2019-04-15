@@ -57,6 +57,11 @@ class EdgeAware():
         keep_training = True
 
         gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
+        val_logs = self.model.eval_model(val_img_grays, val_img_edges, img_masks)
+
+        train_iterator = self.train_dataset.iterator
+        val_iterator = self.val_dataset.iterator
+        mask_iterator = self.mask_dataset.mask_iterator
 
         # the saver for model saving and loading
         saver = tf.train.Saver()
@@ -64,9 +69,14 @@ class EdgeAware():
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
-            iterators = [iterator.initializer, mask_iterator.initializer] if cfg['MASK'] == 2 else iterator.initializer
-            feed_dict = {self.dataset.train_filenames: flist,
-                         self.dataset.mask_filenames: mask_flist} if cfg['MASK'] == 2 else {self.dataset.train_filenames: flist}
+            if cfg['MASK'] == 2:
+                iterators = [train_iterator.initializer, val_iterator.initializer, mask_iterator.initializer]
+            else:
+                iterators = [train_iterator.initializer, val_iterator.initializer]
+
+            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
+                         self.val_dataset.filenames: self.val_dataset.flist}
+
             sess.run(iterators, feed_dict=feed_dict)
 
             summary_writer = tf.summary.FileWriter(log_dir)
@@ -101,7 +111,11 @@ class EdgeAware():
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
-                    if step % self.cfg['SUMMARY_INTERVAL'] == 0:
+                    if step % self.cfg['EVAL_INTERVAL'] == 0:
+                        val_logs_ = sess.run(val_logs)
+                        print('-----------val_precision: {}'.format(val_logs_[0]))
+                        print('-----------val_recall: {}'.format(val_logs_[1]))
+
                         summary = sess.run(all_summary)
                         summary_writer.add_summary(summary, step)
 
