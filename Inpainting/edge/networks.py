@@ -9,7 +9,7 @@ from ops import instance_norm
 
 from loss import adversarial_loss
 
-# from utils import images_summary
+from metrics import edge_accuracy
 
 
 class EdgeModel():
@@ -110,6 +110,9 @@ class EdgeModel():
         outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
+        # metrics
+        precision, recall = edge_accuracy(edges * masks, outputs_merged * masks, self.cfg['EDGE_THRESHOLD'])
+
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
         else:
@@ -192,11 +195,12 @@ class EdgeModel():
         logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
 
         # add summary for monitor
-        tf.summary.scalar('dis_loss', dis_loss)
-        tf.summary.scalar('gen_loss', gen_loss)
-        tf.summary.scalar('gen_gan_loss', gen_gan_loss)
-        tf.summary.scalar('gen_fm_loss', gen_fm_loss)
-        # tf.summary.scalar('gen_ce_loss', gen_ce_loss)
+        tf.summary.scalar('train_dis_loss', dis_loss)
+        tf.summary.scalar('train_gen_loss', gen_loss)
+        tf.summary.scalar('train_gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('train_gen_fm_loss', gen_fm_loss)
+        tf.summary.scalar('train_precision', precision)
+        tf.summary.scalar('train_recall', recall)
 
         return gen_train, dis_train, logs
 
@@ -208,9 +212,18 @@ class EdgeModel():
         outputs = self.edge_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
+        # metrics
+        precision, recall = edge_accuracy(edges * masks, outputs_merged * masks, self.cfg['EDGE_THRESHOLD'])
+
+        tf.summary.scalar('val_precision', precision)
+        tf.summary.scalar('val_recall', recall)
+
         visual_img = [img_grays, grays_masked, edges, edges_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('gray_edge_merged', visual_img, 4)
+
+        val_logs = [precision, recall]
+        return val_logs
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
