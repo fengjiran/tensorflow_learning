@@ -16,3 +16,6 @@ elif pf.system() == 'Linux':
         checkpoint_dir = cfg['MODEL_PATH_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
         checkpoint_dir = cfg['MODEL_PATH_LINUX_7610']
+
+
+model = ColorModel(cfg)
