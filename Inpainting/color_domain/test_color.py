@@ -65,9 +65,10 @@ if __name__ == '__main__':
     ############################# load the data #########################################
     mask_type = 1
     mask_path = 'F:\\Datasets\\qd_imd\\train\\00001_train.png'
-    image_path = 'F:\\Datasets\\celebahq\\img00000000.png'
+    image_path = 'F:\\Datasets\\celebahq\\img00000001.png'
     img_mask = load_mask(cfg, mask_type, mask_path)
     img, img_color_domain = load_image(cfg, image_path)
+    color_domain_masked = img_color_domain * (1 - img_mask) + img_mask
 
     ########################### construct the model #####################################
     model = ColorModel(cfg)
@@ -99,22 +100,27 @@ if __name__ == '__main__':
 
         plt.figure(figsize=(8, 3))
 
-        plt.subplot(141)
+        plt.subplot(151)
         plt.imshow(img[0])
         plt.axis('off')
         plt.title('image', fontsize=20)
 
-        plt.subplot(142)
+        plt.subplot(152)
         plt.imshow(img_color_domain[0])
         plt.axis('off')
         plt.title('color domain', fontsize=20)
 
-        plt.subplot(143)
+        plt.subplot(153)
         plt.imshow(img_mask[0, :, :, 0], cmap=plt.cm.gray)
         plt.axis('off')
         plt.title('mask', fontsize=20)
 
-        plt.subplot(144)
+        plt.subplot(154)
+        plt.imshow(color_domain_masked[0])
+        plt.axis('off')
+        plt.title('masked', fontsize=20)
+
+        plt.subplot(155)
         plt.imshow(inpainted_color[0])
         plt.axis('off')
         plt.title('inpainted', fontsize=20)
