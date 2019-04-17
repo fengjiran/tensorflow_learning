@@ -30,8 +30,10 @@ class Dataset():
 
     def load_items(self):
         images = self.load_images()
+        img_grays = self.load_grayscales(images)
+        img_edges = self.load_edges(img_grays)
         img_color_domains = self.load_color_domain(images)
-        return images, img_color_domains
+        return images, img_edges, img_color_domains
 
     def input_parse(self, img_path):
         with tf.device('/cpu:0'):
@@ -71,8 +73,6 @@ class Dataset():
 
     def load_edges(self, img_grays, mask=None):
         sigma = self.cfg['SIGMA']
-
-        # img_grays = self.load_grayscales(images)
         shape = img_grays.get_shape().as_list()
         img_grays = tf.reshape(img_grays, [-1, shape[1], shape[2]])
 
