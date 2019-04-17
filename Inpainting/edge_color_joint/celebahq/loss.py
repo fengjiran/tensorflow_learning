@@ -10,7 +10,7 @@ elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         vgg19_npy_path = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/vgg19.npy'
     elif pf.node() == 'icie-Precision-T7610':
-        pass
+        vgg19_npy_path = '/home/icie/Datasets/vgg19.npy'
 
 
 def adversarial_loss(inputs, is_real, gan_type='nsgan', is_disc=None):
