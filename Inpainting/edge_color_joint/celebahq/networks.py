@@ -25,6 +25,7 @@ class InpaintModel():
         print('Construct the inpaint model.')
         self.cfg = config
         self.init_type = self.cfg['INIT_TYPE']
+        self.vgg = Vgg19()
 
     def inpaint_generator(self, x, reuse=None):
         with tf.variable_scope('inpaint_generator', reuse=reuse):
