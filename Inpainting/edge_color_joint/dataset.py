@@ -19,22 +19,7 @@ class Dataset():
     """Construct dataset class."""
 
     def __init__(self, config, flist):
-        # if pf.system() == 'Windows':
-        #     train_flist = config['TRAIN_FLIST_WIN']
-        #     val_flist = config['VAL_FLIST_WIN']
-        #     test_flist = config['TEST_FLIST_WIN']
-        # elif pf.system() == 'Linux':
-        #     if pf.node() == 'icie-Precision-Tower-7810':
-        #         train_flist = config['TRAIN_FLIST_LINUX_7810']
-        #         val_flist = config['VAL_FLIST_LINUX_7810']
-        #         test_flist = config['TEST_FLIST_LINUX_7810']
-        #     elif pf.node() == 'icie-Precision-T7610':
-        #         train_flist = config['TRAIN_FLIST_LINUX_7610']
-        #         val_flist = config['VAL_FLIST_LINUX_7610']
-        #         test_flist = config['TEST_FLIST_LINUX_7610']
-
         self.cfg = config
-        # self.training = training
         self.flist = self.load_flist(flist)
         self.filenames = tf.placeholder(tf.string, shape=[None])
         self.iterator = None
