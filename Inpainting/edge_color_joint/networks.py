@@ -107,7 +107,6 @@ class InpaintModel():
     def build_model(self, images, edges, color_domains, masks):
         # generator input: [img_masked(3) + edge(1) + color_domain(3) + mask(1)]
         # discriminator input: [img(3)]
-        # color_domains_masked = color_domains * (1 - masks) + masks
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains, edges,
                             masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
@@ -153,11 +152,6 @@ class InpaintModel():
         gen_fake, gen_fake_feat = self.color_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-
-        # generator feature matching loss
-        # gen_fm_loss = 0.0
-        # for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
-        #     gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
 
         # generator perceptual loss
         content_x = self.vgg.forward(outputs_merged)
