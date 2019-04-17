@@ -5,6 +5,7 @@ import yaml
 import tensorflow as tf
 from dataset import Dataset
 from dataset import MaskDataset
+from .networks import InpaintModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
@@ -38,6 +39,7 @@ class JointModel():
 
     def __init__(self, config):
         self.cfg = config
+        self.model = InpaintModel(config)
 
         self.train_dataset = Dataset(config, train_flist)
         self.val_dataset = Dataset(config, val_flist)
@@ -51,3 +53,8 @@ class JointModel():
         total = len(self.train_dataset)
         num_batch = total // self.cfg['BATCH_SIZE']
         max_iteration = self.cfg['MAX_ITERS']
+
+        keep_training = True
+
+        gen_train, dis_train, logs = self.model.build_model(images, edges, img_color_domains, img_masks)
+        val_logs = self.model.eval_model(val_images, val_edges, val_img_color_domains, img_masks)
