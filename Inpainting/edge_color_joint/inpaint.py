@@ -38,3 +38,12 @@ class JointModel():
 
     def __init__(self, config):
         self.cfg = config
+
+        self.train_dataset = Dataset(config, train_flist)
+        self.val_dataset = Dataset(config, val_flist)
+        self.mask_dataset = MaskDataset(config, mask_flist)
+
+    def train(self):
+        images, img_color_domains = self.train_dataset.load_items()
+        val_images, val_img_color_domains = self.val_dataset.load_items()
+        img_masks = self.mask_dataset.load_items()
