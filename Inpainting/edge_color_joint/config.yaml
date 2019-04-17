@@ -28,14 +28,28 @@ GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
 
 SAVE_INTERVAL: 200                 # how many iterations to wait before saving model (0: never)
-SUMMARY_INTERVAL: 200              # how many iterations to wait before saving summaries
+EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
 
-FLIST_WIN: "F:\\Datasets\\flist\\celebahq.flist"
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
-MASK_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/qd_imd_train.flist
-FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_linux_7810.flist
+MASK_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/qd_imd_linux_7810.flist
+MASK_FLIST_LINUX_7610: /home/icie/Datasets/flist/qd_imd_linux_7610.flist
 
-LOG_DIR_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/color_domain/log
+TRAIN_FLIST_WIN: "F:\\Datasets\\flist\\celebahq_train_win.flist"
+VAL_FLIST_WIN: "F:\\Datasets\\flist\\celebahq_val_win.flist"
+TEST_FLIST_WIN: "F:\\Datasets\\flist\\celebahq_test_win.flist"
+
+TRAIN_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_train_linux_7810.flist
+VAL_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_val_linux_7810.flist
+TEST_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celebahq_test_linux_7810.flist
+
+TRAIN_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_train_linux_7610.flist
+VAL_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_val_linux_7610.flist
+TEST_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_test_linux_7610.flist
+
+MODEL_PATH_LINUX_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/color_domain/model
 MODEL_PATH_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/color_domain/model
 MODEL_PATH_WIN: "E:\\TensorFlow_Learning\\Inpainting\\color_domain\\model"
+
 LOG_DIR_WIN: "E:\\TensorFlow_Learning\\Inpainting\\color_domain\\log"
+LOG_DIR_LINUX_7810: /home/richard/TensorFlow_Learning/Inpainting/color_domain/log
+LOG_DIR_LINUX_7610: /home/icie/richard/TensorFlow_Learning/Inpainting/color_domain/log
