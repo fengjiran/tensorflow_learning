@@ -43,7 +43,7 @@ class JointModel():
         self.val_dataset = Dataset(config, val_flist)
         self.mask_dataset = MaskDataset(config, mask_flist)
 
-    def train(self):
+    def pre_train(self):
         images, edges, img_color_domains = self.train_dataset.load_items()
         val_images, val_edges, val_img_color_domains = self.val_dataset.load_items()
         img_masks = self.mask_dataset.load_items()
