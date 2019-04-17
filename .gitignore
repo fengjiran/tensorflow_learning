@@ -62,7 +62,13 @@ Inpainting/edge/log
 Inpainting/edge/model
 Inpainting/color_domain/log
 Inpainting/color_domain/model
-Inpainting/edge_color_joint/log
-Inpainting/edge_color_joint/model
+Inpainting/edge_color_joint/celeba/log
+Inpainting/edge_color_joint/celeba/model
+Inpainting/edge_color_joint/celebahq/log
+Inpainting/edge_color_joint/celebahq/model
+Inpainting/edge_color_joint/psv/log
+Inpainting/edge_color_joint/psv/model
+Inpainting/edge_color_joint/places2/log
+Inpainting/edge_color_joint/places2/model
 
 *.pickle
