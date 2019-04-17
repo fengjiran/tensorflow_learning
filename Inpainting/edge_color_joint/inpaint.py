@@ -130,3 +130,8 @@ class JointModel():
                         break
 
                     step += 1
+
+
+if __name__ == '__main__':
+    model = JointModel(cfg)
+    model.pre_train()
