@@ -203,7 +203,7 @@ class InpaintModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, gen_style_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, gen_style_loss, psnr, ssim, l1, l2]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
@@ -213,9 +213,10 @@ class InpaintModel():
         tf.summary.scalar('gen_content_loss', gen_content_loss)
         tf.summary.scalar('gen_style_loss', gen_style_loss)
 
-        visual_img = [images, masks, edges, color_domains, imgs_masked, outputs_merged]
-        visual_img = tf.concat(visual_img, axis=2)
-        tf.summary.image('image_mask_edge_color_merge', visual_img, 4)
+        tf.summary.scalar('train_psnr', psnr)
+        tf.summary.scalar('train_ssim', ssim)
+        tf.summary.scalar('train_l1', l1)
+        tf.summary.scalar('train_l2', l2)
 
         return gen_train, dis_train, logs
 
@@ -226,6 +227,25 @@ class InpaintModel():
                             masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
         outputs = self.inpaint_generator(inputs)
         outputs_merged = outputs * masks + images * (1 - masks)
+
+        # metrics
+        psnr = tf_psnr(images, outputs_merged, 2.0)
+        ssim = tf_ssim(images, outputs_merged, 2.0)
+        l1 = tf_l1_loss(images, outputs_merged)
+        l2 = tf_l2_loss(images, outputs_merged)
+
+        tf.summary.scalar('train_psnr', psnr)
+        tf.summary.scalar('train_ssim', ssim)
+        tf.summary.scalar('train_l1', l1)
+        tf.summary.scalar('train_l2', l2)
+
+        visual_img = [images, masks, edges, color_domains, imgs_masked, outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        tf.summary.image('image_mask_edge_color_merge', visual_img, 4)
+
+        val_logs = [psnr, ssim, l1, l2]
+
+        return val_logs
 
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
