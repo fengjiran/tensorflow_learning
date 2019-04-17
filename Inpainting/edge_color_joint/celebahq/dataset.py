@@ -246,7 +246,7 @@ if __name__ == '__main__':
             mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
     dataset = Dataset(cfg, val_flist)
-    images, img_color_domains = dataset.load_items()
+    images, img_edges, img_color_domains = dataset.load_items()
     iterator = dataset.iterator
 
     mask_dataset = MaskDataset(cfg, mask_flist)
