@@ -5,7 +5,7 @@ import yaml
 import tensorflow as tf
 from dataset import Dataset
 from dataset import MaskDataset
-from .networks import InpaintModel
+from networks import InpaintModel
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.load(f)
