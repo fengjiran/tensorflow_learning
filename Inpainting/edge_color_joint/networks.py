@@ -136,8 +136,8 @@ class InpaintModel():
         # discriminator loss
         dis_input_real = images
         dis_input_fake = tf.stop_gradient(outputs_merged)
-        dis_real, dis_real_feat = self.color_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
-        dis_fake, dis_fake_feat = self.color_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real, dis_real_feat = self.inpaint_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, dis_fake_feat = self.inpaint_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         dis_real_loss = adversarial_loss(dis_real, is_real=True,
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_fake_loss = adversarial_loss(dis_fake, is_real=False,
@@ -149,7 +149,7 @@ class InpaintModel():
 
         # generator adversarial loss
         gen_input_fake = outputs_merged
-        gen_fake, gen_fake_feat = self.color_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_fake, gen_fake_feat = self.inpaint_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
 
