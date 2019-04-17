@@ -10,7 +10,7 @@ parser.add_argument('--test', type=int, default=1, help='number of test in a ite
 parser.add_argument('--output', type=str, help='path to the three file lists')
 args = parser.parse_args()
 
-ext = {'.jpg', '.png'}
+ext = {'.jpg', '.png', '.JPG'}
 total = args.train + args.val + args.test
 images_train = []
 images_val = []
