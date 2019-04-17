@@ -116,6 +116,12 @@ class InpaintModel():
         outputs = self.inpaint_generator(inputs)
         outputs_merged = outputs * masks + images * (1 - masks)
 
+        # metrics
+        psnr = tf_psnr(images, outputs_merged, 2.0)
+        ssim = tf_ssim(images, outputs_merged, 2.0)
+        l1 = tf_l1_loss(images, outputs_merged)
+        l2 = tf_l2_loss(images, outputs_merged)
+
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
         else:
