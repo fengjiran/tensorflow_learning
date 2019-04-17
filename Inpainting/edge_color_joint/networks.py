@@ -12,7 +12,10 @@ from loss import perceptual_loss
 from loss import style_loss
 from loss import Vgg19
 
-# from utils import images_summary
+from metrics import tf_l1_loss
+from metrics import tf_l2_loss
+from metrics import tf_psnr
+from metrics import tf_ssim
 
 
 class InpaintModel():
