@@ -47,3 +47,7 @@ class JointModel():
         images, edges, img_color_domains = self.train_dataset.load_items()
         val_images, val_edges, val_img_color_domains = self.val_dataset.load_items()
         img_masks = self.mask_dataset.load_items()
+
+        total = len(self.train_dataset)
+        num_batch = total // self.cfg['BATCH_SIZE']
+        max_iteration = self.cfg['MAX_ITERS']
