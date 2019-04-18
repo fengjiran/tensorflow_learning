@@ -114,32 +114,6 @@ class Vgg19():
         self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
         print('npy file loaded')
 
-        self.conv1_1 = None
-        self.conv1_2 = None
-        self.pool1 = None
-
-        self.conv2_1 = None
-        self.conv2_2 = None
-        self.pool2 = None
-
-        self.conv3_1 = None
-        self.conv3_2 = None
-        self.conv3_3 = None
-        self.conv3_4 = None
-        self.pool3 = None
-
-        self.conv4_1 = None
-        self.conv4_2 = None
-        self.conv4_3 = None
-        self.conv4_4 = None
-        self.pool4 = None
-
-        self.conv5_1 = None
-        self.conv5_2 = None
-        self.conv5_3 = None
-        self.conv5_4 = None
-        self.pool5 = None
-
     def forward(self, rgb, reuse=None):
         """
         Load variables from npy file to build VGG.
@@ -168,31 +142,31 @@ class Vgg19():
             bgr = bgr / 255.
             assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
 
-            self.conv1_1 = self.conv_layer(bgr, 'conv1_1', reuse)
-            self.conv1_2 = self.conv_layer(self.conv1_1, 'conv1_2', reuse)
-            self.pool1 = self.max_pool(self.conv1_2, 'pool1')
+            conv1_1 = self.conv_layer(bgr, 'conv1_1', reuse)
+            conv1_2 = self.conv_layer(conv1_1, 'conv1_2', reuse)
+            pool1 = self.max_pool(conv1_2, 'pool1')
 
-            self.conv2_1 = self.conv_layer(self.pool1, 'conv2_1', reuse)
-            self.conv2_2 = self.conv_layer(self.conv2_1, 'conv2_2', reuse)
-            self.pool2 = self.max_pool(self.conv2_2, 'pool2')
+            conv2_1 = self.conv_layer(pool1, 'conv2_1', reuse)
+            conv2_2 = self.conv_layer(conv2_1, 'conv2_2', reuse)
+            pool2 = self.max_pool(conv2_2, 'pool2')
 
-            self.conv3_1 = self.conv_layer(self.pool2, "conv3_1", reuse)
-            self.conv3_2 = self.conv_layer(self.conv3_1, "conv3_2", reuse)
-            self.conv3_3 = self.conv_layer(self.conv3_2, "conv3_3", reuse)
-            self.conv3_4 = self.conv_layer(self.conv3_3, "conv3_4", reuse)
-            self.pool3 = self.max_pool(self.conv3_4, 'pool3')
+            conv3_1 = self.conv_layer(pool2, "conv3_1", reuse)
+            conv3_2 = self.conv_layer(conv3_1, "conv3_2", reuse)
+            conv3_3 = self.conv_layer(conv3_2, "conv3_3", reuse)
+            conv3_4 = self.conv_layer(conv3_3, "conv3_4", reuse)
+            pool3 = self.max_pool(conv3_4, 'pool3')
 
-            self.conv4_1 = self.conv_layer(self.pool3, "conv4_1", reuse)
-            self.conv4_2 = self.conv_layer(self.conv4_1, "conv4_2", reuse)
-            self.conv4_3 = self.conv_layer(self.conv4_2, "conv4_3", reuse)
-            self.conv4_4 = self.conv_layer(self.conv4_3, "conv4_4", reuse)
-            self.pool4 = self.max_pool(self.conv4_4, 'pool4')
+            conv4_1 = self.conv_layer(pool3, "conv4_1", reuse)
+            conv4_2 = self.conv_layer(conv4_1, "conv4_2", reuse)
+            conv4_3 = self.conv_layer(conv4_2, "conv4_3", reuse)
+            conv4_4 = self.conv_layer(conv4_3, "conv4_4", reuse)
+            pool4 = self.max_pool(conv4_4, 'pool4')
 
-            self.conv5_1 = self.conv_layer(self.pool4, "conv5_1", reuse)
-            self.conv5_2 = self.conv_layer(self.conv5_1, "conv5_2", reuse)
-            self.conv5_3 = self.conv_layer(self.conv5_2, "conv5_3", reuse)
-            self.conv5_4 = self.conv_layer(self.conv5_3, "conv5_4", reuse)
-            self.pool5 = self.max_pool(self.conv5_4, 'pool5')
+            conv5_1 = self.conv_layer(pool4, "conv5_1", reuse)
+            conv5_2 = self.conv_layer(conv5_1, "conv5_2", reuse)
+            conv5_3 = self.conv_layer(conv5_2, "conv5_3", reuse)
+            conv5_4 = self.conv_layer(conv5_3, "conv5_4", reuse)
+            # pool5 = self.max_pool(conv5_4, 'pool5')
 
             # self.fc6 = self.fc_layer(self.pool5, (25088, 4096), "fc6", reuse)
             # assert self.fc6.get_shape().as_list()[1:] == [4096]
@@ -208,26 +182,26 @@ class Vgg19():
             print('build model finished!')
 
             out = {
-                'relu1_1': self.conv1_1,
-                'relu1_2': self.conv1_2,
+                'relu1_1': conv1_1,
+                'relu1_2': conv1_2,
 
-                'relu2_1': self.conv2_1,
-                'relu2_2': self.conv2_2,
+                'relu2_1': conv2_1,
+                'relu2_2': conv2_2,
 
-                'relu3_1': self.conv3_1,
-                'relu3_2': self.conv3_2,
-                'relu3_3': self.conv3_3,
-                'relu3_4': self.conv3_4,
+                'relu3_1': conv3_1,
+                'relu3_2': conv3_2,
+                'relu3_3': conv3_3,
+                'relu3_4': conv3_4,
 
-                'relu4_1': self.conv4_1,
-                'relu4_2': self.conv4_2,
-                'relu4_3': self.conv4_3,
-                'relu4_4': self.conv4_4,
+                'relu4_1': conv4_1,
+                'relu4_2': conv4_2,
+                'relu4_3': conv4_3,
+                'relu4_4': conv4_4,
 
-                'relu5_1': self.conv5_1,
-                'relu5_2': self.conv5_2,
-                'relu5_3': self.conv5_3,
-                'relu5_4': self.conv5_4
+                'relu5_1': conv5_1,
+                'relu5_2': conv5_2,
+                'relu5_3': conv5_3,
+                'relu5_4': conv5_4
             }
 
             return out
