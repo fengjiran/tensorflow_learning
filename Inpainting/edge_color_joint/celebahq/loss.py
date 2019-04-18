@@ -212,7 +212,7 @@ class Vgg19():
 
             self.prob = tf.nn.softmax(self.fc8, name="prob")
 
-            self.data_dict = None
+            # self.data_dict = None
 
             print('build model finished!')
 
@@ -321,3 +321,4 @@ if __name__ == '__main__':
     a = tf.placeholder(tf.float32, [10, 256, 256, 3])
     out = vgg.forward(a)
     out1 = vgg.forward(a, True)
+    vgg.data_dict = None
