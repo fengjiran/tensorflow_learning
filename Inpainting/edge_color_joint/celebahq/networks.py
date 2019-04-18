@@ -307,14 +307,27 @@ if __name__ == '__main__':
 
     gen, dis, log = model.build_model(images, edges, color_domains, masks)
 
-    gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_generator')
-    dis_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_discriminator')
+    # gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_generator')
+    # dis_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_discriminator')
 
-    var_list = gen_vars + dis_vars
+    # var_list = gen_vars + dis_vars
 
-    saver = tf.train.Saver(var_list)
+    var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+    vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
+    print(len(var_list))
+    print(len(vgg_var_list))
 
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    with tf.Session(config=config) as sess:
-        saver.save(sess, os.pth.join(model_dir, 'model'))
+    vname = vgg_var_list[0].name
+    print(vname.split('/'))
+
+    for var in vgg_var_list:
+        var_list.remove(var)
+    print(len(var_list))
+
+    # saver = tf.train.Saver(var_list)
+
+    # config = tf.ConfigProto()
+    # config.gpu_options.allow_growth = True
+    # with tf.Session(config=config) as sess:
+    #     sess.run(tf.global_variables_initializer())
+    #     saver.save(sess, os.path.join(model_dir, 'model'))
