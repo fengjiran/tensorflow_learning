@@ -249,9 +249,9 @@ class Vgg19():
 
     def conv_layer(self, bottom, name, reuse=None):
         with tf.variable_scope(name, reuse=reuse):
-            filt = tf.get_variable('kernel', initializer=self.data_dict[name][0], trainable=False)
+            filt = tf.get_variable('kernel', trainable=False)
             conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
-            conv_biases = tf.get_variable('bias', initializer=self.data_dict[name][1], trainable=False)
+            conv_biases = tf.get_variable('bias', trainable=False)
             relu = tf.nn.relu(tf.nn.bias_add(conv, conv_biases))
 
             return relu
@@ -266,8 +266,8 @@ class Vgg19():
 
             x = tf.reshape(bottom, [-1, dim])
 
-            weights = tf.get_variable('weights', initializer=self.data_dict[name][0], trainable=False)
-            biases = tf.get_variable('bias', initializer=self.data_dict[name][1], trainable=False)
+            weights = tf.get_variable('weights', trainable=False)
+            biases = tf.get_variable('bias', trainable=False)
 
             fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
 
