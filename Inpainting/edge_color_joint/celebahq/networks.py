@@ -173,8 +173,6 @@ class InpaintModel():
         style_y = self.vgg.forward(images * masks, reuse=True)
         gen_style_loss = style_loss(style_x, style_y)
 
-        self.vgg.data_dict = None
-
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
             gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] +\
@@ -271,11 +269,13 @@ class InpaintModel():
 if __name__ == '__main__':
     import os
     import yaml
+    import numpy as np
     import platform as pf
     with open('config.yaml', 'r') as f:
         cfg = yaml.load(f)
 
     if pf.system() == 'Windows':
+        vgg19_npy_path = 'F:\\Datasets\\vgg19.npy'
         log_dir = cfg['LOG_DIR_WIN']
         model_dir = cfg['MODEL_PATH_WIN']
         train_flist = cfg['TRAIN_FLIST_WIN']
@@ -284,6 +284,7 @@ if __name__ == '__main__':
         mask_flist = cfg['MASK_FLIST_WIN']
     elif pf.system() == 'Linux':
         if pf.node() == 'icie-Precision-Tower-7810':
+            vgg19_npy_path = '/media/icie/b29b7268-50ad-4752-8e03-457669cab10a/vgg19.npy'
             log_dir = cfg['LOG_DIR_LINUX_7810']
             model_dir = cfg['MODEL_PATH_LINUX_7810']
             train_flist = cfg['TRAIN_FLIST_LINUX_7810']
@@ -291,6 +292,7 @@ if __name__ == '__main__':
             test_flist = cfg['TEST_FLIST_LINUX_7810']
             mask_flist = cfg['MASK_FLIST_LINUX_7810']
         elif pf.node() == 'icie-Precision-T7610':
+            vgg19_npy_path = '/home/icie/Datasets/vgg19.npy'
             log_dir = cfg['LOG_DIR_LINUX_7610']
             model_dir = cfg['MODEL_PATH_LINUX_7610']
             train_flist = cfg['TRAIN_FLIST_LINUX_7610']
@@ -312,22 +314,29 @@ if __name__ == '__main__':
 
     # var_list = gen_vars + dis_vars
 
+    data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
+
     var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
-    print(len(var_list))
-    print(len(vgg_var_list))
-
-    vname = vgg_var_list[0].name
-    print(vname.split('/'))
-
     for var in vgg_var_list:
         var_list.remove(var)
-    print(len(var_list))
 
-    # saver = tf.train.Saver(var_list)
+    assign_ops = []
+    for var in vgg_var_list:
+        vname = var.name
+        vname = vname.split('/')[1]
+        var_shape = var.get_shape().as_list()
+        if len(var_shape) != 1:
+            var_value = data_dict[vname][0]
+        else:
+            var_value = data_dict[vname][1]
+        assign_ops.append(tf.assign(var, var_value))
 
-    # config = tf.ConfigProto()
-    # config.gpu_options.allow_growth = True
-    # with tf.Session(config=config) as sess:
-    #     sess.run(tf.global_variables_initializer())
-    #     saver.save(sess, os.path.join(model_dir, 'model'))
+    saver = tf.train.Saver(var_list)
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
+        sess.run(tf.global_variables_initializer())
+        sess.run(assign_ops)
+        saver.save(sess, os.path.join(model_dir, 'model'))
