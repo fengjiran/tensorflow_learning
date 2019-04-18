@@ -212,7 +212,7 @@ class Vgg19():
 
             self.prob = tf.nn.softmax(self.fc8, name="prob")
 
-            # self.data_dict = None
+            self.data_dict = None
 
             print('build model finished!')
 
@@ -313,3 +313,11 @@ class Vgg19():
     def get_fc_weight(self, name):
         return tf.constant(self.data_dict[name][0], name='weights')
         # return self.data_dict[name][0]
+
+
+if __name__ == '__main__':
+    vgg = Vgg19()
+
+    a = tf.placeholder(tf.float32, [10, 256, 256, 3])
+    out = vgg.forward(a)
+    out1 = vgg.forward(a, True)
