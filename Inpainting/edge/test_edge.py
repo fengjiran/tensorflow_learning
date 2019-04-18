@@ -6,6 +6,7 @@ import platform as pf
 import numpy as np
 import cv2
 from scipy.misc import imread
+import matplotlib.pyplot as plt
 from skimage.feature import canny
 from skimage.color import rgb2gray
 import tensorflow as tf
@@ -29,21 +30,28 @@ def load_mask(cfg, mask_type=1, mask_path=None):
     else:  # external
         img_mask = imread(mask_path)
         img_mask = cv2.resize(img_mask, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
+        img_mask = img_mask > 3
+        img_mask = img_mask.astype(np.float32)
         img_mask = np.expand_dims(img_mask, 0)
         img_mask = np.expand_dims(img_mask, -1)
-        img_mask = img_mask.astype(np.float32)
         img_mask = 1 - img_mask
 
     return img_mask  # (1, 256, 256, 1)
 
 
 def load_edge(cfg, image_path):
-    image = imread(image_path)
+    image = imread(image_path)  # [1024, 1024, 3], [0, 255]
     image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
-    gray = rgb2gray(image)
+    gray = rgb2gray(image)  # [256, 256], [0, 1]
 
     edge = canny(gray, sigma=cfg['SIGMA'])
     edge = edge.astype(np.float32)
+
+    gray = np.expand_dims(gray, 0)
+    gray = np.expand_dims(gray, -1)
+
+    edge = np.expand_dims(edge, 0)
+    edge = np.expand_dims(edge, -1)
 
     return gray, edge
 
@@ -61,40 +69,69 @@ if __name__ == '__main__':
             checkpoint_dir = cfg['MODEL_PATH_LINUX_7610']
 
     ############################# load the data #########################################
-    mask_type = 1
+    mask_type = 2
     mask_path = 'F:\\Datasets\\qd_imd\\train\\00001_train.png'
     image_path = 'F:\\Datasets\\celebahq\\img00000001.png'
-    image = imread(image_path)
 
-    # img_mask = load_mask(cfg, mask_type, mask_path)
-    # img, img_color_domain = load_edge(cfg, image_path)
-    # color_domain_masked = img_color_domain * (1 - img_mask) + img_mask
+    img_mask = load_mask(cfg, mask_type, mask_path)
+    img_gray, img_edge = load_edge(cfg, image_path)
+    edge_masked = img_edge * (1 - img_mask)
 
+    ########################### construct the model #####################################
+    model = EdgeModel(cfg)
+    # 1 for missing region, 0 for background
+    mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    output = model.test_model(gray, edge, mask)
 
-# edge_model = EdgeModel(cfg)
+    feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
+    #####################################################################################
 
-# # 1 for missing region, 0 for background
-# mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-# edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-# gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
+        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'edge_generator')
+        assign_ops = []
+        for var in vars_list:
+            vname = var.name
+            from_name = vname
+            var_value = tf.train.load_variable(os.path.join(checkpoint_dir, 'model'), from_name)
+            assign_ops.append(tf.assign(var, var_value))
+        sess.run(assign_ops)
+        print('Model loaded.')
 
+        inpainted_edge = sess.run(output, feed_dict=feed_dict)
 
-# # saver = tf.train.Saver()
-# config = tf.ConfigProto()
-# config.gpu_options.allow_growth = True
-# with tf.Session(config=config) as sess:
-#     # saver.restore(sess, os.path.join(checkpoint_dir, 'model'))
-#     # sess.run(tf.global_variables_initializer())
-#     vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'edge_generator')
-#     assign_ops = []
-#     for var in vars_list:
-#         vname = var.name
-#         print(vname)
-#         from_name = vname
-#         var_value = tf.train.load_variable(os.path.join(checkpoint_dir, 'model'), from_name)
-#         assign_ops.append(tf.assign(var, var_value))
-#     sess.run(assign_ops)
-#     print('Model loaded.')
+        plt.figure(figsize=(8, 3))
+
+        plt.subplot(151)
+        plt.imshow(img_gray[0, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('gray', fontsize=20)
+
+        plt.subplot(152)
+        plt.imshow(img_edge[0, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('edge', fontsize=20)
+
+        plt.subplot(153)
+        plt.imshow(img_mask[0, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('mask', fontsize=20)
+
+        plt.subplot(154)
+        plt.imshow(edge_masked[0, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('edge_masked', fontsize=20)
+
+        plt.subplot(155)
+        plt.imshow(inpainted_edge[0, :, :, 0], cmap=plt.cm.gray)
+        plt.axis('off')
+        plt.title('inpainted', fontsize=20)
+
+        plt.show()
+
 
 #     image = imread(image_path)  # (1024, 1024, 3)
 #     image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
