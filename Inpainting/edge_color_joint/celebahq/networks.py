@@ -314,29 +314,29 @@ if __name__ == '__main__':
 
     # var_list = gen_vars + dis_vars
 
-    data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
+    # data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
 
     var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
     for var in vgg_var_list:
         var_list.remove(var)
 
-    assign_ops = []
-    for var in vgg_var_list:
-        vname = var.name
-        vname = vname.split('/')[1]
-        var_shape = var.get_shape().as_list()
-        if len(var_shape) != 1:
-            var_value = data_dict[vname][0]
-        else:
-            var_value = data_dict[vname][1]
-        assign_ops.append(tf.assign(var, var_value))
+    # assign_ops = []
+    # for var in vgg_var_list:
+    #     vname = var.name
+    #     vname = vname.split('/')[1]
+    #     var_shape = var.get_shape().as_list()
+    #     if len(var_shape) != 1:
+    #         var_value = data_dict[vname][0]
+    #     else:
+    #         var_value = data_dict[vname][1]
+    #     assign_ops.append(tf.assign(var, var_value))
 
     saver = tf.train.Saver(var_list)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        sess.run(tf.global_variables_initializer())
-        sess.run(assign_ops)
-        saver.save(sess, os.path.join(model_dir, 'model'))
+        # sess.run(tf.global_variables_initializer())
+        # saver.save(sess, os.path.join(model_dir, 'model'))
+        saver.restore(sess, os.path.join(model_dir, 'model'))
