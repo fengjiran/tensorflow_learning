@@ -173,6 +173,8 @@ class InpaintModel():
         style_y = self.vgg.forward(images * masks, reuse=True)
         gen_style_loss = style_loss(style_x, style_y)
 
+        self.vgg.data_dict = None
+
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
             gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] +\
@@ -264,3 +266,55 @@ class InpaintModel():
     def load(self, sess, saver, path, model_name):
         print('\nloading the model...\n')
         saver.restore(sess, os.path.join(path, model_name))
+
+
+if __name__ == '__main__':
+    import os
+    import yaml
+    import platform as pf
+    with open('config.yaml', 'r') as f:
+        cfg = yaml.load(f)
+
+    if pf.system() == 'Windows':
+        log_dir = cfg['LOG_DIR_WIN']
+        model_dir = cfg['MODEL_PATH_WIN']
+        train_flist = cfg['TRAIN_FLIST_WIN']
+        val_flist = cfg['VAL_FLIST_WIN']
+        test_flist = cfg['TEST_FLIST_WIN']
+        mask_flist = cfg['MASK_FLIST_WIN']
+    elif pf.system() == 'Linux':
+        if pf.node() == 'icie-Precision-Tower-7810':
+            log_dir = cfg['LOG_DIR_LINUX_7810']
+            model_dir = cfg['MODEL_PATH_LINUX_7810']
+            train_flist = cfg['TRAIN_FLIST_LINUX_7810']
+            val_flist = cfg['VAL_FLIST_LINUX_7810']
+            test_flist = cfg['TEST_FLIST_LINUX_7810']
+            mask_flist = cfg['MASK_FLIST_LINUX_7810']
+        elif pf.node() == 'icie-Precision-T7610':
+            log_dir = cfg['LOG_DIR_LINUX_7610']
+            model_dir = cfg['MODEL_PATH_LINUX_7610']
+            train_flist = cfg['TRAIN_FLIST_LINUX_7610']
+            val_flist = cfg['VAL_FLIST_LINUX_7610']
+            test_flist = cfg['TEST_FLIST_LINUX_7610']
+            mask_flist = cfg['MASK_FLIST_LINUX_7610']
+
+    model = InpaintModel(cfg)
+
+    images = tf.placeholder(tf.float32, [10, 256, 256, 3])
+    color_domains = tf.placeholder(tf.float32, [10, 256, 256, 3])
+    edges = tf.placeholder(tf.float32, [10, 256, 256, 1])
+    masks = tf.placeholder(tf.float32, [10, 256, 256, 1])
+
+    gen, dis, log = model.build_model(images, edges, color_domains, masks)
+
+    gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_generator')
+    dis_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_discriminator')
+
+    var_list = gen_vars + dis_vars
+
+    saver = tf.train.Saver(var_list)
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
+        saver.save(sess, os.pth.join(model_dir, 'model'))
