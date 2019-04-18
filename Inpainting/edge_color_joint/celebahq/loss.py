@@ -103,16 +103,16 @@ def perceptual_loss(x, y, weights=(1.0, 1.0, 1.0, 1.0, 1.0)):
 class Vgg19():
     """Construct VGG19 model."""
 
-    def __init__(self, vgg19_npy_path=vgg19_npy_path):
-        if vgg19_npy_path is None:
-            path = inspect.getfile(Vgg19)
-            path = os.path.abspath(os.path.join(path, os.pardir))
-            path = os.path.join(path, 'vgg19.npy')
-            vgg19_npy_path = path
-            print(vgg19_npy_path)
+    def __init__(self):
+        # if vgg19_npy_path is None:
+        #     path = inspect.getfile(Vgg19)
+        #     path = os.path.abspath(os.path.join(path, os.pardir))
+        #     path = os.path.join(path, 'vgg19.npy')
+        #     vgg19_npy_path = path
+        #     print(vgg19_npy_path)
 
-        self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
-        print('npy file loaded')
+        # self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
+        # print('npy file loaded')
 
         self.conv1_1 = None
         self.conv1_2 = None
@@ -272,47 +272,6 @@ class Vgg19():
             fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
 
             return fc
-
-    # def conv_layer(self, bottom, name):
-    #     with tf.variable_scope(name):
-    #         filt = self.get_conv_filter(name)
-
-    #         conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
-    #         conv_biases = self.get_bias(name)
-
-    #         bias = tf.nn.bias_add(conv, conv_biases)
-
-    #         relu = tf.nn.relu(bias)
-    #         return relu
-
-    # def fc_layer(self, bottom, name):
-    #     with tf.variable_scope(name):
-    #         shape = bottom.get_shape().as_list()
-    #         dim = 1
-
-    #         for d in shape[1:]:
-    #             dim *= d
-
-    #         x = tf.reshape(bottom, [-1, dim])
-
-    #         weights = self.get_fc_weight(name)
-    #         biases = self.get_bias(name)
-
-    #         fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
-
-    #         return fc
-
-    def get_conv_filter(self, name):
-        return tf.constant(self.data_dict[name][0], name='filters')
-        # return self.data_dict[name][0]
-
-    def get_bias(self, name):
-        return tf.constant(self.data_dict[name][1], name='biases')
-        # return self.data_dict[name][1]
-
-    def get_fc_weight(self, name):
-        return tf.constant(self.data_dict[name][0], name='weights')
-        # return self.data_dict[name][0]
 
 
 if __name__ == '__main__':
