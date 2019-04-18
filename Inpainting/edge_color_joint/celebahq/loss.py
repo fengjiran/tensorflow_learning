@@ -175,40 +175,40 @@ class Vgg19():
             bgr = bgr / 255.
             assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
 
-            self.conv1_1 = self.conv_layer(bgr, 'conv1_1', reuse)
-            self.conv1_2 = self.conv_layer(self.conv1_1, 'conv1_2', reuse)
+            self.conv1_1 = self.conv_layer(bgr, (3, 3, 3, 64), 'conv1_1', reuse)
+            self.conv1_2 = self.conv_layer(self.conv1_1, (3, 3, 64, 64), 'conv1_2', reuse)
             self.pool1 = self.max_pool(self.conv1_2, 'pool1')
 
-            self.conv2_1 = self.conv_layer(self.pool1, 'conv2_1', reuse)
-            self.conv2_2 = self.conv_layer(self.conv2_1, 'conv2_2', reuse)
+            self.conv2_1 = self.conv_layer(self.pool1, (3, 3, 64, 128), 'conv2_1', reuse)
+            self.conv2_2 = self.conv_layer(self.conv2_1, (3, 3, 128, 128), 'conv2_2', reuse)
             self.pool2 = self.max_pool(self.conv2_2, 'pool2')
 
-            self.conv3_1 = self.conv_layer(self.pool2, "conv3_1", reuse)
-            self.conv3_2 = self.conv_layer(self.conv3_1, "conv3_2", reuse)
-            self.conv3_3 = self.conv_layer(self.conv3_2, "conv3_3", reuse)
-            self.conv3_4 = self.conv_layer(self.conv3_3, "conv3_4", reuse)
+            self.conv3_1 = self.conv_layer(self.pool2, (3, 3, 128, 256), "conv3_1", reuse)
+            self.conv3_2 = self.conv_layer(self.conv3_1, (3, 3, 256, 256), "conv3_2", reuse)
+            self.conv3_3 = self.conv_layer(self.conv3_2, (3, 3, 256, 256), "conv3_3", reuse)
+            self.conv3_4 = self.conv_layer(self.conv3_3, (3, 3, 256, 256), "conv3_4", reuse)
             self.pool3 = self.max_pool(self.conv3_4, 'pool3')
 
-            self.conv4_1 = self.conv_layer(self.pool3, "conv4_1", reuse)
-            self.conv4_2 = self.conv_layer(self.conv4_1, "conv4_2", reuse)
-            self.conv4_3 = self.conv_layer(self.conv4_2, "conv4_3", reuse)
-            self.conv4_4 = self.conv_layer(self.conv4_3, "conv4_4", reuse)
+            self.conv4_1 = self.conv_layer(self.pool3, (3, 3, 256, 512), "conv4_1", reuse)
+            self.conv4_2 = self.conv_layer(self.conv4_1, (3, 3, 512, 512), "conv4_2", reuse)
+            self.conv4_3 = self.conv_layer(self.conv4_2, (3, 3, 512, 512), "conv4_3", reuse)
+            self.conv4_4 = self.conv_layer(self.conv4_3, (3, 3, 512, 512), "conv4_4", reuse)
             self.pool4 = self.max_pool(self.conv4_4, 'pool4')
 
-            self.conv5_1 = self.conv_layer(self.pool4, "conv5_1", reuse)
-            self.conv5_2 = self.conv_layer(self.conv5_1, "conv5_2", reuse)
-            self.conv5_3 = self.conv_layer(self.conv5_2, "conv5_3", reuse)
-            self.conv5_4 = self.conv_layer(self.conv5_3, "conv5_4", reuse)
+            self.conv5_1 = self.conv_layer(self.pool4, (3, 3, 512, 512), "conv5_1", reuse)
+            self.conv5_2 = self.conv_layer(self.conv5_1, (3, 3, 512, 512), "conv5_2", reuse)
+            self.conv5_3 = self.conv_layer(self.conv5_2, (3, 3, 512, 512), "conv5_3", reuse)
+            self.conv5_4 = self.conv_layer(self.conv5_3, (3, 3, 512, 512), "conv5_4", reuse)
             self.pool5 = self.max_pool(self.conv5_4, 'pool5')
 
-            self.fc6 = self.fc_layer(self.pool5, "fc6", reuse)
+            self.fc6 = self.fc_layer(self.pool5, (25088, 4096), "fc6", reuse)
             assert self.fc6.get_shape().as_list()[1:] == [4096]
             self.relu6 = tf.nn.relu(self.fc6)
 
-            self.fc7 = self.fc_layer(self.relu6, "fc7", reuse)
+            self.fc7 = self.fc_layer(self.relu6, (4096, 4096), "fc7", reuse)
             self.relu7 = tf.nn.relu(self.fc7)
 
-            self.fc8 = self.fc_layer(self.relu7, "fc8", reuse)
+            self.fc8 = self.fc_layer(self.relu7, (4096, 1000), "fc8", reuse)
 
             self.prob = tf.nn.softmax(self.fc8, name="prob")
 
@@ -247,16 +247,16 @@ class Vgg19():
     def max_pool(self, bottom, name):
         return tf.nn.max_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
-    def conv_layer(self, bottom, name, reuse=None):
+    def conv_layer(self, bottom, kernel_shape, name, reuse=None):
         with tf.variable_scope(name, reuse=reuse):
-            filt = tf.get_variable('kernel', trainable=False)
+            filt = tf.get_variable('kernel', shape=kernel_shape, trainable=False)
             conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
-            conv_biases = tf.get_variable('bias', trainable=False)
+            conv_biases = tf.get_variable('bias', shape=[kernel_shape[-1]], trainable=False)
             relu = tf.nn.relu(tf.nn.bias_add(conv, conv_biases))
 
             return relu
 
-    def fc_layer(self, bottom, name, reuse=None):
+    def fc_layer(self, bottom, kernel_shape, name, reuse=None):
         with tf.variable_scope(name, reuse=reuse):
             shape = bottom.get_shape().as_list()
             dim = 1
@@ -266,8 +266,8 @@ class Vgg19():
 
             x = tf.reshape(bottom, [-1, dim])
 
-            weights = tf.get_variable('weights', trainable=False)
-            biases = tf.get_variable('bias', trainable=False)
+            weights = tf.get_variable('weights', shape=kernel_shape, trainable=False)
+            biases = tf.get_variable('bias', shape=[kernel_shape[-1]], trainable=False)
 
             fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
 
