@@ -86,7 +86,7 @@ class EdgeAware():
             else:
                 saver.restore(sess, os.path.join(model_dir, 'model'))
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
-                epoch = step // num_batch
+                epoch = step // num_batch - 1
 
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
