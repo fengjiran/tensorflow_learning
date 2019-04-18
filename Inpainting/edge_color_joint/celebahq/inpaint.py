@@ -63,8 +63,14 @@ class JointModel():
         val_iterator = self.val_dataset.iterator
         mask_iterator = self.mask_dataset.mask_iterator
 
+        var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+        vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
+
+        for var in vgg_var_list:
+            var_list.remove(var)
+
         # the saver for model saving and loading
-        saver = tf.train.Saver()
+        saver = tf.train.Saver(var_list)
 
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
@@ -87,7 +93,7 @@ class JointModel():
             else:
                 saver.restore(sess, os.path.join(model_dir, 'model'))
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
-                epoch = step // num_batch
+                epoch = step // num_batch - 1
 
             with open('logs.csv', 'a+') as f:
                 mywrite = csv.writer(f)
