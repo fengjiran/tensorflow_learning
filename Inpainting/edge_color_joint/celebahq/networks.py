@@ -337,6 +337,6 @@ if __name__ == '__main__':
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        # sess.run(tf.global_variables_initializer())
-        # saver.save(sess, os.path.join(model_dir, 'model'))
-        saver.restore(sess, os.path.join(model_dir, 'model'))
+        sess.run(tf.global_variables_initializer())
+        saver.save(sess, os.path.join(model_dir, 'model'))
+        # saver.restore(sess, os.path.join(model_dir, 'model'))
