@@ -7,7 +7,28 @@ from dataset import Dataset
 from dataset import MaskDataset
 from networks import EdgeModel
 
-with open('config.yaml', 'r') as f:
+with open('config_flag.yaml', 'r') as f:
+    cfg_flag = yaml.load(f)
+    flag = cfg_flag['flag']
+
+if flag == 1:
+    cfg_name = 'config_celeba_regular.yaml'
+elif flag == 2:
+    cfg_name = 'config_celeba_irregular.yaml'
+elif flag == 3:
+    cfg_name = 'config_celebahq_regular.yaml'
+elif flag == 4:
+    cfg_name = 'config_celebahq_irregular.yaml'
+elif flag == 5:
+    cfg_name = 'config_psv_regular.yaml'
+elif flag == 6:
+    cfg_name = 'config_psv_irregular.yaml'
+elif flag == 7:
+    cfg_name = 'config_places2_regular.yaml'
+elif flag == 8:
+    cfg_name = 'config_places2_irregular.yaml'
+
+with open(cfg_name, 'r') as f:
     cfg = yaml.load(f)
 
 if pf.system() == 'Windows':
