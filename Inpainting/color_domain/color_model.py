@@ -7,7 +7,29 @@ from dataset import Dataset
 from dataset import MaskDataset
 from networks import ColorModel
 
-with open('config.yaml', 'r') as f:
+with open('config_color_flag.yaml', 'r') as f:
+    cfg_flag = yaml.load(f)
+    flag = cfg_flag['flag']
+
+if flag == 1:
+    cfg_name = 'config_color_celeba_regular.yaml'
+elif flag == 2:
+    cfg_name = 'config_color_celeba_irregular.yaml'
+elif flag == 3:
+    cfg_name = 'config_color_celebahq_regular.yaml'
+elif flag == 4:
+    cfg_name = 'config_color_celebahq_irregular.yaml'
+elif flag == 5:
+    cfg_name = 'config_color_psv_regular.yaml'
+elif flag == 6:
+    cfg_name = 'config_color_psv_irregular.yaml'
+elif flag == 7:
+    cfg_name = 'config_color_places2_regular.yaml'
+elif flag == 8:
+    cfg_name = 'config_color_places2_irregular.yaml'
+
+
+with open(cfg_name, 'r') as f:
     cfg = yaml.load(f)
 
 if pf.system() == 'Windows':
@@ -89,7 +111,7 @@ class ColorAware():
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
                 epoch = step // num_batch
 
-            with open('logs.csv', 'a+') as f:
+            with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_fm_loss',
                                   'psnr', 'ssim', 'l1', 'l2'])
@@ -108,7 +130,7 @@ class ColorAware():
                     print('-----------gen_fm_loss: {}'.format(logs_[4]))
                     # print('-----------gen_ce_loss: {}'.format(logs_[4]))
 
-                    with open('logs.csv', 'a+') as f:
+                    with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
