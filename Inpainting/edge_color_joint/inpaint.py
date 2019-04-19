@@ -7,7 +7,29 @@ from dataset import Dataset
 from dataset import MaskDataset
 from networks import InpaintModel
 
-with open('config.yaml', 'r') as f:
+with open('config_joint_flag.yaml', 'r') as f:
+    cfg_flag = yaml.load(f)
+    flag = cfg_flag['flag']
+
+if flag == 1:
+    cfg_name = 'config_joint_celeba_regular.yaml'
+elif flag == 2:
+    cfg_name = 'config_joint_celeba_irregular.yaml'
+elif flag == 3:
+    cfg_name = 'config_joint_celebahq_regular.yaml'
+elif flag == 4:
+    cfg_name = 'config_joint_celebahq_irregular.yaml'
+elif flag == 5:
+    cfg_name = 'config_joint_psv_regular.yaml'
+elif flag == 6:
+    cfg_name = 'config_joint_psv_irregular.yaml'
+elif flag == 7:
+    cfg_name = 'config_joint_places2_regular.yaml'
+elif flag == 8:
+    cfg_name = 'config_joint_places2_irregular.yaml'
+
+
+with open(cfg_name, 'r') as f:
     cfg = yaml.load(f)
 
 if pf.system() == 'Windows':
@@ -96,7 +118,7 @@ class JointModel():
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
                 epoch = step // num_batch - 1
 
-            with open('logs.csv', 'a+') as f:
+            with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_content_loss',
                                   'gen_style_loss', 'psnr', 'ssim', 'l1', 'l2'])
@@ -115,7 +137,7 @@ class JointModel():
                     print('-----------gen_content_loss: {}'.format(logs_[4]))
                     print('-----------gen_style_loss: {}'.format(logs_[5]))
 
-                    with open('logs.csv', 'a+') as f:
+                    with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
