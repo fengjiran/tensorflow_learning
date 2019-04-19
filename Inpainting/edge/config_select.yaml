@@ -1,0 +1,13 @@
+flag: 1 # The flag selects which config file is loaded for training
+
+celeba_regular: 1
+celeba_irregular: 2
+
+celebahq_regular: 3
+celebahq_irregular: 4
+
+psv_regular: 5
+psv_irregular: 6
+
+places2_regular: 7
+places2_irregular: 8
