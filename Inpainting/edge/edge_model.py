@@ -7,26 +7,26 @@ from dataset import Dataset
 from dataset import MaskDataset
 from networks import EdgeModel
 
-with open('config_flag.yaml', 'r') as f:
+with open('config_edge_flag.yaml', 'r') as f:
     cfg_flag = yaml.load(f)
     flag = cfg_flag['flag']
 
 if flag == 1:
-    cfg_name = 'config_celeba_regular.yaml'
+    cfg_name = 'config_edge_celeba_regular.yaml'
 elif flag == 2:
-    cfg_name = 'config_celeba_irregular.yaml'
+    cfg_name = 'config_edge_celeba_irregular.yaml'
 elif flag == 3:
-    cfg_name = 'config_celebahq_regular.yaml'
+    cfg_name = 'config_edge_celebahq_regular.yaml'
 elif flag == 4:
-    cfg_name = 'config_celebahq_irregular.yaml'
+    cfg_name = 'config_edge_celebahq_irregular.yaml'
 elif flag == 5:
-    cfg_name = 'config_psv_regular.yaml'
+    cfg_name = 'config_edge_psv_regular.yaml'
 elif flag == 6:
-    cfg_name = 'config_psv_irregular.yaml'
+    cfg_name = 'config_edge_psv_irregular.yaml'
 elif flag == 7:
-    cfg_name = 'config_places2_regular.yaml'
+    cfg_name = 'config_edge_places2_regular.yaml'
 elif flag == 8:
-    cfg_name = 'config_places2_irregular.yaml'
+    cfg_name = 'config_edge_places2_irregular.yaml'
 
 with open(cfg_name, 'r') as f:
     cfg = yaml.load(f)
@@ -109,7 +109,7 @@ class EdgeAware():
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
                 epoch = step // num_batch - 1
 
-            with open('logs.csv', 'a+') as f:
+            with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss'])
 
@@ -128,7 +128,7 @@ class EdgeAware():
                     print('-----------gen_fm_loss: {}'.format(logs_[3]))
                     # print('-----------gen_ce_loss: {}'.format(logs_[4]))
 
-                    with open('logs.csv', 'a+') as f:
+                    with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                         mywrite = csv.writer(f)
                         mywrite.writerow(logs_)
 
