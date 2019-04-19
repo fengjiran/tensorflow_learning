@@ -1,0 +1,52 @@
+firstTimeTrain: true               # the first time to train
+MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
+SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
+EDGE: 1                            # 1: canny, 2: external
+MASK: 1                            # 1: random block, half, 2: external
+LR: 0.0001                         # learning rate
+D2G_LR: 0.1                        # discriminator/generator learning rate ratio
+BETA1: 0.0                         # adam optimizer beta1
+BETA2: 0.9                         # adam optimizer beta2
+BATCH_SIZE: 8                      # input batch size for training
+INPUT_SIZE: 256                    # input image size for training 0 for original size
+MAX_ITERS: 2000000                 # maximum number of iterations to train the model
+VERBOSE: 0                         # turns on verbose mode in the output console
+EDGE_THRESHOLD: 0.5                # edge detection threshold
+
+L1_LOSS_WEIGHT: 2.5                # l1 loss weight
+STYLE_LOSS_WEIGHT: 0.1             # style loss weight
+CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
+ADV_LOSS_WEIGHT: 0.02               # adversarial loss weight
+FM_LOSS_WEIGHT: 5                  # feature matching loss weight
+CE_LOSS_WEIGHT: 1                  # cross entropy loss weight
+
+GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
+INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
+
+SAVE_INTERVAL: 200                 # how many iterations to wait before saving model (0: never)
+EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
+
+MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
+MASK_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/qd_imd_linux_7810.flist
+MASK_FLIST_LINUX_7610: /home/icie/Datasets/flist/qd_imd_linux_7610.flist
+
+TRAIN_FLIST_WIN: "F:\\Datasets\\flist\\celeba_train_win.flist"
+VAL_FLIST_WIN: "F:\\Datasets\\flist\\celeba_val_win.flist"
+TEST_FLIST_WIN: "F:\\Datasets\\flist\\celeba_test_win.flist"
+
+TRAIN_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celeba_train_linux_7810.flist
+VAL_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celeba_val_linux_7810.flist
+TEST_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/celeba_test_linux_7810.flist
+
+TRAIN_FLIST_LINUX_7610: /home/icie/Datasets/flist/celeba_train_linux_7610.flist
+VAL_FLIST_LINUX_7610: /home/icie/Datasets/flist/celeba_val_linux_7610.flist
+TEST_FLIST_LINUX_7610: /home/icie/Datasets/flist/celeba_test_linux_7610.flist
+
+MODEL_PATH_LINUX_7610: /home/richard/model/edge/celeba/regular_mask/model
+MODEL_PATH_LINUX_7810: /home/icie/richard/model/edge/celeba/regular_mask/model
+MODEL_PATH_WIN: "E:\\model\\edge\\celeba\\regular_mask\\model"
+
+LOG_DIR_LINUX_7810: /home/richard/model/edge/celeba/regular_mask/log
+LOG_DIR_LINUX_7610: /home/icie/richard/model/edge/celeba/regular_mask/log
+LOG_DIR_WIN: "E:\\model\\edge\\celeba\\regular_mask\\log"
+
