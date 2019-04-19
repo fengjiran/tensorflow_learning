@@ -42,8 +42,8 @@ TRAIN_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_train_linux_7610.flis
 VAL_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_val_linux_7610.flist
 TEST_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_test_linux_7610.flist
 
-MODEL_PATH_LINUX_7610: /home/richard/model/edge/celebahq/irregular_mask/model
-MODEL_PATH_LINUX_7810: /home/icie/richard/model/edge/celebahq/irregular_mask/model
+MODEL_PATH_LINUX_7810: /home/richard/model/edge/celebahq/irregular_mask/model
+MODEL_PATH_LINUX_7610: /home/icie/richard/model/edge/celebahq/irregular_mask/model
 MODEL_PATH_WIN: "E:\\model\\edge\\celebahq\\irregular_mask\\model"
 
 LOG_DIR_LINUX_7810: /home/richard/model/edge/celebahq/irregular_mask/log
