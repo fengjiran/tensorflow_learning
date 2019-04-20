@@ -45,8 +45,8 @@ class EdgeModel():
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block4')
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block5')
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block6')
-            # x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block7')
-            # x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block8')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block7')
+            x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block8')
 
             # decoder
             shape1 = tf.shape(x)
