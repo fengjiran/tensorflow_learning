@@ -111,7 +111,7 @@ class EdgeAware():
 
             with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                 mywrite = csv.writer(f)
-                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss'])
+                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_fm_loss', 'gen_ce_loss'])
 
             summary_writer = tf.summary.FileWriter(log_dir)
             all_summary = tf.summary.merge_all()
