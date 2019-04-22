@@ -29,6 +29,8 @@ class InpaintModel():
 
     def inpaint_generator(self, x, reuse=None):
         with tf.variable_scope('inpaint_generator', reuse=reuse):
+            color_domains = x[:, :, :, 3:6]
+            edges = x[:, :, :, 6:7]
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
@@ -58,21 +60,34 @@ class InpaintModel():
             # decoder
             shape1 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape1[1] * 2, shape1[2] * 2))
+            color = tf.image.resize_nearest_neighbor(color_domains, size=(shape1[1] * 2, shape1[2] * 2))
+            edge = tf.image.resize_nearest_neighbor(edges, size=(shape1[1] * 2, shape1[2] * 2))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, color, edge], axis=3)
+
             x = conv(x, channels=128, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
-
-            # x = deconv(x, channels=128, kernel=4, stride=2, init_type=self.init_type, name='deconv1')
             x = instance_norm(x, name='in4')
             x = tf.nn.relu(x)
 
             shape2 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape2[1] * 2, shape2[2] * 2))
+            color = tf.image.resize_nearest_neighbor(color_domains, size=(shape2[1] * 2, shape2[2] * 2))
+            edge = tf.image.resize_nearest_neighbor(edges, size=(shape2[1] * 2, shape2[2] * 2))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, color, edge], axis=3)
+
             x = conv(x, channels=64, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv5')
-
             # x = deconv(x, channels=64, kernel=4, stride=2, init_type=self.init_type, name='deconv2')
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
+
+            color = tf.image.resize_nearest_neighbor(color_domains, size=(
+                self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']))
+            edge = tf.image.resize_nearest_neighbor(edges, size=(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, color, edge], axis=3)
 
             x = conv(x, channels=3, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
