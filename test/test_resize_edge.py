@@ -34,6 +34,7 @@ if __name__ == '__main__':
     path = 'F:\\Datasets\\celebahq\\img00000001.png'
     image = imread(path)
     image = cv2.resize(image, (256, 256), interpolation=cv2.INTER_AREA)
+    color = get_color_domain(image, 21, 3, 3)
     gray = rgb2gray(image)
     edge = canny(gray, 2)
     edge = edge.astype(np.float32)
@@ -41,26 +42,38 @@ if __name__ == '__main__':
     edge1 = cv2.resize(edge, (128, 128), interpolation=cv2.INTER_AREA)
     edge1 = edge1 > 0.25
 
+    color1 = cv2.resize(color, (128, 128), interpolation=cv2.INTER_AREA)
+
     # plt.figure(figsize=(8, 3))
 
-    plt.subplot(141)
+    plt.subplot(161)
     plt.imshow(image)
     plt.axis('off')
     plt.title('image')
 
-    plt.subplot(142)
+    plt.subplot(162)
     plt.imshow(gray, cmap=plt.cm.gray)
     plt.axis('off')
     plt.title('gray')
 
-    plt.subplot(143)
+    plt.subplot(163)
     plt.imshow(edge, cmap=plt.cm.gray)
     plt.axis('off')
     plt.title('edge')
 
-    plt.subplot(144)
+    plt.subplot(164)
     plt.imshow(edge1, cmap=plt.cm.gray)
     plt.axis('off')
     plt.title('edge')
+
+    plt.subplot(165)
+    plt.imshow(color)
+    plt.axis('off')
+    plt.title('color')
+
+    plt.subplot(166)
+    plt.imshow(color1)
+    plt.axis('off')
+    plt.title('color')
 
     plt.show()
