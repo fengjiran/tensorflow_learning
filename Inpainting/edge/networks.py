@@ -149,22 +149,19 @@ class EdgeModel():
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
-        # gen_loss += gen_gan_loss
 
         # generator feature matching loss
         gen_fm_loss = 0.0
         for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
-        # gen_fm_loss = gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
-        # gen_loss += gen_fm_loss
-
-        gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
 
         # generator cross entropy loss
-        # gen_ce_loss = 0.0
-        # gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
-        # gen_ce_loss = gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
-        # gen_loss += gen_ce_loss
+        gen_ce_loss = 0.0
+        gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=outputs_merged))
+
+        gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] +\
+            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT'] +\
+            gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
@@ -192,13 +189,14 @@ class EdgeModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss, gen_ce_loss]
 
         # add summary for monitor
         tf.summary.scalar('train_dis_loss', dis_loss)
         tf.summary.scalar('train_gen_loss', gen_loss)
         tf.summary.scalar('train_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('train_gen_fm_loss', gen_fm_loss)
+        tf.summary.scalar('train_gen_ce_loss', gen_ce_loss)
         tf.summary.scalar('train_precision', precision)
         tf.summary.scalar('train_recall', recall)
 
