@@ -233,6 +233,16 @@ class EdgeModel():
 
         return outputs_merged
 
+    def sample(self, img_grays, edges, masks):
+        # generator input: [grayscale(1) + edge(1) + mask(1)]
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        outputs = self.edge_generator(inputs)
+        outputs_merged = outputs * masks + edges * (1 - masks)
+
+        return outputs_merged
+
     def save(self, sess, saver, path, model_name):
         print('\nsaving the model...\n')
         saver.save(sess, os.path.join(path, model_name))
