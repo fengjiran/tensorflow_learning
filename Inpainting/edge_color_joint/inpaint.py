@@ -13,20 +13,28 @@ with open('config_joint_flag.yaml', 'r') as f:
 
 if flag == 1:
     cfg_name = 'config_joint_celeba_regular.yaml'
+    print('Training joint model with celeba and regular mask')
 elif flag == 2:
     cfg_name = 'config_joint_celeba_irregular.yaml'
+    print('Training joint model with celeba and irregular mask')
 elif flag == 3:
     cfg_name = 'config_joint_celebahq_regular.yaml'
+    print('Training joint model with celebahq and regular mask')
 elif flag == 4:
     cfg_name = 'config_joint_celebahq_irregular.yaml'
+    print('Training joint model with celebahq and irregular mask')
 elif flag == 5:
     cfg_name = 'config_joint_psv_regular.yaml'
+    print('Training joint model with psv and regular mask')
 elif flag == 6:
     cfg_name = 'config_joint_psv_irregular.yaml'
+    print('Training joint model with psv and irregular mask')
 elif flag == 7:
     cfg_name = 'config_joint_places2_regular.yaml'
+    print('Training joint model with places2 and regular mask')
 elif flag == 8:
     cfg_name = 'config_joint_places2_irregular.yaml'
+    print('Training joint model with places2 and irregular mask')
 
 
 with open(cfg_name, 'r') as f:
