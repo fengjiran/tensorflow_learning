@@ -184,14 +184,14 @@ class InpaintModel():
         gen_content_loss = perceptual_loss(content_x, content_y)
 
         # generator style loss
-        style_x = self.vgg.forward(outputs_merged * masks, reuse=True)
-        style_y = self.vgg.forward(images * masks, reuse=True)
-        gen_style_loss = style_loss(style_x, style_y)
+        # style_x = self.vgg.forward(outputs_merged * masks, reuse=True)
+        # style_y = self.vgg.forward(images * masks, reuse=True)
+        # gen_style_loss = style_loss(style_x, style_y)
 
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
-            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] +\
-            gen_style_loss * self.cfg['STYLE_LOSS_WEIGHT']
+            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] 
+            # gen_style_loss * self.cfg['STYLE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
@@ -219,7 +219,7 @@ class InpaintModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, gen_style_loss, psnr, ssim, l1, l2]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, psnr, ssim, l1, l2]
 
         # add summary for monitor
         tf.summary.scalar('dis_loss', dis_loss)
@@ -227,7 +227,7 @@ class InpaintModel():
         tf.summary.scalar('gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('gen_l1_loss', gen_l1_loss)
         tf.summary.scalar('gen_content_loss', gen_content_loss)
-        tf.summary.scalar('gen_style_loss', gen_style_loss)
+        # tf.summary.scalar('gen_style_loss', gen_style_loss)
 
         tf.summary.scalar('train_psnr', psnr)
         tf.summary.scalar('train_ssim', ssim)
