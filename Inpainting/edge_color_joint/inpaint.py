@@ -121,7 +121,7 @@ class JointModel():
             with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                 mywrite = csv.writer(f)
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_content_loss',
-                                  'gen_style_loss', 'psnr', 'ssim', 'l1', 'l2'])
+                                  'psnr', 'ssim', 'l1', 'l2'])
             all_summary = tf.summary.merge_all()
 
             while keep_training:
@@ -135,7 +135,7 @@ class JointModel():
                     print('-----------gen_gan_loss: {}'.format(logs_[2]))
                     print('-----------gen_l1_loss: {}'.format(logs_[3]))
                     print('-----------gen_content_loss: {}'.format(logs_[4]))
-                    print('-----------gen_style_loss: {}'.format(logs_[5]))
+                    # print('-----------gen_style_loss: {}'.format(logs_[5]))
 
                     with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
                         mywrite = csv.writer(f)
