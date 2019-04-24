@@ -28,9 +28,9 @@ def get_color_domain(img, blur_factor1, blur_factor2, k):
 
 
 if __name__ == '__main__':
-    path = 'F:\\Datasets\\psv\\psv00002.JPG'
+    path = 'F:\\Datasets\\psv\\psv00007.JPG'
     img = imread(path)
-    img_color_domain = get_color_domain(img, 15, 3, 3)
+    img_color_domain = get_color_domain(img, 19, 3, 3)
 
     print(img_color_domain.shape)
 
