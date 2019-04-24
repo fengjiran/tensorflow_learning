@@ -19,8 +19,8 @@ K: 3                               # k-means parameter
 
 
 L1_LOSS_WEIGHT: 1.0                # l1 loss weight
-STYLE_LOSS_WEIGHT: 0.1             # style loss weight
-CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
+# STYLE_LOSS_WEIGHT: 0.1             # style loss weight
+# CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
 ADV_LOSS_WEIGHT: 1.0               # adversarial loss weight (0.1->0.5->0.8 for regular mask)
 FM_LOSS_WEIGHT: 5                  # feature matching loss weight
 
