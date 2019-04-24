@@ -21,7 +21,7 @@ K: 3                               # k-means parameter
 L1_LOSS_WEIGHT: 1.0                # l1 loss weight
 STYLE_LOSS_WEIGHT: 0             # style loss weight
 CONTENT_LOSS_WEIGHT: 1           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.05              # adversarial loss weight
+ADV_LOSS_WEIGHT: 0.1              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
 GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
