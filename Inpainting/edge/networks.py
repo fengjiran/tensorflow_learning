@@ -72,7 +72,7 @@ class EdgeModel():
 
             edge = tf.nn.sigmoid(x)
 
-            return edge, x
+            return edge
 
     def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
@@ -107,7 +107,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs, logits = self.edge_generator(inputs)
+        outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         # metrics
@@ -156,11 +156,11 @@ class EdgeModel():
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
 
         # generator cross entropy loss
-        gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
+        # gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
 
         gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] +\
-            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT'] +\
-            gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
+            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
+        # gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
@@ -188,14 +188,14 @@ class EdgeModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss, gen_ce_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
 
         # add summary for monitor
         tf.summary.scalar('train_dis_loss', dis_loss)
         tf.summary.scalar('train_gen_loss', gen_loss)
         tf.summary.scalar('train_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('train_gen_fm_loss', gen_fm_loss)
-        tf.summary.scalar('train_gen_ce_loss', gen_ce_loss)
+        # tf.summary.scalar('train_gen_ce_loss', gen_ce_loss)
         tf.summary.scalar('train_precision', precision)
         tf.summary.scalar('train_recall', recall)
 
@@ -206,7 +206,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs, _ = self.edge_generator(inputs, reuse=True)
+        outputs = self.edge_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         # metrics
@@ -227,7 +227,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs, _ = self.edge_generator(inputs)
+        outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         return outputs_merged
@@ -237,7 +237,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs, _ = self.edge_generator(inputs)
+        outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         return outputs_merged
