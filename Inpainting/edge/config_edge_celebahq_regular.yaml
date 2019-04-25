@@ -23,7 +23,7 @@ FM_LOSS_WEIGHT: 15                  # feature matching loss weight
 GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
 
-SAVE_INTERVAL: 200                 # how many iterations to wait before saving model (0: never)
+SAVE_INTERVAL: 1000                 # how many iterations to wait before saving model (0: never)
 EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
 
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
