@@ -152,7 +152,7 @@ class EdgeModel():
 
         # generator feature matching loss
         gen_fm_loss = 0.0
-        for (real_feat, fake_feat) in zip(dis_real_feat, dis_fake_feat):
+        for (real_feat, fake_feat) in zip(dis_real_feat, gen_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
 
         # generator cross entropy loss
