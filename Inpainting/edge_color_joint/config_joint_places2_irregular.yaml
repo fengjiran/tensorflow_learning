@@ -1,6 +1,6 @@
 firstTimeTrain: true               # the first time to train
 MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
-SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
+SIGMA: 1.8                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
 EDGE: 1                            # 1: canny, 2: external
 MASK: 2                            # 1: random block, half, 2: external
 LR: 0.0001                         # learning rate
@@ -13,16 +13,16 @@ MAX_ITERS: 2000000                 # maximum number of iterations to train the m
 VERBOSE: 0                         # turns on verbose mode in the output console
 EDGE_THRESHOLD: 0.5                # edge detection threshold
 
-BLUR_FACTOR1: 21                   # the first factor for median filter
+BLUR_FACTOR1: 11                   # the first factor for median filter
 BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
 
 L1_LOSS_WEIGHT: 1.0                # l1 loss weight
-STYLE_LOSS_WEIGHT: 150             # style loss weight
+# STYLE_LOSS_WEIGHT: 150             # style loss weight
 CONTENT_LOSS_WEIGHT: 1           # perceptual loss weight
 ADV_LOSS_WEIGHT: 0.05              # adversarial loss weight
-FM_LOSS_WEIGHT: 10                 # feature matching loss weight
+# FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
 GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
