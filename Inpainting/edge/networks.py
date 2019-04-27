@@ -135,7 +135,7 @@ class EdgeModel():
 
         # discriminator loss
         dis_input_real = tf.concat([imgs, edges], axis=3)
-        dis_input_fake = tf.concat([imgs, tf.stop_gradient(outputs)], axis=3)
+        dis_input_fake = tf.concat([imgs, tf.stop_gradient(outputs_merged)], axis=3)
         # dis_input_fake = tf.concat([img_grays, tf.stop_gradient(outputs_merged)], axis=3)
         dis_real, dis_real_feat = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
         dis_fake, dis_fake_feat = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
@@ -147,7 +147,7 @@ class EdgeModel():
 
         # generator adversarial loss
         # gen_input_fake = tf.concat([img_grays, outputs_merged], axis=3)
-        gen_input_fake = tf.concat([imgs, outputs], axis=3)
+        gen_input_fake = tf.concat([imgs, outputs_merged], axis=3)
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
@@ -217,7 +217,7 @@ class EdgeModel():
         tf.summary.scalar('val_precision', precision)
         tf.summary.scalar('val_recall', recall)
 
-        visual_img = [img_grays, grays_masked, edges, edges_masked, outputs_merged]
+        visual_img = [grays_masked, edges, edges_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('gray_edge_merged', visual_img, 4)
 
