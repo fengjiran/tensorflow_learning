@@ -85,7 +85,7 @@ class EdgeAware():
 
         keep_training = True
 
-        gen_train, dis_train, logs = self.model.build_model(images, img_grays, img_edges, img_masks)
+        gen_train, dis_train, logs = self.model.build_model(img_grays, img_edges, img_masks)
         val_logs = self.model.eval_model(val_img_grays, val_img_edges, img_masks)
 
         train_iterator = self.train_dataset.iterator
