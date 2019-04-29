@@ -128,7 +128,7 @@ class InpaintModel():
         # discriminator input: [img(3)]
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains, edges,
-                            masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
+                            masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
         outputs = self.inpaint_generator(inputs)
         outputs_merged = outputs * masks + images * (1 - masks)
 
@@ -190,8 +190,8 @@ class InpaintModel():
 
         gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
             gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
-            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT'] 
-            # gen_style_loss * self.cfg['STYLE_LOSS_WEIGHT']
+            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT']
+        # gen_style_loss * self.cfg['STYLE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
@@ -240,7 +240,7 @@ class InpaintModel():
         # generator input: [img_masked(3) + edge(1) + color_domain(3) + mask(1)]
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains, edges,
-                            masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
+                            masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
         outputs = self.inpaint_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + images * (1 - masks)
 
