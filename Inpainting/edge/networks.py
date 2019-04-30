@@ -56,8 +56,6 @@ class EdgeModel():
             x = instance_norm(x, name='in4')
             x = tf.nn.relu(x)
 
-            decoder1 = x
-
             shape2 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape2[1] * 2, shape2[2] * 2))
             x = conv(x, channels=64, kernel=3, stride=1, pad=1,
@@ -65,14 +63,12 @@ class EdgeModel():
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)
 
-            decoder2 = x
-
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
-            edge = tf.nn.sigmoid(x)
-            # edge = tf.nn.relu(x)
+            # edge = tf.nn.sigmoid(x)
+            edge = tf.nn.relu(x)
 
-            return edge, decoder1, decoder2
+            return edge
 
     def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
