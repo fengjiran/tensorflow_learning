@@ -26,17 +26,21 @@ class EdgeModel():
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
             x = instance_norm(x, name='in1')
-            x = tf.nn.relu(x)
+            x = tf.nn.relu(x)  # [N, 256, 256, 64]
+
+            feature_maps1 = x
 
             x = conv(x, channels=128, kernel=4, stride=2, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv2')
             x = instance_norm(x, name='in2')
-            x = tf.nn.relu(x)
+            x = tf.nn.relu(x)  # [N, 128, 128, 128]
+
+            feature_maps2 = x
 
             x = conv(x, channels=256, kernel=4, stride=2, pad=1,
                      pad_type='zero', init_type=self.init_type, name='conv3')
             x = instance_norm(x, name='in3')
-            x = tf.nn.relu(x)
+            x = tf.nn.relu(x)  # [N, 64, 64, 256]
 
             # resnet block
             x = resnet_block(x, out_channels=256, dilation=2, init_type=self.init_type, name='resnet_block1')
@@ -54,19 +58,21 @@ class EdgeModel():
             x = conv(x, channels=128, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
             x = instance_norm(x, name='in4')
-            x = tf.nn.relu(x)
+            x = tf.nn.relu(x)  # [N, 128, 128, 128]
+            x = tf.concat([x, feature_maps2], axis=3)
 
             shape2 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape2[1] * 2, shape2[2] * 2))
             x = conv(x, channels=64, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv5')
             x = instance_norm(x, name='in5')
-            x = tf.nn.relu(x)
+            x = tf.nn.relu(x)  # [N, 256, 256, 64]
+            x = tf.concat([x, feature_maps1], axis=3)
 
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
-            # edge = tf.nn.sigmoid(x)
-            edge = tf.nn.relu(x)
+            edge = tf.nn.sigmoid(x)
+            # edge = tf.nn.relu(x)
 
             return edge
 
@@ -131,7 +137,6 @@ class EdgeModel():
 
         # discriminator loss
         dis_input_real = tf.concat([img_grays, edges], axis=3)
-        # dis_input_fake = tf.concat([img, tf.stop_gradient(outputs_merged)], axis=3)
         dis_input_fake = tf.concat([img_grays, tf.stop_gradient(outputs_merged)], axis=3)
         dis_real, dis_real_feat = self.edge_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
         dis_fake, dis_fake_feat = self.edge_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
@@ -141,9 +146,13 @@ class EdgeModel():
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
 
+        # decoder discriminator loss
+        # decoder_input_fake = tf.concat([img_grays, decoder], axis=3)
+        # decoder_fake, decoder_fake_feat = self.edge_discriminator(
+        #     decoder_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+
         # generator adversarial loss
         gen_input_fake = tf.concat([img_grays, outputs_merged], axis=3)
-        # gen_input_fake = tf.concat([imgs, outputs_merged], axis=3)
         gen_fake, gen_fake_feat = self.edge_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
         gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
                                         gan_type=self.cfg['GAN_LOSS'], is_disc=False)
@@ -153,12 +162,14 @@ class EdgeModel():
         for (real_feat, fake_feat) in zip(dis_real_feat, gen_fake_feat):
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
 
+        # for (real_feat, fake_feat) in zip(dis_real_feat, decoder_fake_feat):
+        #     gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
+
         # generator cross entropy loss
         # gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
 
         gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] +\
             gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
-        # gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
@@ -206,7 +217,7 @@ class EdgeModel():
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
         outputs = self.edge_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + edges * (1 - masks)
-        outputs_merged = tf.clip_by_value(outputs_merged, 0, 1)
+        # outputs_merged = tf.clip_by_value(outputs_merged, 0, 1)
 
         # metrics
         precision, recall = edge_accuracy(edges * masks, outputs_merged * masks, self.cfg['EDGE_THRESHOLD'])
