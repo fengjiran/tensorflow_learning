@@ -22,20 +22,21 @@ class EdgeModel():
 
     def edge_generator(self, x, reuse=None):
         with tf.variable_scope('edge_generator', reuse=reuse):
+            edges_masked = x[:, :, :, 1:2]
             # encoder
             x = conv(x, channels=64, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv1')
             x = instance_norm(x, name='in1')
             x = tf.nn.relu(x)  # [N, 256, 256, 64]
 
-            feature_maps1 = x
+            # feature_maps1 = x
 
             x = conv(x, channels=128, kernel=4, stride=2, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv2')
             x = instance_norm(x, name='in2')
             x = tf.nn.relu(x)  # [N, 128, 128, 128]
 
-            feature_maps2 = x
+            # feature_maps2 = x
 
             x = conv(x, channels=256, kernel=4, stride=2, pad=1,
                      pad_type='zero', init_type=self.init_type, name='conv3')
@@ -55,20 +56,29 @@ class EdgeModel():
             # decoder
             shape1 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape1[1] * 2, shape1[2] * 2))
+            edge = tf.image.resize_nearest_neighbor(edges_masked, size=(shape1[1] * 2, shape1[2] * 2))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, edge], axis=3)
             x = conv(x, channels=128, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv4')
             x = instance_norm(x, name='in4')
             x = tf.nn.relu(x)  # [N, 128, 128, 128]
-            x = tf.concat([x, feature_maps2], axis=3)
+            # x = tf.concat([x, feature_maps2], axis=3)
 
             shape2 = tf.shape(x)
             x = tf.image.resize_nearest_neighbor(x, size=(shape2[1] * 2, shape2[2] * 2))
+            edge = tf.image.resize_nearest_neighbor(edges_masked, size=(shape2[1] * 2, shape2[2] * 2))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, edge], axis=3)
             x = conv(x, channels=64, kernel=3, stride=1, pad=1,
                      pad_type='reflect', init_type=self.init_type, name='conv5')
             x = instance_norm(x, name='in5')
             x = tf.nn.relu(x)  # [N, 256, 256, 64]
-            x = tf.concat([x, feature_maps1], axis=3)
+            # x = tf.concat([x, feature_maps1], axis=3)
 
+            edge = tf.image.resize_nearest_neighbor(edges_masked, size=(self.cfg['INPUT_SIZE'], self.cfg['INPUT_SIZE']))
+            edge = tf.cast(tf.greater(edge, 0.25), dtype=tf.float32)
+            x = tf.concat([x, edge], axis=3)
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
             edge = tf.nn.sigmoid(x)
