@@ -5,7 +5,7 @@ import yaml
 import tensorflow as tf
 from dataset import Dataset
 from dataset import MaskDataset
-from networks1 import EdgeModel
+from networks import EdgeModel
 
 with open('config_edge_flag.yaml', 'r') as f:
     cfg_flag = yaml.load(f)
