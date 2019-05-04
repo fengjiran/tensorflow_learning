@@ -100,10 +100,10 @@ class EdgeModel():
     def build_model(self, img_grays, edges, masks):
         # generator input: [grayscale(1) + edge(1) + mask(1)]
         # discriminator input: [grayscale(1) + edge(1)]
-        # edges_masked = edges * (1 - masks)
-        # grays_masked = img_grays * (1 - masks) + masks
-        edges_masked = edges
-        grays_masked = img_grays
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        # edges_masked = edges
+        # grays_masked = img_grays
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
         outputs = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
