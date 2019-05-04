@@ -65,10 +65,10 @@ class EdgeModel():
 
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
-            # edge = tf.nn.sigmoid(x)
-            edge = tf.nn.relu(x)
+            edge = tf.nn.sigmoid(x)
+            # edge = tf.nn.relu(x)
 
-            return edge
+            return edge, x
 
     def edge_discriminator(self, x, reuse=None, use_sigmoid=False):
         with tf.variable_scope('edge_discriminator', reuse=reuse):
@@ -105,7 +105,7 @@ class EdgeModel():
         # edges_masked = edges
         # grays_masked = img_grays
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs)
+        outputs, logits = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         # metrics
@@ -156,11 +156,21 @@ class EdgeModel():
             gen_fm_loss += tf.losses.absolute_difference(tf.stop_gradient(real_feat), fake_feat)
 
         # generator cross entropy loss
-        # gen_ce_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits))
+        ce = tf.nn.sigmoid_cross_entropy_with_logits(labels=edges, logits=logits)
+        hole_ce = tf.reduce_mean(tf.reduce_mean(ce * masks, axis=(1, 2, 3)) / tf.reduce_mean(masks, axis=(1, 2, 3)))
+        unhole_ce = tf.reduce_mean(tf.reduce_mean(ce * (1 - masks), axis=(1, 2, 3)) /
+                                   tf.reduce_mean(1 - masks, axis=(1, 2, 3)))
+        l2 = tf.square(edges - outputs)
+        hole_l2 = tf.reduce_mean(tf.reduce_mean(l2 * masks, axis=(1, 2, 3)) / tf.reduce_mean(masks, axis=(1, 2, 3)))
+        unhole_l2 = tf.reduce_mean(tf.reduce_mean(l2 * (1 - masks), axis=(1, 2, 3)) /
+                                   tf.reduce_mean(1 - masks, axis=(1, 2, 3)))
 
+        gen_ce_loss = 5 * hole_l2 * hole_ce + unhole_l2 * unhole_ce
+
+        # all loss
         gen_loss = gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] +\
-            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT']
-        # gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
+            gen_fm_loss * self.cfg['FM_LOSS_WEIGHT'] +\
+            gen_ce_loss * self.cfg['CE_LOSS_WEIGHT']
 
         # get model variables
         gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
@@ -188,14 +198,14 @@ class EdgeModel():
         dis_train = tf.group(*dis_train_ops)
 
         # create logs
-        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss]
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_fm_loss, gen_ce_loss]
 
         # add summary for monitor
         tf.summary.scalar('train_dis_loss', dis_loss)
         tf.summary.scalar('train_gen_loss', gen_loss)
         tf.summary.scalar('train_gen_gan_loss', gen_gan_loss)
         tf.summary.scalar('train_gen_fm_loss', gen_fm_loss)
-        # tf.summary.scalar('train_gen_ce_loss', gen_ce_loss)
+        tf.summary.scalar('train_gen_ce_loss', gen_ce_loss)
         tf.summary.scalar('train_precision', precision)
         tf.summary.scalar('train_recall', recall)
 
@@ -206,7 +216,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs, reuse=True)
+        outputs, _ = self.edge_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + edges * (1 - masks)
         outputs_merged = tf.clip_by_value(outputs_merged, 0, 1)
 
@@ -228,7 +238,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs)
+        outputs, _ = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         return outputs_merged
@@ -238,7 +248,7 @@ class EdgeModel():
         edges_masked = edges * (1 - masks)
         grays_masked = img_grays * (1 - masks) + masks
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
-        outputs = self.edge_generator(inputs)
+        outputs, _ = self.edge_generator(inputs)
         outputs_merged = outputs * masks + edges * (1 - masks)
 
         return outputs_merged
