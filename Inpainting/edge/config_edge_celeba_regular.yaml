@@ -13,11 +13,11 @@ MAX_ITERS: 2000000                 # maximum number of iterations to train the m
 VERBOSE: 0                         # turns on verbose mode in the output console
 EDGE_THRESHOLD: 0.5                # edge detection threshold
 
-L1_LOSS_WEIGHT: 2.5                # l1 loss weight
-STYLE_LOSS_WEIGHT: 0.1             # style loss weight
-CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.02               # adversarial loss weight
-FM_LOSS_WEIGHT: 5                  # feature matching loss weight
+# L1_LOSS_WEIGHT: 1                # l1 loss weight
+# STYLE_LOSS_WEIGHT: 0.1             # style loss weight
+# CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
+ADV_LOSS_WEIGHT: 0.001               # adversarial loss weight
+FM_LOSS_WEIGHT: 10                  # feature matching loss weight
 CE_LOSS_WEIGHT: 1                  # cross entropy loss weight
 
 GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
