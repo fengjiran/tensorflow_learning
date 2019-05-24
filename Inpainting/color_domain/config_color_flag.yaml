@@ -1,4 +1,4 @@
-flag: 3 # The flag selects which config file is loaded for training
+flag: 4 # The flag selects which config file is loaded for training
 
 celeba_regular: 1
 celeba_irregular: 2
