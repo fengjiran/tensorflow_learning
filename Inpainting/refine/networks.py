@@ -346,3 +346,70 @@ class RefineNet():
         tf.summary.scalar('train_l2', l2)
 
         return gen_train, dis_train, logs
+
+    def eval_model(self, images, img_grays, edges, color_domains, masks):
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        edge_inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        edge_outputs, edge_logits = self.edge_generator(edge_inputs, reuse=True)
+        edge_outputs_merged = edge_outputs * masks + edges * (1 - masks)
+
+        color_domains_masked = color_domains * (1 - masks) + masks
+        imgs_masked = images * (1 - masks) + masks
+        color_inputs = tf.concat([imgs_masked, color_domains_masked,
+                                  masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        color_outputs = self.color_domain_generator(color_inputs, reuse=True)
+        color_outputs_merged = color_outputs * masks + color_domains * (1 - masks)
+
+        refine_inputs = tf.concat([imgs_masked, color_outputs_merged, edge_outputs_merged,
+                                   masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        outputs = self.inpaint_generator(refine_inputs, reuse=True)
+        outputs_merged = outputs * masks + images * (1 - masks)
+
+        # metrics
+        psnr = tf_psnr(images, outputs_merged, 2.0)
+        ssim = tf_ssim(images, outputs_merged, 2.0)
+        l1 = tf_l1_loss(images, outputs_merged)
+        l2 = tf_l2_loss(images, outputs_merged)
+
+        tf.summary.scalar('train_psnr', psnr)
+        tf.summary.scalar('train_ssim', ssim)
+        tf.summary.scalar('train_l1', l1)
+        tf.summary.scalar('train_l2', l2)
+
+        visual_img = [images, edge_outputs_merged, color_outputs_merged, imgs_masked, outputs_merged]
+        visual_img = tf.concat(visual_img, axis=2)
+        tf.summary.image('image_edge_color_merge', visual_img, 5)
+
+        val_logs = [psnr, ssim, l1, l2]
+
+        return val_logs
+
+    def test_model(self, images, img_grays, edges, color_domains, masks):
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        edge_inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        edge_outputs, edge_logits = self.edge_generator(edge_inputs)
+        edge_outputs_merged = edge_outputs * masks + edges * (1 - masks)
+
+        color_domains_masked = color_domains * (1 - masks) + masks
+        imgs_masked = images * (1 - masks) + masks
+        color_inputs = tf.concat([imgs_masked, color_domains_masked,
+                                  masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        color_outputs = self.color_domain_generator(color_inputs)
+        color_outputs_merged = color_outputs * masks + color_domains * (1 - masks)
+
+        refine_inputs = tf.concat([imgs_masked, color_outputs_merged, edge_outputs_merged,
+                                   masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        outputs = self.inpaint_generator(refine_inputs)
+        outputs_merged = outputs * masks + images * (1 - masks)
+
+        return outputs_merged
+
+    def save(self, sess, saver, path, model_name):
+        print('\nsaving the model...\n')
+        saver.save(sess, os.path.join(path, model_name))
+
+    def load(self, sess, saver, path, model_name):
+        print('\nloading the model...\n')
+        saver.restore(sess, os.path.join(path, model_name))
