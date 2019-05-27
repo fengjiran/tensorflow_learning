@@ -11,6 +11,11 @@ from loss import perceptual_loss
 # from loss import style_loss
 from loss import Vgg19
 
+from metrics import tf_l1_loss
+from metrics import tf_l2_loss
+from metrics import tf_psnr
+from metrics import tf_ssim
+
 
 class Refine():
     """Construct refine model."""
@@ -240,6 +245,12 @@ class Refine():
         outputs = self.inpaint_generator(refine_inputs)
         outputs_merged = outputs * masks + images * (1 - masks)
 
+        # metrics
+        psnr = tf_psnr(images, outputs_merged, 2.0)
+        ssim = tf_ssim(images, outputs_merged, 2.0)
+        l1 = tf_l1_loss(images, outputs_merged)
+        l2 = tf_l2_loss(images, outputs_merged)
+
         if self.cfg['GAN_LOSS'] == 'lsgan':
             use_sigmoid = True
         else:
@@ -312,3 +323,26 @@ class Refine():
         dis_train = dis_opt.minimize(dis_loss,
                                      global_step=dis_global_step,
                                      var_list=dis_vars)
+
+        dis_train_ops = []
+        for i in range(5):
+            dis_train_ops.append(dis_train)
+        dis_train = tf.group(*dis_train_ops)
+
+        # create logs
+        logs = [dis_loss, gen_loss, gen_gan_loss, gen_l1_loss, gen_content_loss, psnr, ssim, l1, l2]
+
+        # add summary for monitor
+        tf.summary.scalar('dis_loss', dis_loss)
+        tf.summary.scalar('gen_loss', gen_loss)
+        tf.summary.scalar('gen_gan_loss', gen_gan_loss)
+        tf.summary.scalar('gen_l1_loss', gen_l1_loss)
+        tf.summary.scalar('gen_content_loss', gen_content_loss)
+        # tf.summary.scalar('gen_style_loss', gen_style_loss)
+
+        tf.summary.scalar('train_psnr', psnr)
+        tf.summary.scalar('train_ssim', ssim)
+        tf.summary.scalar('train_l1', l1)
+        tf.summary.scalar('train_l2', l2)
+
+        return gen_train, dis_train, logs
