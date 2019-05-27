@@ -8,7 +8,7 @@ from ops import instance_norm
 
 from loss import adversarial_loss
 from loss import perceptual_loss
-from loss import style_loss
+# from loss import style_loss
 from loss import Vgg19
 
 
@@ -220,3 +220,95 @@ class Refine():
                 outputs = tf.nn.sigmoid(conv5)
 
             return outputs, [conv1, conv2, conv3, conv4, conv5]
+
+    def build_model(self, images, img_grays, edges, color_domains, masks):
+        edges_masked = edges * (1 - masks)
+        grays_masked = img_grays * (1 - masks) + masks
+        edge_inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
+        edge_outputs, edge_logits = self.edge_generator(edge_inputs)
+        edge_outputs_merged = edge_outputs * masks + edges * (1 - masks)
+
+        color_domains_masked = color_domains * (1 - masks) + masks
+        imgs_masked = images * (1 - masks) + masks
+        color_inputs = tf.concat([imgs_masked, color_domains_masked,
+                                  masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        color_outputs = self.color_domain_generator(color_inputs)
+        color_outputs_merged = color_outputs * masks + color_domains * (1 - masks)
+
+        refine_inputs = tf.concat([imgs_masked, color_outputs_merged, edge_outputs_merged,
+                                   masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
+        outputs = self.inpaint_generator(refine_inputs)
+        outputs_merged = outputs * masks + images * (1 - masks)
+
+        if self.cfg['GAN_LOSS'] == 'lsgan':
+            use_sigmoid = True
+        else:
+            use_sigmoid = False
+
+        # get the global steps
+        gen_global_step = tf.get_variable('gen_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+        dis_global_step = tf.get_variable('dis_global_step',
+                                          [],
+                                          tf.int32,
+                                          initializer=tf.zeros_initializer(),
+                                          trainable=False)
+
+        gen_loss = 0.0
+        dis_loss = 0.0
+
+        # discriminator loss
+        dis_input_real = images
+        dis_input_fake = tf.stop_gradient(outputs_merged)
+        dis_real, dis_real_feat = self.inpaint_discriminator(dis_input_real, use_sigmoid=use_sigmoid)
+        dis_fake, dis_fake_feat = self.inpaint_discriminator(dis_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        dis_real_loss = adversarial_loss(dis_real, is_real=True,
+                                         gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_fake_loss = adversarial_loss(dis_fake, is_real=False,
+                                         gan_type=self.cfg['GAN_LOSS'], is_disc=True)
+        dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
+
+        # generator l1 loss
+        gen_l1_loss = tf.losses.absolute_difference(images, outputs) / tf.reduce_mean(masks)
+
+        # generator adversarial loss
+        gen_input_fake = outputs_merged
+        gen_fake, gen_fake_feat = self.inpaint_discriminator(gen_input_fake, reuse=True, use_sigmoid=use_sigmoid)
+        gen_gan_loss = adversarial_loss(gen_fake, is_real=True,
+                                        gan_type=self.cfg['GAN_LOSS'], is_disc=False)
+
+        # generator perceptual loss
+        content_x = self.vgg.forward(outputs_merged)
+        content_y = self.vgg.forward(images, reuse=True)
+        gen_content_loss = perceptual_loss(content_x, content_y)
+
+        gen_loss = gen_l1_loss * self.cfg['L1_LOSS_WEIGHT'] + \
+            gen_gan_loss * self.cfg['ADV_LOSS_WEIGHT'] + \
+            gen_content_loss * self.cfg['CONTENT_LOSS_WEIGHT']
+
+        # get model variables
+        edge_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'edge_generator')
+        color_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'color_generator')
+        inpaint_gen_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_generator')
+        dis_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'inpaint_discriminator')
+
+        gen_vars = edge_gen_vars + color_gen_vars + inpaint_gen_vars
+
+        # get the optimizer for training
+        gen_opt = tf.train.AdamOptimizer(self.cfg['LR'],
+                                         beta1=self.cfg['BETA1'],
+                                         beta2=self.cfg['BETA2'])
+        dis_opt = tf.train.AdamOptimizer(self.cfg['LR'] * self.cfg['D2G_LR'],
+                                         beta1=self.cfg['BETA1'],
+                                         beta2=self.cfg['BETA2'])
+
+        # optimize the model
+        gen_train = gen_opt.minimize(gen_loss,
+                                     global_step=gen_global_step,
+                                     var_list=gen_vars)
+        dis_train = dis_opt.minimize(dis_loss,
+                                     global_step=dis_global_step,
+                                     var_list=dis_vars)
