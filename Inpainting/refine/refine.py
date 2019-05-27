@@ -84,3 +84,49 @@ class RefineModel():
         max_iteration = self.cfg['MAX_ITERS']
 
         keep_training = True
+
+        gen_train, dis_train, logs = self.model.build_model(images, img_grays, edges, img_color_domains, img_masks)
+        val_logs = self.model.eval_model(val_images, val_grays, val_edges, val_img_color_domains, img_masks)
+
+        train_iterator = self.train_dataset.iterator
+        val_iterator = self.val_dataset.iterator
+        mask_iterator = self.mask_dataset.mask_iterator
+
+        var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+        vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
+
+        for var in vgg_var_list:
+            var_list.remove(var)
+
+        # the saver for model saving and loading
+        saver = tf.train.Saver(var_list)
+
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
+            if cfg['MASK'] == 2:
+                iterators = [train_iterator.initializer, val_iterator.initializer, mask_iterator.initializer]
+            else:
+                iterators = [train_iterator.initializer, val_iterator.initializer]
+
+            feed_dict = {self.train_dataset.filenames: self.train_dataset.flist,
+                         self.val_dataset.filenames: self.val_dataset.flist}
+
+            sess.run(iterators, feed_dict=feed_dict)
+            summary_writer = tf.summary.FileWriter(log_dir)
+
+            if self.cfg['firstTimeTrain']:
+                step = 0
+                epoch = 0
+                sess.run(tf.global_variables_initializer())
+            else:
+                sess.run(tf.global_variables_initializer())
+                saver.restore(sess, os.path.join(model_dir, 'model'))
+                step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
+                epoch = step // num_batch - 1
+
+            with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
+                mywrite = csv.writer(f)
+                mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_content_loss',
+                                  'psnr', 'ssim', 'l1', 'l2'])
+            all_summary = tf.summary.merge_all()
