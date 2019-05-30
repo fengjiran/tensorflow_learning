@@ -47,6 +47,9 @@ if pf.system() == 'Windows':
     val_flist = cfg['VAL_FLIST_WIN']
     test_flist = cfg['TEST_FLIST_WIN']
     mask_flist = cfg['MASK_FLIST_WIN']
+    edge_model_dir = cfg['EDGE_PATH_WIN']
+    color_model_dir = cfg['COLOR_PATH_WIN']
+    joint_model_dir = cfg['JOINT_PATH_WIN']
 elif pf.system() == 'Linux':
     if pf.node() == 'icie-Precision-Tower-7810':
         log_dir = cfg['LOG_DIR_LINUX_7810']
@@ -55,6 +58,9 @@ elif pf.system() == 'Linux':
         val_flist = cfg['VAL_FLIST_LINUX_7810']
         test_flist = cfg['TEST_FLIST_LINUX_7810']
         mask_flist = cfg['MASK_FLIST_LINUX_7810']
+        edge_model_dir = cfg['EDGE_PATH_LINUX_7810']
+        color_model_dir = cfg['COLOR_PATH_LINUX_7810']
+        joint_model_dir = cfg['JOINT_PATH_LINUX_7810']
     elif pf.node() == 'icie-Precision-T7610':
         log_dir = cfg['LOG_DIR_LINUX_7610']
         model_dir = cfg['MODEL_PATH_LINUX_7610']
@@ -62,6 +68,9 @@ elif pf.system() == 'Linux':
         val_flist = cfg['VAL_FLIST_LINUX_7610']
         test_flist = cfg['TEST_FLIST_LINUX_7610']
         mask_flist = cfg['MASK_FLIST_LINUX_7610']
+        edge_model_dir = cfg['EDGE_PATH_LINUX_7610']
+        color_model_dir = cfg['COLOR_PATH_LINUX_7610']
+        joint_model_dir = cfg['JOINT_PATH_LINUX_7610']
 
 
 class RefineModel():
