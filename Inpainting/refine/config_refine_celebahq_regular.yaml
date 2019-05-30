@@ -1,4 +1,4 @@
-firstTimeTrain: false               # the first time to train
+firstTimeTrain: true               # the first time to train
 MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
 SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
 EDGE: 1                            # 1: canny, 2: external
@@ -53,3 +53,15 @@ MODEL_PATH_WIN: "E:\\model\\joint\\celebahq\\regular_mask\\model"
 LOG_DIR_LINUX_7810: /home/richard/model/joint/celebahq/regular_mask/log
 LOG_DIR_LINUX_7610: /home/icie/richard/model/joint/celebahq/regular_mask/log
 LOG_DIR_WIN: "E:\\model\\joint\\celebahq\\regular_mask\\log"
+
+EDGE_PATH_LINUX_7810: /home/richard/model/edge/celebahq/regular_mask/model
+EDGE_PATH_LINUX_7610: /home/icie/richard/model/edge/celebahq/regular_mask/model
+EDGE_PATH_WIN: "E:\\model\\edge\\celebahq\\regular_mask\\model"
+
+COLOR_PATH_LINUX_7810: /home/richard/model/color/celebahq/regular_mask/model
+COLOR_PATH_LINUX_7610: /home/icie/richard/model/color/celebahq/regular_mask/model
+COLOR_PATH_WIN: "E:\\model\\color\\celebahq\\regular_mask\\model"
+
+JOINT_PATH_LINUX_7810: /home/richard/model/joint/celebahq/regular_mask/model
+JOINT_PATH_LINUX_7610: /home/icie/richard/model/joint/celebahq/regular_mask/model
+JOINT_PATH_WIN: "E:\\model\\joint\\celebahq\\regular_mask\\model"
