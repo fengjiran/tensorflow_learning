@@ -139,3 +139,44 @@ class RefineModel():
                 mywrite.writerow(['dis_loss', 'gen_loss', 'gen_gan_loss', 'gen_l1_loss', 'gen_content_loss',
                                   'psnr', 'ssim', 'l1', 'l2'])
             all_summary = tf.summary.merge_all()
+
+            while keep_training:
+                epoch += 1
+                print('\n\nTraining epoch: %d' % epoch)
+                for i in range(num_batch):
+                    _, _, logs_ = sess.run([dis_train, gen_train, logs])
+                    print('Epoch: {}, Iter: {}'.format(epoch, step))
+                    print('-----------dis_loss: {}'.format(logs_[0]))
+                    print('-----------gen_loss: {}'.format(logs_[1]))
+                    print('-----------gen_gan_loss: {}'.format(logs_[2]))
+                    print('-----------gen_l1_loss: {}'.format(logs_[3]))
+                    print('-----------gen_content_loss: {}'.format(logs_[4]))
+                    # print('-----------gen_style_loss: {}'.format(logs_[5]))
+
+                    with open(os.path.join(log_dir, 'logs.csv'), 'a+') as f:
+                        mywrite = csv.writer(f)
+                        mywrite.writerow(logs_)
+
+                    if step % self.cfg['EVAL_INTERVAL'] == 0:
+                        val_logs_ = sess.run(val_logs)
+                        print('-----------psnr: {}'.format(val_logs_[0]))
+                        print('-----------ssim: {}'.format(val_logs_[1]))
+                        print('-----------l1: {}'.format(val_logs_[2]))
+                        print('-----------l2: {}'.format(val_logs_[3]))
+
+                        summary = sess.run(all_summary)
+                        summary_writer.add_summary(summary, step)
+
+                    if self.cfg['SAVE_INTERVAL'] and step % self.cfg['SAVE_INTERVAL'] == 0:
+                        self.model.save(sess, saver, model_dir, 'model')
+
+                    if step >= max_iteration:
+                        keep_training = False
+                        break
+
+                    step += 1
+
+
+if __name__ == '__main__':
+    model = RefineModel(cfg)
+    model.train()
