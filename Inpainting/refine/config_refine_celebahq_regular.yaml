@@ -7,7 +7,7 @@ LR: 0.0001                         # learning rate
 D2G_LR: 0.1                        # discriminator/generator learning rate ratio
 BETA1: 0.0                         # adam optimizer beta1
 BETA2: 0.9                         # adam optimizer beta2
-BATCH_SIZE: 8                      # input batch size for training
+BATCH_SIZE: 2                      # input batch size for training
 INPUT_SIZE: 256                    # input image size for training 0 for original size
 MAX_ITERS: 2000000                 # maximum number of iterations to train the model
 VERBOSE: 0                         # turns on verbose mode in the output console
@@ -46,9 +46,9 @@ TRAIN_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_train_linux_7610.flis
 VAL_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_val_linux_7610.flist
 TEST_FLIST_LINUX_7610: /home/icie/Datasets/flist/celebahq_test_linux_7610.flist
 
-MODEL_PATH_LINUX_7810: /home/richard/model/joint/celebahq/regular_mask/model
-MODEL_PATH_LINUX_7610: /home/icie/richard/model/joint/celebahq/regular_mask/model
-MODEL_PATH_WIN: "E:\\model\\joint\\celebahq\\regular_mask\\model"
+MODEL_PATH_LINUX_7810: /home/richard/model/refine/celebahq/regular_mask/model
+MODEL_PATH_LINUX_7610: /home/icie/richard/model/refine/celebahq/regular_mask/model
+MODEL_PATH_WIN: "E:\\model\\refine\\celebahq\\regular_mask\\model"
 
 LOG_DIR_LINUX_7810: /home/richard/model/joint/celebahq/regular_mask/log
 LOG_DIR_LINUX_7610: /home/icie/richard/model/joint/celebahq/regular_mask/log
