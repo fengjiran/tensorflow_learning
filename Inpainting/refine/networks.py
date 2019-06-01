@@ -377,7 +377,7 @@ class RefineNet():
         tf.summary.scalar('train_l1', l1)
         tf.summary.scalar('train_l2', l2)
 
-        visual_img = [images, edge_outputs_merged, color_outputs_merged, imgs_masked, outputs_merged]
+        visual_img = [images, color_outputs_merged, imgs_masked, outputs_merged]
         visual_img = tf.concat(visual_img, axis=2)
         tf.summary.image('image_edge_color_merge', visual_img, 5)
 
