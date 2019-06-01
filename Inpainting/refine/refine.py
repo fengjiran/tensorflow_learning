@@ -101,6 +101,12 @@ class RefineModel():
         val_iterator = self.val_dataset.iterator
         mask_iterator = self.mask_dataset.mask_iterator
 
+        # get model variables
+        edge_gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'edge_generator')
+        color_gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'color_generator')
+        inpaint_gen_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_generator')
+        dis_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_discriminator')
+
         var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
         vgg_var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'vgg')
 
@@ -128,6 +134,43 @@ class RefineModel():
                 step = 0
                 epoch = 0
                 sess.run(tf.global_variables_initializer())
+
+                edge_assign_ops = []
+                color_assign_ops = []
+                inpaint_assign_ops = []
+                dis_assign_ops = []
+
+                for var in edge_gen_vars:
+                    vname = var.name
+                    from_name = vname
+                    var_value = tf.train.load_variable(os.path.join(edge_model_dir, 'model'), from_name)
+                    edge_assign_ops.append(tf.assign(var, var_value))
+                sess.run(edge_assign_ops)
+                print('Edge model loaded!')
+
+                for var in color_gen_vars:
+                    vname = var.name
+                    from_name = vname
+                    var_value = tf.train.load_variable(os.path.join(color_model_dir, 'model'), from_name)
+                    color_assign_ops.append(tf.assign(var, var_value))
+                sess.run(color_assign_ops)
+                print('Color model loaded!')
+
+                for var in inpaint_gen_vars:
+                    vname = var.name
+                    from_name = vname
+                    var_value = tf.train.load_variable(os.path.join(joint_model_dir, 'model'), from_name)
+                    inpaint_assign_ops.append(tf.assign(var, var_value))
+                sess.run(inpaint_assign_ops)
+                print('Joint model loaded!')
+
+                for var in dis_vars:
+                    vname = var.name
+                    from_name = vname
+                    var_value = tf.train.load_variable(os.path.join(joint_model_dir, 'model'), from_name)
+                    dis_assign_ops.append(tf.assign(var, var_value))
+                sess.run(dis_assign_ops)
+                print('Dis model loaded!')
             else:
                 sess.run(tf.global_variables_initializer())
                 saver.restore(sess, os.path.join(model_dir, 'model'))
