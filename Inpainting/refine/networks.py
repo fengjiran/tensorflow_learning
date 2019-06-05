@@ -232,6 +232,7 @@ class RefineNet():
         edge_inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
         edge_outputs, edge_logits = self.edge_generator(edge_inputs)
         edge_outputs_merged = edge_outputs * masks + edges * (1 - masks)
+        # edge_outputs_merged = tf.stop_gradient(edge_outputs_merged)
 
         color_domains_masked = color_domains * (1 - masks) + masks
         imgs_masked = images * (1 - masks) + masks
@@ -239,6 +240,7 @@ class RefineNet():
                                   masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
         color_outputs = self.color_domain_generator(color_inputs)
         color_outputs_merged = color_outputs * masks + color_domains * (1 - masks)
+        # color_outputs_merged = tf.stop_gradient(color_outputs_merged)
 
         refine_inputs = tf.concat([imgs_masked, color_outputs_merged, edge_outputs_merged,
                                    masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
@@ -317,6 +319,9 @@ class RefineNet():
                                          beta2=self.cfg['BETA2'])
 
         # optimize the model
+        # gen_train = gen_opt.minimize(gen_loss,
+        #                              global_step=gen_global_step,
+        #                              var_list=inpaint_gen_vars)
         gen_train = gen_opt.minimize(gen_loss,
                                      global_step=gen_global_step,
                                      var_list=gen_vars)
