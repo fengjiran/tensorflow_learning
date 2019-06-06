@@ -173,6 +173,46 @@ class RefineModel():
                 print('Dis model loaded!')
             else:
                 sess.run(tf.global_variables_initializer())
+                # # add below
+                # edge_assign_ops = []
+                # color_assign_ops = []
+                # inpaint_assign_ops = []
+                # dis_assign_ops = []
+
+                # for var in edge_gen_vars:
+                #     vname = var.name
+                #     from_name = vname
+                #     var_value = tf.train.load_variable(os.path.join(edge_model_dir, 'model'), from_name)
+                #     edge_assign_ops.append(tf.assign(var, var_value))
+                # sess.run(edge_assign_ops)
+                # print('Edge model loaded!')
+
+                # for var in color_gen_vars:
+                #     vname = var.name
+                #     from_name = vname
+                #     var_value = tf.train.load_variable(os.path.join(color_model_dir, 'model'), from_name)
+                #     color_assign_ops.append(tf.assign(var, var_value))
+                # sess.run(color_assign_ops)
+                # print('Color model loaded!')
+
+                # for var in inpaint_gen_vars:
+                #     vname = var.name
+                #     from_name = vname
+                #     var_value = tf.train.load_variable(os.path.join(model_dir, 'model'), from_name)
+                #     inpaint_assign_ops.append(tf.assign(var, var_value))
+                # sess.run(inpaint_assign_ops)
+                # print('Refine model loaded!')
+
+                # for var in dis_vars:
+                #     vname = var.name
+                #     from_name = vname
+                #     var_value = tf.train.load_variable(os.path.join(model_dir, 'model'), from_name)
+                #     dis_assign_ops.append(tf.assign(var, var_value))
+                # sess.run(dis_assign_ops)
+                # print('Dis model loaded!')
+
+                # add above
+
                 saver.restore(sess, os.path.join(model_dir, 'model'))
                 step = tf.train.load_variable(os.path.join(model_dir, 'model'), 'gen_global_step')
                 epoch = step // num_batch - 1
