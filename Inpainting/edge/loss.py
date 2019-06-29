@@ -111,7 +111,7 @@ class Vgg19():
             vgg19_npy_path = path
             print(vgg19_npy_path)
 
-        self.data_dict = np.load(vgg19_npy_path, encoding='latin1').item()
+        self.data_dict = np.load(vgg19_npy_path, allow_pickle=True, encoding='latin1').item()
         print('npy file loaded')
 
         self.conv1_1 = None
