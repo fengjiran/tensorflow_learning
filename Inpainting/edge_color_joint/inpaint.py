@@ -8,7 +8,7 @@ from dataset import MaskDataset
 from networks import InpaintModel
 
 with open('config_joint_flag.yaml', 'r') as f:
-    cfg_flag = yaml.load(f)
+    cfg_flag = yaml.load(f, Loader=yaml.FullLoader)
     flag = cfg_flag['flag']
 
 if flag == 1:
@@ -38,7 +38,7 @@ elif flag == 8:
 
 
 with open(cfg_name, 'r') as f:
-    cfg = yaml.load(f)
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 if pf.system() == 'Windows':
     log_dir = cfg['LOG_DIR_WIN']
@@ -139,8 +139,8 @@ class JointModel():
                     _, _, logs_ = sess.run([dis_train, gen_train, logs])
                     print('Epoch: {}, Iter: {}'.format(epoch, step))
                     print('-----------dis_loss: {}'.format(logs_[0]))
-                    print('-----------gen_loss: {}'.format(logs_[1]))
                     print('-----------gen_gan_loss: {}'.format(logs_[2]))
+                    print('-----------gen_loss: {}'.format(logs_[1]))
                     print('-----------gen_l1_loss: {}'.format(logs_[3]))
                     print('-----------gen_content_loss: {}'.format(logs_[4]))
                     # print('-----------gen_style_loss: {}'.format(logs_[5]))
