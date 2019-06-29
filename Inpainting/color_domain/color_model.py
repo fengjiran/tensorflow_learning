@@ -8,7 +8,7 @@ from dataset import MaskDataset
 from networks import ColorModel
 
 with open('config_color_flag.yaml', 'r') as f:
-    cfg_flag = yaml.load(f)
+    cfg_flag = yaml.load(f, Loader=yaml.FullLoader)
     flag = cfg_flag['flag']
 
 if flag == 1:
@@ -30,7 +30,7 @@ elif flag == 8:
 
 
 with open(cfg_name, 'r') as f:
-    cfg = yaml.load(f)
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 if pf.system() == 'Windows':
     log_dir = cfg['LOG_DIR_WIN']
