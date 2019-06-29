@@ -8,7 +8,7 @@ from dataset import MaskDataset
 from networks import EdgeModel
 
 with open('config_edge_flag.yaml', 'r') as f:
-    cfg_flag = yaml.load(f)
+    cfg_flag = yaml.load(f, Loader=yaml.FullLoader)
     flag = cfg_flag['flag']
 
 if flag == 1:
@@ -37,7 +37,7 @@ elif flag == 8:
     print('Traing edge model with places2 and irregular mask')
 
 with open(cfg_name, 'r') as f:
-    cfg = yaml.load(f)
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 if pf.system() == 'Windows':
     log_dir = cfg['LOG_DIR_WIN']
