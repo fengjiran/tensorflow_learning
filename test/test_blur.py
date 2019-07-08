@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.misc import imread
+from imageio import imread
+from imageio import imwrite
 import matplotlib.pyplot as plt
 import cv2
 
@@ -47,16 +48,12 @@ def get_color_domain(img, blur_factor1, blur_factor2, k):
 
 if __name__ == '__main__':
     img = imread('img.png')
-    img = img
     print(img.shape)
 
-    img_color_domain = get_color_domain(img, 11, 3, 3)
-
-    # img_color_domain = cv2.medianBlur(img, 11)
-    # img_color_domain = img_kmeans(img_color_domain, k)
-    # img_color_domain = cv2.medianBlur(img_color_domain, 3)
-
+    img_color_domain = get_color_domain(img, 21, 3, 3)
     print(img_color_domain.shape)
+
+    imwrite('img_color.png', img_color_domain)
 
     plt.figure()
 
