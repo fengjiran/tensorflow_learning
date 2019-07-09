@@ -18,7 +18,7 @@ EDGE_THRESHOLD: 0.5                # edge detection threshold
 # CONTENT_LOSS_WEIGHT: 0.1           # perceptual loss weight
 ADV_LOSS_WEIGHT: 0.001               # adversarial loss weight
 FM_LOSS_WEIGHT: 10                  # feature matching loss weight
-# CE_LOSS_WEIGHT: 1                  # cross entropy loss weight
+CE_LOSS_WEIGHT: 1                  # cross entropy loss weight
 
 GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
