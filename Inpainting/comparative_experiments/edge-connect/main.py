@@ -18,10 +18,8 @@ def main(mode=None):
 
     config = load_config(mode)
 
-
     # cuda visble devices
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
-
 
     # init device
     if torch.cuda.is_available():
@@ -30,11 +28,8 @@ def main(mode=None):
     else:
         config.DEVICE = torch.device("cpu")
 
-
-
     # set cv2 running threads to 1 (prevents deadlocks with pytorch dataloader)
     cv2.setNumThreads(0)
-
 
     # initialize random seed
     torch.manual_seed(config.SEED)
@@ -42,12 +37,9 @@ def main(mode=None):
     np.random.seed(config.SEED)
     random.seed(config.SEED)
 
-
-
     # build the model and initialize
     model = EdgeConnect(config)
     model.load()
-
 
     # model training
     if config.MODE == 1:
@@ -74,8 +66,10 @@ def load_config(mode=None):
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path', '--checkpoints', type=str, default='./checkpoints', help='model checkpoints path (default: ./checkpoints)')
-    parser.add_argument('--model', type=int, choices=[1, 2, 3, 4], help='1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model')
+    parser.add_argument('--path', '--checkpoints', type=str, default='./checkpoints',
+                        help='model checkpoints path (default: ./checkpoints)')
+    parser.add_argument('--model', type=int, choices=[1, 2, 3, 4],
+                        help='1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model')
 
     # test mode
     if mode == 2:
