@@ -3,8 +3,11 @@ from imageio import imread
 from imageio import imwrite
 import matplotlib.pyplot as plt
 
-edge = imread('/Users/richard/Desktop/edge.png')  # (256, 256)
-mask = imread('/Users/richard/Desktop/mask.png')  # (256, 256)
+# edge = imread('/Users/richard/Desktop/edge.png')  # (256, 256)
+# mask = imread('/Users/richard/Desktop/mask.png')  # (256, 256)
+
+edge = imread('E:\\model\\sample\\test_16.png')
+mask = imread('E:\\model\\sample\\mask_04.png')
 
 edge = edge / 255
 mask = mask / 255
@@ -31,7 +34,8 @@ edges = np.concatenate((edge, edge, edge), axis=2)  # (256, 256, 3)
 
 s = 1 - edges + m
 
-imwrite('/Users/richard/Desktop/tmp.png', s)
+# imwrite('/Users/richard/Desktop/tmp.png', s)
+imwrite('E:\\model\\sample\\inpaint_edge_04.png', s)
 
 plt.imshow(s)
 plt.show()
