@@ -26,22 +26,32 @@ sample_dir = "E:\\model\\sample"
 #     imwrite(os.path.join(sample_dir, 'img_%02d.png' % i), img)
 
 i = 0
-for img_path in image_paths:
-    for mask_path in mask_paths:
-        i = i + 1
-        img = imread(img_path)
-        mask = imread(mask_path)
+for path in mask_paths:
+    i = i + 1
+    mask = imread(path)
+    mask = cv2.resize(mask, (256, 256), interpolation=cv2.INTER_AREA)
+    mask = mask > 3
+    mask = mask.astype(np.float32)
+    imwrite(os.path.join(sample_dir, 'mask_%02d.png' % i), 1 - mask)
 
-        img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
-        img = img / 255.
 
-        mask = cv2.resize(mask, (256, 256), interpolation=cv2.INTER_AREA)
-        mask = mask > 3
-        mask = mask.astype(np.float32)
+# i = 0
+# for img_path in image_paths:
+#     for mask_path in mask_paths:
+#         i = i + 1
+#         img = imread(img_path)
+#         mask = imread(mask_path)
 
-        mask = np.expand_dims(mask, -1)
-        mask = np.concatenate((mask, mask, mask), axis=2)
+#         img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
+#         img = img / 255.
 
-        masked_img = img * mask + 1 - mask
+#         mask = cv2.resize(mask, (256, 256), interpolation=cv2.INTER_AREA)
+#         mask = mask > 3
+#         mask = mask.astype(np.float32)
 
-        imwrite(os.path.join(sample_dir, 'masked_img_%02d.png' % i), masked_img)
+#         mask = np.expand_dims(mask, -1)
+#         mask = np.concatenate((mask, mask, mask), axis=2)
+
+#         masked_img = img * mask + 1 - mask
+
+#         imwrite(os.path.join(sample_dir, 'masked_img_%02d.png' % i), masked_img)
