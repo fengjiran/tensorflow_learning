@@ -4,8 +4,8 @@ import yaml
 import platform as pf
 import numpy as np
 import cv2
-from scipy.misc import imread
-from scipy.misc import imsave
+from imageio import imread
+from imageio import imwrite
 import matplotlib.pyplot as plt
 from skimage.feature import canny
 from skimage.color import rgb2gray
@@ -120,13 +120,14 @@ if __name__ == '__main__':
             test_flist = cfg['TEST_FLIST_LINUX_7610']
             mask_flist = cfg['MASK_FLIST_LINUX_7610']
 
-    mask_type = cfg['MASK']
-    mask_paths = load_flist(mask_flist)
-    image_paths = load_flist(test_flist)
+    mask_type = 2
+    # mask_paths = load_flist(mask_flist)
+    # image_paths = load_flist(test_flist)
 
-    # img_mask = load_mask(cfg, mask_type, mask_paths[0])
-    # img_gray, img_edge = load_edge(cfg, image_paths[0])
-    # edge_masked = img_edge * (1 - img_mask)
+    image_paths = ['C:\\Users\\Richard\\Desktop\\img00000020.png', 'C:\\Users\\Richard\\Desktop\\img00000590.png',
+                   'C:\\Users\\Richard\\Desktop\\img00000934.png', 'C:\\Users\\Richard\\Desktop\\img00001469.png']
+    mask_paths = ['C:\\Users\\Richard\\Desktop\\00127_test.png', 'C:\\Users\\Richard\\Desktop\\00007_test.png',
+                  'C:\\Users\\Richard\\Desktop\\00034_test.png', 'C:\\Users\\Richard\\Desktop\\00052_test.png']
 
     ########################### construct the model #####################################
     model = EdgeModel(cfg)
@@ -151,11 +152,14 @@ if __name__ == '__main__':
         sess.run(assign_ops)
         print('Model loaded.')
 
+        i = 0
         for img_path in image_paths:
             for mask_path in mask_paths:
+                i = i + 1
                 img_mask = load_mask(cfg, mask_type, mask_path)
                 img_gray, img_edge = load_edge(cfg, img_path)
                 feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
 
                 inpainted_edge = sess.run(output, feed_dict=feed_dict)
-                imsave(sample_dir, 'test.png')
+                inpainted_edge = np.reshape(inpainted_edge, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
+                imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_edge)
