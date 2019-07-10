@@ -49,3 +49,5 @@ MODEL_PATH_WIN: "E:\\model\\edge\\celebahq\\irregular_mask\\model"
 LOG_DIR_LINUX_7810: /home/richard/model/edge/celebahq/irregular_mask/log
 LOG_DIR_LINUX_7610: /home/icie/richard/model/edge/celebahq/irregular_mask/log
 LOG_DIR_WIN: "E:\\model\\edge\\celebahq\\irregular_mask\\log"
+
+SAMPLE_DIR_WIN: "E:\\model\\sample"
