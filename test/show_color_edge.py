@@ -6,17 +6,17 @@ import matplotlib.pyplot as plt
 # edge = imread('/Users/richard/Desktop/edge.png')  # (256, 256)
 # mask = imread('/Users/richard/Desktop/mask.png')  # (256, 256)
 
-edge = imread('E:\\model\\sample\\test_16.png')
-mask = imread('E:\\model\\sample\\mask_04.png')
+edge = imread('E:\\model\\sample\\test_02.png')
+mask = imread('E:\\model\\sample\\mask_02.png')
 
 edge = edge / 255
 mask = mask / 255
 
 tmp = edge * mask
 
-r = tmp * 65 / 255.
-g = tmp * 105 / 255.
-b = tmp * 225 / 255.
+r = tmp * 0 / 255.
+g = tmp * 0 / 255.
+b = tmp * 255 / 255.
 
 r = np.expand_dims(r, -1)
 g = np.expand_dims(g, -1)
@@ -35,7 +35,7 @@ edges = np.concatenate((edge, edge, edge), axis=2)  # (256, 256, 3)
 s = 1 - edges + m
 
 # imwrite('/Users/richard/Desktop/tmp.png', s)
-imwrite('E:\\model\\sample\\inpaint_edge_04.png', s)
+imwrite('E:\\model\\sample\\inpaint_edge_01.png', s)
 
 plt.imshow(s)
 plt.show()
