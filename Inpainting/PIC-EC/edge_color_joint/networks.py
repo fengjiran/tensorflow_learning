@@ -3,7 +3,6 @@ import os
 import tensorflow as tf
 
 from ops import conv
-# from ops import deconv
 from ops import resnet_block
 from ops import instance_norm
 
@@ -267,7 +266,7 @@ class InpaintModel():
         # generator input: [img_masked(3) + edge(1) + color_domain(3) + mask(1)]
         imgs_masked = images * (1 - masks) + masks
         inputs = tf.concat([imgs_masked, color_domains, edges,
-                            masks * tf.ones_like(tf.expand_dims(images[:, :, :, 0], -1))], axis=3)
+                            masks * tf.ones_like(images[:, :, :, 0:1])], axis=3)
         outputs = self.inpaint_generator(inputs)
         outputs_merged = outputs * masks + images * (1 - masks)
         return outputs_merged
@@ -282,7 +281,6 @@ class InpaintModel():
 
 
 if __name__ == '__main__':
-    import os
     import yaml
     import numpy as np
     import platform as pf
