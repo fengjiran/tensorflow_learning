@@ -106,12 +106,11 @@ if __name__ == '__main__':
 
     checkpoint_dir = cfg['MODEL_PATH']
     sample_dir = cfg['SAMPLE_DIR']
-
     mask_type = cfg['MASK']
     # mask_paths = load_flist(mask_flist)
     # image_paths = load_flist(test_flist)
 
-    ########################### construct the model #####################################
+    ########################### construct the model ##################################
     model = EdgeModel(cfg)
     # 1 for missing region, 0 for background
     mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
@@ -119,7 +118,7 @@ if __name__ == '__main__':
     gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     output = model.sample(gray, edge, mask)
 
-    #####################################################################################
+    ##################################################################################
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
