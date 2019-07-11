@@ -6,9 +6,6 @@ import numpy as np
 import cv2
 from imageio import imread
 from imageio import imwrite
-# import matplotlib.pyplot as plt
-# from skimage.feature import canny
-# from skimage.color import rgb2gray
 import tensorflow as tf
 
 from utils import get_color_domain
