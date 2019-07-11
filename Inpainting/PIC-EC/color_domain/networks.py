@@ -188,7 +188,7 @@ class ColorModel():
                                      var_list=dis_vars)
 
         dis_train_ops = []
-        for i in range(5):
+        for i in range(3):
             dis_train_ops.append(dis_train)
         dis_train = tf.group(*dis_train_ops)
 
