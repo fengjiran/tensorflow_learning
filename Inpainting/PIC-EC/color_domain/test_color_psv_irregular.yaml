@@ -1,0 +1,15 @@
+MASK: 2                            # 1: random block, half, 2: external
+INPUT_SIZE: 256
+SIGMA: 2.0
+INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
+
+BLUR_FACTOR1: 21                   # the first factor for median filter
+BLUR_FACTOR2: 3                    # the second factor for median filter
+K: 3                               # k-means parameter
+
+
+MODEL_PATH: "E:\\model\\color\\psv\\irregular_mask\\model"
+SAMPLE_DIR: "E:\\model\\color\\psv\\irregular_mask\\sample"
+
+TEST_IMAGE_PATH: "test_image.flist"
+TEST_MASK_PATH: "test_mask.flist"
