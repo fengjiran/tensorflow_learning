@@ -36,17 +36,24 @@ def load_mask(cfg, mask_type=1, mask_path=None):
     return img_mask  # (1, 256, 256, 1) float
 
 
-def load_color(cfg, image_path):
+def load_items(cfg, image_path, color_path, edge_path):
     image = imread(image_path)  # [1024, 1024, 3], [0, 255]
     image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
-    color = get_color_domain(image, cfg['BLUR_FACTOR1'], cfg['BLUR_FACTOR1'], cfg['K'])
+
+    color = imread(color_path)
+    edge = imread(edge_path)
 
     image = np.expand_dims(image, 0)  # (1, 256, 256, 3)
     color = np.expand_dims(color, 0)  # (1, 256, 256, 3)
 
-    image = image / 127.5 - 1
+    edge = np.expand_dims(edge, 0)
+    edge = np.expand_dims(edge, -1)
 
-    return image, color
+    image = image / 127.5 - 1
+    color = color / 255.
+    edge = edge / 255.
+
+    return image, color, edge
 
 
 def load_flist(flist):
@@ -104,18 +111,19 @@ if __name__ == '__main__':
     image_paths = load_flist(cfg['TEST_IMAGE_PATH'])
 
     ########################### construct the model ##################################
-    model = ColorModel(cfg)
+    model = InpaintModel(cfg)
     # 1 for missing region, 0 for background
     mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     image = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
     color = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-    output = model.test_model(image, color, mask)
+    output = model.test_model(image, edge, color, mask)
     ##################################################################################
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'color_generator')
+        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'inpaint_generator')
         assign_ops = []
         for var in vars_list:
             vname = var.name
