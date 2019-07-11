@@ -133,13 +133,38 @@ if __name__ == '__main__':
         print('Model loaded.')
 
         i = 0
-        for img_path in image_paths:
-            for mask_path in mask_paths:
-                i = i + 1
-                img_mask = load_mask(cfg, mask_type, mask_path)
-                _, img_gray, img_edge = load_edge(cfg, img_path)
-                feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
+        for (img_path, mask_path) in zip(image_paths, mask_paths):
+            i = i + 1
+            img_mask = load_mask(cfg, mask_type, mask_path)
+            img, img_gray, img_edge = load_edge(cfg, img_path)
+            # imwrite(os.path.join(sample_dir, 'celebahq_gt_image_%02d.png' % i), img)
+            feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
 
-                inpainted_edge = sess.run(output, feed_dict=feed_dict)
-                inpainted_edge = np.reshape(inpainted_edge, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
-                imwrite(os.path.join(sample_dir, 'test_regular_%02d.png' % i), inpainted_edge)
+            inpainted_edge = sess.run(output, feed_dict=feed_dict)
+            inpainted_edge = np.reshape(inpainted_edge, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
+
+            # dye the inpainted edge
+            img_mask = np.reshape(img_mask, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
+            tmp = inpainted_edge * img_mask
+            r = tmp * 0 / 255.
+            g = tmp * 0 / 255.
+            b = tmp * 255 / 255.
+
+            r = np.expand_dims(r, -1)
+            g = np.expand_dims(g, -1)
+            b = np.expand_dims(b, -1)
+
+            m = np.concatenate((r, g, b), axis=2)
+
+            inpainted_edge = np.expand_dims(inpainted_edge, -1)
+            inpainted_edge = np.concatenate((inpainted_edge, inpainted_edge, inpainted_edge), axis=2)
+
+            inpainted_edge = 1 - inpainted_edge + m
+
+            imwrite(os.path.join(sample_dir, 'celebahq_irregular_edge_inpainted_%02d.png' % i), inpainted_edge)
+
+            # # masked images
+            # img_mask = np.reshape(img_mask, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+            # img = img / 255.
+            # masked_img = img * (1 - img_mask) + img_mask
+            # imwrite(os.path.join(sample_dir, 'celebahq_irregular_masked_%02d.png' % i), masked_img)
