@@ -114,8 +114,8 @@ if __name__ == '__main__':
     model = EdgeModel(cfg)
     # 1 for missing region, 0 for background
     mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-    edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+    edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     output = model.sample(gray, edge, mask)
     ##################################################################################
 
@@ -142,4 +142,4 @@ if __name__ == '__main__':
 
                 inpainted_edge = sess.run(output, feed_dict=feed_dict)
                 inpainted_edge = np.reshape(inpainted_edge, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
-                imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_edge)
+                imwrite(os.path.join(sample_dir, 'test_regular_%02d.png' % i), inpainted_edge)
