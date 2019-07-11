@@ -1,0 +1,10 @@
+MASK: 2                            # 1: random block, half, 2: external
+INPUT_SIZE: 256
+SIGMA: 2.0
+INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
+
+MODEL_PATH: "E:\\model\\color\\celebahq\\irregular_mask\\model"
+SAMPLE_DIR: "E:\\model\\color\\celebahq\\irregular_mask\\sample"
+
+TEST_IMAGE_PATH: "test_image.flist"
+TEST_MASK_PATH: "test_mask.flist"
