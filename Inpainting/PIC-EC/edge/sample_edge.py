@@ -163,8 +163,8 @@ if __name__ == '__main__':
 
             imwrite(os.path.join(sample_dir, 'celebahq_irregular_edge_inpainted_%02d.png' % i), inpainted_edge)
 
-            # # masked images
-            # img_mask = np.reshape(img_mask, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-            # img = img / 255.
-            # masked_img = img * (1 - img_mask) + img_mask
-            # imwrite(os.path.join(sample_dir, 'celebahq_irregular_masked_%02d.png' % i), masked_img)
+            # masked images
+            img_mask = np.reshape(img_mask, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
+            img = img / 255.
+            masked_img = img * (1 - img_mask) + img_mask
+            imwrite(os.path.join(sample_dir, 'celebahq_irregular_masked_%02d.png' % i), masked_img)
