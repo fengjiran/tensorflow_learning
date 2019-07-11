@@ -1,6 +1,6 @@
 import os
 import glob
-import platform as pf
+# import platform as pf
 import yaml
 import numpy as np
 import cv2
