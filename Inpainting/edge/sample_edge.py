@@ -36,7 +36,7 @@ def load_mask(cfg, mask_type=1, mask_path=None):
         img_mask = np.expand_dims(img_mask, -1)
         img_mask = 1 - img_mask
 
-    return img_mask  # (1, 256, 256, 1)
+    return img_mask  # (1, 256, 256, 1) float
 
 
 def load_edge(cfg, image_path):
@@ -107,8 +107,8 @@ if __name__ == '__main__':
     checkpoint_dir = cfg['MODEL_PATH']
     sample_dir = cfg['SAMPLE_DIR']
     mask_type = cfg['MASK']
-    # mask_paths = load_flist(mask_flist)
-    # image_paths = load_flist(test_flist)
+    mask_paths = load_flist(cfg['TEST_MASK_PATH'])
+    image_paths = load_flist(cfg['TEST_IMAGE_PATH'])
 
     ########################### construct the model ##################################
     model = EdgeModel(cfg)
