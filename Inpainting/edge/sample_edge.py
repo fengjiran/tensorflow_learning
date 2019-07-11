@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 from imageio import imread
 from imageio import imwrite
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from skimage.feature import canny
 from skimage.color import rgb2gray
 import tensorflow as tf
@@ -48,12 +48,12 @@ def load_edge(cfg, image_path):
     edge = edge.astype(np.float32)
 
     gray = np.expand_dims(gray, 0)
-    gray = np.expand_dims(gray, -1)
+    gray = np.expand_dims(gray, -1)  # (1, 256, 256, 1)
 
     edge = np.expand_dims(edge, 0)
-    edge = np.expand_dims(edge, -1)
+    edge = np.expand_dims(edge, -1)  # (1, 256, 256, 1)
 
-    return gray, edge
+    return image, gray, edge
 
 
 def load_flist(flist):
@@ -80,54 +80,36 @@ def load_flist(flist):
 
 
 if __name__ == '__main__':
-    # with open('config_edge_flag.yaml', 'r') as f:
-    #     cfg_flag = yaml.load(f)
-    #     flag = cfg_flag['flag']
-    flag = 4
+    with open('test_edge_flag.yaml', 'r') as f:
+        cfg_flag = yaml.load(f, Loader=yaml.FullLoader)
+        flag = cfg_flag['flag']
 
     if flag == 1:
-        cfg_name = 'config_edge_celeba_regular.yaml'
+        cfg_name = 'test_edge_celeba_regular.yaml'
     elif flag == 2:
-        cfg_name = 'config_edge_celeba_irregular.yaml'
+        cfg_name = 'test_edge_celeba_irregular.yaml'
     elif flag == 3:
-        cfg_name = 'config_edge_celebahq_regular.yaml'
+        cfg_name = 'test_edge_celebahq_regular.yaml'
     elif flag == 4:
-        cfg_name = 'config_edge_celebahq_irregular.yaml'
+        cfg_name = 'test_edge_celebahq_irregular.yaml'
     elif flag == 5:
-        cfg_name = 'config_edge_psv_regular.yaml'
+        cfg_name = 'test_edge_psv_regular.yaml'
     elif flag == 6:
-        cfg_name = 'config_edge_psv_irregular.yaml'
+        cfg_name = 'test_edge_psv_irregular.yaml'
     elif flag == 7:
-        cfg_name = 'config_edge_places2_regular.yaml'
+        cfg_name = 'test_edge_places2_regular.yaml'
     elif flag == 8:
-        cfg_name = 'config_edge_places2_irregular.yaml'
+        cfg_name = 'test_edge_places2_irregular.yaml'
 
     with open(cfg_name, 'r') as f:
-        cfg = yaml.load(f)
+        cfg = yaml.load(f, Loader=yaml.FullLoader)
 
-    if pf.system() == 'Windows':
-        checkpoint_dir = cfg['MODEL_PATH_WIN']
-        test_flist = cfg['TEST_FLIST_WIN']
-        mask_flist = cfg['MASK_FLIST_WIN']
-        sample_dir = cfg['SAMPLE_DIR_WIN']
-    elif pf.system() == 'Linux':
-        if pf.node() == 'icie-Precision-Tower-7810':
-            checkpoint_dir = cfg['MODEL_PATH_LINUX_7810']
-            test_flist = cfg['TEST_FLIST_LINUX_7810']
-            mask_flist = cfg['MASK_FLIST_LINUX_7810']
-        elif pf.node() == 'icie-Precision-T7610':
-            checkpoint_dir = cfg['MODEL_PATH_LINUX_7610']
-            test_flist = cfg['TEST_FLIST_LINUX_7610']
-            mask_flist = cfg['MASK_FLIST_LINUX_7610']
+    checkpoint_dir = cfg['MODEL_PATH']
+    sample_dir = cfg['SAMPLE_DIR']
 
-    mask_type = 2
+    mask_type = cfg['MASK']
     # mask_paths = load_flist(mask_flist)
     # image_paths = load_flist(test_flist)
-
-    image_paths = ['C:\\Users\\Richard\\Desktop\\img00000020.png', 'C:\\Users\\Richard\\Desktop\\img00000590.png',
-                   'C:\\Users\\Richard\\Desktop\\img00000934.png', 'C:\\Users\\Richard\\Desktop\\img00001469.png']
-    mask_paths = ['C:\\Users\\Richard\\Desktop\\00127_test.png', 'C:\\Users\\Richard\\Desktop\\00007_test.png',
-                  'C:\\Users\\Richard\\Desktop\\00034_test.png', 'C:\\Users\\Richard\\Desktop\\00052_test.png']
 
     ########################### construct the model #####################################
     model = EdgeModel(cfg)
