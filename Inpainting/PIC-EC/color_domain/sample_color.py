@@ -127,13 +127,12 @@ if __name__ == '__main__':
         print('Model loaded.')
 
         i = 0
-        for img_path in image_paths:
-            for mask_path in mask_paths:
-                i = i + 1
-                img_mask = load_mask(cfg, mask_type, mask_path)
-                img, img_color = load_color(cfg, img_path)
-                feed_dict = {image: img, color: img_color, mask: img_mask}
+        for (img_path, mask_path) in zip(image_paths, mask_paths):
+            i = i + 1
+            img_mask = load_mask(cfg, mask_type, mask_path)
+            img, img_color = load_color(cfg, img_path)
+            feed_dict = {image: img, color: img_color, mask: img_mask}
 
-                inpainted_color = sess.run(output, feed_dict=feed_dict)
-                inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-                imwrite(os.path.join(sample_dir, 'test_color_%02d.png' % i), inpainted_color)
+            inpainted_color = sess.run(output, feed_dict=feed_dict)
+            inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+            imwrite(os.path.join(sample_dir, 'celebahq_irregular_color_inpainted_%02d.png' % i), inpainted_color)
