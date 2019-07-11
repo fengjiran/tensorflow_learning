@@ -104,6 +104,15 @@ if __name__ == '__main__':
     with open(cfg_name, 'r') as f:
         cfg = yaml.load(f, Loader=yaml.FullLoader)
 
+    img_path = 'C:\\Users\\Richard\\Desktop\\img00000020.png'
+    color_path = 'E:\\model\\color\\celebahq\\irregular_mask\\sample\\test_color_02.png'
+    edge_path = 'E:\\model\\edge\\celebahq\\irregular_mask\\sample\\test_02.png'
+    mask_path = 'C:\\Users\\Richard\\Desktop\\00007_test.png'
+    # image, color, edge = load_items(cfg, img_path, color_path, edge_path)
+    # print(image.shape, image.max(), image.min())
+    # print(color.shape, color.max(), color.min())
+    # print(edge.shape, edge.max(), edge.min())
+
     checkpoint_dir = cfg['MODEL_PATH']
     sample_dir = cfg['SAMPLE_DIR']
     mask_type = cfg['MASK']
@@ -133,14 +142,22 @@ if __name__ == '__main__':
         sess.run(assign_ops)
         print('Model loaded.')
 
-        i = 0
-        for img_path in image_paths:
-            for mask_path in mask_paths:
-                i = i + 1
-                img_mask = load_mask(cfg, mask_type, mask_path)
-                img, img_color = load_color(cfg, img_path)
-                feed_dict = {image: img, color: img_color, mask: img_mask}
+        img_mask = load_mask(cfg, mask_type, mask_path)
+        img, img_color, img_edge = load_items(cfg, img_path, color_path, edge_path)
+        feed_dict = {image: img, color: img_color, edge: img_edge, mask: img_mask}
 
-                inpainted_color = sess.run(output, feed_dict=feed_dict)
-                inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-                imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_color)
+        inpainted_joint = sess.run(output, feed_dict=feed_dict)
+        inpainted_joint = np.reshape(inpainted_joint, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+        imwrite(os.path.join(sample_dir, 'test_joint.png'), inpainted_joint)
+
+        # i = 0
+        # for img_path in image_paths:
+        #     for mask_path in mask_paths:
+        #         i = i + 1
+        #         img_mask = load_mask(cfg, mask_type, mask_path)
+        #         img, img_color = load_color(cfg, img_path)
+        #         feed_dict = {image: img, color: img_color, mask: img_mask}
+
+        #         inpainted_color = sess.run(output, feed_dict=feed_dict)
+        #         inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+        #         imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_color)
