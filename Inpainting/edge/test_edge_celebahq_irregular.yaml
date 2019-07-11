@@ -3,3 +3,6 @@ INPUT_SIZE: 256
 
 MODEL_PATH: "E:\\model\\edge\\psv\\irregular_mask\\model"
 SAMPLE_DIR: "E:\\model\\edge\\psv\\irregular_mask\\sample"
+
+TEST_IMAGE_PATH: "test_image.flist"
+TEST_MASK_PATH: "test_mask.flist"
