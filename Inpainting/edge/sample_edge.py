@@ -1,7 +1,7 @@
 import os
 import glob
-import yaml
 import platform as pf
+import yaml
 import numpy as np
 import cv2
 from imageio import imread
