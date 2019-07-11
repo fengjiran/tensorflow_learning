@@ -7,10 +7,11 @@ import cv2
 from imageio import imread
 from imageio import imwrite
 # import matplotlib.pyplot as plt
-from skimage.feature import canny
-from skimage.color import rgb2gray
+# from skimage.feature import canny
+# from skimage.color import rgb2gray
 import tensorflow as tf
 
+from utils import get_color_domain
 from networks import ColorModel
 
 
@@ -39,21 +40,17 @@ def load_mask(cfg, mask_type=1, mask_path=None):
     return img_mask  # (1, 256, 256, 1) float
 
 
-def load_edge(cfg, image_path):
+def load_color(cfg, image_path):
     image = imread(image_path)  # [1024, 1024, 3], [0, 255]
     image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
-    gray = rgb2gray(image)  # [256, 256], [0, 1]
+    color = get_color_domain(image, cfg['BLUR_FACTOR1'], cfg['BLUR_FACTOR1'], cfg['K'])
 
-    edge = canny(gray, sigma=cfg['SIGMA'])
-    edge = edge.astype(np.float32)
+    image = np.expand_dims(image, 0)  # (1, 256, 256, 3)
+    color = np.expand_dims(color, 0)  # (1, 256, 256, 3)
 
-    gray = np.expand_dims(gray, 0)
-    gray = np.expand_dims(gray, -1)  # (1, 256, 256, 1)
+    image = image / 127.5 - 1
 
-    edge = np.expand_dims(edge, 0)
-    edge = np.expand_dims(edge, -1)  # (1, 256, 256, 1)
-
-    return image, gray, edge
+    return image, color
 
 
 def load_flist(flist):
@@ -111,18 +108,18 @@ if __name__ == '__main__':
     image_paths = load_flist(cfg['TEST_IMAGE_PATH'])
 
     ########################### construct the model ##################################
-    model = EdgeModel(cfg)
+    model = ColorModel(cfg)
     # 1 for missing region, 0 for background
     mask = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-    gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-    edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
-    output = model.sample(gray, edge, mask)
+    image = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+    color = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+    output = model.test_model(image, color, mask)
     ##################################################################################
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'edge_generator')
+        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'color_generator')
         assign_ops = []
         for var in vars_list:
             vname = var.name
@@ -137,9 +134,9 @@ if __name__ == '__main__':
             for mask_path in mask_paths:
                 i = i + 1
                 img_mask = load_mask(cfg, mask_type, mask_path)
-                _, img_gray, img_edge = load_edge(cfg, img_path)
-                feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
+                img, img_color = load_color(cfg, img_path)
+                feed_dict = {image: img, color: img_color, mask: img_mask}
 
-                inpainted_edge = sess.run(output, feed_dict=feed_dict)
-                inpainted_edge = np.reshape(inpainted_edge, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE']])
-                imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_edge)
+                inpainted_color = sess.run(output, feed_dict=feed_dict)
+                inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
+                imwrite(os.path.join(sample_dir, 'test_%02d.png' % i), inpainted_color)
