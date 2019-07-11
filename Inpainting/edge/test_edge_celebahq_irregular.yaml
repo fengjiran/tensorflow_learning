@@ -1,5 +1,6 @@
 MASK: 2                            # 1: random block, half, 2: external
 INPUT_SIZE: 256
+SIGMA: 2.0
 
 MODEL_PATH: "E:\\model\\edge\\psv\\irregular_mask\\model"
 SAMPLE_DIR: "E:\\model\\edge\\psv\\irregular_mask\\sample"
