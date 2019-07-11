@@ -117,7 +117,6 @@ if __name__ == '__main__':
     edge = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     gray = tf.placeholder(tf.float32, [1, cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 1])
     output = model.sample(gray, edge, mask)
-
     ##################################################################################
 
     config = tf.ConfigProto()
@@ -138,7 +137,7 @@ if __name__ == '__main__':
             for mask_path in mask_paths:
                 i = i + 1
                 img_mask = load_mask(cfg, mask_type, mask_path)
-                img_gray, img_edge = load_edge(cfg, img_path)
+                _, img_gray, img_edge = load_edge(cfg, img_path)
                 feed_dict = {gray: img_gray, edge: img_edge, mask: img_mask}
 
                 inpainted_edge = sess.run(output, feed_dict=feed_dict)
