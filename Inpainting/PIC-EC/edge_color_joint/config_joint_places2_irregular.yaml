@@ -13,7 +13,7 @@ MAX_ITERS: 2000000                 # maximum number of iterations to train the m
 VERBOSE: 0                         # turns on verbose mode in the output console
 EDGE_THRESHOLD: 0.5                # edge detection threshold
 
-BLUR_FACTOR1: 11                   # the first factor for median filter
+BLUR_FACTOR1: 19                   # the first factor for median filter
 BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
@@ -21,13 +21,13 @@ K: 3                               # k-means parameter
 L1_LOSS_WEIGHT: 1.0                # l1 loss weight
 # STYLE_LOSS_WEIGHT: 150             # style loss weight
 CONTENT_LOSS_WEIGHT: 1           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.05              # adversarial loss weight
+ADV_LOSS_WEIGHT: 0.001              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
-GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
+GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
 
-SAVE_INTERVAL: 200                 # how many iterations to wait before saving model (0: never)
+SAVE_INTERVAL: 1000                 # how many iterations to wait before saving model (0: never)
 EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
 
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"

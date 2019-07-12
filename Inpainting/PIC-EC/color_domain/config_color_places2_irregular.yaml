@@ -13,7 +13,7 @@ MAX_ITERS: 2000000                 # maximum number of iterations to train the m
 VERBOSE: 0                         # turns on verbose mode in the output console
 EDGE_THRESHOLD: 0.5                # edge detection threshold
 
-BLUR_FACTOR1: 21                   # the first factor for median filter
+BLUR_FACTOR1: 19                   # the first factor for median filter
 BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
