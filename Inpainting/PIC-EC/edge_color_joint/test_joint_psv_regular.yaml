@@ -1,15 +1,17 @@
 MASK: 1                            # 1: random block, half, 2: external
 INPUT_SIZE: 256
-SIGMA: 2.0
+SIGMA: 1.8
 INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
 
-BLUR_FACTOR1: 21                   # the first factor for median filter
+BLUR_FACTOR1: 19                   # the first factor for median filter
 BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
 
-MODEL_PATH: "E:\\model\\joint\\psv\\regular_mask\\model"
-SAMPLE_DIR: "E:\\model\\joint\\psv\\regular_mask\\sample"
+EDGE_MODEL_PATH: "E:\\model\\edge\\psv\\regular_mask\\model"
+COLOR_MODEL_PATH: "E:\\model\\color\\psv\\regular_mask\\model"
+JOINT_MODEL_PATH: "E:\\model\\joint\\psv\\regular_mask\\model"
+SAMPLE_DIR: "E:\\model\\experiments\\exp1\\psv"
 
-TEST_IMAGE_PATH: "test_image.flist"
-TEST_MASK_PATH: "test_mask.flist"
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\psv\\image.flist"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\psv\\mask.flist"
