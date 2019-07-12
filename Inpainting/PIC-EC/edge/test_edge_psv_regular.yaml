@@ -1,1 +1,10 @@
 MASK: 1                            # 1: random block, half, 2: external
+INPUT_SIZE: 256
+SIGMA: 1.8
+INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
+
+MODEL_PATH: "E:\\model\\edge\\psv\\regular_mask\\model"
+SAMPLE_DIR: "E:\\model\\experiments\\exp1\\psv"
+
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\psv\\image.flist"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\psv\\mask.flist"
