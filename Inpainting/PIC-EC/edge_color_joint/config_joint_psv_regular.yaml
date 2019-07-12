@@ -22,15 +22,15 @@ K: 3                               # k-means parameter
 
 L1_LOSS_WEIGHT: 1.0                # l1 loss weight
 # STYLE_LOSS_WEIGHT: 150             # style loss weight
-CONTENT_LOSS_WEIGHT: 1           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.001              # adversarial loss weight
+CONTENT_LOSS_WEIGHT: 1.0           # perceptual loss weight
+ADV_LOSS_WEIGHT: 0.01              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
 GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
-INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
+INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
 
 SAVE_INTERVAL: 1000                 # how many iterations to wait before saving model (0: never)
-EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
+EVAL_INTERVAL: 500              # how many iterations to wait before saving summaries
 
 MASK_FLIST_WIN: "F:\\Datasets\\flist\\qd_imd_train.flist"
 MASK_FLIST_LINUX_7810: /media/icie/b29b7268-50ad-4752-8e03-457669cab10a/flist/qd_imd_linux_7810.flist
