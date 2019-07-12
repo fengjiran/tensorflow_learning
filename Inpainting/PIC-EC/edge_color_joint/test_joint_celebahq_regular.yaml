@@ -8,8 +8,10 @@ BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
 
-MODEL_PATH: "E:\\model\\joint\\celebahq\\regular_mask\\model"
-SAMPLE_DIR: "E:\\model\\joint\\celebahq\\regular_mask\\sample"
+EDGE_MODEL_PATH: "E:\\model\\edge\\celebahq\\irregular_mask\\model"
+COLOR_MODEL_PATH: "E:\\model\\color\\celebahq\\irregular_mask\\model"
+JOINT_MODEL_PATH: "E:\\model\\joint\\celebahq\\irregular_mask\\model"
+SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
 
-TEST_IMAGE_PATH: "test_image.flist"
-TEST_MASK_PATH: "test_mask.flist"
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\celebahq\\mask.flist"
