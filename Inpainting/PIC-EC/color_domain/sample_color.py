@@ -135,4 +135,5 @@ if __name__ == '__main__':
 
             inpainted_color = sess.run(output, feed_dict=feed_dict)
             inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-            imwrite(os.path.join(sample_dir, 'celebahq_irregular_color_inpainted_%02d.png' % i), inpainted_color)
+            # imwrite(os.path.join(sample_dir, 'celebahq_irregular_color_inpainted_%02d.png' % i), inpainted_color)
+            imwrite(os.path.join(sample_dir, 'psv_irregular_color_inpainted_%02d.png' % i), inpainted_color)
