@@ -20,10 +20,10 @@ BLUR_FACTOR2: 3                    # the second factor for median filter
 K: 3                               # k-means parameter
 
 
-L1_LOSS_WEIGHT: 1.0                # l1 loss weight
+L1_LOSS_WEIGHT: 2.0                # l1 loss weight
 # STYLE_LOSS_WEIGHT: 150             # style loss weight
-CONTENT_LOSS_WEIGHT: 1.0           # perceptual loss weight
-ADV_LOSS_WEIGHT: 0.1              # adversarial loss weight
+CONTENT_LOSS_WEIGHT: 2.0           # perceptual loss weight
+ADV_LOSS_WEIGHT: 0.001              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
 GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
