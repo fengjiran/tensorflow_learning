@@ -2,7 +2,7 @@ import os
 import numpy as np
 from imageio import imwrite
 
-smaple_dir = 'E:\\model\\experiments\\exp2\\celebahq\\mask\\regular_mask'
+smaple_dir = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
 
 
 def generate_regular_mask(mask_size=256, hole_size=128):
@@ -19,4 +19,4 @@ def generate_regular_mask(mask_size=256, hole_size=128):
 if __name__ == '__main__':
     for i in range(100):
         mask = generate_regular_mask()
-        imwrite(os.path.join(smaple_dir, 'regular_mask_%02d.png' % (i + 1)), mask)
+        imwrite(os.path.join(smaple_dir, 'regular_mask_%03d.png' % (i + 1)), mask)
