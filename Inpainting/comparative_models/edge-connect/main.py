@@ -22,11 +22,12 @@ def main(mode=None):
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
 
     # init device
-    if torch.cuda.is_available():
-        config.DEVICE = torch.device("cuda")
-        torch.backends.cudnn.benchmark = True   # cudnn auto-tuner
-    else:
-        config.DEVICE = torch.device("cpu")
+    config.DEVICE = torch.device("cpu")
+    # if torch.cuda.is_available():
+    #     config.DEVICE = torch.device("cuda")
+    #     torch.backends.cudnn.benchmark = True   # cudnn auto-tuner
+    # else:
+    #     config.DEVICE = torch.device("cpu")
 
     # set cv2 running threads to 1 (prevents deadlocks with pytorch dataloader)
     cv2.setNumThreads(0)
