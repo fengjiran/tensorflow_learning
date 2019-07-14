@@ -38,8 +38,10 @@ class CreateDataset(data.Dataset):
 
     def load_mask(self, img, index):
         """Load different mask types for training and testing"""
-        mask_type_index = random.randint(0, len(self.opt.mask_type) - 1)
-        mask_type = self.opt.mask_type[mask_type_index]
+        # mask_type_index = random.randint(0, len(self.opt.mask_type) - 1)
+        # mask_type = self.opt.mask_type[mask_type_index]
+
+        mask_type = 3
 
         # center mask
         if mask_type == 0:
@@ -56,27 +58,29 @@ class CreateDataset(data.Dataset):
         # external mask from "Image Inpainting for Irregular Holes Using Partial Convolutions (ECCV18)"
         if mask_type == 3:
             if self.opt.isTrain:
-                mask_index = random.randint(0, self.mask_size-1)
+                mask_index = random.randint(0, self.mask_size - 1)
             else:
                 mask_index = index
             mask_pil = Image.open(self.mask_paths[mask_index]).convert('RGB')
-            size = mask_pil.size[0]
-            if size > mask_pil.size[1]:
-                size = mask_pil.size[1]
-            mask_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
-                                                 transforms.RandomRotation(10),
-                                                 transforms.CenterCrop([size, size]),
-                                                 transforms.Resize(self.opt.fineSize),
-                                                 transforms.ToTensor()
-                                                 ])
-            mask = (mask_transform(mask_pil) == 0).float()
-            mask_pil.close()
+            mask = mask_pil
+            # size = mask_pil.size[0]
+            # if size > mask_pil.size[1]:
+            #     size = mask_pil.size[1]
+            # mask_transform = transforms.Compose([transforms.RandomHorizontalFlip(),
+            #                                      transforms.RandomRotation(10),
+            #                                      transforms.CenterCrop([size, size]),
+            #                                      transforms.Resize(self.opt.fineSize),
+            #                                      transforms.ToTensor()
+            #                                      ])
+            # mask = (mask_transform(mask_pil) == 0).float()
+            # mask_pil.close()
             return mask
 
 
 def dataloader(opt):
     datasets = CreateDataset(opt)
-    dataset = data.DataLoader(datasets, batch_size=opt.batchSize, shuffle=not opt.no_shuffle, num_workers=int(opt.nThreads))
+    dataset = data.DataLoader(datasets, batch_size=opt.batchSize,
+                              shuffle=not opt.no_shuffle, num_workers=int(opt.nThreads))
 
     return dataset
 
