@@ -69,8 +69,12 @@ class Pluralistic(BaseModel):
         self.mask = input['mask']
 
         if len(self.gpu_ids) > 0:
-            self.img = self.img.cuda(self.gpu_ids[0], async=True)
-            self.mask = self.mask.cuda(self.gpu_ids[0], async=True)
+            self.img = self.img.cuda(self.gpu_ids[0])
+            self.mask = self.mask.cuda(self.gpu_ids[0])
+
+        # if len(self.gpu_ids) > 0:
+        #     self.img = self.img.cuda(self.gpu_ids[0], async=True)
+        #     self.mask = self.mask.cuda(self.gpu_ids[0], async=True)
 
         # get I_m and I_c for image with mask and complement regions for training
         self.img_truth = self.img * 2 - 1
