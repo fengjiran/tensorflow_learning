@@ -13,7 +13,7 @@ if __name__ == '__main__':
     print('testing images = %d' % dataset_size)
     # create a model
     model = create_model(opt)
-    model.eval()
+    # model.eval()
     # create a visualizer
     # visualizer = visualizer.Visualizer(opt)
 
