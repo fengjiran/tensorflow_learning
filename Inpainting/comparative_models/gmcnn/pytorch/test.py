@@ -7,9 +7,9 @@ from options.test_options import TestOptions
 from model.net import InpaintingModel_GMCNN
 from util.utils import generate_rect_mask, generate_stroke_mask, getLatest
 
-os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmax([int(x.split()[2]) for x in subprocess.Popen(
-        "nvidia-smi -q -d Memory | grep -A4 GPU | grep Free", shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-        ))
+os.environ['CUDA_VISIBLE_DEVICES'] = str(np.argmax([int(x.split()[2]) for x in subprocess.Popen(
+    "nvidia-smi -q -d Memory | grep -A4 GPU | grep Free", shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+))
 
 config = TestOptions().parse()
 
@@ -46,18 +46,18 @@ for i in range(test_num):
     h, w = image.shape[:2]
 
     if h >= config.img_shapes[0] and w >= config.img_shapes[1]:
-        h_start = (h-config.img_shapes[0]) // 2
-        w_start = (w-config.img_shapes[1]) // 2
-        image = image[h_start: h_start+config.img_shapes[0], w_start: w_start+config.img_shapes[1], :]
+        h_start = (h - config.img_shapes[0]) // 2
+        w_start = (w - config.img_shapes[1]) // 2
+        image = image[h_start: h_start + config.img_shapes[0], w_start: w_start + config.img_shapes[1], :]
     else:
         t = min(h, w)
-        image = image[(h-t)//2:(h-t)//2+t, (w-t)//2:(w-t)//2+t, :]
+        image = image[(h - t) // 2:(h - t) // 2 + t, (w - t) // 2:(w - t) // 2 + t, :]
         image = cv2.resize(image, (config.img_shapes[1], config.img_shapes[0]))
 
     image = np.transpose(image, [2, 0, 1])
     image = np.expand_dims(image, axis=0)
-    image_vis = image * (1-mask) + 255 * mask
-    image_vis = np.transpose(image_vis[0][::-1,:,:], [1, 2, 0])
+    image_vis = image * (1 - mask) + 255 * mask
+    image_vis = np.transpose(image_vis[0][::-1, :, :], [1, 2, 0])
     cv2.imwrite(os.path.join(config.saving_path, 'input_{:03d}.png'.format(i)), image_vis.astype(np.uint8))
 
     h, w = image.shape[2:]
@@ -65,7 +65,7 @@ for i in range(test_num):
     image = image[:, :, :h // grid * grid, :w // grid * grid]
     mask = mask[:, :, :h // grid * grid, :w // grid * grid]
     result = ourModel.evaluate(image, mask)
-    result = np.transpose(result[0][::-1,:,:], [1, 2, 0])
+    result = np.transpose(result[0][::-1, :, :], [1, 2, 0])
     cv2.imwrite(os.path.join(config.saving_path, '{:03d}.png'.format(i)), result)
-    print(' > {} / {}'.format(i+1, test_num))
+    print(' > {} / {}'.format(i + 1, test_num))
 print('done.')
