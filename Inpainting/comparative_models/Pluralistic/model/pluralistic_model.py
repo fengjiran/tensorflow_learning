@@ -7,6 +7,7 @@ import itertools
 
 class Pluralistic(BaseModel):
     """This class implements the pluralistic image completion, for 256*256 resolution image inpainting"""
+
     def name(self):
         return "Pluralistic Image Completion"
 
@@ -15,7 +16,8 @@ class Pluralistic(BaseModel):
         """Add new options and rewrite default values for existing options"""
         parser.add_argument('--output_scale', type=int, default=4, help='# of number of the output scale')
         if is_train:
-            parser.add_argument('--train_paths', type=str, default='two', help='training strategies with one path or two paths')
+            parser.add_argument('--train_paths', type=str, default='two',
+                                help='training strategies with one path or two paths')
             parser.add_argument('--lambda_rec', type=float, default=20.0, help='weight for image reconstruction loss')
             parser.add_argument('--lambda_kl', type=float, default=20.0, help='weight for kl divergence loss')
             parser.add_argument('--lambda_g', type=float, default=1.0, help='weight for generation loss')
@@ -38,8 +40,10 @@ class Pluralistic(BaseModel):
         self.net_G = network.define_g(ngf=32, z_nc=128, img_f=128, L=0, layers=5, output_scale=opt.output_scale,
                                       norm='instance', activation='LeakyReLU', init_type='orthogonal', gpu_ids=opt.gpu_ids)
         # define the discriminator model
-        self.net_D = network.define_d(ndf=32, img_f=128, layers=5, model_type='ResDis', init_type='orthogonal', gpu_ids=opt.gpu_ids)
-        self.net_D_rec = network.define_d(ndf=32, img_f=128, layers=5, model_type='ResDis', init_type='orthogonal', gpu_ids=opt.gpu_ids)
+        self.net_D = network.define_d(ndf=32, img_f=128, layers=5, model_type='ResDis',
+                                      init_type='orthogonal', gpu_ids=opt.gpu_ids)
+        self.net_D_rec = network.define_d(ndf=32, img_f=128, layers=5, model_type='ResDis',
+                                          init_type='orthogonal', gpu_ids=opt.gpu_ids)
 
         if self.isTrain:
             # define the loss functions
@@ -48,9 +52,9 @@ class Pluralistic(BaseModel):
             self.L2loss = torch.nn.MSELoss()
             # define the optimizer
             self.optimizer_G = torch.optim.Adam(itertools.chain(filter(lambda p: p.requires_grad, self.net_G.parameters()),
-                        filter(lambda p: p.requires_grad, self.net_E.parameters())), lr=opt.lr, betas=(0.0, 0.999))
+                                                                filter(lambda p: p.requires_grad, self.net_E.parameters())), lr=opt.lr, betas=(0.0, 0.999))
             self.optimizer_D = torch.optim.Adam(itertools.chain(filter(lambda p: p.requires_grad, self.net_D.parameters()),
-                                                filter(lambda p: p.requires_grad, self.net_D_rec.parameters())),
+                                                                filter(lambda p: p.requires_grad, self.net_D_rec.parameters())),
                                                 lr=opt.lr, betas=(0.0, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
@@ -120,7 +124,8 @@ class Pluralistic(BaseModel):
                 kl_g += torch.distributions.kl_divergence(m_distribution, q_distribution)
             elif self.opt.train_paths == "two":
                 kl_g += torch.distributions.kl_divergence(p_distribution_fix, q_distribution)
-            self.distribution.append([torch.zeros_like(p_mu), m_sigma * torch.ones_like(p_sigma), p_mu, p_sigma, q_mu, q_sigma])
+            self.distribution.append([torch.zeros_like(p_mu), m_sigma *
+                                      torch.ones_like(p_sigma), p_mu, p_sigma, q_mu, q_sigma])
 
         return p_distribution, q_distribution, kl_rec, kl_g
 
@@ -150,7 +155,7 @@ class Pluralistic(BaseModel):
             img_rec, img_g = result.chunk(2)
             self.img_rec.append(img_rec)
             self.img_g.append(img_g)
-        self.img_out = (1-self.mask) * self.img_g[-1].detach() + self.mask * self.img_truth
+        self.img_out = (1 - self.mask) * self.img_g[-1].detach() + self.mask * self.img_truth
 
     def backward_D_basic(self, netD, real, fake):
         """Calculate GAN loss for the discriminator"""
@@ -165,7 +170,7 @@ class Pluralistic(BaseModel):
         # gradient penalty for wgan-gp
         if self.opt.gan_mode == 'wgangp':
             gradient_penalty, gradients = external_function.cal_gradient_penalty(netD, real, fake.detach())
-            D_loss +=gradient_penalty
+            D_loss += gradient_penalty
 
         D_loss.backward()
 
@@ -202,7 +207,7 @@ class Pluralistic(BaseModel):
             if self.opt.train_paths == "one":
                 loss_app_g += self.L1loss(img_fake_i, img_real_i)
             elif self.opt.train_paths == "two":
-                loss_app_g += self.L1loss(img_fake_i*mask_i, img_real_i*mask_i)
+                loss_app_g += self.L1loss(img_fake_i * mask_i, img_real_i * mask_i)
         self.loss_app_rec = loss_app_rec * self.opt.lambda_rec
         self.loss_app_g = loss_app_g * self.opt.lambda_rec
 
