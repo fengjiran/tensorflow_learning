@@ -74,7 +74,7 @@ class CreateDataset(data.Dataset):
             #                                      transforms.ToTensor()
             #                                      ])
             # mask = (mask_transform(mask_pil) == 0).float()
-            # mask_pil.close()
+            mask_pil.close()
             return mask
 
 
