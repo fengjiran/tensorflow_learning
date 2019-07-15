@@ -1,8 +1,8 @@
+import itertools
 import torch
 from .base_model import BaseModel
 from . import network, base_function, external_function
 from util import task
-import itertools
 
 
 class Pluralistic(BaseModel):
