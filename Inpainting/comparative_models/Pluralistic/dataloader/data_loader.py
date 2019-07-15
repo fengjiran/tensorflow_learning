@@ -32,7 +32,8 @@ class CreateDataset(data.Dataset):
         ImageFile.LOAD_TRUNCATED_IMAGES = True
         img_path = self.img_paths[index % self.img_size]
         img_pil = Image.open(img_path).convert('RGB')
-        img = self.transform(img_pil)
+        # img = self.transform(img_pil)
+        img = transforms.ToTensor()(img_pil)
         img_pil.close()
         return img, img_path
 
@@ -62,7 +63,7 @@ class CreateDataset(data.Dataset):
             else:
                 mask_index = index
             mask_pil = Image.open(self.mask_paths[mask_index]).convert('RGB')
-            mask = mask_pil
+            mask = transforms.ToTensor()(mask_pil)
             # size = mask_pil.size[0]
             # if size > mask_pil.size[1]:
             #     size = mask_pil.size[1]
