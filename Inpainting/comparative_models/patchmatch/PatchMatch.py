@@ -125,8 +125,8 @@ def NNS(img, ref, p_size, itr):
 if __name__ == "__main__":
     # img = np.array(Image.open("./cup_a.jpg"))
     # ref = np.array(Image.open("./cup_b.jpg"))
-    img = np.array(Image.open("./masked_face.png"))
-    ref = np.array(Image.open("./ref.png"))
+    img = np.array(Image.open("./ref.png"))
+    ref = np.array(Image.open("./irregular_mask_001.png"))
     p_size = 3
     itr = 5
     start = time.time()
