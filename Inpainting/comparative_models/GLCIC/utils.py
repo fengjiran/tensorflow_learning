@@ -7,8 +7,8 @@ from poissonblending import blend
 
 
 def gen_input_mask(
-    shape, hole_size,
-    hole_area=None, max_holes=1):
+        shape, hole_size,
+        hole_area=None, max_holes=1):
     """
     * inputs:
         - shape (sequence, required):
@@ -40,7 +40,7 @@ def gen_input_mask(
     mask = torch.zeros(shape)
     bsize, _, mask_h, mask_w = mask.shape
     for i in range(bsize):
-        n_holes = random.choice(list(range(1, max_holes+1)))
+        n_holes = random.choice(list(range(1, max_holes + 1)))
         for _ in range(n_holes):
             # choose patch width
             if isinstance(hole_size[0], tuple) and len(hole_size[0]) == 2:
@@ -63,7 +63,7 @@ def gen_input_mask(
             else:
                 offset_x = random.randint(0, mask_w - hole_w)
                 offset_y = random.randint(0, mask_h - hole_h)
-            mask[i, :, offset_y : offset_y + hole_h, offset_x : offset_x + hole_w] = 1.0
+            mask[i, :, offset_y: offset_y + hole_h, offset_x: offset_x + hole_w] = 1.0
     return mask
 
 
@@ -100,7 +100,7 @@ def crop(x, area):
     """
     xmin, ymin = area[0]
     w, h = area[1]
-    return x[:, :, ymin : ymin + h, xmin : xmin + w]
+    return x[:, :, ymin: ymin + h, xmin: xmin + w]
 
 
 def sample_random_batch(dataset, batch_size=32):
@@ -138,7 +138,7 @@ def poisson_blend(x, output, mask):
     x = x.clone().cpu()
     output = output.clone().cpu()
     mask = mask.clone().cpu()
-    mask = torch.cat((mask,mask,mask), dim=1) # convert to 3-channel format
+    mask = torch.cat((mask, mask, mask), dim=1)  # convert to 3-channel format
     num_samples = x.shape[0]
     ret = []
     for i in range(num_samples):
@@ -152,7 +152,7 @@ def poisson_blend(x, output, mask):
         xs, ys = [], []
         for i in range(msk.shape[0]):
             for j in range(msk.shape[1]):
-                if msk[i,j,0] == 255:
+                if msk[i, j, 0] == 255:
                     ys.append(i)
                     xs.append(j)
         xmin, xmax = min(xs), max(xs)
