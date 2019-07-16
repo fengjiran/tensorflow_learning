@@ -18,9 +18,9 @@ irregular_output_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\GLCIC\
 regular_output_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\GLCIC\\regular'
 
 
-# =============================================
+# ==============================================
 # Load model
-# =============================================
+# ==============================================
 with open('config.json', 'r') as f:
     config = json.load(f)
 mpv = torch.tensor(config['mpv']).view(1, 3, 1, 1)
