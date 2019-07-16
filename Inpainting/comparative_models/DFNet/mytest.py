@@ -236,7 +236,7 @@ class Tester:
 
 
 if __name__ == '__main__':
-    model_path = ''
+    model_path = 'E:\\comparative_models\\DFNet\\celeba\\model_celeba.pth'
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-m', '--model', default='E:\\comparative_models\\DFNet\\celeba\\model_celeba.pth',
