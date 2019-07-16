@@ -1,4 +1,5 @@
-import os, ntpath
+import os
+import ntpath
 import torch
 from collections import OrderedDict
 from util import util
@@ -86,7 +87,7 @@ class BaseModel():
         for i in range(1):
             for j, name in enumerate(self.value_names):
                 if isinstance(name, str):
-                    dis_ret[name+str(i)] =util.tensor2array(value[i][j].data)
+                    dis_ret[name + str(i)] = util.tensor2array(value[i][j].data)
 
         return dis_ret
 
@@ -108,29 +109,40 @@ class BaseModel():
         for name in self.model_names:
             if isinstance(name, str):
                 filename = '%s_net_%s.pth' % (which_epoch, name)
+                # print(self.save_dir)
                 path = os.path.join(self.save_dir, filename)
                 net = getattr(self, 'net_' + name)
-                try:
-                    net.load_state_dict(torch.load(path))
-                except:
-                    pretrained_dict = torch.load(path)
-                    model_dict = net.state_dict()
-                    try:
-                        pretrained_dict = {k:v for k,v in pretrained_dict.items() if k in model_dict}
-                        net.load_state_dict(pretrained_dict)
-                        print('Pretrained network %s has excessive layers; Only loading layers that are used' % name)
-                    except:
-                        print('Pretrained network %s has fewer layers; The following are not initialized:' % name)
-                        not_initialized = set()
-                        for k, v in pretrained_dict.items():
-                            if v.size() == model_dict[k].size():
-                                model_dict[k] = v
 
-                        for k, v in model_dict.items():
-                            if k not in pretrained_dict or v.size() != pretrained_dict[k].size():
-                                not_initialized.add(k.split('.')[0])
-                        print(sorted(not_initialized))
-                        net.load_state_dict(model_dict)
+                pretrained_dict = torch.load(path)
+                model_dict = net.state_dict()
+
+                pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+                model_dict.update(pretrained_dict)
+                net.load_state_dict(model_dict)
+
+                # try:
+                #     net.load_state_dict(torch.load(path))
+                #     print('hello try')
+                # except:
+                #     print('hello except')
+                #     pretrained_dict = torch.load(path)
+                #     model_dict = net.state_dict()
+                #     try:
+                #         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+                #         net.load_state_dict(pretrained_dict)
+                #         print('Pretrained network %s has excessive layers; Only loading layers that are used' % name)
+                #     except:
+                #         print('Pretrained network %s has fewer layers; The following are not initialized:' % name)
+                #         not_initialized = set()
+                #         for k, v in pretrained_dict.items():
+                #             if v.size() == model_dict[k].size():
+                #                 model_dict[k] = v
+
+                #         for k, v in model_dict.items():
+                #             if k not in pretrained_dict or v.size() != pretrained_dict[k].size():
+                #                 not_initialized.add(k.split('.')[0])
+                #         print(sorted(not_initialized))
+                #         net.load_state_dict(model_dict)
                 if len(self.gpu_ids) > 0 and torch.cuda.is_available():
                     net.cuda()
                 if not self.isTrain:
