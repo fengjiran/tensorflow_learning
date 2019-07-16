@@ -12,7 +12,7 @@ class BaseOptions():
 
     def initialize(self, parser):
         # base define
-        parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment.')
+        parser.add_argument('--name', type=str, default='', help='name of the experiment.')
         parser.add_argument('--model', type=str, default='pluralistic', help='name of the model type. [pluralistic]')
         parser.add_argument('--mask_type', type=int, default=[1, 2],
                             help='mask type, 0: center mask, 1:random regular mask, '
