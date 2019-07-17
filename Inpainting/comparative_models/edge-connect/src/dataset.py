@@ -148,6 +148,7 @@ class Dataset(torch.utils.data.Dataset):
             mask = self.resize(mask, imgh, imgw, centerCrop=False)
             mask = rgb2gray(mask)
             mask = (mask > 0).astype(np.uint8) * 255
+            mask = 255 - mask
             return mask
 
     def to_tensor(self, img):
