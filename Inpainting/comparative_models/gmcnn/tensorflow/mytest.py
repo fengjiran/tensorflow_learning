@@ -20,16 +20,24 @@ config = TestOptions().parse()
 #     print('Invalid testing data file/folder path.')
 #     exit(1)
 
-dataset_path = 'E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256'
+# dataset_path = 'E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256'
+dataset_path = 'E:\\model\\experiments\\exp2\\psv\\gt_images'
+
 regular_mask_path = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
 irregular_mask_path = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
-saving_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\gmcnn\\irregular'
+# saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\irregular'
+saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\regular'
 
-model_dir = 'E:\\model\\comparative_models\\gmcnn\\celebahq'
-# model_dir = 'E:\\model\\comparative_models\\gmcnn\\psv'
+# saving_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\gmcnn\\irregular'
+# saving_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\gmcnn\\regular'
 
-pathfile = glob.glob(os.path.join(dataset_path, '*.png'))
+
+# model_dir = 'E:\\model\\comparative_models\\gmcnn\\celebahq'
+model_dir = 'E:\\model\\comparative_models\\gmcnn\\psv'
+
+pathfile = glob.glob(os.path.join(dataset_path, '*.jpg'))
+# pathfile = glob.glob(os.path.join(dataset_path, '*.png'))
 regular_maskpath = glob.glob(os.path.join(regular_mask_path, '*.png'))
 irregular_maskpath = glob.glob(os.path.join(irregular_mask_path, '*.png'))
 
@@ -63,7 +71,8 @@ with tf.Session(config=sess_config) as sess:
         np.random.seed(config.seed)
 
     for i in range(test_num):
-        mask = imread(irregular_maskpath[i])
+        # mask = imread(irregular_maskpath[i])
+        mask = imread(regular_maskpath[i])
         image = imread(pathfile[i])
 
         mask = mask / 255.
@@ -78,6 +87,6 @@ with tf.Session(config=sess_config) as sess:
         mask = np.expand_dims(mask, 0)
 
         result = sess.run(output, feed_dict={input_image_tf: image, input_mask_tf: mask})
-        imwrite(os.path.join(saving_path, '{:03d}.png'.format(i)), result[0][:, :, ::-1])
+        imwrite(os.path.join(saving_path, '{:03d}.png'.format(i + 1)), result[0][:, :, ::-1])
         print(' > {} / {}'.format(i + 1, test_num))
 print('done.')
