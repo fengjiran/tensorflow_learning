@@ -32,8 +32,32 @@ if __name__ == '__main__':
     config.MODEL = model
     config.INPUT_SIZE = 0
 
+    config.PATH = model_path
+
     config.TEST_FLIST = img_dir
 
-    config.TEST_MASK_FLIST = regular_mask_dir
+    config.TEST_MASK_FLIST = irregular_mask_dir
 
-    config.RESULTS = regular_output_dir
+    config.RESULTS = irregular_output_dir
+
+    # cuda visble devices
+    os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
+
+    # init device
+    config.DEVICE = torch.device("cpu")
+
+    # set cv2 running threads to 1 (prevents deadlocks with pytorch dataloader)
+    cv2.setNumThreads(0)
+
+    # initialize random seed
+    torch.manual_seed(config.SEED)
+    torch.cuda.manual_seed_all(config.SEED)
+    np.random.seed(config.SEED)
+    random.seed(config.SEED)
+
+    # build the model and initialize
+    model = EdgeConnect(config)
+    model.load()
+
+    print('\nstart testing...\n')
+    model.test()
