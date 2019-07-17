@@ -18,7 +18,7 @@ from model import _netG
 import utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset',  default='streetview', help='cifar10 | lsun | imagenet | folder | lfw ')
+parser.add_argument('--dataset', default='streetview', help='cifar10 | lsun | imagenet | folder | lfw ')
 parser.add_argument('--test_image', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
@@ -37,19 +37,17 @@ parser.add_argument('--netD', default='', help="path to netD (to continue traini
 parser.add_argument('--outf', default='.', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 
-parser.add_argument('--nBottleneck', type=int,default=4000,help='of dim for bottleneck of encoder')
-parser.add_argument('--overlapPred',type=int,default=4,help='overlapping edges')
-parser.add_argument('--nef',type=int,default=64,help='of encoder filters in first conv layer')
-parser.add_argument('--wtl2',type=float,default=0.999,help='0 means do not use else use with this weight')
+parser.add_argument('--nBottleneck', type=int, default=4000, help='of dim for bottleneck of encoder')
+parser.add_argument('--overlapPred', type=int, default=4, help='overlapping edges')
+parser.add_argument('--nef', type=int, default=64, help='of encoder filters in first conv layer')
+parser.add_argument('--wtl2', type=float, default=0.999, help='0 means do not use else use with this weight')
 opt = parser.parse_args()
 print(opt)
 
 
-
-
 netG = _netG(opt)
 # netG = TransformerNet()
-netG.load_state_dict(torch.load(opt.netG,map_location=lambda storage, location: storage)['state_dict'])
+netG.load_state_dict(torch.load(opt.netG, map_location=lambda storage, location: storage)['state_dict'])
 # netG.requires_grad = False
 netG.eval()
 
@@ -63,7 +61,7 @@ image = image.repeat(1, 1, 1, 1)
 
 input_real = torch.FloatTensor(1, 3, opt.imageSize, opt.imageSize)
 input_cropped = torch.FloatTensor(1, 3, opt.imageSize, opt.imageSize)
-real_center = torch.FloatTensor(1, 3, opt.imageSize/2, opt.imageSize/2)
+real_center = torch.FloatTensor(1, 3, opt.imageSize / 2, opt.imageSize / 2)
 
 criterionMSE = nn.MSELoss()
 
@@ -80,22 +78,26 @@ real_center = Variable(real_center)
 
 input_real.data.resize_(image.size()).copy_(image)
 input_cropped.data.resize_(image.size()).copy_(image)
-real_center_cpu = image[:,:,opt.imageSize/4:opt.imageSize/4+opt.imageSize/2,opt.imageSize/4:opt.imageSize/4+opt.imageSize/2]
+real_center_cpu = image[:, :, opt.imageSize / 4:opt.imageSize / 4 +
+                        opt.imageSize / 2, opt.imageSize / 4:opt.imageSize / 4 + opt.imageSize / 2]
 real_center.data.resize_(real_center_cpu.size()).copy_(real_center_cpu)
 
-input_cropped.data[:,0,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred] = 2*117.0/255.0 - 1.0
-input_cropped.data[:,1,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred] = 2*104.0/255.0 - 1.0
-input_cropped.data[:,2,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred,opt.imageSize/4+opt.overlapPred:opt.imageSize/4+opt.imageSize/2-opt.overlapPred] = 2*123.0/255.0 - 1.0
+input_cropped.data[:, 0, opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred,
+                   opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred] = 2 * 117.0 / 255.0 - 1.0
+input_cropped.data[:, 1, opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred,
+                   opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred] = 2 * 104.0 / 255.0 - 1.0
+input_cropped.data[:, 2, opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred,
+                   opt.imageSize / 4 + opt.overlapPred:opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred] = 2 * 123.0 / 255.0 - 1.0
 
 fake = netG(input_cropped)
-errG = criterionMSE(fake,real_center)
+errG = criterionMSE(fake, real_center)
 
 recon_image = input_cropped.clone()
-recon_image.data[:,:,opt.imageSize/4:opt.imageSize/4+opt.imageSize/2,opt.imageSize/4:opt.imageSize/4+opt.imageSize/2] = fake.data
+recon_image.data[:, :, opt.imageSize / 4:opt.imageSize / 4 + opt.imageSize /
+                 2, opt.imageSize / 4:opt.imageSize / 4 + opt.imageSize / 2] = fake.data
 
-utils.save_image('val_real_samples.png',image[0])
-utils.save_image('val_cropped_samples.png',input_cropped.data[0])
-utils.save_image('val_recon_samples.png',recon_image.data[0])
+utils.save_image('val_real_samples.png', image[0])
+utils.save_image('val_cropped_samples.png', input_cropped.data[0])
+utils.save_image('val_recon_samples.png', recon_image.data[0])
 
 print('%.4f' % errG.data[0])
-
