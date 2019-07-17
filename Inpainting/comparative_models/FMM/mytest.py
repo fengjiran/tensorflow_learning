@@ -10,10 +10,10 @@ regular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
 irregular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
 irregular_celebahq_results_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\FMM\\irregular'
-regular_celebahq_results_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\FMM\\irregular'
+regular_celebahq_results_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\FMM\\regular'
 
 irregular_psv_results_dir = 'E:\\model\\experiments\\exp2\\psv\\results\\FMM\\irregular'
-regular_psv_results_dir = 'E:\\model\\experiments\\exp2\\psv\\results\\FMM\\irregular'
+regular_psv_results_dir = 'E:\\model\\experiments\\exp2\\psv\\results\\FMM\\regular'
 
 # for celebahq
 celebahq_flist = os.listdir(celebahq_img_dir)
