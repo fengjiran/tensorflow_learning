@@ -1,6 +1,6 @@
 MODE: 2             # 1: train, 2: test, 3: eval
 MODEL: 3            # 1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model
-MASK: 3             # 1: random block, 2: half, 3: external, 4: (external, random block), 5: (external, random block, half)
+MASK: 6             # 1: random block, 2: half, 3: external, 4: (external, random block), 5: (external, random block, half)
 EDGE: 1             # 1: canny, 2: external
 NMS: 1              # 0: no non-max-suppression, 1: applies non-max-suppression on the external edges by multiplying by Canny
 SEED: 10            # random seed
