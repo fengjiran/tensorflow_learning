@@ -10,17 +10,22 @@ from src.edge_connect import EdgeConnect
 
 
 if __name__ == '__main__':
-    model_path = 'E:\\model\\comparative_models\\edge_connect\\celeba'
+    model_path = 'E:\\model\\comparative_models\\edge_connect\\psv'
+    # model_path = 'E:\\model\\comparative_models\\edge_connect\\celeba'
 
-    img_dir = 'E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256'
+    img_dir = 'E:\\model\\experiments\\exp2\\psv\\gt_images'
+    # img_dir = 'E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256'
 
     # Mask or Mask folder
     regular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
     irregular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
     # Output dir
-    regular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\edge-connect\\regular'
-    irregular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\edge-connect\\irregular'
+    regular_output_dir = 'E:\\model\\experiments\\exp2\\psv\\results\\edge-connect\\regular'
+    irregular_output_dir = 'E:\\model\\experiments\\exp2\\psv\\results\\edge-connect\\irregular'
+
+    # regular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\edge-connect\\regular'
+    # irregular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\edge-connect\\irregular'
 
     # 1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model
     model = 3
@@ -36,9 +41,9 @@ if __name__ == '__main__':
 
     config.TEST_FLIST = img_dir
 
-    config.TEST_MASK_FLIST = irregular_mask_dir
+    config.TEST_MASK_FLIST = regular_mask_dir
 
-    config.RESULTS = irregular_output_dir
+    config.RESULTS = regular_output_dir
 
     # cuda visble devices
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
