@@ -1,6 +1,6 @@
 import os
-import cv2
 import random
+import cv2
 import numpy as np
 import torch
 import argparse
