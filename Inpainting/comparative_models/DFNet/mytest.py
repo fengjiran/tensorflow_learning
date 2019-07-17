@@ -48,6 +48,7 @@ class Tester:
         print('Model %s loaded.' % path)
 
     def get_name(self, path):
+        path = Path(path)
         return '.'.join(path.name.split('.')[:-1])
 
     def results_path(self, output, img_path, mask_path, prefix='result'):
@@ -236,31 +237,36 @@ class Tester:
 
 
 if __name__ == '__main__':
-    model_path = 'E:\\comparative_models\\DFNet\\celeba\\model_celeba.pth'
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-m', '--model', default='E:\\comparative_models\\DFNet\\celeba\\model_celeba.pth',
-        help='Select a checkpoint.')
-    parser.add_argument(
-        '-i', '--input_size', default=0, type=int,
-        help='Batch size for testing.')
-    parser.add_argument(
-        '-b', '--batch_size', default=8, type=int,
-        help='Batch size for testing.')
-    parser.add_argument(
-        '--img', default='E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256',
-        help='Image or Image folder.')
-    parser.add_argument(
-        '--mask', default='E:\\model\\experiments\\exp2\\mask\\regular_mask',
-        help='Mask or Mask folder.')
-    parser.add_argument(
-        '--output', default='E:\\model\\experiments\\exp2\\celebahq\\results\\DFNet\\regular',
-        help='Output dir')
-    parser.add_argument(
-        '--merge', action='store_true',
-        help='Whether merge input and results for better viewing.')
+    # Select a checkpoint
+    model_path = 'E:\\model\\comparative_models\\DFNet\\celeba\\model_celeba.pth'
 
-    args = parser.parse_args()
-    tester = Tester(args.model, args.input_size, args.batch_size)
+    # Image or Image folder
+    img_dir = 'E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256'
 
-    tester.inpaint(args.output, args.img, args.mask, merge_result=args.merge)
+    # Mask or Mask folder
+    regular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
+    irregular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
+
+    # Output dir
+    regular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\DFNet\\regular'
+    irregular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\DFNet\\irregular'
+
+    input_size = 256  # input size for testing
+    batch_size = 8  # Batch size for testing
+    merge = True  # Whether merge input and results for better viewing
+
+    tester = Tester(model_path, input_size, batch_size)
+
+    img_list = os.listdir(img_dir)
+    regular_mask_list = os.listdir(regular_mask_dir)
+    irregular_mask_list = os.listdir(irregular_mask_dir)
+
+    for dir1, dir2 in zip(img_list, regular_mask_list):
+        dir1 = os.path.join(img_dir, dir1)
+        dir2 = os.path.join(regular_mask_dir, dir2)
+        tester.inpaint(regular_output_dir, dir1, dir2, merge_result=merge)
+
+    for dir1, dir2 in zip(img_list, irregular_mask_list):
+        dir1 = os.path.join(img_dir, dir1)
+        dir2 = os.path.join(irregular_mask_dir, dir2)
+        tester.inpaint(irregular_output_dir, dir1, dir2, merge_result=merge)
