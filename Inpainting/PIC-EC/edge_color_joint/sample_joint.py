@@ -235,7 +235,7 @@ def load_mask(cfg, mask_type=1, mask_path=None):
         img_mask = np.expand_dims(img_mask, -1)  # (1, 256, 256, 1) float
     else:  # external
         img_mask = imread(mask_path)
-        img_mask = cv2.resize(img_mask, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
+        # img_mask = cv2.resize(img_mask, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
         img_mask = img_mask > 3
         img_mask = img_mask.astype(np.float32)
         img_mask = np.expand_dims(img_mask, 0)
@@ -247,7 +247,7 @@ def load_mask(cfg, mask_type=1, mask_path=None):
 
 def load_items(cfg, image_path):
     image = imread(image_path)  # [1024, 1024, 3], [0, 255]
-    image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
+    # image = cv2.resize(image, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)  # (256, 256, 3)
     gray = rgb2gray(image)
     color = get_color_domain(image, cfg['BLUR_FACTOR1'], cfg['BLUR_FACTOR1'], cfg['K'])
 
@@ -381,5 +381,5 @@ with tf.Session(config=config) as sess:
 
         inpainted_image = sess.run(output, feed_dict=feed_dict)
         inpainted_image = np.reshape(inpainted_image, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-        # imwrite(os.path.join(sample_dir, 'celebahq_irregular_image_inpainted_%02d.png' % i), inpainted_image)
-        imwrite(os.path.join(sample_dir, 'psv_irregular_image_inpainted_%02d.png' % i), inpainted_image)
+        imwrite(os.path.join(sample_dir, 'celebahq_irregular_image_inpainted_%02d.png' % i), inpainted_image)
+        # imwrite(os.path.join(sample_dir, 'psv_irregular_image_inpainted_%02d.png' % i), inpainted_image)
