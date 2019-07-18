@@ -11,7 +11,11 @@ K: 3                               # k-means parameter
 EDGE_MODEL_PATH: "E:\\model\\edge\\celebahq\\irregular_mask\\model"
 COLOR_MODEL_PATH: "E:\\model\\color\\celebahq\\irregular_mask\\model"
 JOINT_MODEL_PATH: "E:\\model\\joint\\celebahq\\irregular_mask\\model"
-SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
+# SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
+SAMPLE_DIR: "E:\\model\\experiments\\exp2\\celebahq\\results\\irregular"
 
-TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
-TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\celebahq\\mask.flist"
+# TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
+# TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\celebahq\\mask.flist"
+
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp2\\mask\\irregular_mask"
