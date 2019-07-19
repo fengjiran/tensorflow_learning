@@ -66,7 +66,7 @@ class EdgeModel():
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
             edge = tf.nn.sigmoid(x)
-            # edge = tf.nn.relu(x)
+            edge = tf.cast(edge > 0.25, tf.float32)
 
             return edge, x
 
@@ -218,7 +218,7 @@ class EdgeModel():
         inputs = tf.concat([grays_masked, edges_masked, masks * tf.ones_like(img_grays)], axis=3)
         outputs, _ = self.edge_generator(inputs, reuse=True)
         outputs_merged = outputs * masks + edges * (1 - masks)
-        outputs_merged = tf.clip_by_value(outputs_merged, 0, 1)
+        # outputs_merged = tf.clip_by_value(outputs_merged, 0, 1)
 
         # metrics
         precision, recall = edge_accuracy(edges * masks, outputs_merged * masks, self.cfg['EDGE_THRESHOLD'])
