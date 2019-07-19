@@ -66,7 +66,7 @@ class EdgeModel():
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
             edge = tf.nn.sigmoid(x)
-            edge = tf.cast(edge > 0.25, tf.float32)
+            # edge = tf.cast(edge > 0.1, tf.float32)
 
             return edge, x
 
@@ -128,8 +128,8 @@ class EdgeModel():
                                           initializer=tf.zeros_initializer(),
                                           trainable=False)
 
-        gen_loss = 0.0
-        dis_loss = 0.0
+        # gen_loss = 0.0
+        # dis_loss = 0.0
 
         # discriminator loss
         dis_input_real = tf.concat([img_grays, edges], axis=3)
@@ -141,7 +141,7 @@ class EdgeModel():
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
         dis_fake_loss = adversarial_loss(dis_fake, is_real=False,
                                          gan_type=self.cfg['GAN_LOSS'], is_disc=True)
-        dis_loss += (dis_fake_loss + dis_real_loss) / 2.0
+        dis_loss = (dis_fake_loss + dis_real_loss) / 2.0
 
         # generator adversarial loss
         gen_input_fake = tf.concat([img_grays, outputs_merged], axis=3)
