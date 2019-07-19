@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import numpy as np
 
+
 class GraphicsScene(QGraphicsScene):
     def __init__(self, mode_list, parent=None):
         QGraphicsScene.__init__(self, parent)
@@ -52,8 +53,8 @@ class GraphicsScene(QGraphicsScene):
                 if self.prev_pt:
                     self.drawMask(self.prev_pt, event.scenePos())
                     pts = {}
-                    pts['prev'] = (int(self.prev_pt.x()),int(self.prev_pt.y()))
-                    pts['curr'] = (int(event.scenePos().x()),int(event.scenePos().y()))
+                    pts['prev'] = (int(self.prev_pt.x()), int(self.prev_pt.y()))
+                    pts['curr'] = (int(event.scenePos().x()), int(event.scenePos().y()))
                     self.mask_points.append(pts)
                     self.history.append(0)
                     self.prev_pt = event.scenePos()
@@ -63,8 +64,8 @@ class GraphicsScene(QGraphicsScene):
                 if self.prev_pt:
                     self.drawSketch(self.prev_pt, event.scenePos())
                     pts = {}
-                    pts['prev'] = (int(self.prev_pt.x()),int(self.prev_pt.y()))
-                    pts['curr'] = (int(event.scenePos().x()),int(event.scenePos().y()))
+                    pts['prev'] = (int(self.prev_pt.x()), int(self.prev_pt.y()))
+                    pts['curr'] = (int(event.scenePos().x()), int(event.scenePos().y()))
                     self.sketch_points.append(pts)
                     self.history.append(1)
                     self.prev_pt = event.scenePos()
@@ -74,8 +75,8 @@ class GraphicsScene(QGraphicsScene):
                 if self.prev_pt:
                     self.drawStroke(self.prev_pt, event.scenePos())
                     pts = {}
-                    pts['prev'] = (int(self.prev_pt.x()),int(self.prev_pt.y()))
-                    pts['curr'] = (int(event.scenePos().x()),int(event.scenePos().y()))
+                    pts['prev'] = (int(self.prev_pt.x()), int(self.prev_pt.y()))
+                    pts['curr'] = (int(event.scenePos().x()), int(event.scenePos().y()))
                     pts['color'] = self.stk_color
                     self.stroke_points.append(pts)
                     self.history.append(2)
@@ -85,17 +86,17 @@ class GraphicsScene(QGraphicsScene):
 
     def drawMask(self, prev_pt, curr_pt):
         lineItem = QGraphicsLineItem(QLineF(prev_pt, curr_pt))
-        lineItem.setPen(QPen(Qt.white, 12, Qt.SolidLine)) # rect
+        lineItem.setPen(QPen(Qt.white, 12, Qt.SolidLine))  # rect
         self.addItem(lineItem)
 
     def drawSketch(self, prev_pt, curr_pt):
         lineItem = QGraphicsLineItem(QLineF(prev_pt, curr_pt))
-        lineItem.setPen(QPen(Qt.black, 1, Qt.SolidLine)) # rect
+        lineItem.setPen(QPen(Qt.black, 1, Qt.SolidLine))  # rect
         self.addItem(lineItem)
 
     def drawStroke(self, prev_pt, curr_pt):
         lineItem = QGraphicsLineItem(QLineF(prev_pt, curr_pt))
-        lineItem.setPen(QPen(QColor(self.stk_color), 4, Qt.SolidLine)) # rect
+        lineItem.setPen(QPen(QColor(self.stk_color), 4, Qt.SolidLine))  # rect
         self.addItem(lineItem)
 
     def get_stk_color(self, color):
@@ -108,10 +109,10 @@ class GraphicsScene(QGraphicsScene):
         for i in range(len(self.items())):
             item = self.items()[0]
             self.removeItem(item)
-        
+
     def undo(self):
-        if len(self.items())>1:
-            if len(self.items())>=9:
+        if len(self.items()) > 1:
+            if len(self.items()) >= 9:
                 for i in range(8):
                     item = self.items()[0]
                     self.removeItem(item)
@@ -127,7 +128,7 @@ class GraphicsScene(QGraphicsScene):
                     elif self.history[-1] == 3:
                         self.history.pop()
             else:
-                for i in range(len(self.items())-1):
+                for i in range(len(self.items()) - 1):
                     item = self.items()[0]
                     self.removeItem(item)
                     if self.history[-1] == 0:
