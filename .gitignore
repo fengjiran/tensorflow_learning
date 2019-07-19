@@ -9,6 +9,7 @@
 *.save
 *.png
 *.jpg
+*.git
 
 # VSCODE settings
 .sync/
