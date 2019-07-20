@@ -38,20 +38,18 @@ Key `q` | To quit
 
 # Python 2/3 compatibility
 from __future__ import print_function
-
+import os
 import argparse
 import glob
-
+import shutil
 from easygui import *
 import numpy as np
 import cv2 as cv
-import os
-import shutil
+from skimage.feature import canny
+from skimage.color import rgb2gray
 from src.config import Config
 from main import main
 from src.utils import resize, img_kmeans
-from skimage.feature import canny
-from skimage.color import rgb2gray
 
 BLUE = [148, 195, 222]  # rectangle color
 RED = [0, 0, 255]  # PR BG
@@ -272,7 +270,7 @@ def inital_colorful_pic(file, sigma, kmeans):
 
 def lighter(output):
     alpha = 1.1
-    res = np.uint8(np.clip((alpha * output + 125*(1-alpha)), 0, 255))
+    res = np.uint8(np.clip((alpha * output + 125 * (1 - alpha)), 0, 255))
     # (b, g, r) = cv.split(output)
     # bH = cv.equalizeHist(b)
     # gH = cv.equalizeHist(g)
