@@ -10,6 +10,7 @@
 *.png
 *.jpg
 *.git
+*.gz
 
 # VSCODE settings
 .sync/
