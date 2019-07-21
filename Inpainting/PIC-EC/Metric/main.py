@@ -146,5 +146,5 @@ def mean_kernel_inception_distance():
 
 inception_score()
 frechet_inception_distance()
-kernel_inception_distance()
+# kernel_inception_distance()
 # mean_kernel_inception_distance()
