@@ -22,7 +22,8 @@ def main(mode=None):
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in config.GPU)
 
     # init device
-    config.DEVICE = torch.device("cpu")
+    # config.DEVICE = torch.device("cpu")
+    config.DEVICE = torch.device("cuda")
 
     # if torch.cuda.is_available():
     #     config.DEVICE = torch.device("cuda")
