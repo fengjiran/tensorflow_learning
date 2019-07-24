@@ -1,4 +1,4 @@
-firstTimeTrain: false               # the first time to train
+firstTimeTrain: true               # the first time to train
 MODEL: 1                           # 1: coarse model, 2: refine model, 3: joint model
 SIGMA: 2.0                         # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
 EDGE: 1                            # 1: canny, 2: external
@@ -21,11 +21,11 @@ K: 3                               # k-means parameter
 L1_LOSS_WEIGHT: 5.0                # l1 loss weight
 # STYLE_LOSS_WEIGHT: 0             # style loss weight
 CONTENT_LOSS_WEIGHT: 2           # perceptual loss weight
-ADV_LOSS_WEIGHT: 1              # adversarial loss weight
+ADV_LOSS_WEIGHT: 0.001              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
 GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
-INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
+INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
 
 SAVE_INTERVAL: 1000                 # how many iterations to wait before saving model (0: never)
 EVAL_INTERVAL: 200              # how many iterations to wait before saving summaries
