@@ -28,12 +28,13 @@ def load_flist(flist):
 
 
 if __name__ == '__main__':
-    test_flist_path = 'F:\\Datasets\\flist\\celebahq_test_win.flist'
+    # test_flist_path = 'F:\\Datasets\\flist\\celebahq_test_win.flist'
+    test_flist_path = 'F:\\Datasets\\flist\\psv_test_win.flist'
     test_flist = load_flist(test_flist_path)
     print(len(test_flist))
     print(test_flist[0])
 
-    dst = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
+    dst = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
     i = 1
     for path in test_flist:
