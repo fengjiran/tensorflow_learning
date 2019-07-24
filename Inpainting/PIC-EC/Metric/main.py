@@ -3,8 +3,11 @@ from glob import glob
 from frechet_kernel_Inception_distance import *
 from inception_score import *
 
-fake_dir = '/Users/richard/Desktop/fake'
-real_dir = '/Users/richard/Desktop/real_target'
+# fake_dir = '/Users/richard/Desktop/fake'
+# real_dir = '/Users/richard/Desktop/real_target'
+
+fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\GLCIC\\128'
+real_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 
 
 def inception_score():
@@ -146,5 +149,5 @@ def mean_kernel_inception_distance():
 
 inception_score()
 frechet_inception_distance()
-# kernel_inception_distance()
+kernel_inception_distance()
 # mean_kernel_inception_distance()
