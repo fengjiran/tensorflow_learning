@@ -13,7 +13,7 @@ COLOR_MODEL_PATH: "E:\\model\\color\\celebahq\\regular_mask\\model"
 JOINT_MODEL_PATH: "E:\\model\\joint\\celebahq\\regular_mask\\model"
 
 # SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
-SAMPLE_DIR: "E:\\model\\experiments\\exp2\\celebahq\\results\\PIC-EC\\regular"
+SAMPLE_DIR: "E:\\model\\experiments\\exp2\\celebahq\\results\\PIC-EC\\regular1"
 
 
 # TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
