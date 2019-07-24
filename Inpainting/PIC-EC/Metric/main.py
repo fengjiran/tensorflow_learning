@@ -6,8 +6,8 @@ from inception_score import *
 # fake_dir = '/Users/richard/Desktop/fake'
 # real_dir = '/Users/richard/Desktop/real_target'
 
-fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\GLCIC\\128'
-real_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
+fake_dir = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\90'
+real_dir = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
 
 def inception_score():
