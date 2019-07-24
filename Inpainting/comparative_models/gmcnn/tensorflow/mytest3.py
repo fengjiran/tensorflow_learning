@@ -20,21 +20,21 @@ config = TestOptions().parse()
 #     print('Invalid testing data file/folder path.')
 #     exit(1)
 
-dataset_path = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
-# dataset_path = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
+# dataset_path = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
+dataset_path = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
-regular_mask_path = 'E:\\model\\experiments\\exp3\\mask\\128'
+regular_mask_path = 'E:\\model\\experiments\\exp3\\psv\\mask\\50'
 # irregular_mask_path = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
 # saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\irregular'
 # saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\regular'
 
 # saving_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\gmcnn\\irregular'
-saving_path = 'E:\\model\\experiments\\exp3\\celebahq\\results\\gmcnn\\128'
+saving_path = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\50'
 
 
-model_dir = 'E:\\model\\comparative_models\\gmcnn\\celebahq'
-# model_dir = 'E:\\model\\comparative_models\\gmcnn\\psv'
+# model_dir = 'E:\\model\\comparative_models\\gmcnn\\celebahq'
+model_dir = 'E:\\model\\comparative_models\\gmcnn\\psv'
 
 # pathfile = glob.glob(os.path.join(dataset_path, '*.jpg'))
 pathfile = glob.glob(os.path.join(dataset_path, '*.png'))
