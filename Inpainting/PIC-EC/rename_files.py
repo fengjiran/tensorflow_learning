@@ -1,6 +1,6 @@
 import os
 
-path = 'E:\\model\\experiments\\exp3\\psv\\results\\FMM\\128'
+path = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\128'
 # path = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
 file_list = os.listdir(path)
