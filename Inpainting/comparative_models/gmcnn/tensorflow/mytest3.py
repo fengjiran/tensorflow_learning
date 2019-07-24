@@ -23,14 +23,14 @@ config = TestOptions().parse()
 # dataset_path = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 dataset_path = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
-regular_mask_path = 'E:\\model\\experiments\\exp3\\psv\\mask\\50'
+regular_mask_path = 'E:\\model\\experiments\\exp3\\psv\\mask\\128'
 # irregular_mask_path = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
 # saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\irregular'
 # saving_path = 'E:\\model\\experiments\\exp2\\psv\\results\\gmcnn\\regular'
 
 # saving_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\gmcnn\\irregular'
-saving_path = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\50'
+saving_path = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\128'
 
 
 # model_dir = 'E:\\model\\comparative_models\\gmcnn\\celebahq'
