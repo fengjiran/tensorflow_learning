@@ -6,7 +6,7 @@ from inception_score import *
 # fake_dir = '/Users/richard/Desktop/fake'
 # real_dir = '/Users/richard/Desktop/real_target'
 
-fake_dir = 'E:\\model\\experiments\\exp3\\psv\\results\\gmcnn\\90'
+fake_dir = 'E:\\model\\experiments\\exp3\\psv\\results\\edge-connect\\128'
 real_dir = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
 
