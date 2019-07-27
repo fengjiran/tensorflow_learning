@@ -275,8 +275,7 @@ def load_flist(flist):
     # flist: image file path, image directory path, text file flist path
     if isinstance(flist, str):
         if os.path.isdir(flist):
-            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png')) + \
-                list(glob.glob(flist + '/*.JPG'))
+            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png'))
             flist.sort()
             return flist
 
@@ -324,6 +323,9 @@ if __name__ == '__main__':
     mask_type = cfg['MASK']
     mask_paths = load_flist(cfg['TEST_MASK_PATH'])
     image_paths = load_flist(cfg['TEST_IMAGE_PATH'])
+
+    print(mask_paths[0], mask_paths[1])
+    print(image_paths[0], image_paths[1])
 
 
 ########################### construct the model ##################################
@@ -381,5 +383,5 @@ with tf.Session(config=config) as sess:
 
         inpainted_image = sess.run(output, feed_dict=feed_dict)
         inpainted_image = np.reshape(inpainted_image, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-        imwrite(os.path.join(sample_dir, 'celebahq_regular_image_inpainted_%03d.png' % i), inpainted_image)
-        # imwrite(os.path.join(sample_dir, 'psv_irregular_image_inpainted_%02d.png' % i), inpainted_image)
+        # imwrite(os.path.join(sample_dir, 'celebahq_regular_image_inpainted_%03d.png' % i), inpainted_image)
+        imwrite(os.path.join(sample_dir, 'psv_regular_inpainted_%03d.png' % i), inpainted_image)
