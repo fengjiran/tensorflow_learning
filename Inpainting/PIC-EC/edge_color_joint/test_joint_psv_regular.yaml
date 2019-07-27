@@ -11,7 +11,7 @@ K: 3                               # k-means parameter
 EDGE_MODEL_PATH: "E:\\model\\edge\\psv\\regular_mask\\model"
 COLOR_MODEL_PATH: "E:\\model\\color\\psv\\regular_mask\\model"
 JOINT_MODEL_PATH: "E:\\model\\joint\\psv\\regular_mask\\model"
-SAMPLE_DIR: "E:\\model\\experiments\\exp1\\psv"
+SAMPLE_DIR: "E:\\model\\experiments\\exp2\\psv\\results\\PIC-EC\\regular"
 
-TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\psv\\image.flist"
-TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\psv\\mask.flist"
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp2\\psv\\gt_images"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp2\\mask\\regular_mask"
