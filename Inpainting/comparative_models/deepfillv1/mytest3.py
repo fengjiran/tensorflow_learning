@@ -14,11 +14,11 @@ model_path = 'E:\\model\\comparative_models\\deepfillv1\\celebahq'
 img_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 
 # Mask or Mask folder
-regular_mask_dir = 'E:\\model\\experiments\\exp3\\mask\\128'
+regular_mask_dir = 'E:\\model\\experiments\\exp3\\celebahq\\mask\\50'
 # irregular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
 # Output dir
-regular_output_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\deepfillv1\\128'
+regular_output_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\deepfillv1\\50'
 # irregular_output_dir = 'E:\\model\\experiments\\exp2\\celebahq\\results\\deepfillv1\\irregular'
 
 
@@ -62,5 +62,5 @@ with tf.Session(config=sess_config) as sess:
         mask = np.expand_dims(mask, -1)
 
         result = sess.run(output, feed_dict={img_tf: img, mask_tf: mask})
-        imwrite(os.path.join(regular_output_dir, 'inpainted_128_%04d.png' % i), result[0][:, :, ::-1])
+        imwrite(os.path.join(regular_output_dir, 'test_img_%04d_fake.png' % i), result[0][:, :, ::-1])
         i += 1
