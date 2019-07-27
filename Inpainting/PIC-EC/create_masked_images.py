@@ -12,8 +12,7 @@ def load_flist(flist):
     # flist: image file path, image directory path, text file flist path
     if isinstance(flist, str):
         if os.path.isdir(flist):
-            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png')) + \
-                list(glob.glob(flist + '/*.JPG'))
+            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png'))
             flist.sort()
             return flist
 
@@ -30,9 +29,9 @@ def load_flist(flist):
 
 if __name__ == '__main__':
     gt_img_dir = 'E:\\model\\experiments\\exp2\\psv\\gt_images'
-    mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
+    mask_dir = 'E:\\model\\experiments\\exp2\\mask\\regular_mask'
 
-    result_dir = 'E:\\model\\experiments\\exp2\\psv\\irregular_masked_imgs'
+    result_dir = 'E:\\model\\experiments\\exp2\\psv\\regular_masked_imgs'
 
     gt_img_list = load_flist(gt_img_dir)
     mask_list = load_flist(mask_dir)
@@ -49,5 +48,5 @@ if __name__ == '__main__':
 
         masked_img = img * mask + 1 - mask
 
-        imwrite(os.path.join(result_dir, 'irregular_masked_img_256_%03d.png' % i), masked_img)
+        imwrite(os.path.join(result_dir, 'regular_img_256_%03d.png' % i), masked_img)
         i += 1
