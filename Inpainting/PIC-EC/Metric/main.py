@@ -6,8 +6,8 @@ from inception_score import *
 # fake_dir = '/Users/richard/Desktop/fake'
 # real_dir = '/Users/richard/Desktop/real_target'
 
-fake_dir = 'E:\\model\\experiments\\exp3\\psv\\results\\edge-connect\\128'
-real_dir = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
+fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\PIC-EC\\100'
+real_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 
 
 def inception_score():
@@ -147,7 +147,7 @@ def mean_kernel_inception_distance():
     print("mean_KID_stddev : ", mean_KID_stddev * 100)
 
 
-inception_score()
+# inception_score()
 frechet_inception_distance()
-kernel_inception_distance()
+# kernel_inception_distance()
 # mean_kernel_inception_distance()
