@@ -71,7 +71,9 @@ class JointNetTest():
 
             x = conv(x, channels=1, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
-            edge = tf.nn.sigmoid(x)
+            # edge = tf.nn.sigmoid(x)
+            edge = tf.nn.tanh(x)
+            edge = (edge + 1) / 2.
 
             return edge, x
 
@@ -377,11 +379,12 @@ with tf.Session(config=config) as sess:
     i = 0
     for (img_path, mask_path) in zip(image_paths, mask_paths):
         i = i + 1
+        print(i)
         img_mask = load_mask(cfg, mask_type, mask_path)
         img, img_gray, img_color, img_edge = load_items(cfg, img_path)
         feed_dict = {image: img, gray: img_gray, color: img_color, edge: img_edge, mask: img_mask}
 
         inpainted_image = sess.run(output, feed_dict=feed_dict)
         inpainted_image = np.reshape(inpainted_image, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
-        # imwrite(os.path.join(sample_dir, 'celebahq_regular_image_inpainted_%03d.png' % i), inpainted_image)
-        imwrite(os.path.join(sample_dir, 'psv_regular_inpainted_%03d.png' % i), inpainted_image)
+        imwrite(os.path.join(sample_dir, 'test_img_%04d_fake.png' % i), inpainted_image)
+        # imwrite(os.path.join(sample_dir, 'psv_regular_inpainted_%03d.png' % i), inpainted_image)
