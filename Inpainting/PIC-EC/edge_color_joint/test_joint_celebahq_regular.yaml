@@ -13,11 +13,11 @@ COLOR_MODEL_PATH: "E:\\model\\color\\celebahq\\regular_mask\\model"
 JOINT_MODEL_PATH: "E:\\model\\joint\\celebahq\\regular_mask\\model"
 
 # SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
-SAMPLE_DIR: "E:\\model\\experiments\\exp2\\celebahq\\results\\PIC-EC\\regular1"
+SAMPLE_DIR: "E:\\model\\experiments\\exp3\\celebahq\\results\\PIC-EC\\70"
 
 
 # TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
 # TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\celebahq\\mask.flist"
 
-TEST_IMAGE_PATH: "E:\\model\\experiments\\exp2\\celebahq\\gt_images\\256"
-TEST_MASK_PATH: "E:\\model\\experiments\\exp2\\mask\\regular_mask"
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp3\\celebahq\\gt_images"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp3\\celebahq\\mask\\70"
