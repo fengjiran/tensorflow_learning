@@ -28,16 +28,17 @@ def load_flist(flist):
 
 
 if __name__ == '__main__':
-    # test_flist_path = 'F:\\Datasets\\flist\\celebahq_test_win.flist'
-    test_flist_path = 'F:\\Datasets\\flist\\psv_test_win.flist'
+    test_flist_path = 'F:\\Datasets\\flist\\celebahq_train_win.flist'
+    # test_flist_path = 'F:\\Datasets\\flist\\psv_test_win.flist'
     test_flist = load_flist(test_flist_path)
     print(len(test_flist))
     print(test_flist[0])
 
-    dst = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
+    # dst = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
+    dst = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images1'
 
     i = 1
-    for path in test_flist:
+    for path in test_flist[0:1000]:
         new_img_name = 'test_img_%04d.png' % i
         shutil.copy(path, os.path.join(dst, new_img_name))
         i += 1
