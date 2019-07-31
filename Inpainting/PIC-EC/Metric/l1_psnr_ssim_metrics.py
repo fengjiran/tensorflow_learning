@@ -27,8 +27,7 @@ def load_flist(flist):
     # flist: image file path, image directory path, text file flist path
     if isinstance(flist, str):
         if os.path.isdir(flist):
-            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png')) + \
-                list(glob.glob(flist + '/*.JPG'))
+            flist = list(glob.glob(flist + '/*.jpg')) + list(glob.glob(flist + '/*.png'))
             flist.sort()
             return flist
 
@@ -55,7 +54,7 @@ if __name__ == '__main__':
     ssim = tf_ssim(a, b, max_val=1.0)
 
     with tf.Session() as sess:
-        fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\edge-connect\\80'
+        fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\PIC-EC\\70'
         real_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 
         real_flist = load_flist(real_dir)
