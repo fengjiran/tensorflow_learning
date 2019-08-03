@@ -12,7 +12,7 @@ EDGE_MODEL_PATH: "E:\\model\\edge\\psv\\regular_mask\\model"
 COLOR_MODEL_PATH: "E:\\model\\color\\psv\\regular_mask\\model"
 JOINT_MODEL_PATH: "E:\\model\\joint\\psv\\regular_mask\\model"
 
-SAMPLE_DIR: "E:\\model\\experiments\\exp3\\psv\\results\\PIC-EC\\70"
+SAMPLE_DIR: "E:\\model\\experiments\\exp3\\psv\\results\\PIC-EC\\90"
 
 TEST_IMAGE_PATH: "E:\\model\\experiments\\exp3\\psv\\gt_images"
-TEST_MASK_PATH: "E:\\model\\experiments\\exp3\\psv\\mask\\70"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp3\\psv\\mask\\90"
