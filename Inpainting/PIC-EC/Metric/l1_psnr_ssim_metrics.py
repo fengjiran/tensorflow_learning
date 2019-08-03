@@ -54,8 +54,8 @@ if __name__ == '__main__':
     ssim = tf_ssim(a, b, max_val=1.0)
 
     with tf.Session() as sess:
-        fake_dir = 'E:\\model\\experiments\\exp3\\celebahq\\results\\PIC-EC\\70'
-        real_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
+        fake_dir = 'E:\\model\\experiments\\exp3\\psv\\results\\PIC-EC\\128'
+        real_dir = 'E:\\model\\experiments\\exp3\\psv\\gt_images'
 
         real_flist = load_flist(real_dir)
         fake_flist = load_flist(fake_dir)
