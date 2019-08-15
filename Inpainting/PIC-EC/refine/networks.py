@@ -128,7 +128,8 @@ class RefineNet():
             x = conv(x, channels=3, kernel=7, stride=1, pad=3,
                      pad_type='reflect', init_type=self.init_type, name='conv6')
 
-            x = tf.nn.sigmoid(x)
+            x = tf.nn.tanh(x)
+            x = (x + 1) / 2.
 
             return x
 
