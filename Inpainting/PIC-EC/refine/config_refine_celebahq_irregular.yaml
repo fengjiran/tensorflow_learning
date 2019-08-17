@@ -24,7 +24,7 @@ CONTENT_LOSS_WEIGHT: 2.0           # perceptual loss weight
 ADV_LOSS_WEIGHT: 1              # adversarial loss weight
 # FM_LOSS_WEIGHT: 10                 # feature matching loss weight
 
-GAN_LOSS: "nsgan"                  # nsgan | lsgan | hinge
+GAN_LOSS: "lsgan"                  # nsgan | lsgan | hinge
 INIT_TYPE: "normal"                # normal | xavier | kaiming | orthogonal
 
 SAVE_INTERVAL: 1000                 # how many iterations to wait before saving model (0: never)
