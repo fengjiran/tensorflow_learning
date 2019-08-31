@@ -1,5 +1,6 @@
 import os
 import argparse
+import time
 from imageio import imread
 from imageio import imwrite
 import cv2
@@ -52,6 +53,7 @@ with tf.Session(config=sess_config) as sess:
     sess.run(assign_ops)
     print('Model loaded.')
 
+    start = time.time()
     i = 1
     for dir1, dir2 in zip(img_list, regular_mask_list):
         img = imread(os.path.join(img_dir, dir1))
@@ -64,3 +66,6 @@ with tf.Session(config=sess_config) as sess:
         result = sess.run(output, feed_dict={img_tf: img, mask_tf: mask})
         imwrite(os.path.join(regular_output_dir, 'test_img_%04d_fake.png' % i), result[0][:, :, ::-1])
         i += 1
+
+    end = time.time()
+    print((end - start) * 1000)

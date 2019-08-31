@@ -1,5 +1,6 @@
 import os
 import random
+import time
 import cv2
 import numpy as np
 import torch
@@ -65,4 +66,7 @@ if __name__ == '__main__':
     model.load()
 
     print('\nstart testing...\n')
+    start = time.time()
     model.test()
+    end = time.time()
+    print((end - start) * 1000)

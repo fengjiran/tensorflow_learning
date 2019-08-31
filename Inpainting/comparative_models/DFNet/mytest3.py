@@ -4,6 +4,7 @@ from itertools import islice
 from multiprocessing.pool import ThreadPool as Pool
 from pathlib import Path
 import argparse
+import time
 import cv2
 import numpy as np
 import torch
@@ -244,7 +245,7 @@ if __name__ == '__main__':
     img_dir = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 
     # Mask or Mask folder
-    regular_mask_dir = 'E:\\model\\experiments\\exp3\\mask\\128'
+    regular_mask_dir = 'E:\\model\\experiments\\exp3\\celebahq\\mask\\128'
     # irregular_mask_dir = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
 
     # Output dir
@@ -261,11 +262,14 @@ if __name__ == '__main__':
     regular_mask_list = os.listdir(regular_mask_dir)
     # irregular_mask_list = os.listdir(irregular_mask_dir)
 
+    start = time.time()
     for dir1, dir2 in zip(img_list, regular_mask_list):
         dir1 = os.path.join(img_dir, dir1)
         dir2 = os.path.join(regular_mask_dir, dir2)
         tester.inpaint(regular_output_dir, dir1, dir2, merge_result=merge)
 
+    end = time.time()
+    print((end - start) * 1000)
     # for dir1, dir2 in zip(img_list, irregular_mask_list):
     #     dir1 = os.path.join(img_dir, dir1)
     #     dir2 = os.path.join(irregular_mask_dir, dir2)

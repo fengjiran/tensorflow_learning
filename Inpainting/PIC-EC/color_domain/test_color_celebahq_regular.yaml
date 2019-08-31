@@ -1,4 +1,4 @@
-MASK: 1                            # 1: random block, half, 2: external
+MASK: 2                            # 1: random block, half, 2: external
 INPUT_SIZE: 256
 SIGMA: 2.0
 INIT_TYPE: "kaiming"                # normal | xavier | kaiming | orthogonal
@@ -9,7 +9,7 @@ K: 3                               # k-means parameter
 
 
 MODEL_PATH: "E:\\model\\color\\celebahq\\regular_mask\\model"
-SAMPLE_DIR: "E:\\model\\experiments\\exp1\\celebahq"
+SAMPLE_DIR: "E:\\model\\experiments\\exp4\\celebahq\\results\\colors"
 
-TEST_IMAGE_PATH: "E:\\model\\experiments\\exp1\\celebahq\\image.flist"
-TEST_MASK_PATH: "E:\\model\\experiments\\exp1\\celebahq\\mask.flist"
+TEST_IMAGE_PATH: "E:\\model\\experiments\\exp4\\celebahq\\gt_images\\256"
+TEST_MASK_PATH: "E:\\model\\experiments\\exp4\\celebahq\\regular_masks"

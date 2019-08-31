@@ -1,6 +1,7 @@
 import os
 import argparse
 import json
+import time
 import torch
 import numpy as np
 import torchvision.transforms as transforms
@@ -12,7 +13,7 @@ from utils import poisson_blend, gen_input_mask
 model_path = 'E:\\model\\comparative_models\\GLCIC\\celeba\\model_cn'
 img_path = 'E:\\model\\experiments\\exp3\\celebahq\\gt_images'
 # irregular_mask_path = 'E:\\model\\experiments\\exp2\\mask\\irregular_mask'
-regular_mask_path = 'E:\\model\\experiments\\exp3\\mask\\128'
+regular_mask_path = 'E:\\model\\experiments\\exp3\\celebahq\\mask\\128'
 
 # irregular_output_path = 'E:\\model\\experiments\\exp2\\celebahq\\results\\GLCIC\\irregular'
 regular_output_path = 'E:\\model\\experiments\\exp3\\celebahq\\results\\GLCIC\\128'
@@ -56,7 +57,7 @@ regular_mask_dir = os.listdir(regular_mask_path)
 #         save_image(inpainted, filename)
 
 #     i += 1
-
+start = time.time()
 i = 1
 for dir1, dir2 in zip(img_dir, regular_mask_dir):
     img = Image.open(os.path.join(img_path, dir1))
@@ -79,3 +80,6 @@ for dir1, dir2 in zip(img_dir, regular_mask_dir):
         save_image(inpainted, filename)
 
     i += 1
+
+end = time.time()
+print((end - start) * 1000)

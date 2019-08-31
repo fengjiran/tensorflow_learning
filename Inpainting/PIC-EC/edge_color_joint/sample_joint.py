@@ -1,6 +1,7 @@
 import os
 import glob
 import yaml
+import time
 import numpy as np
 import cv2
 from imageio import imread
@@ -326,8 +327,8 @@ if __name__ == '__main__':
     mask_paths = load_flist(cfg['TEST_MASK_PATH'])
     image_paths = load_flist(cfg['TEST_IMAGE_PATH'])
 
-    print(mask_paths[0], mask_paths[1])
-    print(image_paths[0], image_paths[1])
+    # print(mask_paths[0], mask_paths[1])
+    # print(image_paths[0], image_paths[1])
 
 
 ########################### construct the model ##################################
@@ -376,15 +377,23 @@ with tf.Session(config=config) as sess:
     sess.run(inpaint_assign_ops)
     print('Joint Model loaded.')
 
+    run_times = []
     i = 0
     for (img_path, mask_path) in zip(image_paths, mask_paths):
         i = i + 1
-        print(i)
+
         img_mask = load_mask(cfg, mask_type, mask_path)
         img, img_gray, img_color, img_edge = load_items(cfg, img_path)
         feed_dict = {image: img, gray: img_gray, color: img_color, edge: img_edge, mask: img_mask}
 
+        start = time.time()
         inpainted_image = sess.run(output, feed_dict=feed_dict)
+        end = time.time()
+        run_time = (end - start) * 1000
+        run_times.append(run_time)
+
         inpainted_image = np.reshape(inpainted_image, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
         imwrite(os.path.join(sample_dir, 'test_img_%04d_fake.png' % i), inpainted_image)
         # imwrite(os.path.join(sample_dir, 'psv_regular_inpainted_%03d.png' % i), inpainted_image)
+
+    print(np.mean(run_times))

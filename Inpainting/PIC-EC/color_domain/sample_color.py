@@ -27,9 +27,10 @@ def load_mask(cfg, mask_type=1, mask_path=None):
         img_mask = np.expand_dims(img_mask, -1)  # (1, 256, 256, 1) float
     else:  # external
         img_mask = imread(mask_path)
-        img_mask = cv2.resize(img_mask, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
-        img_mask = img_mask > 3
-        img_mask = img_mask.astype(np.float32)
+        # img_mask = cv2.resize(img_mask, (cfg['INPUT_SIZE'], cfg['INPUT_SIZE']), interpolation=cv2.INTER_AREA)
+        # img_mask = img_mask > 3
+        # img_mask = img_mask.astype(np.float32)
+        img_mask = img_mask / 255.
         img_mask = np.expand_dims(img_mask, 0)
         img_mask = np.expand_dims(img_mask, -1)
         img_mask = 1 - img_mask
@@ -136,4 +137,4 @@ if __name__ == '__main__':
             inpainted_color = sess.run(output, feed_dict=feed_dict)
             inpainted_color = np.reshape(inpainted_color, [cfg['INPUT_SIZE'], cfg['INPUT_SIZE'], 3])
             # imwrite(os.path.join(sample_dir, 'celebahq_irregular_color_inpainted_%02d.png' % i), inpainted_color)
-            imwrite(os.path.join(sample_dir, 'psv_irregular_color_inpainted_%02d.png' % i), inpainted_color)
+            imwrite(os.path.join(sample_dir, 'celebahq_color_inpainted_%04d.png' % i), inpainted_color)

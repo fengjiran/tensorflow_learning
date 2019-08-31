@@ -1,5 +1,6 @@
 import os
 import glob
+import time
 import numpy as np
 from imageio import imread
 from imageio import imwrite
@@ -70,6 +71,7 @@ with tf.Session(config=sess_config) as sess:
     if config.random_mask:
         np.random.seed(config.seed)
 
+    start = time.time()
     for i in range(test_num):
         # mask = imread(irregular_maskpath[i])
         mask = imread(regular_maskpath[i])
@@ -89,4 +91,7 @@ with tf.Session(config=sess_config) as sess:
         result = sess.run(output, feed_dict={input_image_tf: image, input_mask_tf: mask})
         imwrite(os.path.join(saving_path, '{:04d}.png'.format(i + 1)), result[0][:, :, ::-1])
         print(' > {} / {}'.format(i + 1, test_num))
+
+    end = time.time()
+    print((end - start) * 1000)
 print('done.')
