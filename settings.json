@@ -1,0 +1,70 @@
+{
+    "editor.fontSize": 16,
+    "workbench.iconTheme": "material-icon-theme",
+    // 配置 glob 模式以排除文件和文件夹。
+    "files.exclude": {
+        "**/.git": false,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pyc": true,
+        "**/*.py~": true,
+        "**/*.pickle": true,
+        "**/__pycache__": true,
+        "**/.out": true,
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "editor.renderIndentGuides": true,
+    // 保存时设置文件的格式。格式化程序必须可用，不能自动保存文件，并且不能关闭编辑器。
+    "editor.formatOnSave": true,
+    // 控制编辑器是否应该允许通过拖放移动所选项。
+    "editor.dragAndDrop": true,
+    // 控制光标样式，接受的值为 "block"、"block-outline"、"line"、"line-thin" 、"underline" 和 "underline-thin"
+    "editor.cursorStyle": "line",
+    // 控制如果某窗口已退出 zen 模式，是否应还原到 zen 模式。
+    "zenMode.restore": true,
+    // 控制打开 Zen 模式是否也会隐藏工作台选项卡。
+    "zenMode.hideTabs": false,
+    // 控制编辑器应如何呈现当前行突出显示，可能为“无”、“装订线”、“线”和“全部”。
+    "editor.renderLineHighlight": "none",
+    "python.pythonPath": "/opt/anaconda3/envs/dl/bin/python3.7",
+    // "python.pythonPath": "/usr/local/bin/python3",
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    // Whether to lint Python files using pep8
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pydocstyleEnabled": true,
+    "python.formatting.provider": "autopep8",
+    "python.linting.pylintArgs": [
+        "--max-line-length=120",
+        "--disable=E712,E1101,C0121,C0301,F405,E711,C0103,E0102,W0612,C0111,W0621"
+    ],
+    "python.formatting.autopep8Args": [
+        "--max-line-length=120",
+        "--ignore=E712,E1101,C0121,C0301,F405,E711,C0103,E0102"
+    ],
+    "python.linting.pycodestyleArgs": [
+        "--max-line-length=120",
+        "--ignore=E712,E1101,C0121,C0301,F405,E711,C0103,E0102,E501,E266"
+    ],
+    "python.linting.flake8Args": [
+        "--max-line-length=120",
+        "--ignore=E712,E1101,C0121,C0301,F405,E711,C0103,E0102,E501,E266"
+    ],
+    "python.linting.pydocstyleArgs": [
+        "--ignore=D102,D103,D107,D203,D100,D212,D213,D416"
+    ],
+    "workbench.colorTheme": "One Dark Pro",
+    "java.errors.incompleteClasspath.severity": "info",
+    "java.home": "/Library/Java/JavaVirtualMachines/jdk-11.0.1.jdk/Contents/Home/",
+    "python.jediEnabled": false,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "window.zoomLevel": 0,
+    "terminal.integrated.inheritEnv": false,
+    "kite.showWelcomeNotificationOnStartup": false
+}
