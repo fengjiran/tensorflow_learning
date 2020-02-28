@@ -1,0 +1,46 @@
+mixup + baseline
+mixup + baseline + refinement
+
+mixup + baseline + exp0s
+mixup + baseline + exp0s + refinement
+
+mixup + baseline + randaugment (N={1,2,3}, M={5,8,10,14})
+mixup + baseline + randaugment + refinement (N={1,2,3}, M={5,8,10,14})
+
+
+log_name: log/mixup/mixup_cifar10.log
+          log/mixup/mixup_cifar100.log
+
+          log/mixup/mixup_refinement_cifar10.log
+          log/mixup/mixup_refinement_cifar100.log
+
+          log/mixup/mixup_exp0s_cifar10.log
+          log/mixup/mixup_exp0s_cifar100.log
+
+          log/mixup/mixup_exp0s_refinement_cifar10.log
+          log/mixup/mixup_exp0s_refinement_cifar100.log
+
+          log/mixup/mixup_rand_N#M#_cifar10.log
+          log/mixup/mixup_rand_N#M#_cifar100.log
+
+          log/mixup/mixup_rand_N#M#_refinement_cifar10.log
+          log/mixup/mixup_rand_N#M#_refinement_cifar100.log
+
+
+ckpt_path: ckpt/mixup/mixup_cifar10
+           ckpt/mixup/mixup_cifar100
+
+           ckpt/mixup/mixup_refinement_cifar10
+           ckpt/mixup/mixup_refinement_cifar100
+
+           ckpt/mixup/mixup_exp0s_cifar10
+           ckpt/mixup/mixup_exp0s_cifar100
+
+           ckpt/mixup/mixup_exp0s_refinement_cifar10
+           ckpt/mixup/mixup_exp0s_refinement_cifar100
+
+           ckpt/mixup/mixup_rand_N#M#_cifar10
+           ckpt/mixup/mixup_rand_N#M#_cifar100
+
+           ckpt/mixup/mixup_rand_N#M#_refinement_cifar10
+           ckpt/mixup/mixup_rand_N#M#_refinement_cifar100
