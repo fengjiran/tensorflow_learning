@@ -28,8 +28,8 @@ import os
 import numpy as np
 import tensorflow as tf
 
-import autoaugment.augmentation_transforms as augmentation_transforms
-import autoaugment.policies as found_policies
+import augmentation_transforms
+import policies as found_policies
 
 # pylint:disable=logging-format-interpolation
 
@@ -144,21 +144,16 @@ class DataSet(object):
             epoch = self.epochs + 1
             self.reset()
             self.epochs = epoch
-        batched_data = (
-            self.train_images[self.curr_train_index:
-                              self.curr_train_index + self.hparams.batch_size],
-            self.train_labels[self.curr_train_index:
-                              self.curr_train_index + self.hparams.batch_size])
+
+        batched_data = (self.train_images[self.curr_train_index: self.curr_train_index + self.hparams.batch_size],
+                        self.train_labels[self.curr_train_index: self.curr_train_index + self.hparams.batch_size])
         final_imgs = []
 
         images, labels = batched_data
         for data in images:
-            epoch_policy = self.good_policies[np.random.choice(
-                len(self.good_policies))]
-            final_img = augmentation_transforms.apply_policy(
-                epoch_policy, data)
-            final_img = augmentation_transforms.random_flip(
-                augmentation_transforms.zero_pad_and_crop(final_img, 4))
+            epoch_policy = self.good_policies[np.random.choice(len(self.good_policies))]
+            final_img = augmentation_transforms.apply_policy(epoch_policy, data)
+            final_img = augmentation_transforms.random_flip(augmentation_transforms.zero_pad_and_crop(final_img, 4))
             # Apply cutout
             final_img = augmentation_transforms.cutout_numpy(final_img)
             final_imgs.append(final_img)
@@ -172,8 +167,7 @@ class DataSet(object):
         # Shuffle the training data
         perm = np.arange(self.num_train)
         np.random.shuffle(perm)
-        assert self.num_train == self.train_images.shape[
-            0], 'Error incorrect shuffling mask'
+        assert self.num_train == self.train_images.shape[0], 'Error incorrect shuffling mask'
         self.train_images = self.train_images[perm]
         self.train_labels = self.train_labels[perm]
         self.curr_train_index = 0
