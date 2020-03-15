@@ -26,12 +26,12 @@ import time
 import numpy as np
 import tensorflow as tf
 
-import autoaugment.custom_ops as ops
-import autoaugment.data_utils as data_utils
-import autoaugment.helper_utils as helper_utils
-from autoaugment.shake_drop import build_shake_drop_model
-from autoaugment.shake_shake import build_shake_shake_model
-from autoaugment.wrn import build_wrn_model
+import custom_ops as ops
+import data_utils
+import helper_utils
+from shake_drop import build_shake_drop_model
+from shake_shake import build_shake_shake_model
+from wrn import build_wrn_model
 
 
 tf.flags.DEFINE_string('model_name', 'wrn',
@@ -97,14 +97,11 @@ def build_model(inputs, num_classes, is_training, hparams):
     scopes = setup_arg_scopes(is_training)
     with contextlib.nested(*scopes):
         if hparams.model_name == 'pyramid_net':
-            logits = build_shake_drop_model(
-                inputs, num_classes, is_training)
+            logits = build_shake_drop_model(inputs, num_classes, is_training)
         elif hparams.model_name == 'wrn':
-            logits = build_wrn_model(
-                inputs, num_classes, hparams.wrn_size)
+            logits = build_wrn_model(inputs, num_classes, hparams.wrn_size)
         elif hparams.model_name == 'shake_shake':
-            logits = build_shake_shake_model(
-                inputs, num_classes, hparams, is_training)
+            logits = build_shake_shake_model(inputs, num_classes, hparams, is_training)
     return logits
 
 
@@ -140,8 +137,7 @@ class CifarModel(object):
         else:
             self.num_classes = 100
         self.images = tf.placeholder(tf.float32, [self.batch_size, 32, 32, 3])
-        self.labels = tf.placeholder(tf.float32,
-                                     [self.batch_size, self.num_classes])
+        self.labels = tf.placeholder(tf.float32, [self.batch_size, self.num_classes])
 
     def assign_epoch(self, session, epoch_value):
         session.run(self._epoch_update, feed_dict={self._new_epoch: epoch_value})
@@ -160,20 +156,16 @@ class CifarModel(object):
         if is_training:
             self.global_step = tf.train.get_or_create_global_step()
 
-        logits = build_model(
-            images,
-            self.num_classes,
-            is_training,
-            self.hparams)
-        self.predictions, self.cost = helper_utils.setup_loss(
-            logits, labels)
-        self.accuracy, self.eval_op = tf.metrics.accuracy(
-            tf.argmax(labels, 1), tf.argmax(self.predictions, 1))
+        logits = build_model(images,
+                             self.num_classes,
+                             is_training,
+                             self.hparams)
+        self.predictions, self.cost = helper_utils.setup_loss(logits, labels)
+        self.accuracy, self.eval_op = tf.metrics.accuracy(tf.argmax(labels, 1), tf.argmax(self.predictions, 1))
         self._calc_num_trainable_params()
 
         # Adds L2 weight decay to the cost
-        self.cost = helper_utils.decay_weights(self.cost,
-                                               self.hparams.weight_decay_rate)
+        self.cost = helper_utils.decay_weights(self.cost, self.hparams.weight_decay_rate)
 
         if is_training:
             self._build_train_op()
@@ -187,11 +179,8 @@ class CifarModel(object):
                              tf.local_variables_initializer())
 
     def _calc_num_trainable_params(self):
-        self.num_trainable_params = np.sum([
-            np.prod(var.get_shape().as_list()) for var in tf.trainable_variables()
-        ])
-        tf.logging.info('number of trainable params: {}'.format(
-            self.num_trainable_params))
+        self.num_trainable_params = np.sum([np.prod(var.get_shape().as_list()) for var in tf.trainable_variables()])
+        tf.logging.info('number of trainable params: {}'.format(self.num_trainable_params))
 
     def _build_train_op(self):
         """Build the train op for the cifar model."""
@@ -199,20 +188,17 @@ class CifarModel(object):
         tvars = tf.trainable_variables()
         grads = tf.gradients(self.cost, tvars)
         if hparams.gradient_clipping_by_global_norm > 0.0:
-            grads, norm = tf.clip_by_global_norm(
-                grads, hparams.gradient_clipping_by_global_norm)
+            grads, norm = tf.clip_by_global_norm(grads, hparams.gradient_clipping_by_global_norm)
             tf.summary.scalar('grad_norm', norm)
 
         # Setup the initial learning rate
         initial_lr = self.lr_rate_ph
-        optimizer = tf.train.MomentumOptimizer(
-            initial_lr,
-            0.9,
-            use_nesterov=True)
+        optimizer = tf.train.MomentumOptimizer(initial_lr,
+                                               0.9,
+                                               use_nesterov=True)
 
         self.optimizer = optimizer
-        apply_op = optimizer.apply_gradients(
-            zip(grads, tvars), global_step=self.global_step, name='train_step')
+        apply_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step, name='train_step')
         train_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies([apply_op]):
             self.train_op = tf.group(*train_ops)
@@ -243,19 +229,18 @@ class CifarModelTrainer(object):
             number, instead of overwriting the existing checkpoints.
 
         """
-        model_save_name = os.path.join(self.model_dir, 'model.ckpt')
+        model_save_name = os.path.join(self.model_dir, 'model')
         if not tf.gfile.IsDirectory(self.model_dir):
             tf.gfile.MakeDirs(self.model_dir)
         self.saver.save(self.session, model_save_name, global_step=step)
-        tf.logging.info('Saved child model')
+        tf.logging.info('Saved model')
 
     def extract_model_spec(self):
         """Load a checkpoint with the architecture structure stored in the name."""
         checkpoint_path = tf.train.latest_checkpoint(self.model_dir)
         if checkpoint_path is not None:
             self.saver.restore(self.session, checkpoint_path)
-            tf.logging.info('Loaded child model checkpoint from %s',
-                            checkpoint_path)
+            tf.logging.info('Loaded model checkpoint from %s', checkpoint_path)
         else:
             self.save_model(step=0)
 
@@ -297,10 +282,7 @@ class CifarModelTrainer(object):
         # Create a new session for this model, initialize
         # variables, and save / restore from
         # checkpoint.
-        self._session = tf.Session(
-            '',
-            config=tf.ConfigProto(
-                allow_soft_placement=True, log_device_placement=False))
+        self._session = tf.Session('', config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False))
         self.session.run(m.init)
 
         # Load in a previous checkpoint, or save this one
@@ -370,36 +352,27 @@ class CifarModelTrainer(object):
         hparams = self.hparams
 
         # Build the child graph
-        with tf.Graph().as_default(), tf.device(
-                '/cpu:0' if FLAGS.use_cpu else '/gpu:0'):
+        with tf.Graph().as_default(), tf.device('/cpu:0' if FLAGS.use_cpu else '/gpu:0'):
             m, meval = self._build_models()
 
             # Figure out what epoch we are on
             starting_epoch = self._calc_starting_epoch(m)
 
             # Run the validation error right at the beginning
-            valid_accuracy = self.eval_child_model(
-                meval, self.data_loader, 'val')
-            tf.logging.info('Before Training Epoch: {}     Val Acc: {}'.format(
-                starting_epoch, valid_accuracy))
+            valid_accuracy = self.eval_child_model(meval, self.data_loader, 'val')
+            tf.logging.info('Before Training Epoch: {}     Val Acc: {}'.format(starting_epoch, valid_accuracy))
             training_accuracy = None
 
             for curr_epoch in range(starting_epoch, hparams.num_epochs):
-
                 # Run one training epoch
                 training_accuracy = self._run_training_loop(m, curr_epoch)
+                valid_accuracy = self.eval_child_model(meval, self.data_loader, 'val')
+                tf.logging.info('Epoch: {}    Valid Acc: {}'.format(curr_epoch, valid_accuracy))
 
-                valid_accuracy = self.eval_child_model(
-                    meval, self.data_loader, 'val')
-                tf.logging.info('Epoch: {}    Valid Acc: {}'.format(
-                    curr_epoch, valid_accuracy))
+            valid_accuracy, test_accuracy = self._compute_final_accuracies(meval)
 
-            valid_accuracy, test_accuracy = self._compute_final_accuracies(
-                meval)
-
-        tf.logging.info(
-            'Train Acc: {}    Valid Acc: {}     Test Acc: {}'.format(
-                training_accuracy, valid_accuracy, test_accuracy))
+        tf.logging.info('Train Acc: {}    Valid Acc: {}     Test Acc: {}'.format(
+            training_accuracy, valid_accuracy, test_accuracy))
 
     @property
     def saver(self):

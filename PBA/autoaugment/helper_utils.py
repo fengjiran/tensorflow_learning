@@ -147,13 +147,22 @@ def run_epoch_training(session, model, data_loader, curr_epoch):
             tf.logging.info('Training {}/{}'.format(step, steps_per_epoch))
 
         train_images, train_labels = data_loader.next_batch()
-        _, step, _ = session.run(
-            [model.train_op, model.global_step, model.eval_op],
-            feed_dict={
-                model.images: train_images,
-                model.labels: train_labels,
-            })
+        _, step, _ = session.run([model.train_op, model.global_step, model.eval_op],
+                                 feed_dict={model.images: train_images,
+                                            model.labels: train_labels,
+                                            })
 
     train_accuracy = session.run(model.accuracy)
     tf.logging.info('Train accuracy: {}'.format(train_accuracy))
     return train_accuracy
+
+
+if __name__ == '__main__':
+    init_lr = 0.1
+    epoch = 399
+    iteration = 300
+    batches_per_epoch = 390
+    total_epoch = 400
+
+    lr = cosine_lr(init_lr, epoch, iteration, batches_per_epoch, total_epoch)
+    print(lr)
