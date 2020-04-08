@@ -4,7 +4,7 @@ import tensorflow_probability as tfp
 alpha = 1
 k = 2
 bs = 10
-num_classes = 6
+num_classes = 10
 label = tf.random.uniform([bs, k], maxval=num_classes, dtype=tf.int32)
 
 dist = tfp.distributions.Dirichlet([alpha] * k)
