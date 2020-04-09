@@ -11,7 +11,7 @@ def smooth(x, sigma):
     mean = (kernel_size - 1.) / 2
     mgrid = mgrid - mean
     mgrid = mgrid * size_denom
-    kernel = 1. / (sigma * tf.sqrt(2 * np.pi)) * tf.exp(-(((mgrid - 0.) / (sigma)) ** 2) * 0.5)
+    kernel = 1. / (sigma * tf.sqrt(2 * np.pi)) * tf.exp(-0.5 * tf.square(mgrid / sigma))
 
     # Make sure sum of values in gaussian kernel equals 1.
     kernel = kernel / tf.reduce_sum(kernel)
