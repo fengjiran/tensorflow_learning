@@ -8,7 +8,7 @@ Keras-Preprocessing==1.0.9
 Markdown==3.0.1
 mock==2.0.0
 numpy==1.16.1
-opencv-python==4.0.0.21
+opencv-python==4.2.0.32
 pbr==5.1.2
 protobuf==3.6.1
 PyQt5==5.12
